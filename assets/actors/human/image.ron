@@ -1,0 +1,17 @@
+/*!
+    @import /amethyst_rendy/src/sprite/mod.rs#Sprites
+    Sprites
+*/
+
+List((
+    texture_width: 76,
+    texture_height: 76,
+    sprites: [
+        (
+            x: 0,
+            y: 0,
+            width: 76,
+            height: 76,
+        ),
+    ],
+))

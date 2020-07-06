@@ -1,0 +1,9 @@
+[package]
+name = "shooter"
+version = "0.1.0"
+authors = ["Aunmag <aunmag@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+amethyst = { version = "0.15", features = ["vulkan", "tiles"] }
+dunce = "1.0" # TODO: This is temporary, remove in the future
