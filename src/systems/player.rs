@@ -13,6 +13,9 @@ use amethyst::ecs::prelude::WriteStorage;
 use amethyst::input::InputHandler;
 use amethyst::input::StringBindings;
 
+const MOVEMENT_VELOCITY: f32 = 50.0;
+const ROTATION_SENSITIVITY: f32 = 0.01;
+
 #[derive(SystemDesc)]
 pub struct PlayerSystem;
 
@@ -26,42 +29,30 @@ impl<'a> System<'a> for PlayerSystem {
     );
 
     fn run(&mut self, (actors, players, mut transforms, time, input): Self::SystemData) {
-        let velocity = 50.0;
-        let velocity_rotate = 4.0;
-
         for (_, _, transform) in (&actors, &players, &mut transforms).join() {
             let mut move_x = 0.0;
             let mut move_y = 0.0;
-            let mut rotate = 0.0;
 
             if input.action_is_down("move_forward").unwrap_or(false) {
-                move_y += velocity;
+                move_y += MOVEMENT_VELOCITY;
             }
 
             if input.action_is_down("move_backwards").unwrap_or(false) {
-                move_y -= velocity;
+                move_y -= MOVEMENT_VELOCITY;
             }
 
             if input.action_is_down("move_left").unwrap_or(false) {
-                move_x -= velocity;
+                move_x -= MOVEMENT_VELOCITY;
             }
 
             if input.action_is_down("move_right").unwrap_or(false) {
-                move_x += velocity;
+                move_x += MOVEMENT_VELOCITY;
             }
 
-            if input.action_is_down("rotate_left").unwrap_or(false) {
-                rotate -= velocity_rotate;
-            }
-
-            if input.action_is_down("rotate_right").unwrap_or(false) {
-                rotate += velocity_rotate;
-            }
-
-            let delta = time.delta_seconds();
-            transform.rotate_2d(rotate * delta);
+            transform.rotate_2d(utils::input::take_mouse_delta() as f32 * ROTATION_SENSITIVITY);
 
             // TODO: Optimize, avoid calculating cos and sin
+            let delta = time.delta_seconds();
             let angle = transform.euler_angles().2;
             let angle_perpendicular = angle - utils::math::PI_0_5;
             transform.prepend_translation_x(move_x * angle_perpendicular.cos() * delta);

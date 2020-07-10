@@ -5,7 +5,5 @@
         "move_backwards": [[Key(S)]],
         "move_left": [[Key(A)]],
         "move_right": [[Key(D)]],
-        "rotate_left": [[Key(Q)]],
-        "rotate_right": [[Key(E)]],
     },
 )

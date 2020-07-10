@@ -4,6 +4,7 @@ use crate::utils;
 use crate::ARENA_SIZE;
 use amethyst::assets::AssetStorage;
 use amethyst::assets::Loader;
+use amethyst::controls::HideCursor;
 use amethyst::core::math::Point3;
 use amethyst::core::math::Vector3;
 use amethyst::core::transform::Transform;
@@ -12,6 +13,7 @@ use amethyst::ecs::prelude::World;
 use amethyst::ecs::Entity;
 use amethyst::input::is_close_requested;
 use amethyst::input::is_key_down;
+use amethyst::input::InputEvent;
 use amethyst::prelude::*;
 use amethyst::renderer::sprite::SpriteSheetHandle;
 use amethyst::renderer::Camera;
@@ -59,6 +61,10 @@ impl SimpleState for Game {
 
         create_camera(world, actor_main);
         create_ground(world);
+
+        world.write_resource::<HideCursor>().hide = true;
+
+        utils::input::reset_mouse_delta();
     }
 
     fn handle_event(
@@ -66,10 +72,21 @@ impl SimpleState for Game {
         _: StateData<'_, GameData<'_, '_>>,
         event: StateEvent,
     ) -> SimpleTrans {
-        if let StateEvent::Window(event) = &event {
-            if is_close_requested(&event) || is_key_down(&event, VirtualKeyCode::Escape) {
-                return Trans::Quit;
+        match event {
+            StateEvent::Window(event) => {
+                if is_close_requested(&event) || is_key_down(&event, VirtualKeyCode::Escape) {
+                    return Trans::Quit;
+                }
             }
+            StateEvent::Input(event) => {
+                if let InputEvent::MouseMoved {
+                    delta_x: delta,
+                    delta_y: _,
+                } = event {
+                    utils::input::add_mouse_delta(delta as i16);
+                }
+            }
+            _ => {}
         }
 
         return Trans::None;
