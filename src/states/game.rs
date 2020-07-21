@@ -2,7 +2,6 @@ use crate::components::actor::Actor;
 use crate::components::player::Player;
 use crate::states::menu::home::Home;
 use crate::utils;
-use crate::ARENA_SIZE;
 use amethyst::assets::AssetStorage;
 use amethyst::assets::Loader;
 use amethyst::core::math::Point3;
@@ -27,13 +26,7 @@ use amethyst::tiles::Tile;
 use amethyst::tiles::TileMap;
 use amethyst::winit::VirtualKeyCode;
 
-#[derive(Default, Clone)]
-pub struct ExampleTile;
-impl Tile for ExampleTile {
-    fn sprite(&self, _: Point3<u32>, _: &World) -> Option<usize> {
-        return Some(1);
-    }
-}
+const VIEWPORT: f32 = 150.0; // TODO: Do not hard-code
 
 #[derive(Debug)]
 pub enum GameEvent {
@@ -52,67 +45,34 @@ impl Game {
 }
 
 impl SimpleState for Game {
-    fn on_start(&mut self, data: StateData<'_, GameData<'_, '_>>) {
-        let StateData { mut world, .. } = data;
-
-        utils::set_cursor_visibility(false, &mut world);
+    fn on_start(&mut self, mut data: StateData<GameData>) {
+        utils::set_cursor_visibility(false, &mut data.world);
 
         let actor_renderer = SpriteRender {
             // TODO: Simplify sprite loading, avoid using sprite sheets
             sprite_sheet: load_sprite_sheet(
-                world,
+                data.world,
                 "actors/human/image.png",
                 "actors/human/image.ron",
             ),
             sprite_number: 0,
         };
 
-        let root = world.create_entity().build();
+        let root = data.world.create_entity().build();
 
-        create_actor(
-            world,
-            50.0,
-            0.0,
-            false,
-            actor_renderer.clone(),
-            root.clone(),
-        );
+        create_actor(data.world, 50.0, 0.0, false, actor_renderer.clone(), root);
+        create_actor(data.world, -50.0, 0.0, false, actor_renderer.clone(), root);
+        create_actor(data.world, 0.0, 50.0, false, actor_renderer.clone(), root);
+        create_actor(data.world, 0.0, -50.0, false, actor_renderer.clone(), root);
 
-        create_actor(
-            world,
-            -50.0,
-            0.0,
-            false,
-            actor_renderer.clone(),
-            root.clone(),
-        );
+        let actor_main = create_actor(data.world, 0.0, 0.0, true, actor_renderer, root);
 
-        create_actor(
-            world,
-            0.0,
-            50.0,
-            false,
-            actor_renderer.clone(),
-            root.clone(),
-        );
-
-        create_actor(
-            world,
-            0.0,
-            -50.0,
-            false,
-            actor_renderer.clone(),
-            root.clone(),
-        );
-
-        let actor_main = create_actor(world, 0.0, 0.0, true, actor_renderer, root.clone());
-
-        create_camera(world, actor_main);
-        create_ground(world, root.clone());
+        create_camera(data.world, actor_main);
+        create_ground(data.world, root);
 
         utils::input::reset_mouse_delta();
 
-        world
+        data.world
             .write_resource::<EventChannel<GameEvent>>()
             .single_write(GameEvent::GameStart);
 
@@ -132,16 +92,11 @@ impl SimpleState for Game {
             .single_write(GameEvent::GameEnd);
     }
 
-    fn on_resume(&mut self, data: StateData<GameData>) {
-        let StateData { mut world, .. } = data;
-        utils::set_cursor_visibility(false, &mut world);
+    fn on_resume(&mut self, mut data: StateData<GameData>) {
+        utils::set_cursor_visibility(false, &mut data.world);
     }
 
-    fn handle_event(
-        &mut self,
-        _: StateData<'_, GameData<'_, '_>>,
-        event: StateEvent,
-    ) -> SimpleTrans {
+    fn handle_event(&mut self, _data: StateData<GameData>, event: StateEvent) -> SimpleTrans {
         match event {
             StateEvent::Window(event) => {
                 if is_key_down(&event, VirtualKeyCode::Escape) {
@@ -149,10 +104,8 @@ impl SimpleState for Game {
                 }
             }
             StateEvent::Input(event) => {
-                if let InputEvent::MouseMoved {
-                    delta_x: delta,
-                    delta_y: _,
-                } = event {
+                if let InputEvent::MouseMoved { delta_x: delta, .. } = event {
+                    #[allow(clippy::cast_possible_truncation)]
                     utils::input::add_mouse_delta(delta as i16);
                 }
             }
@@ -160,6 +113,15 @@ impl SimpleState for Game {
         }
 
         return Trans::None;
+    }
+}
+
+#[derive(Default, Clone)]
+pub struct GroundTile;
+
+impl Tile for GroundTile {
+    fn sprite(&self, _: Point3<u32>, _: &World) -> Option<usize> {
+        return Some(1);
     }
 }
 
@@ -196,16 +158,16 @@ fn create_camera(world: &mut World, player: Entity) -> Entity {
 
     return world
         .create_entity()
-        .with(Camera::standard_2d(ARENA_SIZE * 1.5, ARENA_SIZE * 1.5))
+        .with(Camera::standard_2d(VIEWPORT, VIEWPORT))
         .with(transform)
         .with(Parent { entity: player })
         .build();
 }
 
 fn create_ground(world: &mut World, root: Entity) -> Entity {
-    let map = TileMap::<ExampleTile, MortonEncoder>::new(
-        Vector3::new(2, 2, 1), // how many
-        Vector3::new(128, 128, 1), // size of one
+    let map = TileMap::<GroundTile, MortonEncoder>::new(
+        Vector3::new(2, 2, 1),
+        Vector3::new(128, 128, 1),
         Some(load_sprite_sheet(
             world,
             "ground/grass.png",

@@ -5,7 +5,7 @@ pub struct Player;
 
 impl Player {
     pub fn new() -> Self {
-        return Self {};
+        return Self;
     }
 }
 

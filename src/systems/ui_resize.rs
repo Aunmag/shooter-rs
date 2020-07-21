@@ -34,12 +34,7 @@ impl UiResizeSystem {
         };
     }
 
-    fn resize_wallpapers(
-        &self,
-        transforms: &mut WriteStorage<UiTransform>,
-        size_x: f32,
-        size_y: f32,
-    ) {
+    fn resize_wallpapers(transforms: &mut WriteStorage<UiTransform>, size_x: f32, size_y: f32) {
         let scale;
 
         if size_x / size_y > WALLPAPER_ASPECT_RATIO {
@@ -76,11 +71,11 @@ impl UiResizeSystem {
 impl<'a> System<'a> for UiResizeSystem {
     type SystemData = (
         ReadExpect<'a, ScreenDimensions>,
-        WriteStorage<'a, UiTransform>,
         WriteStorage<'a, UiText>,
+        WriteStorage<'a, UiTransform>,
     );
 
-    fn run(&mut self, (screen, mut transforms, mut texts): Self::SystemData) {
+    fn run(&mut self, (screen, mut texts, mut transforms): Self::SystemData) {
         self.ui_awaiter.update();
 
         if self.ui_awaiter.is_ready() {
@@ -88,12 +83,14 @@ impl<'a> System<'a> for UiResizeSystem {
             let size_y = screen.height();
             let size_quad = f32::min(size_y, size_x);
 
+            #[allow(clippy::float_cmp)]
             if size_x != self.last_size_x || size_y != self.last_size_y {
-                self.resize_wallpapers(&mut transforms, size_x, size_y);
+                Self::resize_wallpapers(&mut transforms, size_x, size_y);
                 self.last_size_x = size_x;
                 self.last_size_y = size_y;
             }
 
+            #[allow(clippy::float_cmp)]
             if size_quad != self.last_size_quad {
                 self.resize_texts(&mut texts, size_quad);
                 self.last_size_quad = size_quad;

@@ -40,9 +40,7 @@ impl Home {
 }
 
 impl SimpleState for Home {
-    fn on_start(&mut self, data: StateData<GameData>) {
-        let mut data = data;
-
+    fn on_start(&mut self, mut data: StateData<GameData>) {
         self.ui_root = self.find_ui_root(&mut data.world);
         self.on_start_or_resume(&mut data.world);
 
@@ -54,21 +52,15 @@ impl SimpleState for Home {
         });
     }
 
-    fn on_pause(&mut self, data: StateData<GameData>) {
-        let mut data = data;
-
+    fn on_pause(&mut self, mut data: StateData<GameData>) {
         self.on_stop_or_pause(&mut data.world);
     }
 
-    fn on_resume(&mut self, data: StateData<GameData>) {
-        let mut data = data;
-
+    fn on_resume(&mut self, mut data: StateData<GameData>) {
         self.on_start_or_resume(&mut data.world);
     }
 
-    fn on_stop(&mut self, data: StateData<GameData>) {
-        let mut data = data;
-
+    fn on_stop(&mut self, mut data: StateData<GameData>) {
         self.button_continue = None;
         self.button_start = None;
         self.button_help = None;
@@ -112,6 +104,6 @@ impl UiState for Home {
     }
 
     fn get_ui_root(&self) -> Option<Entity> {
-        return self.ui_root.clone();
+        return self.ui_root;
     }
 }

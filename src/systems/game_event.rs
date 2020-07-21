@@ -26,11 +26,11 @@ impl GameEventSystem {
 impl<'a> System<'a> for GameEventSystem {
     type SystemData = (
         Read<'a, EventChannel<GameEvent>>,
-        WriteStorage<'a, UiTransform>,
         WriteStorage<'a, UiText>,
+        WriteStorage<'a, UiTransform>,
     );
 
-    fn run(&mut self, (events, mut transforms, mut texts): Self::SystemData) {
+    fn run(&mut self, (events, mut texts, mut transforms): Self::SystemData) {
         let mut has_game = None;
 
         for event in events.read(&mut self.reader) {
@@ -41,7 +41,7 @@ impl<'a> System<'a> for GameEventSystem {
                 GameEvent::GameEnd => {
                     has_game = Some(false);
                 }
-            };
+            }
         }
 
         if let Some(has_game) = has_game {

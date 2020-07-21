@@ -1,14 +1,34 @@
-mod bundle;
+#![warn(clippy::all, clippy::cargo, clippy::pedantic, clippy::restriction)]
+#![allow(
+    clippy::as_conversions,
+    clippy::cargo_common_metadata,
+    clippy::cast_lossless,
+    clippy::default_trait_access,
+    clippy::expect_used, // TODO: Don't allow later
+    clippy::float_arithmetic,
+    clippy::implicit_return, // TODO: Allow later excepting closures
+    clippy::integer_arithmetic,
+    clippy::match_wildcard_for_single_variants,
+    clippy::missing_docs_in_private_items,
+    clippy::module_name_repetitions,
+    clippy::multiple_crate_versions,
+    clippy::needless_return,
+    clippy::type_complexity,
+    clippy::wildcard_enum_match_arm,
+)]
+
 mod components;
 mod states;
 mod systems;
 mod utils;
 
-use crate::bundle::GameBundle;
-use crate::states::game::ExampleTile;
+use crate::states::game::GroundTile;
 use crate::states::startup::Startup;
 use crate::systems::game_event::GameEventSystemDesc;
+use crate::systems::player::PlayerSystem;
 use crate::systems::ui_resize::UiResizeSystem;
+use amethyst::controls::CursorHideSystemDesc;
+use amethyst::controls::MouseFocusUpdateSystemDesc;
 use amethyst::core::frame_limiter::FrameRateLimitStrategy;
 use amethyst::core::transform::TransformBundle;
 use amethyst::core::HideHierarchySystemDesc;
@@ -26,7 +46,6 @@ use amethyst::ui::UiBundle;
 use amethyst::utils::application_root_dir;
 use std::time::Duration;
 
-const ARENA_SIZE: f32 = 100.0;
 const FRAME_RATE: u32 = 144;
 
 fn main() -> amethyst::Result<()> {
@@ -38,25 +57,24 @@ fn main() -> amethyst::Result<()> {
     let game_data = GameDataBuilder::default()
         .with_bundle(TransformBundle::new())?
         .with_bundle(
-            InputBundle::<StringBindings>::new().with_bindings_from_file(
-                root.join("config/input.ron"),
-            )?,
+            InputBundle::<StringBindings>::new()
+                .with_bindings_from_file(root.join("config/input.ron"))?,
         )?
-        .with_bundle(GameBundle)?
+        .with_system_desc(PlayerSystem, "", &["input_system"])
+        .with_system_desc(MouseFocusUpdateSystemDesc::default(), "mouse_focus", &[])
+        .with_system_desc(CursorHideSystemDesc::default(), "", &["mouse_focus"])
         .with_system_desc(UiResizeSystem::new(), "", &[])
         .with_system_desc(GameEventSystemDesc::default(), "", &[])
-        .with_system_desc(
-            HideHierarchySystemDesc::default(),
-            "",
-            &[], // TODO: Maybe this system depends on something?
-        )
+        .with_system_desc(HideHierarchySystemDesc::default(), "", &[]) // TODO: Maybe this system depends on something?
         .with_bundle(UiBundle::<StringBindings>::new())?
         .with_bundle(
             RenderingBundle::<DefaultBackend>::new()
-                .with_plugin(RenderToWindow::from_config_path(root.join("config/display.ron"))?)
+                .with_plugin(RenderToWindow::from_config_path(
+                    root.join("config/display.ron"),
+                )?)
                 .with_plugin(RenderFlat2D::default())
                 .with_plugin(RenderUi::default())
-                .with_plugin(RenderTiles2D::<ExampleTile, MortonEncoder>::default()),
+                .with_plugin(RenderTiles2D::<GroundTile, MortonEncoder>::default()),
         )?;
 
     Application::build(root.join("assets/"), Startup::new())?

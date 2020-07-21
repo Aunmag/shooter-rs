@@ -5,7 +5,7 @@ pub struct Actor;
 
 impl Actor {
     pub fn new() -> Self {
-        return Self {};
+        return Self;
     }
 }
 

@@ -21,14 +21,14 @@ pub struct PlayerSystem;
 
 impl<'a> System<'a> for PlayerSystem {
     type SystemData = (
+        Read<'a, InputHandler<StringBindings>>,
+        Read<'a, Time>,
         ReadStorage<'a, Actor>,
         ReadStorage<'a, Player>,
         WriteStorage<'a, Transform>,
-        Read<'a, Time>,
-        Read<'a, InputHandler<StringBindings>>,
     );
 
-    fn run(&mut self, (actors, players, mut transforms, time, input): Self::SystemData) {
+    fn run(&mut self, (input, time, actors, players, mut transforms): Self::SystemData) {
         for (_, _, transform) in (&actors, &players, &mut transforms).join() {
             let mut move_x = 0.0;
             let mut move_y = 0.0;

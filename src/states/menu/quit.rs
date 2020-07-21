@@ -32,9 +32,7 @@ impl Quit {
 }
 
 impl SimpleState for Quit {
-    fn on_start(&mut self, data: StateData<GameData>) {
-        let mut data = data;
-
+    fn on_start(&mut self, mut data: StateData<GameData>) {
         self.ui_root = self.find_ui_root(&mut data.world);
         self.on_start_or_resume(&mut data.world);
 
@@ -45,9 +43,7 @@ impl SimpleState for Quit {
         });
     }
 
-    fn on_stop(&mut self, data: StateData<GameData>) {
-        let mut data = data;
-
+    fn on_stop(&mut self, mut data: StateData<GameData>) {
         self.button_disconnect = None;
         self.button_exit = None;
         self.button_cancel = None;
@@ -90,6 +86,6 @@ impl UiState for Quit {
     }
 
     fn get_ui_root(&self) -> Option<Entity> {
-        return self.ui_root.clone();
+        return self.ui_root;
     }
 }

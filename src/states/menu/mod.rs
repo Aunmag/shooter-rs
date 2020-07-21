@@ -49,7 +49,7 @@ pub fn set_buttons_availability(
     let mut texts_id = HashSet::with_capacity(ids.len());
 
     for id in ids {
-        transforms_id.insert(id.to_string());
+        transforms_id.insert((*id).to_string());
         texts_id.insert(format!("{}_btn_txt", id));
     }
 
