@@ -6,9 +6,12 @@ mod utils;
 
 use crate::bundle::GameBundle;
 use crate::states::game::ExampleTile;
-use crate::states::game::Game;
+use crate::states::startup::Startup;
+use crate::systems::game_event::GameEventSystemDesc;
+use crate::systems::ui_resize::UiResizeSystem;
 use amethyst::core::frame_limiter::FrameRateLimitStrategy;
 use amethyst::core::transform::TransformBundle;
+use amethyst::core::HideHierarchySystemDesc;
 use amethyst::input::InputBundle;
 use amethyst::input::StringBindings;
 use amethyst::prelude::*;
@@ -40,6 +43,13 @@ fn main() -> amethyst::Result<()> {
             )?,
         )?
         .with_bundle(GameBundle)?
+        .with_system_desc(UiResizeSystem::new(), "", &[])
+        .with_system_desc(GameEventSystemDesc::default(), "", &[])
+        .with_system_desc(
+            HideHierarchySystemDesc::default(),
+            "",
+            &[], // TODO: Maybe this system depends on something?
+        )
         .with_bundle(UiBundle::<StringBindings>::new())?
         .with_bundle(
             RenderingBundle::<DefaultBackend>::new()
@@ -49,7 +59,7 @@ fn main() -> amethyst::Result<()> {
                 .with_plugin(RenderTiles2D::<ExampleTile, MortonEncoder>::default()),
         )?;
 
-    Application::build(root.join("assets/"), Game::default())?
+    Application::build(root.join("assets/"), Startup::new())?
         .with_frame_limit(
             // TODO: Learn more
             FrameRateLimitStrategy::SleepAndYield(Duration::from_millis(2)),

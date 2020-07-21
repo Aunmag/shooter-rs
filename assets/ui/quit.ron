@@ -1,0 +1,185 @@
+#![enable(implicit_some)]
+Container(
+    transform: (
+        id: "quit",
+        hidden: true,
+        opaque: false,
+        stretch: XY(
+            x_margin: 0.0,
+            y_margin: 0.0,
+            keep_aspect_ratio: false,
+        ),
+    ),
+    children: [
+        Container(
+            transform: (
+                id: "quit.wallpaper",
+                z: 0.5,
+                width: 1.0,
+                height: 1.0,
+                opaque: false,
+            ),
+            background: Texture(File("wallpapers/quit.png", ("IMAGE", (
+                sampler_info: (
+                    // TODO: Copy-pasted config, I don't know what most of these parameters do, keep them as defaults, don't modify unnecessary since I need only nearest stretching
+                    min_filter: Nearest,
+                    mag_filter: Nearest,
+                    mip_filter: Nearest,
+                    wrap_mode: (Tile, Tile, Tile),
+                    lod_bias: (0),
+                    lod_range: (
+                        start: ( 0 ),
+                        end: ( 8000 ),
+                    ),
+                    comparison: None,
+                    border: (0),
+                    normalized: true,
+                    anisotropic: Off,
+                ),
+            )))),
+            children: [],
+        ),
+        Container(
+            transform: (
+                z: 1.0,
+                opaque: false,
+                stretch: XY(
+                    x_margin: 0.0,
+                    y_margin: 0.0,
+                    keep_aspect_ratio: false,
+                ),
+            ),
+            background: Texture(Generate(Srgba(0.2, 0.2, 0.2, 0.8))),
+            children: [
+                Container(
+                    transform: (
+                        width: 1.0,
+                        height: 1.0,
+                        opaque: false,
+                        stretch: XY(
+                            x_margin: 0.0,
+                            y_margin: 0.0,
+                            keep_aspect_ratio: true,
+                        ),
+                    ),
+                    children: [
+                        Label(
+                            transform: (
+                                anchor: TopLeft,
+                                pivot: TopLeft,
+                                percent: true,
+                                x: 0.0,
+                                y: -0.25, // 3 of 12
+                                width: 1.0,
+                                height: 0.083333, // 1 of 12
+                                opaque: false,
+                            ),
+                            text: (
+                                text: "Are you sure you want to quit?",
+                                font: File("fonts/bold.ttf", ("TTF", ())),
+                                font_size: 32.0,
+                                color: (1.0, 1.0, 1.0, 1.0),
+                            )
+                        ),
+                        Container(
+                            transform: (
+                                anchor: TopLeft,
+                                pivot: TopLeft,
+                                percent: true,
+                                x: 0.333333, // 4 of 12
+                                y: -0.583333, // 7 of 12
+                                width: 0.333333, // 4 of 12
+                                height: 0.083333, // 1 of 12
+                                opaque: false,
+                            ),
+                            children: [
+                                Button(
+                                    transform: (
+                                        id: "quit.cancel",
+                                        stretch: XY(
+                                            x_margin: 1.0,
+                                            y_margin: 1.0,
+                                            keep_aspect_ratio: false,
+                                        ),
+                                    ),
+                                    button: (
+                                        text: "Cancel",
+                                        font: File("fonts/regular.ttf", ("TTF", ())),
+                                        font_size: 28.0,
+                                        normal_text_color: (1.0, 1.0, 1.0, 1.0),
+                                        normal_image: Texture(Generate(Srgba(0.5, 0.5, 0.5, 0.6))),
+                                        hover_image: Texture(Generate(Srgba(0.6, 0.6, 0.6, 0.6))),
+                                    )
+                                ),
+                            ],
+                        ),
+                        Container(
+                            transform: (
+                                anchor: TopLeft,
+                                pivot: TopLeft,
+                                percent: true,
+                                x: 0.333333, // 4 of 12
+                                y: -0.666667, // 8 of 12
+                                width: 0.333333, // 4 of 12
+                                height: 0.083333, // 1 of 12
+                                opaque: false,
+                            ),
+                            children: [
+                                Button(
+                                    transform: (
+                                        id: "quit.disconnect",
+                                        stretch: XY(
+                                            x_margin: 1.0,
+                                            y_margin: 1.0,
+                                            keep_aspect_ratio: false,
+                                        ),
+                                    ),
+                                    button: (
+                                        text: "Quit game session",
+                                        font: File("fonts/regular.ttf", ("TTF", ())),
+                                        font_size: 28.0,
+                                        normal_text_color: (1.0, 1.0, 1.0, 1.0),
+                                        normal_image: Texture(Generate(Srgba(0.5, 0.5, 0.5, 0.6))),
+                                        hover_image: Texture(Generate(Srgba(0.6, 0.6, 0.6, 0.6))),
+                                    )
+                                ),
+                            ],
+                        ),
+                        Container(
+                            transform: (
+                                anchor: TopLeft,
+                                pivot: TopLeft,
+                                percent: true,
+                                x: 0.333333, // 4 of 12
+                                y: -0.75, // 9 of 12
+                                width: 0.333333, // 4 of 12
+                                height: 0.083333, // 1 of 12
+                                opaque: false,
+                            ),
+                            children: [
+                                Button(
+                                    transform: (
+                                        id: "quit.exit",
+                                        stretch: XY(
+                                            x_margin: 1.0,
+                                            y_margin: 1.0,
+                                            keep_aspect_ratio: false,
+                                        ),
+                                    ),
+                                    button: (
+                                        text: "Exit",
+                                        font: File("fonts/regular.ttf", ("TTF", ())),
+                                        font_size: 28.0,
+                                        normal_text_color: (1.0, 1.0, 1.0, 1.0),
+                                        normal_image: Texture(Generate(Srgba(0.5, 0.5, 0.5, 0.6))),
+                                        hover_image: Texture(Generate(Srgba(0.6, 0.6, 0.6, 0.6))),
+                                    )
+                                ),
+                            ],
+                        ),
+                    ],
+                ),
+            ],
+        )
+    ],
+)

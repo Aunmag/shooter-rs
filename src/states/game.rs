@@ -1,17 +1,17 @@
 use crate::components::actor::Actor;
 use crate::components::player::Player;
+use crate::states::menu::home::Home;
 use crate::utils;
 use crate::ARENA_SIZE;
 use amethyst::assets::AssetStorage;
 use amethyst::assets::Loader;
-use amethyst::controls::HideCursor;
 use amethyst::core::math::Point3;
 use amethyst::core::math::Vector3;
+use amethyst::core::shrev::EventChannel;
 use amethyst::core::transform::Transform;
 use amethyst::core::Parent;
 use amethyst::ecs::prelude::World;
 use amethyst::ecs::Entity;
-use amethyst::input::is_close_requested;
 use amethyst::input::is_key_down;
 use amethyst::input::InputEvent;
 use amethyst::prelude::*;
@@ -35,12 +35,27 @@ impl Tile for ExampleTile {
     }
 }
 
-#[derive(Default)]
-pub struct Game {}
+#[derive(Debug)]
+pub enum GameEvent {
+    GameStart,
+    GameEnd,
+}
+
+pub struct Game {
+    root: Option<Entity>,
+}
+
+impl Game {
+    pub fn new() -> Self {
+        return Self { root: None };
+    }
+}
 
 impl SimpleState for Game {
     fn on_start(&mut self, data: StateData<'_, GameData<'_, '_>>) {
-        let StateData { world, .. } = data; // TODO: Learn more
+        let StateData { mut world, .. } = data;
+
+        utils::set_cursor_visibility(false, &mut world);
 
         let actor_renderer = SpriteRender {
             // TODO: Simplify sprite loading, avoid using sprite sheets
@@ -52,19 +67,74 @@ impl SimpleState for Game {
             sprite_number: 0,
         };
 
-        create_actor(world, 50.0, 0.0, false, actor_renderer.clone());
-        create_actor(world, -50.0, 0.0, false, actor_renderer.clone());
-        create_actor(world, 0.0, 50.0, false, actor_renderer.clone());
-        create_actor(world, 0.0, -50.0, false, actor_renderer.clone());
+        let root = world.create_entity().build();
 
-        let actor_main = create_actor(world, 0.0, 0.0, true, actor_renderer);
+        create_actor(
+            world,
+            50.0,
+            0.0,
+            false,
+            actor_renderer.clone(),
+            root.clone(),
+        );
+
+        create_actor(
+            world,
+            -50.0,
+            0.0,
+            false,
+            actor_renderer.clone(),
+            root.clone(),
+        );
+
+        create_actor(
+            world,
+            0.0,
+            50.0,
+            false,
+            actor_renderer.clone(),
+            root.clone(),
+        );
+
+        create_actor(
+            world,
+            0.0,
+            -50.0,
+            false,
+            actor_renderer.clone(),
+            root.clone(),
+        );
+
+        let actor_main = create_actor(world, 0.0, 0.0, true, actor_renderer, root.clone());
 
         create_camera(world, actor_main);
-        create_ground(world);
-
-        world.write_resource::<HideCursor>().hide = true;
+        create_ground(world, root.clone());
 
         utils::input::reset_mouse_delta();
+
+        world
+            .write_resource::<EventChannel<GameEvent>>()
+            .single_write(GameEvent::GameStart);
+
+        self.root = Some(root);
+    }
+
+    fn on_stop(&mut self, data: StateData<GameData>) {
+        if let Some(root) = self.root.take() {
+            // TODO: Do not panic, write warning to the log instead
+            data.world
+                .delete_entity(root)
+                .expect("Failed to delete the root entity. Was it already removed?");
+        }
+
+        data.world
+            .write_resource::<EventChannel<GameEvent>>()
+            .single_write(GameEvent::GameEnd);
+    }
+
+    fn on_resume(&mut self, data: StateData<GameData>) {
+        let StateData { mut world, .. } = data;
+        utils::set_cursor_visibility(false, &mut world);
     }
 
     fn handle_event(
@@ -74,8 +144,8 @@ impl SimpleState for Game {
     ) -> SimpleTrans {
         match event {
             StateEvent::Window(event) => {
-                if is_close_requested(&event) || is_key_down(&event, VirtualKeyCode::Escape) {
-                    return Trans::Quit;
+                if is_key_down(&event, VirtualKeyCode::Escape) {
+                    return Trans::Push(Box::new(Home::new(false)));
                 }
             }
             StateEvent::Input(event) => {
@@ -99,6 +169,7 @@ fn create_actor(
     y: f32,
     is_player: bool,
     renderer: SpriteRender,
+    root: Entity,
 ) -> Entity {
     let mut transform = Transform::default();
     transform.set_translation_xyz(x, y, 0.0);
@@ -108,7 +179,8 @@ fn create_actor(
         .create_entity()
         .with(renderer)
         .with(Actor::new())
-        .with(transform);
+        .with(transform)
+        .with(Parent { entity: root });
 
     if is_player {
         actor = actor.with(Player::new());
@@ -130,7 +202,7 @@ fn create_camera(world: &mut World, player: Entity) -> Entity {
         .build();
 }
 
-fn create_ground(world: &mut World) -> Entity {
+fn create_ground(world: &mut World, root: Entity) -> Entity {
     let map = TileMap::<ExampleTile, MortonEncoder>::new(
         Vector3::new(2, 2, 1), // how many
         Vector3::new(128, 128, 1), // size of one
@@ -145,6 +217,7 @@ fn create_ground(world: &mut World) -> Entity {
         .create_entity()
         .with(map)
         .with(Transform::default())
+        .with(Parent { entity: root })
         .build();
 }
 
