@@ -1,6 +1,7 @@
 use crate::components::actor::Actor;
 use crate::components::player::Player;
 use crate::states::menu::home::Home;
+use crate::systems::player::PlayerSystem;
 use crate::utils;
 use amethyst::assets::AssetStorage;
 use amethyst::assets::Loader;
@@ -8,8 +9,11 @@ use amethyst::core::math::Point3;
 use amethyst::core::math::Vector3;
 use amethyst::core::shrev::EventChannel;
 use amethyst::core::transform::Transform;
+use amethyst::core::ArcThreadPool;
 use amethyst::core::Parent;
 use amethyst::ecs::prelude::World;
+use amethyst::ecs::Dispatcher;
+use amethyst::ecs::DispatcherBuilder;
 use amethyst::ecs::Entity;
 use amethyst::input::is_key_down;
 use amethyst::input::InputEvent;
@@ -25,6 +29,7 @@ use amethyst::tiles::MortonEncoder;
 use amethyst::tiles::Tile;
 use amethyst::tiles::TileMap;
 use amethyst::winit::VirtualKeyCode;
+use std::sync::Arc;
 
 const VIEWPORT: f32 = 150.0; // TODO: Do not hard-code
 
@@ -34,18 +39,36 @@ pub enum GameEvent {
     GameEnd,
 }
 
-pub struct Game {
+pub struct Game<'a, 'b> {
     root: Option<Entity>,
+    dispatcher: Option<Dispatcher<'a, 'b>>,
 }
 
-impl Game {
+impl Game<'_, '_> {
     pub fn new() -> Self {
-        return Self { root: None };
+        return Self {
+            root: None,
+            dispatcher: None,
+        };
+    }
+
+    fn create_dispatcher(&mut self, world: &mut World) {
+        let mut builder = DispatcherBuilder::new();
+        builder.add(PlayerSystem, "", &[]);
+
+        let mut dispatcher = builder
+            .with_pool(Arc::clone(&world.read_resource::<ArcThreadPool>()))
+            .build();
+
+        dispatcher.setup(world);
+
+        self.dispatcher = Some(dispatcher);
     }
 }
 
-impl SimpleState for Game {
+impl<'a, 'b> SimpleState for Game<'a, 'b> {
     fn on_start(&mut self, mut data: StateData<GameData>) {
+        self.create_dispatcher(&mut data.world);
         utils::set_cursor_visibility(false, &mut data.world);
 
         let actor_renderer = SpriteRender {
@@ -94,6 +117,14 @@ impl SimpleState for Game {
 
     fn on_resume(&mut self, mut data: StateData<GameData>) {
         utils::set_cursor_visibility(false, &mut data.world);
+    }
+
+    fn update(&mut self, data: &mut StateData<GameData>) -> SimpleTrans {
+        if let Some(dispatcher) = self.dispatcher.as_mut() {
+            dispatcher.dispatch(data.world);
+        }
+
+        return Trans::None;
     }
 
     fn handle_event(&mut self, _data: StateData<GameData>, event: StateEvent) -> SimpleTrans {

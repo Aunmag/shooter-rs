@@ -25,7 +25,6 @@ mod utils;
 use crate::states::game::GroundTile;
 use crate::states::startup::Startup;
 use crate::systems::game_event::GameEventSystemDesc;
-use crate::systems::player::PlayerSystem;
 use crate::systems::ui_resize::UiResizeSystem;
 use amethyst::controls::CursorHideSystemDesc;
 use amethyst::controls::MouseFocusUpdateSystemDesc;
@@ -60,7 +59,6 @@ fn main() -> amethyst::Result<()> {
             InputBundle::<StringBindings>::new()
                 .with_bindings_from_file(root.join("config/input.ron"))?,
         )?
-        .with_system_desc(PlayerSystem, "", &["input_system"])
         .with_system_desc(MouseFocusUpdateSystemDesc::default(), "mouse_focus", &[])
         .with_system_desc(CursorHideSystemDesc::default(), "", &["mouse_focus"])
         .with_system_desc(UiResizeSystem::new(), "", &[])
