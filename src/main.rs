@@ -43,7 +43,6 @@ use amethyst::tiles::RenderTiles2D;
 use amethyst::ui::RenderUi;
 use amethyst::ui::UiBundle;
 use amethyst::utils::application_root_dir;
-use std::time::Duration;
 
 const FRAME_RATE: u32 = 144;
 
@@ -76,11 +75,7 @@ fn main() -> amethyst::Result<()> {
         )?;
 
     Application::build(root.join("assets/"), Startup::new())?
-        .with_frame_limit(
-            // TODO: Learn more
-            FrameRateLimitStrategy::SleepAndYield(Duration::from_millis(2)),
-            FRAME_RATE,
-        )
+        .with_frame_limit(FrameRateLimitStrategy::Yield, FRAME_RATE)
         .build(game_data)?
         .run();
 
