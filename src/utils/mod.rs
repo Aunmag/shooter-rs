@@ -1,6 +1,3 @@
-pub mod input;
-pub mod math;
-
 use amethyst::controls::HideCursor;
 use amethyst::core::HiddenPropagate;
 use amethyst::ecs::prelude::Entity;

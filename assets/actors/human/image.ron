@@ -4,14 +4,15 @@
 */
 
 List((
-    texture_width: 76,
-    texture_height: 76,
+    texture_width: 17,
+    texture_height: 46,
     sprites: [
         (
             x: 0,
             y: 0,
-            width: 76,
-            height: 76,
+            width: 17,
+            height: 46,
+            offsets: Some((0.5, -14.0))
         ),
     ],
 ))

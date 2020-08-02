@@ -18,10 +18,12 @@
 )]
 
 mod components;
+mod input;
 mod states;
 mod systems;
 mod utils;
 
+use crate::input::CustomBindingTypes;
 use crate::states::game::GroundTile;
 use crate::states::startup::Startup;
 use crate::systems::game_event::GameEventSystemDesc;
@@ -32,7 +34,6 @@ use amethyst::core::frame_limiter::FrameRateLimitStrategy;
 use amethyst::core::transform::TransformBundle;
 use amethyst::core::HideHierarchySystemDesc;
 use amethyst::input::InputBundle;
-use amethyst::input::StringBindings;
 use amethyst::prelude::*;
 use amethyst::renderer::plugins::RenderFlat2D;
 use amethyst::renderer::plugins::RenderToWindow;
@@ -55,7 +56,7 @@ fn main() -> amethyst::Result<()> {
     let game_data = GameDataBuilder::default()
         .with_bundle(TransformBundle::new())?
         .with_bundle(
-            InputBundle::<StringBindings>::new()
+            InputBundle::<CustomBindingTypes>::new()
                 .with_bindings_from_file(root.join("config/input.ron"))?,
         )?
         .with_system_desc(MouseFocusUpdateSystemDesc::default(), "mouse_focus", &[])
@@ -63,7 +64,7 @@ fn main() -> amethyst::Result<()> {
         .with_system_desc(UiResizeSystem::new(), "", &[])
         .with_system_desc(GameEventSystemDesc::default(), "", &[])
         .with_system_desc(HideHierarchySystemDesc::default(), "", &[]) // TODO: Maybe this system depends on something?
-        .with_bundle(UiBundle::<StringBindings>::new())?
+        .with_bundle(UiBundle::<CustomBindingTypes>::new())?
         .with_bundle(
             RenderingBundle::<DefaultBackend>::new()
                 .with_plugin(RenderToWindow::from_config_path(

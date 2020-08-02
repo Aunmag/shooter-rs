@@ -1,9 +1,13 @@
 (
-    axes: {},
-    actions: {
-        "move_forward": [[Key(W)]],
-        "move_backwards": [[Key(S)]],
-        "move_left": [[Key(A)]],
-        "move_right": [[Key(D)]],
+    axes: {
+        MoveForward: Emulated(
+            pos: Key(W),
+            neg: Key(S),
+        ),
+        MoveAside: Emulated(
+            pos: Key(D),
+            neg: Key(A),
+        ),
     },
+    actions: {},
 )

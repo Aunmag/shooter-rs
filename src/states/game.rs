@@ -1,5 +1,6 @@
 use crate::components::actor::Actor;
 use crate::components::player::Player;
+use crate::input;
 use crate::states::menu::home::Home;
 use crate::systems::player::PlayerSystem;
 use crate::utils;
@@ -16,7 +17,6 @@ use amethyst::ecs::Dispatcher;
 use amethyst::ecs::DispatcherBuilder;
 use amethyst::ecs::Entity;
 use amethyst::input::is_key_down;
-use amethyst::input::InputEvent;
 use amethyst::prelude::*;
 use amethyst::renderer::sprite::SpriteSheetHandle;
 use amethyst::renderer::Camera;
@@ -28,6 +28,8 @@ use amethyst::renderer::Texture;
 use amethyst::tiles::MortonEncoder;
 use amethyst::tiles::Tile;
 use amethyst::tiles::TileMap;
+use amethyst::winit::DeviceEvent;
+use amethyst::winit::Event;
 use amethyst::winit::VirtualKeyCode;
 use std::sync::Arc;
 
@@ -93,7 +95,7 @@ impl<'a, 'b> SimpleState for Game<'a, 'b> {
         create_camera(data.world, actor_main);
         create_ground(data.world, root);
 
-        utils::input::reset_mouse_delta();
+        input::reset_mouse_delta();
 
         data.world
             .write_resource::<EventChannel<GameEvent>>()
@@ -128,19 +130,18 @@ impl<'a, 'b> SimpleState for Game<'a, 'b> {
     }
 
     fn handle_event(&mut self, _data: StateData<GameData>, event: StateEvent) -> SimpleTrans {
-        match event {
-            StateEvent::Window(event) => {
-                if is_key_down(&event, VirtualKeyCode::Escape) {
-                    return Trans::Push(Box::new(Home::new(false)));
-                }
+        if let StateEvent::Window(event) = event {
+            if let Event::DeviceEvent {
+                event: DeviceEvent::MouseMotion { delta },
+                ..
+            } = event {
+                #[allow(clippy::cast_possible_truncation)]
+                input::add_mouse_delta(delta.0 as i16);
             }
-            StateEvent::Input(event) => {
-                if let InputEvent::MouseMoved { delta_x: delta, .. } = event {
-                    #[allow(clippy::cast_possible_truncation)]
-                    utils::input::add_mouse_delta(delta as i16);
-                }
+
+            if is_key_down(&event, VirtualKeyCode::Escape) {
+                return Trans::Push(Box::new(Home::new(false)));
             }
-            _ => {}
         }
 
         return Trans::None;
@@ -166,7 +167,6 @@ fn create_actor(
 ) -> Entity {
     let mut transform = Transform::default();
     transform.set_translation_xyz(x, y, 0.0);
-    transform.set_rotation_2d(utils::math::PI_0_5);
 
     let mut actor = world
         .create_entity()
@@ -185,7 +185,6 @@ fn create_actor(
 fn create_camera(world: &mut World, player: Entity) -> Entity {
     let mut transform = Transform::default();
     transform.set_translation_xyz(0.0, 0.0, 1.0);
-    transform.set_rotation_2d(utils::math::PI_1_5);
 
     return world
         .create_entity()
