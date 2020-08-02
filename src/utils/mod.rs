@@ -9,8 +9,6 @@ pub fn set_cursor_visibility(is_visible: bool, world: &mut World) {
 }
 
 pub fn set_entity_visibility(entity: Entity, world: &mut World, is_visible: bool) {
-    // TODO: Do not use `expect`, write warning to log
-
     let mut storage = world.write_storage::<HiddenPropagate>();
 
     if is_visible {

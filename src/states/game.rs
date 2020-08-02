@@ -106,7 +106,6 @@ impl<'a, 'b> SimpleState for Game<'a, 'b> {
 
     fn on_stop(&mut self, data: StateData<GameData>) {
         if let Some(root) = self.root.take() {
-            // TODO: Do not panic, write warning to the log instead
             data.world
                 .delete_entity(root)
                 .expect("Failed to delete the root entity. Was it already removed?");
