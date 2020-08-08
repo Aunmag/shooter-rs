@@ -1,8 +1,15 @@
+use amethyst::assets::AssetStorage;
+use amethyst::assets::Loader;
 use amethyst::controls::HideCursor;
 use amethyst::core::HiddenPropagate;
 use amethyst::ecs::prelude::Entity;
 use amethyst::ecs::prelude::World;
 use amethyst::prelude::*;
+use amethyst::renderer::sprite::SpriteSheetHandle;
+use amethyst::renderer::ImageFormat;
+use amethyst::renderer::SpriteSheet;
+use amethyst::renderer::SpriteSheetFormat;
+use amethyst::renderer::Texture;
 
 pub fn set_cursor_visibility(is_visible: bool, world: &mut World) {
     world.write_resource::<HideCursor>().hide = !is_visible;
@@ -44,4 +51,18 @@ impl UiAwaiter {
     pub fn is_ready(&self) -> bool {
         return self.frames_passed >= Self::FRAMES_TO_AWAIT;
     }
+}
+
+pub fn load_sprite_sheet(world: &mut World, png_path: &str, ron_path: &str) -> SpriteSheetHandle {
+    return world.read_resource::<Loader>().load(
+        ron_path,
+        SpriteSheetFormat(world.read_resource::<Loader>().load(
+            png_path,
+            ImageFormat::default(),
+            (),
+            &world.read_resource::<AssetStorage<Texture>>(),
+        )),
+        (),
+        &world.read_resource::<AssetStorage<SpriteSheet>>(),
+    );
 }

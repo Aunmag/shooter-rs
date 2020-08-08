@@ -1,13 +1,11 @@
 use crate::components::actor::Actor;
 use crate::components::player::Player;
+use crate::components::terrain::Terrain;
 use crate::input;
 use crate::states::menu::home::Home;
 use crate::systems::player::PlayerSystem;
+use crate::systems::terrain::TerrainSystem;
 use crate::utils;
-use amethyst::assets::AssetStorage;
-use amethyst::assets::Loader;
-use amethyst::core::math::Point3;
-use amethyst::core::math::Vector3;
 use amethyst::core::shrev::EventChannel;
 use amethyst::core::transform::Transform;
 use amethyst::core::ArcThreadPool;
@@ -18,16 +16,8 @@ use amethyst::ecs::DispatcherBuilder;
 use amethyst::ecs::Entity;
 use amethyst::input::is_key_down;
 use amethyst::prelude::*;
-use amethyst::renderer::sprite::SpriteSheetHandle;
 use amethyst::renderer::Camera;
-use amethyst::renderer::ImageFormat;
 use amethyst::renderer::SpriteRender;
-use amethyst::renderer::SpriteSheet;
-use amethyst::renderer::SpriteSheetFormat;
-use amethyst::renderer::Texture;
-use amethyst::tiles::MortonEncoder;
-use amethyst::tiles::Tile;
-use amethyst::tiles::TileMap;
 use amethyst::winit::DeviceEvent;
 use amethyst::winit::Event;
 use amethyst::winit::VirtualKeyCode;
@@ -57,6 +47,7 @@ impl Game<'_, '_> {
     fn create_dispatcher(&mut self, world: &mut World) {
         let mut builder = DispatcherBuilder::new();
         builder.add(PlayerSystem, "", &[]);
+        builder.add(TerrainSystem, "", &[]); // TODO: Maybe run while fixed update
 
         let mut dispatcher = builder
             .with_pool(Arc::clone(&world.read_resource::<ArcThreadPool>()))
@@ -75,7 +66,7 @@ impl<'a, 'b> SimpleState for Game<'a, 'b> {
 
         let actor_renderer = SpriteRender {
             // TODO: Simplify sprite loading, avoid using sprite sheets
-            sprite_sheet: load_sprite_sheet(
+            sprite_sheet: utils::load_sprite_sheet(
                 data.world,
                 "actors/human/image.png",
                 "actors/human/image.ron",
@@ -93,7 +84,7 @@ impl<'a, 'b> SimpleState for Game<'a, 'b> {
         let actor_main = create_actor(data.world, 0.0, 0.0, true, actor_renderer, root);
 
         create_camera(data.world, actor_main);
-        create_ground(data.world, root);
+        Terrain::create_entity(data.world, root);
 
         input::reset_mouse_delta();
 
@@ -147,15 +138,6 @@ impl<'a, 'b> SimpleState for Game<'a, 'b> {
     }
 }
 
-#[derive(Default, Clone)]
-pub struct GroundTile;
-
-impl Tile for GroundTile {
-    fn sprite(&self, _: Point3<u32>, _: &World) -> Option<usize> {
-        return Some(1);
-    }
-}
-
 fn create_actor(
     world: &mut World,
     x: f32,
@@ -191,37 +173,4 @@ fn create_camera(world: &mut World, player: Entity) -> Entity {
         .with(transform)
         .with(Parent { entity: player })
         .build();
-}
-
-fn create_ground(world: &mut World, root: Entity) -> Entity {
-    let map = TileMap::<GroundTile, MortonEncoder>::new(
-        Vector3::new(2, 2, 1),
-        Vector3::new(128, 128, 1),
-        Some(load_sprite_sheet(
-            world,
-            "ground/grass.png",
-            "ground/grass.ron",
-        )),
-    );
-
-    return world
-        .create_entity()
-        .with(map)
-        .with(Transform::default())
-        .with(Parent { entity: root })
-        .build();
-}
-
-fn load_sprite_sheet(world: &mut World, png_path: &str, ron_path: &str) -> SpriteSheetHandle {
-    return world.read_resource::<Loader>().load(
-        ron_path,
-        SpriteSheetFormat(world.read_resource::<Loader>().load(
-            png_path,
-            ImageFormat::default(),
-            (),
-            &world.read_resource::<AssetStorage<Texture>>(),
-        )),
-        (),
-        &world.read_resource::<AssetStorage<SpriteSheet>>(),
-    );
 }

@@ -3,6 +3,7 @@
     clippy::as_conversions,
     clippy::cargo_common_metadata,
     clippy::cast_lossless,
+    clippy::cast_precision_loss,
     clippy::default_trait_access,
     clippy::expect_used, // TODO: Don't allow later
     clippy::float_arithmetic,
@@ -23,8 +24,8 @@ mod states;
 mod systems;
 mod utils;
 
+use crate::components::terrain::Terrain;
 use crate::input::CustomBindingTypes;
-use crate::states::game::GroundTile;
 use crate::states::startup::Startup;
 use crate::systems::game_event::GameEventSystemDesc;
 use crate::systems::ui_resize::UiResizeSystem;
@@ -72,7 +73,7 @@ fn main() -> amethyst::Result<()> {
                 )?)
                 .with_plugin(RenderFlat2D::default())
                 .with_plugin(RenderUi::default())
-                .with_plugin(RenderTiles2D::<GroundTile, MortonEncoder>::default()),
+                .with_plugin(RenderTiles2D::<Terrain, MortonEncoder>::default()),
         )?;
 
     Application::build(root.join("assets/"), Startup::new())?
