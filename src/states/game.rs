@@ -3,6 +3,7 @@ use crate::components::player::Player;
 use crate::components::terrain::Terrain;
 use crate::input;
 use crate::states::menu::home::Home;
+use crate::systems::camera::CameraSystem;
 use crate::systems::player::PlayerSystem;
 use crate::systems::terrain::TerrainSystem;
 use crate::utils;
@@ -22,8 +23,6 @@ use amethyst::winit::DeviceEvent;
 use amethyst::winit::Event;
 use amethyst::winit::VirtualKeyCode;
 use std::sync::Arc;
-
-const VIEWPORT: f32 = 150.0; // TODO: Do not hard-code
 
 #[derive(Debug)]
 pub enum GameEvent {
@@ -46,6 +45,7 @@ impl Game<'_, '_> {
 
     fn create_dispatcher(&mut self, world: &mut World) {
         let mut builder = DispatcherBuilder::new();
+        builder.add(CameraSystem::new(), "", &[]);
         builder.add(PlayerSystem, "", &[]);
         builder.add(TerrainSystem, "", &[]); // TODO: Maybe run while fixed update
 
@@ -169,7 +169,7 @@ fn create_camera(world: &mut World, player: Entity) -> Entity {
 
     return world
         .create_entity()
-        .with(Camera::standard_2d(VIEWPORT, VIEWPORT))
+        .with(Camera::standard_2d(1.0, 1.0))
         .with(transform)
         .with(Parent { entity: player })
         .build();

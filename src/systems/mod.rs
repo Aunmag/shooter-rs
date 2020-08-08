@@ -1,3 +1,4 @@
+pub mod camera;
 pub mod game_event;
 pub mod player;
 pub mod terrain;
