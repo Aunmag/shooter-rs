@@ -5,6 +5,5 @@ authors = ["Aunmag <aunmag@gmail.com>"]
 edition = "2018"
 
 [dependencies]
-amethyst = { version = "0.15", features = ["vulkan", "tiles"] }
-dunce = "1.0" # TODO: This is temporary, remove in the future
+amethyst = { version = "0.15.1", features = ["vulkan", "tiles"] }
 serde = { version = "1.0", features = ["derive"] }

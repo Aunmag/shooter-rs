@@ -5,7 +5,6 @@ use amethyst::ecs::prelude::ReadExpect;
 use amethyst::ecs::prelude::System;
 use amethyst::ecs::prelude::SystemData;
 use amethyst::ecs::prelude::WriteStorage;
-use amethyst::renderer::camera::Projection;
 use amethyst::renderer::Camera;
 use amethyst::window::ScreenDimensions;
 
@@ -41,17 +40,18 @@ impl<'a> System<'a> for CameraSystem {
         #[allow(clippy::float_cmp)]
         if screen_size_x != self.screen_size_x || screen_size_y != self.screen_size_y {
             let scale = VIEW_DISTANCE / to_view_distance(screen_size_x, screen_size_y);
-            let view_x = screen_size_x * scale / 2.0;
-            let view_y = screen_size_y * scale / 2.0;
+            let view_x = 2.0 / (screen_size_x * scale);
+            let view_y = -2.0 / (screen_size_y * scale);
             let offset = screen_size_y * scale * OFFSET_RATIO;
             let mut is_camera = false;
 
+            #[allow(clippy::indexing_slicing)]
             for (camera, transform) in (&mut cameras, &mut transforms).join() {
                 // Keep in sync with `Camera::standard_2d` source
-                camera.set_projection(Projection::orthographic(
-                    -view_x, view_x, -view_y, view_y, 0.1, 2000.0,
-                ));
-
+                camera.matrix[(0, 0)] = view_x;
+                camera.matrix[(1, 1)] = view_y;
+                camera.matrix[(0, 3)] = 0.0;
+                camera.matrix[(1, 3)] = 0.0;
                 transform.set_translation_y(offset);
                 is_camera = true;
             }

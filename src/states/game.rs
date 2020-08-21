@@ -64,15 +64,14 @@ impl<'a, 'b> SimpleState for Game<'a, 'b> {
         self.create_dispatcher(&mut data.world);
         utils::set_cursor_visibility(false, &mut data.world);
 
-        let actor_renderer = SpriteRender {
-            // TODO: Simplify sprite loading, avoid using sprite sheets
-            sprite_sheet: utils::load_sprite_sheet(
+        let actor_renderer = SpriteRender::new(
+            utils::load_sprite_sheet(
                 data.world,
                 "actors/human/image.png",
                 "actors/human/image.ron",
             ),
-            sprite_number: 0,
-        };
+            0,
+        );
 
         let root = data.world.create_entity().build();
 

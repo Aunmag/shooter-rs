@@ -51,9 +51,7 @@ const FRAME_RATE: u32 = 144;
 fn main() -> amethyst::Result<()> {
     amethyst::start_logger(Default::default());
 
-    // TODO: `dunce::simplified` is a temporary workaround, remove in the future (see https://github.com/amethyst/amethyst/pull/2337#issue-438871838)
-    let root = dunce::simplified(&application_root_dir()?).to_path_buf();
-
+    let root = application_root_dir()?;
     let game_data = GameDataBuilder::default()
         .with_bundle(TransformBundle::new())?
         .with_bundle(
