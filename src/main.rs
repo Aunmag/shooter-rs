@@ -5,9 +5,9 @@
     clippy::cast_lossless,
     clippy::cast_precision_loss,
     clippy::default_trait_access,
-    clippy::expect_used, // TODO: Don't allow later
+    clippy::else_if_without_else,
     clippy::float_arithmetic,
-    clippy::implicit_return, // TODO: Don't later excepting closures
+    clippy::implicit_return, // TODO: Enable later excepting closures
     clippy::integer_arithmetic,
     clippy::match_wildcard_for_single_variants,
     clippy::missing_docs_in_private_items,

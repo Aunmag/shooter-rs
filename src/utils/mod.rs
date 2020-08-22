@@ -19,13 +19,17 @@ pub fn set_entity_visibility(entity: Entity, world: &mut World, is_visible: bool
     let mut storage = world.write_storage::<HiddenPropagate>();
 
     if is_visible {
-        storage
-            .remove(entity)
-            .expect(&"Failed to delete HiddenPropagate component");
-    } else {
-        storage
-            .insert(entity, HiddenPropagate::new())
-            .expect(&"Failed to insert HiddenPropagate component");
+        if storage.remove(entity).is_none() {
+            log::warn!(
+                "There was no HiddenPropagate component to delete from {:?}",
+                entity,
+            );
+        }
+    } else if let Err(error) = storage.insert(entity, HiddenPropagate::new()) {
+        log::error!(
+            "Failed to insert HiddenPropagate component. Details: {}",
+            error,
+        );
     }
 }
 

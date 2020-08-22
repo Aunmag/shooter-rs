@@ -6,4 +6,5 @@ edition = "2018"
 
 [dependencies]
 amethyst = { version = "0.15.1", features = ["vulkan", "tiles"] }
+log = "0.4"
 serde = { version = "1.0", features = ["derive"] }
