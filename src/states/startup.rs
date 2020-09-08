@@ -1,6 +1,6 @@
-use crate::states::game::GameEvent;
 use crate::states::menu;
-use crate::states::menu::home::Home;
+use crate::states::menu::HomeState;
+use crate::states::GameEvent;
 use crate::utils::UiAwaiter;
 use amethyst::core::shrev::EventChannel;
 use amethyst::prelude::*;
@@ -8,11 +8,11 @@ use amethyst::ui::UiCreator;
 use amethyst::ui::UiText;
 use amethyst::ui::UiTransform;
 
-pub struct Startup {
+pub struct StartupState {
     ui_awaiter: UiAwaiter,
 }
 
-impl Startup {
+impl StartupState {
     pub fn new() -> Self {
         return Self {
             ui_awaiter: UiAwaiter::new(),
@@ -20,7 +20,7 @@ impl Startup {
     }
 }
 
-impl SimpleState for Startup {
+impl SimpleState for StartupState {
     fn on_start(&mut self, data: StateData<GameData>) {
         data.world.exec(|mut creator: UiCreator| {
             creator.create("ui/home.ron", ());
@@ -50,7 +50,7 @@ impl SimpleState for Startup {
                 .write_resource::<EventChannel<GameEvent>>()
                 .single_write(GameEvent::GameEnd);
 
-            return Trans::Switch(Box::new(Home::new(true)));
+            return Trans::Switch(Box::new(HomeState::new(true)));
         }
 
         return Trans::None;

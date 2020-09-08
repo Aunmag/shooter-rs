@@ -1,6 +1,6 @@
-use crate::states::game::Game;
-use crate::states::menu::quit::Quit;
+use crate::states::menu::QuitState;
 use crate::states::menu::UiState;
+use crate::states::GameState;
 use amethyst::ecs::prelude::Entity;
 use amethyst::input::is_key_down;
 use amethyst::prelude::*;
@@ -17,7 +17,7 @@ pub const BUTTON_SETTINGS_ID: &str = "home.settings";
 pub const BUTTON_HELP_ID: &str = "home.help";
 pub const BUTTON_QUIT_ID: &str = "home.quit";
 
-pub struct Home {
+pub struct HomeState {
     is_root: bool,
     ui_root: Option<Entity>,
     button_continue: Option<Entity>,
@@ -26,7 +26,7 @@ pub struct Home {
     button_quit: Option<Entity>,
 }
 
-impl Home {
+impl HomeState {
     pub fn new(is_root: bool) -> Self {
         return Self {
             is_root,
@@ -39,7 +39,7 @@ impl Home {
     }
 }
 
-impl SimpleState for Home {
+impl SimpleState for HomeState {
     fn on_start(&mut self, mut data: StateData<GameData>) {
         self.ui_root = self.find_ui_root(&mut data.world);
         self.on_start_or_resume(&mut data.world);
@@ -84,11 +84,11 @@ impl SimpleState for Home {
                 }
 
                 if Some(target) == self.button_start {
-                    return Trans::Replace(Box::new(Game::new()));
+                    return Trans::Replace(Box::new(GameState::new()));
                 }
 
                 if Some(target) == self.button_quit {
-                    return Trans::Push(Box::new(Quit::new()));
+                    return Trans::Push(Box::new(QuitState::new()));
                 }
             }
             _ => {}
@@ -98,7 +98,7 @@ impl SimpleState for Home {
     }
 }
 
-impl UiState for Home {
+impl UiState for HomeState {
     fn get_ui_root_id(&self) -> &'static str {
         return ROOT_ID;
     }

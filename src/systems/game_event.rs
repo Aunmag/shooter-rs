@@ -1,5 +1,5 @@
-use crate::states::game::GameEvent;
 use crate::states::menu;
+use crate::states::GameEvent;
 use amethyst::core::shrev::EventChannel;
 use amethyst::core::shrev::ReaderId;
 use amethyst::derive::SystemDesc;

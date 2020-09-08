@@ -11,7 +11,6 @@ use amethyst::window::ScreenDimensions;
 
 /// Determines which screen min(width, height) font sizes are set to by default
 const ORIGIN_SCREEN_SIZE_QUAD: f32 = 720.0;
-
 const WALLPAPER_SIZE_X: f32 = 480.0;
 const WALLPAPER_SIZE_Y: f32 = 270.0;
 const WALLPAPER_ASPECT_RATIO: f32 = WALLPAPER_SIZE_X / WALLPAPER_SIZE_Y;

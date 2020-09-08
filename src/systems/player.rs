@@ -1,5 +1,5 @@
-use crate::components::actor::Actor;
-use crate::components::player::Player;
+use crate::components::Actor;
+use crate::components::Player;
 use crate::input;
 use crate::input::AxisBinding;
 use crate::input::CustomBindingTypes;

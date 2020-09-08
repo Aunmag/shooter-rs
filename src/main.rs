@@ -24,11 +24,11 @@ mod states;
 mod systems;
 mod utils;
 
-use crate::components::terrain::Terrain;
+use crate::components::Terrain;
 use crate::input::CustomBindingTypes;
-use crate::states::startup::Startup;
-use crate::systems::game_event::GameEventSystemDesc;
-use crate::systems::ui_resize::UiResizeSystem;
+use crate::states::StartupState;
+use crate::systems::GameEventSystemDesc;
+use crate::systems::UiResizeSystem;
 use amethyst::controls::CursorHideSystemDesc;
 use amethyst::controls::MouseFocusUpdateSystemDesc;
 use amethyst::core::frame_limiter::FrameRateLimitStrategy;
@@ -74,7 +74,7 @@ fn main() -> amethyst::Result<()> {
                 .with_plugin(RenderTiles2D::<Terrain, MortonEncoder>::default()),
         )?;
 
-    Application::build(root.join("assets/"), Startup::new())?
+    Application::build(root.join("assets/"), StartupState::new())?
         .with_frame_limit(FrameRateLimitStrategy::Yield, FRAME_RATE)
         .build(game_data)?
         .run();

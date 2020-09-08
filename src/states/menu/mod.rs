@@ -11,6 +11,9 @@ use std::collections::HashSet;
 pub mod home;
 pub mod quit;
 
+pub use self::home::*;
+pub use self::quit::*;
+
 const FONT_COLOR: [f32; 4] = [1.0, 1.0, 1.0, 1.0];
 const FONT_COLOR_DISABLED: [f32; 4] = [0.8, 0.8, 0.8, 0.5];
 

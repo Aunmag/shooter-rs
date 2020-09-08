@@ -1,4 +1,4 @@
-use crate::components::terrain::Terrain;
+use crate::components::Terrain;
 use amethyst::core::transform::Transform;
 use amethyst::derive::SystemDesc;
 use amethyst::ecs::prelude::Join;

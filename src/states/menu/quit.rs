@@ -1,4 +1,4 @@
-use crate::states::menu::home::Home;
+use crate::states::menu::HomeState;
 use crate::states::menu::UiState;
 use amethyst::ecs::prelude::Entity;
 use amethyst::input::is_key_down;
@@ -13,14 +13,14 @@ pub const BUTTON_DISCONNECT_ID: &str = "quit.disconnect";
 pub const BUTTON_EXIT_ID: &str = "quit.exit";
 pub const BUTTON_CANCEL_ID: &str = "quit.cancel";
 
-pub struct Quit {
+pub struct QuitState {
     ui_root: Option<Entity>,
     button_disconnect: Option<Entity>,
     button_exit: Option<Entity>,
     button_cancel: Option<Entity>,
 }
 
-impl Quit {
+impl QuitState {
     pub fn new() -> Self {
         return Self {
             ui_root: None,
@@ -31,7 +31,7 @@ impl Quit {
     }
 }
 
-impl SimpleState for Quit {
+impl SimpleState for QuitState {
     fn on_start(&mut self, mut data: StateData<GameData>) {
         self.ui_root = self.find_ui_root(&mut data.world);
         self.on_start_or_resume(&mut data.world);
@@ -66,7 +66,7 @@ impl SimpleState for Quit {
                 }
 
                 if Some(target) == self.button_disconnect {
-                    return Trans::Replace(Box::new(Home::new(true)));
+                    return Trans::Replace(Box::new(HomeState::new(true)));
                 }
 
                 if Some(target) == self.button_exit {
@@ -80,7 +80,7 @@ impl SimpleState for Quit {
     }
 }
 
-impl UiState for Quit {
+impl UiState for QuitState {
     fn get_ui_root_id(&self) -> &'static str {
         return ROOT_ID;
     }

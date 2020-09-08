@@ -1,11 +1,11 @@
-use crate::components::actor::Actor;
-use crate::components::player::Player;
-use crate::components::terrain::Terrain;
+use crate::components::Actor;
+use crate::components::Player;
+use crate::components::Terrain;
 use crate::input;
-use crate::states::menu::home::Home;
-use crate::systems::camera::CameraSystem;
-use crate::systems::player::PlayerSystem;
-use crate::systems::terrain::TerrainSystem;
+use crate::states::menu::HomeState;
+use crate::systems::CameraSystem;
+use crate::systems::PlayerSystem;
+use crate::systems::TerrainSystem;
 use crate::utils;
 use amethyst::core::shrev::EventChannel;
 use amethyst::core::transform::Transform;
@@ -24,18 +24,19 @@ use amethyst::winit::Event;
 use amethyst::winit::VirtualKeyCode;
 use std::sync::Arc;
 
+// TODO: Maybe move to another module or refactor
 #[derive(Debug)]
 pub enum GameEvent {
     GameStart,
     GameEnd,
 }
 
-pub struct Game<'a, 'b> {
+pub struct GameState<'a, 'b> {
     root: Option<Entity>,
     dispatcher: Option<Dispatcher<'a, 'b>>,
 }
 
-impl Game<'_, '_> {
+impl GameState<'_, '_> {
     pub fn new() -> Self {
         return Self {
             root: None,
@@ -59,7 +60,7 @@ impl Game<'_, '_> {
     }
 }
 
-impl<'a, 'b> SimpleState for Game<'a, 'b> {
+impl<'a, 'b> SimpleState for GameState<'a, 'b> {
     fn on_start(&mut self, mut data: StateData<GameData>) {
         self.create_dispatcher(&mut data.world);
         utils::set_cursor_visibility(false, &mut data.world);
@@ -129,7 +130,7 @@ impl<'a, 'b> SimpleState for Game<'a, 'b> {
             }
 
             if is_key_down(&event, VirtualKeyCode::Escape) {
-                return Trans::Push(Box::new(Home::new(false)));
+                return Trans::Push(Box::new(HomeState::new(false)));
             }
         }
 

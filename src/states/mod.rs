@@ -1,3 +1,6 @@
-pub mod game;
+mod game;
 pub mod menu;
-pub mod startup;
+mod startup;
+
+pub use self::game::*;
+pub use self::startup::*;
