@@ -1,6 +1,9 @@
 use crate::components::Actor;
 use crate::components::Player;
 use crate::components::Terrain;
+use crate::data::LAYER_ACTOR;
+use crate::data::LAYER_ACTOR_PLAYER;
+use crate::data::LAYER_CAMERA;
 use crate::input;
 use crate::states::menu::HomeState;
 use crate::systems::CameraSystem;
@@ -146,8 +149,16 @@ fn create_actor(
     renderer: SpriteRender,
     root: Entity,
 ) -> Entity {
+    let z;
+
+    if is_player {
+        z = LAYER_ACTOR_PLAYER;
+    } else {
+        z = LAYER_ACTOR;
+    }
+
     let mut transform = Transform::default();
-    transform.set_translation_xyz(x, y, 0.0);
+    transform.set_translation_xyz(x, y, z);
 
     let mut actor = world
         .create_entity()
@@ -165,7 +176,7 @@ fn create_actor(
 
 fn create_camera(world: &mut World, player: Entity) -> Entity {
     let mut transform = Transform::default();
-    transform.set_translation_xyz(0.0, 0.0, 1.0);
+    transform.set_translation_xyz(0.0, 0.0, LAYER_CAMERA);
 
     return world
         .create_entity()

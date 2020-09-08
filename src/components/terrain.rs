@@ -1,3 +1,4 @@
+use crate::data::LAYER_TERRAIN;
 use crate::utils;
 use amethyst::core::math::Point3;
 use amethyst::core::math::Vector3;
@@ -29,10 +30,13 @@ impl Terrain {
             )),
         );
 
+        let mut transform = Transform::default();
+        transform.set_translation_xyz(0.0, 0.0, LAYER_TERRAIN);
+
         return world
             .create_entity()
             .with(tile_map)
-            .with(Transform::default())
+            .with(transform)
             .with(Parent { entity: root })
             .build();
     }

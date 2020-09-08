@@ -19,6 +19,7 @@
 )]
 
 mod components;
+mod data;
 mod input;
 mod states;
 mod systems;
