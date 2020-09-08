@@ -21,6 +21,7 @@
 mod components;
 mod data;
 mod input;
+mod resources;
 mod states;
 mod systems;
 mod utils;
@@ -28,8 +29,8 @@ mod utils;
 use crate::components::Terrain;
 use crate::input::CustomBindingTypes;
 use crate::states::StartupState;
-use crate::systems::GameEventSystemDesc;
 use crate::systems::UiResizeSystem;
+use crate::systems::UiTaskSystem;
 use amethyst::controls::CursorHideSystemDesc;
 use amethyst::controls::MouseFocusUpdateSystemDesc;
 use amethyst::core::frame_limiter::FrameRateLimitStrategy;
@@ -62,7 +63,7 @@ fn main() -> amethyst::Result<()> {
         .with_system_desc(MouseFocusUpdateSystemDesc::default(), "mouse_focus", &[])
         .with_system_desc(CursorHideSystemDesc::default(), "", &["mouse_focus"])
         .with_system_desc(UiResizeSystem::new(), "", &[])
-        .with_system_desc(GameEventSystemDesc::default(), "", &[])
+        .with_system_desc(UiTaskSystem, "", &[])
         .with_system_desc(HideHierarchySystemDesc::default(), "", &[]) // TODO: Maybe this system depends on something?
         .with_bundle(UiBundle::<CustomBindingTypes>::new())?
         .with_bundle(

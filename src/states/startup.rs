@@ -1,12 +1,10 @@
+use crate::resources::UiTask;
+use crate::resources::UiTaskResource;
 use crate::states::menu;
 use crate::states::menu::HomeState;
-use crate::states::GameEvent;
 use crate::utils::UiAwaiter;
-use amethyst::core::shrev::EventChannel;
 use amethyst::prelude::*;
 use amethyst::ui::UiCreator;
-use amethyst::ui::UiText;
-use amethyst::ui::UiTransform;
 
 pub struct StartupState {
     ui_awaiter: UiAwaiter,
@@ -32,23 +30,32 @@ impl SimpleState for StartupState {
         self.ui_awaiter.update();
 
         if self.ui_awaiter.is_ready() {
-            {
-                // TODO: Do I need this nested scope?
-                menu::set_buttons_availability(
-                    &[
-                        menu::home::BUTTON_JOIN_ID,
-                        menu::home::BUTTON_SETTINGS_ID,
-                        menu::home::BUTTON_HELP_ID,
-                    ],
-                    false,
-                    &mut data.world.write_storage::<UiTransform>(),
-                    &mut data.world.write_storage::<UiText>(),
-                );
-            }
+            let mut tasks = data.world.write_resource::<UiTaskResource>();
 
-            data.world
-                .write_resource::<EventChannel<GameEvent>>()
-                .single_write(GameEvent::GameEnd);
+            tasks.push(UiTask::SetButtonAvailability(
+                menu::home::BUTTON_CONTINUE_ID,
+                false,
+            ));
+
+            tasks.push(UiTask::SetButtonAvailability(
+                menu::home::BUTTON_HELP_ID,
+                false,
+            ));
+
+            tasks.push(UiTask::SetButtonAvailability(
+                menu::home::BUTTON_JOIN_ID,
+                false,
+            ));
+
+            tasks.push(UiTask::SetButtonAvailability(
+                menu::home::BUTTON_SETTINGS_ID,
+                false,
+            ));
+
+            tasks.push(UiTask::SetButtonAvailability(
+                menu::quit::BUTTON_DISCONNECT_ID,
+                false,
+            ));
 
             return Trans::Switch(Box::new(HomeState::new(true)));
         }

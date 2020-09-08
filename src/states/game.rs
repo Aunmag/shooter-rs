@@ -5,12 +5,14 @@ use crate::data::LAYER_ACTOR;
 use crate::data::LAYER_ACTOR_PLAYER;
 use crate::data::LAYER_CAMERA;
 use crate::input;
+use crate::resources::UiTask;
+use crate::resources::UiTaskResource;
+use crate::states::menu;
 use crate::states::menu::HomeState;
 use crate::systems::CameraSystem;
 use crate::systems::PlayerSystem;
 use crate::systems::TerrainSystem;
 use crate::utils;
-use amethyst::core::shrev::EventChannel;
 use amethyst::core::transform::Transform;
 use amethyst::core::ArcThreadPool;
 use amethyst::core::Parent;
@@ -26,13 +28,6 @@ use amethyst::winit::DeviceEvent;
 use amethyst::winit::Event;
 use amethyst::winit::VirtualKeyCode;
 use std::sync::Arc;
-
-// TODO: Maybe move to another module or refactor
-#[derive(Debug)]
-pub enum GameEvent {
-    GameStart,
-    GameEnd,
-}
 
 pub struct GameState<'a, 'b> {
     root: Option<Entity>,
@@ -60,6 +55,20 @@ impl GameState<'_, '_> {
         dispatcher.setup(world);
 
         self.dispatcher = Some(dispatcher);
+    }
+
+    fn set_buttons_availability(data: &mut StateData<GameData>, is_availability: bool) {
+        let mut tasks = data.world.write_resource::<UiTaskResource>();
+
+        tasks.push(UiTask::SetButtonAvailability(
+            menu::home::BUTTON_CONTINUE_ID,
+            is_availability,
+        ));
+
+        tasks.push(UiTask::SetButtonAvailability(
+            menu::quit::BUTTON_DISCONNECT_ID,
+            is_availability,
+        ));
     }
 }
 
@@ -91,23 +100,19 @@ impl<'a, 'b> SimpleState for GameState<'a, 'b> {
 
         input::reset_mouse_delta();
 
-        data.world
-            .write_resource::<EventChannel<GameEvent>>()
-            .single_write(GameEvent::GameStart);
+        Self::set_buttons_availability(&mut data, true);
 
         self.root = Some(root);
     }
 
-    fn on_stop(&mut self, data: StateData<GameData>) {
+    fn on_stop(&mut self, mut data: StateData<GameData>) {
         if let Some(root) = self.root.take() {
             if let Err(error) = data.world.delete_entity(root) {
                 log::error!("Failed to delete the root entity. Details: {}", error);
             }
         }
 
-        data.world
-            .write_resource::<EventChannel<GameEvent>>()
-            .single_write(GameEvent::GameEnd);
+        Self::set_buttons_availability(&mut data, false);
     }
 
     fn on_resume(&mut self, mut data: StateData<GameData>) {
