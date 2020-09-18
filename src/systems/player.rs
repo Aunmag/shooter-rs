@@ -31,17 +31,28 @@ impl<'a> System<'a> for PlayerSystem {
 
     fn run(&mut self, (input, time, actors, players, mut transforms): Self::SystemData) {
         for (_, _, transform) in (&actors, &players, &mut transforms).join() {
-            let move_forward = input.axis_value(&AxisBinding::MoveForward).unwrap_or(0.0)
-                * MOVEMENT_VELOCITY
-                * time.delta_seconds();
+            let (mut movement_x, mut movement_y) = normalize_movement_input(
+                input.axis_value(&AxisBinding::MoveAside).unwrap_or(0.0),
+                input.axis_value(&AxisBinding::MoveForward).unwrap_or(0.0),
+            );
 
-            let move_aside = input.axis_value(&AxisBinding::MoveAside).unwrap_or(0.0)
-                * MOVEMENT_VELOCITY
-                * time.delta_seconds();
+            movement_x *= MOVEMENT_VELOCITY * time.delta_seconds();
+            movement_y *= MOVEMENT_VELOCITY * time.delta_seconds();
 
             transform.rotate_2d(input::take_mouse_delta() as f32 * ROTATION_SENSITIVITY);
-            transform.move_up(move_forward);
-            transform.move_right(move_aside);
+            transform.move_right(movement_x);
+            transform.move_up(movement_y);
         }
+    }
+}
+
+fn normalize_movement_input(x: f32, y: f32) -> (f32, f32) {
+    let movement_squared = x * x + y * y;
+
+    if movement_squared > 1.0 {
+        let movement = movement_squared.sqrt();
+        return (1.0 * x / movement, 1.0 * y / movement);
+    } else {
+        return (x, y);
     }
 }
