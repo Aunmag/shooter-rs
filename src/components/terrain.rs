@@ -17,7 +17,7 @@ pub struct Terrain;
 impl Terrain {
     pub const SIZE: u32 = 128;
     pub const SIZE_HALF: f32 = Self::SIZE as f32 / 2.0;
-    pub const QUANTITY: u32 = 3;
+    pub const QUANTITY: u32 = 5;
 
     pub fn create_entity(world: &mut World, root: Entity) -> Entity {
         let tile_map = TileMap::<Self, MortonEncoder>::new(

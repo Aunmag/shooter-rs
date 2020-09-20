@@ -5,6 +5,7 @@ use crate::states::menu::HomeState;
 use crate::utils::UiAwaiter;
 use amethyst::prelude::*;
 use amethyst::ui::UiCreator;
+use amethyst::window::Window;
 
 pub struct StartupState {
     ui_awaiter: UiAwaiter,
@@ -56,6 +57,14 @@ impl SimpleState for StartupState {
                 menu::quit::BUTTON_DISCONNECT_ID,
                 false,
             ));
+
+            let window = data.world.read_resource::<Window>();
+
+            #[allow(clippy::never_loop)]
+            for monitor in window.get_available_monitors() {
+                window.set_fullscreen(Some(monitor));
+                break;
+            }
 
             return Trans::Switch(Box::new(HomeState::new(true)));
         }
