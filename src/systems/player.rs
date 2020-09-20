@@ -1,4 +1,3 @@
-use crate::components::Actor;
 use crate::components::Player;
 use crate::input;
 use crate::input::AxisBinding;
@@ -24,13 +23,12 @@ impl<'a> System<'a> for PlayerSystem {
     type SystemData = (
         Read<'a, InputHandler<CustomBindingTypes>>,
         Read<'a, Time>,
-        ReadStorage<'a, Actor>,
         ReadStorage<'a, Player>,
         WriteStorage<'a, Transform>,
     );
 
-    fn run(&mut self, (input, time, actors, players, mut transforms): Self::SystemData) {
-        for (_, _, transform) in (&actors, &players, &mut transforms).join() {
+    fn run(&mut self, (input, time, players, mut transforms): Self::SystemData) {
+        for (_, transform) in (&players, &mut transforms).join() {
             let (mut movement_x, mut movement_y) = normalize_movement_input(
                 input.axis_value(&AxisBinding::MoveAside).unwrap_or(0.0),
                 input.axis_value(&AxisBinding::MoveForward).unwrap_or(0.0),

@@ -74,6 +74,7 @@ impl GameState<'_, '_> {
 
 impl<'a, 'b> SimpleState for GameState<'a, 'b> {
     fn on_start(&mut self, mut data: StateData<GameData>) {
+        data.world.register::<Actor>();
         self.create_dispatcher(&mut data.world);
         utils::set_cursor_visibility(false, &mut data.world);
 
