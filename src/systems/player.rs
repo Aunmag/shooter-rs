@@ -1,3 +1,4 @@
+use crate::components::Actor;
 use crate::components::Player;
 use crate::input;
 use crate::input::AxisBinding;
@@ -13,7 +14,6 @@ use amethyst::ecs::prelude::SystemData;
 use amethyst::ecs::prelude::WriteStorage;
 use amethyst::input::InputHandler;
 
-const MOVEMENT_VELOCITY: f32 = 50.0;
 const ROTATION_SENSITIVITY: f32 = 0.01;
 
 #[derive(SystemDesc)]
@@ -34,8 +34,8 @@ impl<'a> System<'a> for PlayerSystem {
                 input.axis_value(&AxisBinding::MoveForward).unwrap_or(0.0),
             );
 
-            movement_x *= MOVEMENT_VELOCITY * time.delta_seconds();
-            movement_y *= MOVEMENT_VELOCITY * time.delta_seconds();
+            movement_x *= Actor::MOVEMENT_VELOCITY * time.delta_seconds();
+            movement_y *= Actor::MOVEMENT_VELOCITY * time.delta_seconds();
 
             transform.rotate_2d(input::take_mouse_delta() as f32 * ROTATION_SENSITIVITY);
             transform.move_right(movement_x);

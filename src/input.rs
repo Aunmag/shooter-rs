@@ -8,7 +8,7 @@ use std::sync::atomic::AtomicI16;
 use std::sync::atomic::Ordering;
 
 // TODO: Try make an object with methods for it
-// TODO: Make sure it's a good way to tack mouse movement with minimal delay
+// TODO: Make sure it's a good way to track mouse movement with minimal delay
 // TODO: Maybe it's better to store a decimal value, at least I've seen integers only so far
 static MOUSE_DELTA: AtomicI16 = AtomicI16::new(0);
 
