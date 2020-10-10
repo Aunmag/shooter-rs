@@ -1,6 +1,10 @@
+use crate::resources::UiTask;
+use crate::resources::UiTaskResource;
+use crate::states::menu::ConfirmState;
+use crate::states::menu::NewGameState;
 use crate::states::menu::QuitState;
 use crate::states::menu::UiState;
-use crate::states::GameState;
+use crate::utils;
 use amethyst::ecs::prelude::Entity;
 use amethyst::input::is_key_down;
 use amethyst::prelude::*;
@@ -9,20 +13,21 @@ use amethyst::ui::UiEventType;
 use amethyst::ui::UiFinder;
 use amethyst::winit::VirtualKeyCode;
 
-pub const ROOT_ID: &str = "home";
-pub const BUTTON_CONTINUE_ID: &str = "home.continue";
-pub const BUTTON_START_ID: &str = "home.start";
-pub const BUTTON_JOIN_ID: &str = "home.join";
-pub const BUTTON_SETTINGS_ID: &str = "home.settings";
-pub const BUTTON_HELP_ID: &str = "home.help";
-pub const BUTTON_QUIT_ID: &str = "home.quit";
+const ROOT_ID: &str = "home";
+const BUTTON_CONTINUE_ID: &str = "home.continue";
+const BUTTON_NEW_GAME_ID: &str = "home.new_game";
+const BUTTON_DISCONNECT_ID: &str = "home.disconnect";
+const BUTTON_SETTINGS_ID: &str = "home.settings";
+const BUTTON_HELP_ID: &str = "home.help";
+const BUTTON_QUIT_ID: &str = "home.quit";
+const DISCONNECTION_TITLE: &str = "Are you sure you want to disconnect?";
 
 pub struct HomeState {
     is_root: bool,
     ui_root: Option<Entity>,
     button_continue: Option<Entity>,
-    button_start: Option<Entity>,
-    button_help: Option<Entity>,
+    button_new_game: Option<Entity>,
+    button_disconnect: Option<Entity>,
     button_quit: Option<Entity>,
 }
 
@@ -32,8 +37,8 @@ impl HomeState {
             is_root,
             ui_root: None,
             button_continue: None,
-            button_start: None,
-            button_help: None,
+            button_new_game: None,
+            button_disconnect: None,
             button_quit: None,
         };
     }
@@ -46,10 +51,35 @@ impl SimpleState for HomeState {
 
         data.world.exec(|finder: UiFinder| {
             self.button_continue = finder.find(BUTTON_CONTINUE_ID);
-            self.button_start = finder.find(BUTTON_START_ID);
-            self.button_help = finder.find(BUTTON_HELP_ID);
+            self.button_new_game = finder.find(BUTTON_NEW_GAME_ID);
+            self.button_disconnect = finder.find(BUTTON_DISCONNECT_ID);
             self.button_quit = finder.find(BUTTON_QUIT_ID);
         });
+
+        if let Some(button_new_game) = self.button_new_game {
+            utils::set_entity_visibility(button_new_game, &mut data.world, self.is_root);
+        }
+
+        if let Some(button_disconnect) = self.button_disconnect {
+            utils::set_entity_visibility(button_disconnect, &mut data.world, !self.is_root);
+        }
+
+        let mut ui_tasks = data.world.write_resource::<UiTaskResource>();
+
+        ui_tasks.insert(
+            BUTTON_CONTINUE_ID.to_string(),
+            UiTask::SetButtonAvailability(!self.is_root),
+        );
+
+        ui_tasks.insert(
+            BUTTON_HELP_ID.to_string(),
+            UiTask::SetButtonAvailability(false),
+        );
+
+        ui_tasks.insert(
+            BUTTON_SETTINGS_ID.to_string(),
+            UiTask::SetButtonAvailability(false),
+        );
     }
 
     fn on_pause(&mut self, mut data: StateData<GameData>) {
@@ -62,8 +92,8 @@ impl SimpleState for HomeState {
 
     fn on_stop(&mut self, mut data: StateData<GameData>) {
         self.button_continue = None;
-        self.button_start = None;
-        self.button_help = None;
+        self.button_new_game = None;
+        self.button_disconnect = None;
         self.button_quit = None;
         self.on_stop_or_pause(&mut data.world);
     }
@@ -83,8 +113,14 @@ impl SimpleState for HomeState {
                     return Trans::Pop;
                 }
 
-                if Some(target) == self.button_start {
-                    return Trans::Replace(Box::new(GameState::new()));
+                if Some(target) == self.button_new_game {
+                    return Trans::Push(Box::new(NewGameState::new()));
+                }
+
+                if Some(target) == self.button_disconnect {
+                    return Trans::Push(Box::new(ConfirmState::new(DISCONNECTION_TITLE, || {
+                        Trans::Replace(Box::new(HomeState::new(true)))
+                    })));
                 }
 
                 if Some(target) == self.button_quit {

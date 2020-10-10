@@ -1,5 +1,8 @@
-pub type UiTaskResource = Vec<UiTask>;
+use std::collections::HashMap;
+
+pub type UiTaskResource = HashMap<String, UiTask>;
 
 pub enum UiTask {
-    SetButtonAvailability(&'static str, bool),
+    SetButtonAvailability(bool),
+    SetText(&'static str),
 }

@@ -10,11 +10,27 @@ use amethyst::ui::UiText;
 use amethyst::ui::UiTransform;
 use std::collections::HashMap;
 
-const FONT_COLOR: [f32; 4] = [1.0, 1.0, 1.0, 1.0];
-const FONT_COLOR_DISABLED: [f32; 4] = [0.8, 0.8, 0.8, 0.5];
-
 #[derive(SystemDesc)]
 pub struct UiTaskSystem;
+
+impl UiTaskSystem {
+    fn prepare_tasks(tasks: &mut UiTaskResource) {
+        let mut prepared = HashMap::with_capacity(tasks.len());
+
+        for (id, task) in tasks.drain() {
+            if let UiTask::SetButtonAvailability(is_availability) = task {
+                prepared.insert(
+                    format!("{}_btn_txt", id),
+                    UiTask::SetButtonAvailability(is_availability),
+                );
+            }
+
+            prepared.insert(id, task);
+        }
+
+        std::mem::swap(tasks, &mut prepared);
+    }
+}
 
 impl<'a> System<'a> for UiTaskSystem {
     type SystemData = (
@@ -24,33 +40,39 @@ impl<'a> System<'a> for UiTaskSystem {
     );
 
     fn run(&mut self, (mut tasks, mut texts, mut transforms): Self::SystemData) {
-        let mut to_update = HashMap::new();
-
-        while let Some(task) = tasks.pop() {
-            match task {
-                UiTask::SetButtonAvailability(id, is_availability) => {
-                    to_update.insert(id.to_string(), is_availability);
-                    to_update.insert(format!("{}_btn_txt", id), is_availability);
-                }
-            }
+        if tasks.is_empty() {
+            return;
         }
+
+        Self::prepare_tasks(&mut tasks);
 
         for (transform, text) in (&mut transforms, (&mut texts).maybe()).join() {
-            if let Some(is_availability) = to_update.remove(&transform.id) {
-                if let Some(text) = text {
-                    if is_availability {
-                        text.color = FONT_COLOR;
-                    } else {
-                        text.color = FONT_COLOR_DISABLED;
+            if let Some(task) = tasks.remove(&transform.id) {
+                match task {
+                    UiTask::SetButtonAvailability(is_availability) => {
+                        if let Some(text) = text {
+                            if is_availability {
+                                text.color[3] = 1.0;
+                            } else {
+                                text.color[3] = 0.3;
+                            }
+                        } else {
+                            transform.opaque = is_availability;
+                        }
                     }
-                } else {
-                    transform.opaque = is_availability;
+                    UiTask::SetText(text_to_set) => {
+                        if let Some(text) = text {
+                            text.text = text_to_set.to_string();
+                        }
+                    }
+                }
+
+                if tasks.is_empty() {
+                    break;
                 }
             }
-
-            if to_update.is_empty() {
-                break;
-            }
         }
+
+        tasks.clear();
     }
 }

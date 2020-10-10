@@ -1,6 +1,7 @@
 #![warn(clippy::all, clippy::cargo, clippy::pedantic, clippy::restriction)]
 #![allow(
     clippy::as_conversions,
+    clippy::blanket_clippy_restriction_lints,
     clippy::cargo_common_metadata,
     clippy::cast_lossless,
     clippy::cast_precision_loss,

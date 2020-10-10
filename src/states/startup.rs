@@ -1,6 +1,3 @@
-use crate::resources::UiTask;
-use crate::resources::UiTaskResource;
-use crate::states::menu;
 use crate::states::menu::HomeState;
 use crate::utils::UiAwaiter;
 use amethyst::prelude::*;
@@ -22,7 +19,9 @@ impl StartupState {
 impl SimpleState for StartupState {
     fn on_start(&mut self, data: StateData<GameData>) {
         data.world.exec(|mut creator: UiCreator| {
+            creator.create("ui/confirm.ron", ());
             creator.create("ui/home.ron", ());
+            creator.create("ui/new_game.ron", ());
             creator.create("ui/quit.ron", ());
         });
     }
@@ -31,33 +30,6 @@ impl SimpleState for StartupState {
         self.ui_awaiter.update();
 
         if self.ui_awaiter.is_ready() {
-            let mut tasks = data.world.write_resource::<UiTaskResource>();
-
-            tasks.push(UiTask::SetButtonAvailability(
-                menu::home::BUTTON_CONTINUE_ID,
-                false,
-            ));
-
-            tasks.push(UiTask::SetButtonAvailability(
-                menu::home::BUTTON_HELP_ID,
-                false,
-            ));
-
-            tasks.push(UiTask::SetButtonAvailability(
-                menu::home::BUTTON_JOIN_ID,
-                false,
-            ));
-
-            tasks.push(UiTask::SetButtonAvailability(
-                menu::home::BUTTON_SETTINGS_ID,
-                false,
-            ));
-
-            tasks.push(UiTask::SetButtonAvailability(
-                menu::quit::BUTTON_DISCONNECT_ID,
-                false,
-            ));
-
             let window = data.world.read_resource::<Window>();
 
             #[allow(clippy::never_loop)]

@@ -43,7 +43,11 @@ impl UiResizeSystem {
         }
 
         for transform in (transforms).join() {
-            if transform.id == "home.wallpaper" || transform.id == "quit.wallpaper" {
+            if transform.id == "confirm.wallpaper"
+                || transform.id == "home.wallpaper"
+                || transform.id == "new_game.wallpaper"
+                || transform.id == "quit.wallpaper"
+            {
                 transform.width = WALLPAPER_SIZE_X * scale;
                 transform.height = WALLPAPER_SIZE_Y * scale;
             }

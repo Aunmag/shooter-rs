@@ -69,209 +69,131 @@ Container(
                                 pivot: TopLeft,
                                 percent: true,
                                 x: 0.0,
-                                y: -0.25, // 3 of 12
+                                y: -0.3,
                                 width: 1.0,
-                                height: 0.083333, // 1 of 12
+                                height: 0.05,
                                 opaque: false,
-                             ),
+                            ),
                             text: (
                                 text: "A Zombie Shooter Game",
                                 font: File("fonts/bold.ttf", ("TTF", ())),
                                 font_size: 32.0,
-                                color: (1.0, 1.0, 1.0, 1.0),
+                                color: (0.8, 0.8, 0.8, 1.0),
                             )
                         ),
-                        Container(
+                        Button(
                             transform: (
+                                id: "home.continue",
                                 anchor: TopLeft,
                                 pivot: TopLeft,
                                 percent: true,
-                                x: 0.333333, // 4 of 12
-                                y: -0.416667, // 5 of 12
-                                width: 0.333333, // 4 of 12
-                                height: 0.083333, // 1 of 12
-                                opaque: false,
+                                x: 0.35,
+                                y: -0.45,
+                                width: 0.3,
+                                height: 0.05,
                             ),
-                            children: [
-                                Button(
-                                    transform: (
-                                        id: "home.continue",
-                                        stretch: XY(
-                                            x_margin: 1.0,
-                                            y_margin: 1.0,
-                                            keep_aspect_ratio: false,
-                                        ),
-                                    ),
-                                    button: (
-                                        text: "Continue",
-                                        font: File("fonts/regular.ttf", ("TTF", ())),
-                                        font_size: 28.0,
-                                        normal_text_color: (1.0, 1.0, 1.0, 1.0),
-                                        normal_image: Texture(Generate(Srgba(0.5, 0.5, 0.5, 0.6))),
-                                        hover_image: Texture(Generate(Srgba(0.6, 0.6, 0.6, 0.6))),
-                                    )
-                                ),
-                            ],
+                            button: (
+                                text: "Continue",
+                                font: File("fonts/regular.ttf", ("TTF", ())),
+                                font_size: 26.0,
+                                normal_text_color: (0.8, 0.8, 0.8, 1.0),
+                                hover_text_color: (0.6, 0.6, 0.6, 1.0),
+                            )
                         ),
-                        Container(
+                        Button(
                             transform: (
+                                id: "home.new_game",
                                 anchor: TopLeft,
                                 pivot: TopLeft,
                                 percent: true,
-                                x: 0.333333, // 4 of 12
-                                y: -0.5, // 6 of 12
-                                width: 0.333333, // 4 of 12
-                                height: 0.083333, // 1 of 12
-                                opaque: false,
+                                x: 0.35,
+                                y: -0.5,
+                                width: 0.3,
+                                height: 0.05,
                             ),
-                            children: [
-                                Button(
-                                    transform: (
-                                        id: "home.start",
-                                        stretch: XY(
-                                            x_margin: 1.0,
-                                            y_margin: 1.0,
-                                            keep_aspect_ratio: false,
-                                        ),
-                                    ),
-                                    button: (
-                                        text: "New Game",
-                                        font: File("fonts/regular.ttf", ("TTF", ())),
-                                        font_size: 28.0,
-                                        normal_text_color: (1.0, 1.0, 1.0, 1.0),
-                                        normal_image: Texture(Generate(Srgba(0.5, 0.5, 0.5, 0.6))),
-                                        hover_image: Texture(Generate(Srgba(0.6, 0.6, 0.6, 0.6))),
-                                    )
-                                ),
-                            ],
+                            button: (
+                                text: "New Game",
+                                font: File("fonts/regular.ttf", ("TTF", ())),
+                                font_size: 26.0,
+                                normal_text_color: (0.8, 0.8, 0.8, 1.0),
+                                hover_text_color: (0.6, 0.6, 0.6, 1.0),
+                            )
                         ),
-                        Container(
+                        Button(
                             transform: (
+                                id: "home.disconnect",
                                 anchor: TopLeft,
                                 pivot: TopLeft,
                                 percent: true,
-                                x: 0.333333, // 4 of 12
-                                y: -0.583333, // 7 of 12
-                                width: 0.333333, // 4 of 12
-                                height: 0.083333, // 1 of 12
-                                opaque: false,
+                                x: 0.35,
+                                y: -0.5,
+                                width: 0.3,
+                                height: 0.05,
                             ),
-                            children: [
-                                Button(
-                                    transform: (
-                                        id: "home.join",
-                                        stretch: XY(
-                                            x_margin: 1.0,
-                                            y_margin: 1.0,
-                                            keep_aspect_ratio: false,
-                                        ),
-                                    ),
-                                    button: (
-                                        text: "Join Game",
-                                        font: File("fonts/regular.ttf", ("TTF", ())),
-                                        font_size: 28.0,
-                                        normal_text_color: (1.0, 1.0, 1.0, 1.0),
-                                        normal_image: Texture(Generate(Srgba(0.5, 0.5, 0.5, 0.6))),
-                                        hover_image: Texture(Generate(Srgba(0.6, 0.6, 0.6, 0.6))),
-                                    )
-                                ),
-                            ],
+                            button: (
+                                text: "Disconnect",
+                                font: File("fonts/regular.ttf", ("TTF", ())),
+                                font_size: 26.0,
+                                normal_text_color: (0.8, 0.8, 0.8, 1.0),
+                                hover_text_color: (0.6, 0.6, 0.6, 1.0),
+                            )
                         ),
-                        Container(
+                        Button(
                             transform: (
+                                id: "home.settings",
                                 anchor: TopLeft,
                                 pivot: TopLeft,
                                 percent: true,
-                                x: 0.333333, // 4 of 12
-                                y: -0.666667, // 8 of 12
-                                width: 0.333333, // 4 of 12
-                                height: 0.083333, // 1 of 12
-                                opaque: false,
+                                x: 0.35,
+                                y: -0.55,
+                                width: 0.3,
+                                height: 0.05,
                             ),
-                            children: [
-                                Button(
-                                    transform: (
-                                        id: "home.settings",
-                                        stretch: XY(
-                                            x_margin: 1.0,
-                                            y_margin: 1.0,
-                                            keep_aspect_ratio: false,
-                                        ),
-                                    ),
-                                    button: (
-                                        text: "Settings",
-                                        font: File("fonts/regular.ttf", ("TTF", ())),
-                                        font_size: 28.0,
-                                        normal_text_color: (1.0, 1.0, 1.0, 1.0),
-                                        normal_image: Texture(Generate(Srgba(0.5, 0.5, 0.5, 0.6))),
-                                        hover_image: Texture(Generate(Srgba(0.6, 0.6, 0.6, 0.6))),
-                                    )
-                                ),
-                            ],
+                            button: (
+                                text: "Settings",
+                                font: File("fonts/regular.ttf", ("TTF", ())),
+                                font_size: 26.0,
+                                normal_text_color: (0.8, 0.8, 0.8, 1.0),
+                                hover_text_color: (0.6, 0.6, 0.6, 1.0),
+                            )
                         ),
-                        Container(
+                        Button(
                             transform: (
+                                id: "home.help",
                                 anchor: TopLeft,
                                 pivot: TopLeft,
                                 percent: true,
-                                x: 0.333333, // 4 of 12
-                                y: -0.75, // 9 of 12
-                                width: 0.333333, // 4 of 12
-                                height: 0.083333, // 1 of 12
-                                opaque: false,
+                                x: 0.35,
+                                y: -0.6,
+                                width: 0.3,
+                                height: 0.05,
                             ),
-                            children: [
-                                Button(
-                                    transform: (
-                                        id: "home.help",
-                                        stretch: XY(
-                                            x_margin: 1.0,
-                                            y_margin: 1.0,
-                                            keep_aspect_ratio: false,
-                                        ),
-                                    ),
-                                    button: (
-                                        text: "Help",
-                                        font: File("fonts/regular.ttf", ("TTF", ())),
-                                        font_size: 28.0,
-                                        normal_text_color: (1.0, 1.0, 1.0, 1.0),
-                                        normal_image: Texture(Generate(Srgba(0.5, 0.5, 0.5, 0.6))),
-                                        hover_image: Texture(Generate(Srgba(0.6, 0.6, 0.6, 0.6))),
-                                    )
-                                ),
-                            ],
+                            button: (
+                                text: "Help",
+                                font: File("fonts/regular.ttf", ("TTF", ())),
+                                font_size: 26.0,
+                                normal_text_color: (0.8, 0.8, 0.8, 1.0),
+                                hover_text_color: (0.6, 0.6, 0.6, 1.0),
+                            )
                         ),
-                        Container(
+                        Button(
                             transform: (
+                                id: "home.quit",
                                 anchor: TopLeft,
                                 pivot: TopLeft,
                                 percent: true,
-                                x: 0.333333, // 4 of 12
-                                y: -0.833333, // 10 of 12
-                                width: 0.333333, // 4 of 12
-                                height: 0.083333, // 1 of 12
-                                opaque: false,
+                                x: 0.35,
+                                y: -0.65,
+                                width: 0.3,
+                                height: 0.05,
                             ),
-                            children: [
-                                Button(
-                                    transform: (
-                                        id: "home.quit",
-                                        stretch: XY(
-                                            x_margin: 1.0,
-                                            y_margin: 1.0,
-                                            keep_aspect_ratio: false,
-                                        ),
-                                    ),
-                                    button: (
-                                        text: "Quit",
-                                        font: File("fonts/regular.ttf", ("TTF", ())),
-                                        font_size: 28.0,
-                                        normal_text_color: (1.0, 1.0, 1.0, 1.0),
-                                        normal_image: Texture(Generate(Srgba(0.5, 0.5, 0.5, 0.6))),
-                                        hover_image: Texture(Generate(Srgba(0.6, 0.6, 0.6, 0.6))),
-                                    )
-                                ),
-                            ],
+                            button: (
+                                text: "Quit",
+                                font: File("fonts/regular.ttf", ("TTF", ())),
+                                font_size: 26.0,
+                                normal_text_color: (0.8, 0.8, 0.8, 1.0),
+                                hover_text_color: (0.6, 0.6, 0.6, 1.0),
+                            )
                         ),
                         Label(
                             transform: (
@@ -279,16 +201,16 @@ Container(
                                 pivot: TopLeft,
                                 percent: true,
                                 x: 0.0,
-                                y: -0.916667, // 11 of 12
+                                y: -0.9,
                                 width: 1.0,
-                                height: 0.083333, // 1 of 12
+                                height: 0.05,
                                 opaque: false,
                             ),
                             text: (
                                 text: "v0.1.0",
                                 font: File("fonts/regular.ttf", ("TTF", ())),
-                                font_size: 16.0,
-                                color: (1.0, 1.0, 1.0, 0.25),
+                                font_size: 12.0,
+                                color: (0.8, 0.8, 0.8, 0.3),
                             )
                         ),
                     ],

@@ -1,7 +1,7 @@
 #![enable(implicit_some)]
 Container(
     transform: (
-        id: "quit",
+        id: "confirm",
         hidden: true,
         opaque: false,
         stretch: XY(
@@ -13,13 +13,14 @@ Container(
     children: [
         Container(
             transform: (
-                id: "quit.wallpaper",
+                id: "confirm.wallpaper",
                 z: 0.5,
                 width: 1.0,
                 height: 1.0,
                 opaque: false,
             ),
-            background: Texture(File("wallpapers/quit.png", ("IMAGE", (
+            // TODO: Use different image
+            background: Texture(File("wallpapers/home.png", ("IMAGE", (
                 sampler_info: (
                     // TODO: Copy-pasted config, I don't know what most of these parameters do, keep them as defaults, don't modify unnecessary since I need only nearest stretching
                     min_filter: Nearest,
@@ -65,6 +66,7 @@ Container(
                     children: [
                         Label(
                             transform: (
+                                id: "confirm.title",
                                 anchor: TopLeft,
                                 pivot: TopLeft,
                                 percent: true,
@@ -75,7 +77,7 @@ Container(
                                 opaque: false,
                             ),
                             text: (
-                                text: "Are you sure you want to quit?",
+                                text: "",
                                 font: File("fonts/bold.ttf", ("TTF", ())),
                                 font_size: 32.0,
                                 color: (0.8, 0.8, 0.8, 1.0),
@@ -83,7 +85,7 @@ Container(
                         ),
                         Button(
                             transform: (
-                                id: "quit.yes",
+                                id: "confirm.yes",
                                 anchor: TopLeft,
                                 pivot: TopLeft,
                                 percent: true,
@@ -102,7 +104,7 @@ Container(
                         ),
                         Button(
                             transform: (
-                                id: "quit.no",
+                                id: "confirm.no",
                                 anchor: TopLeft,
                                 pivot: TopLeft,
                                 percent: true,

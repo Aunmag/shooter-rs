@@ -3,10 +3,14 @@ use amethyst::ecs::prelude::Entity;
 use amethyst::ecs::prelude::World;
 use amethyst::ui::UiFinder;
 
-pub mod home;
-pub mod quit;
+mod confirm;
+mod home;
+mod new_game;
+mod quit;
 
+pub use self::confirm::*;
 pub use self::home::*;
+pub use self::new_game::*;
 pub use self::quit::*;
 
 pub trait UiState {

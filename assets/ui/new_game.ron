@@ -1,0 +1,336 @@
+#![enable(implicit_some)]
+Container(
+    transform: (
+        id: "new_game",
+        hidden: true,
+        opaque: false,
+        stretch: XY(
+            x_margin: 0.0,
+            y_margin: 0.0,
+            keep_aspect_ratio: false,
+        ),
+    ),
+    children: [
+        Container(
+            transform: (
+                id: "new_game.wallpaper",
+                z: 0.5,
+                width: 1.0,
+                height: 1.0,
+                opaque: false,
+            ),
+            // TODO: Use different image
+            background: Texture(File("wallpapers/home.png", ("IMAGE", (
+                sampler_info: (
+                    // TODO: Copy-pasted config, I don't know what most of these parameters do, keep them as defaults, don't modify unnecessary since I need only nearest stretching
+                    min_filter: Nearest,
+                    mag_filter: Nearest,
+                    mip_filter: Nearest,
+                    wrap_mode: (Tile, Tile, Tile),
+                    lod_bias: (0),
+                    lod_range: (
+                        start: ( 0 ),
+                        end: ( 8000 ),
+                    ),
+                    comparison: None,
+                    border: (0),
+                    normalized: true,
+                    anisotropic: Off,
+                ),
+            )))),
+            children: [],
+        ),
+        Container(
+            transform: (
+                z: 1.0,
+                opaque: false,
+                stretch: XY(
+                    x_margin: 0.0,
+                    y_margin: 0.0,
+                    keep_aspect_ratio: false,
+                ),
+            ),
+            background: Texture(Generate(Srgba(0.2, 0.2, 0.2, 0.8))),
+            children: [
+                Container(
+                    transform: (
+                        width: 1.0,
+                        height: 1.0,
+                        opaque: false,
+                        stretch: XY(
+                            x_margin: 0.0,
+                            y_margin: 0.0,
+                            keep_aspect_ratio: true,
+                        ),
+                    ),
+                    children: [
+                        Label(
+                            transform: (
+                                anchor: TopLeft,
+                                pivot: TopLeft,
+                                percent: true,
+                                x: 0.0,
+                                y: -0.3,
+                                width: 1.0,
+                                height: 0.05,
+                                opaque: false,
+                            ),
+                            text: (
+                                text: "New Game",
+                                font: File("fonts/bold.ttf", ("TTF", ())),
+                                font_size: 32.0,
+                                color: (0.8, 0.8, 0.8, 1.0),
+                            )
+                        ),
+                        Label(
+                            transform: (
+                                anchor: TopLeft,
+                                pivot: TopLeft,
+                                percent: true,
+                                x: 0.3,
+                                y: -0.4,
+                                width: 0.4,
+                                height: 0.05,
+                                opaque: false,
+                            ),
+                            text: (
+                                text: "Nickname:",
+                                font: File("fonts/regular.ttf", ("TTF", ())),
+                                font_size: 20.0,
+                                color: (0.8, 0.8, 0.8, 0.3),
+                                align: MiddleLeft,
+                            )
+                        ),
+                        Label(
+                            transform: (
+                                anchor: TopLeft,
+                                pivot: TopLeft,
+                                percent: true,
+                                x: 0.3,
+                                y: -0.4,
+                                width: 0.4,
+                                height: 0.05,
+                                selectable: 1,
+                            ),
+                            text: (
+                                text: "Petrukha",
+                                font: File("fonts/regular.ttf", ("TTF", ())),
+                                font_size: 20.0,
+                                color: (0.8, 0.8, 0.8, 1.0),
+                                align: MiddleRight,
+                                editable: (
+                                    max_length: 15,
+                                    selected_text_color: (0.0, 0.0, 0.0, 1.0),
+                                    selected_background_color: (1.0, 1.0, 1.0, 1.0),
+                                ),
+                            )
+                        ),
+                        Container(
+                            transform: (
+                                anchor: TopLeft,
+                                pivot: TopLeft,
+                                percent: true,
+                                x: 0.3,
+                                y: -0.45,
+                                width: 0.4,
+                                height: 0.002,
+                            ),
+                            background: Texture(Generate(Srgba(1.0, 1.0, 1.0, 0.3))),
+                            children: [],
+                        ),
+                        Label(
+                            transform: (
+                                anchor: TopLeft,
+                                pivot: TopLeft,
+                                percent: true,
+                                x: 0.3,
+                                y: -0.45,
+                                width: 0.4,
+                                height: 0.05,
+                                opaque: false,
+                            ),
+                            text: (
+                                text: "Server IPv4:",
+                                font: File("fonts/regular.ttf", ("TTF", ())),
+                                font_size: 20.0,
+                                color: (0.8, 0.8, 0.8, 0.3),
+                                align: MiddleLeft,
+                            )
+                        ),
+                        Label(
+                            transform: (
+                                id: "new_game.ip",
+                                anchor: TopLeft,
+                                pivot: TopLeft,
+                                percent: true,
+                                x: 0.3,
+                                y: -0.45,
+                                width: 0.4,
+                                height: 0.05,
+                                selectable: 3,
+                            ),
+                            text: (
+                                text: "127.0.0.1",
+                                font: File("fonts/regular.ttf", ("TTF", ())),
+                                font_size: 20.0,
+                                color: (0.8, 0.8, 0.8, 1.0),
+                                align: MiddleRight,
+                                editable: (
+                                    max_length: 15,
+                                    selected_text_color: (0.0, 0.0, 0.0, 1.0),
+                                    selected_background_color: (1.0, 1.0, 1.0, 1.0),
+                                ),
+                            )
+                        ),
+                        Container(
+                            transform: (
+                                anchor: TopLeft,
+                                pivot: TopLeft,
+                                percent: true,
+                                x: 0.3,
+                                y: -0.5,
+                                width: 0.4,
+                                height: 0.002,
+                            ),
+                            background: Texture(Generate(Srgba(1.0, 1.0, 1.0, 0.3))),
+                            children: [],
+                        ),
+                        Label(
+                            transform: (
+                                anchor: TopLeft,
+                                pivot: TopLeft,
+                                percent: true,
+                                x: 0.3,
+                                y: -0.5,
+                                width: 0.4,
+                                height: 0.05,
+                                opaque: false,
+                            ),
+                            text: (
+                                text: "Server port:",
+                                font: File("fonts/regular.ttf", ("TTF", ())),
+                                font_size: 20.0,
+                                color: (0.8, 0.8, 0.8, 0.3),
+                                align: MiddleLeft,
+                            )
+                        ),
+                        Label(
+                            transform: (
+                                id: "new_game.port",
+                                anchor: TopLeft,
+                                pivot: TopLeft,
+                                percent: true,
+                                x: 0.3,
+                                y: -0.5,
+                                width: 0.4,
+                                height: 0.05,
+                                selectable: 2,
+                            ),
+                            text: (
+                                text: "2003",
+                                font: File("fonts/regular.ttf", ("TTF", ())),
+                                font_size: 20.0,
+                                color: (0.8, 0.8, 0.8, 1.0),
+                                align: MiddleRight,
+                                editable: (
+                                    max_length: 6,
+                                    selected_text_color: (0.0, 0.0, 0.0, 1.0),
+                                    selected_background_color: (1.0, 1.0, 1.0, 1.0),
+                                ),
+                            )
+                        ),
+                        Container(
+                            transform: (
+                                anchor: TopLeft,
+                                pivot: TopLeft,
+                                percent: true,
+                                x: 0.3,
+                                y: -0.55,
+                                width: 0.4,
+                                height: 0.002,
+                            ),
+                            background: Texture(Generate(Srgba(1.0, 1.0, 1.0, 0.3))),
+                            children: [],
+                        ),
+                        Button(
+                            transform: (
+                                id: "new_game.single",
+                                anchor: TopLeft,
+                                pivot: TopLeft,
+                                percent: true,
+                                x: 0.35,
+                                y: -0.6,
+                                width: 0.3,
+                                height: 0.05,
+                            ),
+                            button: (
+                                text: "Play Single",
+                                font: File("fonts/regular.ttf", ("TTF", ())),
+                                font_size: 26.0,
+                                normal_text_color: (0.8, 0.8, 0.8, 1.0),
+                                hover_text_color: (0.6, 0.6, 0.6, 1.0),
+                            )
+                        ),
+                        Button(
+                            transform: (
+                                id: "new_game.join",
+                                anchor: TopLeft,
+                                pivot: TopLeft,
+                                percent: true,
+                                x: 0.35,
+                                y: -0.65,
+                                width: 0.3,
+                                height: 0.05,
+                            ),
+                            button: (
+                                text: "Join Game",
+                                font: File("fonts/regular.ttf", ("TTF", ())),
+                                font_size: 26.0,
+                                normal_text_color: (0.8, 0.8, 0.8, 1.0),
+                                hover_text_color: (0.6, 0.6, 0.6, 1.0),
+                            )
+                        ),
+                        Button(
+                            transform: (
+                                id: "new_game.host",
+                                anchor: TopLeft,
+                                pivot: TopLeft,
+                                percent: true,
+                                x: 0.35,
+                                y: -0.7,
+                                width: 0.3,
+                                height: 0.05,
+                            ),
+                            button: (
+                                text: "Host Game",
+                                font: File("fonts/regular.ttf", ("TTF", ())),
+                                font_size: 26.0,
+                                normal_text_color: (0.8, 0.8, 0.8, 1.0),
+                                hover_text_color: (0.6, 0.6, 0.6, 1.0),
+                            )
+                        ),
+                        Button(
+                            transform: (
+                                id: "new_game.back",
+                                anchor: TopLeft,
+                                pivot: TopLeft,
+                                percent: true,
+                                x: 0.35,
+                                y: -0.75,
+                                width: 0.3,
+                                height: 0.05,
+                            ),
+                            button: (
+                                text: "Back",
+                                font: File("fonts/regular.ttf", ("TTF", ())),
+                                font_size: 26.0,
+                                normal_text_color: (0.8, 0.8, 0.8, 1.0),
+                                hover_text_color: (0.6, 0.6, 0.6, 1.0),
+                            )
+                        ),
+                    ],
+                ),
+            ],
+        )
+    ],
+)

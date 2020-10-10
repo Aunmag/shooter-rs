@@ -5,9 +5,6 @@ use crate::data::LAYER_ACTOR;
 use crate::data::LAYER_ACTOR_PLAYER;
 use crate::data::LAYER_CAMERA;
 use crate::input;
-use crate::resources::UiTask;
-use crate::resources::UiTaskResource;
-use crate::states::menu;
 use crate::states::menu::HomeState;
 use crate::systems::CameraSystem;
 use crate::systems::PlayerSystem;
@@ -46,7 +43,7 @@ impl GameState<'_, '_> {
         let mut builder = DispatcherBuilder::new();
         builder.add(CameraSystem::new(), "", &[]);
         builder.add(PlayerSystem, "", &[]);
-        builder.add(TerrainSystem, "", &[]); // TODO: Maybe run while fixed update
+        builder.add(TerrainSystem, "", &[]);
 
         let mut dispatcher = builder
             .with_pool(Arc::clone(&world.read_resource::<ArcThreadPool>()))
@@ -55,20 +52,6 @@ impl GameState<'_, '_> {
         dispatcher.setup(world);
 
         self.dispatcher = Some(dispatcher);
-    }
-
-    fn set_buttons_availability(data: &mut StateData<GameData>, is_availability: bool) {
-        let mut tasks = data.world.write_resource::<UiTaskResource>();
-
-        tasks.push(UiTask::SetButtonAvailability(
-            menu::home::BUTTON_CONTINUE_ID,
-            is_availability,
-        ));
-
-        tasks.push(UiTask::SetButtonAvailability(
-            menu::quit::BUTTON_DISCONNECT_ID,
-            is_availability,
-        ));
     }
 }
 
@@ -101,19 +84,15 @@ impl<'a, 'b> SimpleState for GameState<'a, 'b> {
 
         input::reset_mouse_delta();
 
-        Self::set_buttons_availability(&mut data, true);
-
         self.root = Some(root);
     }
 
-    fn on_stop(&mut self, mut data: StateData<GameData>) {
+    fn on_stop(&mut self, data: StateData<GameData>) {
         if let Some(root) = self.root.take() {
             if let Err(error) = data.world.delete_entity(root) {
                 log::error!("Failed to delete the root entity. Details: {}", error);
             }
         }
-
-        Self::set_buttons_availability(&mut data, false);
     }
 
     fn on_resume(&mut self, mut data: StateData<GameData>) {
@@ -128,7 +107,7 @@ impl<'a, 'b> SimpleState for GameState<'a, 'b> {
         return Trans::None;
     }
 
-    fn handle_event(&mut self, _data: StateData<GameData>, event: StateEvent) -> SimpleTrans {
+    fn handle_event(&mut self, _: StateData<GameData>, event: StateEvent) -> SimpleTrans {
         if let StateEvent::Window(event) = event {
             if let Event::DeviceEvent {
                 event: DeviceEvent::MouseMotion { delta },
