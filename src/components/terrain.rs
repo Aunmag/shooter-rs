@@ -35,9 +35,9 @@ impl Terrain {
 
         return world
             .create_entity()
+            .with(Parent { entity: root })
             .with(tile_map)
             .with(transform)
-            .with(Parent { entity: root })
             .build();
     }
 }

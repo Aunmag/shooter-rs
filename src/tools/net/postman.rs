@@ -58,6 +58,7 @@ impl<R: Message> Postman<R> {
 
             match self.socket.recv_from(&mut buffer) {
                 Ok((message_length, address)) => {
+                    #[allow(clippy::indexing_slicing)] // TODO: Resolve
                     match R::decode(&buffer[..message_length]) {
                         Ok(message) => {
                             let connection = self.keep_connection(address);

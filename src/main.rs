@@ -19,6 +19,7 @@
     clippy::needless_return,
     clippy::shadow_unrelated,
     clippy::type_complexity,
+    clippy::unwrap_used, // TODO: Warn later
     clippy::wildcard_enum_match_arm,
 )]
 

@@ -1,4 +1,6 @@
-use crate::states::menu::UiState;
+use crate::resources::UiTask;
+use crate::resources::UiTaskResource;
+use crate::states::ui::UiState;
 use amethyst::ecs::prelude::Entity;
 use amethyst::input::is_key_down;
 use amethyst::prelude::*;
@@ -7,49 +9,58 @@ use amethyst::ui::UiEventType;
 use amethyst::ui::UiFinder;
 use amethyst::winit::VirtualKeyCode;
 
-const ROOT_ID: &str = "quit";
-const BUTTON_YES_ID: &str = "quit.yes";
-const BUTTON_NO_ID: &str = "quit.no";
+const ROOT_ID: &str = "confirm";
+const LABEL_TITLE_ID: &str = "confirm.title";
+const BUTTON_YES_ID: &str = "confirm.yes";
+const BUTTON_NO_ID: &str = "confirm.no";
 
-pub struct QuitState {
-    ui_root: Option<Entity>,
+pub struct ConfirmState {
+    title: &'static str,
+    root: Option<Entity>,
     button_yes: Option<Entity>,
     button_no: Option<Entity>,
+    on_confirm: fn() -> SimpleTrans,
 }
 
-impl QuitState {
-    pub fn new() -> Self {
+impl ConfirmState {
+    pub fn new(title: &'static str, on_confirm: fn() -> SimpleTrans) -> Self {
         return Self {
-            ui_root: None,
+            title,
+            root: None,
             button_yes: None,
             button_no: None,
+            on_confirm,
         };
     }
 }
 
-impl SimpleState for QuitState {
+impl SimpleState for ConfirmState {
     fn on_start(&mut self, mut data: StateData<GameData>) {
-        self.ui_root = self.find_ui_root(&mut data.world);
-        self.on_start_or_resume(&mut data.world);
-
         data.world.exec(|finder: UiFinder| {
+            self.root = finder.find(ROOT_ID);
             self.button_yes = finder.find(BUTTON_YES_ID);
             self.button_no = finder.find(BUTTON_NO_ID);
         });
+
+        data.world
+            .write_resource::<UiTaskResource>()
+            .insert(LABEL_TITLE_ID.to_string(), UiTask::SetText(self.title));
+
+        self.set_visibility(&mut data.world, true);
     }
 
     fn on_pause(&mut self, mut data: StateData<GameData>) {
-        self.on_stop_or_pause(&mut data.world);
+        self.set_visibility(&mut data.world, false);
     }
 
     fn on_resume(&mut self, mut data: StateData<GameData>) {
-        self.on_start_or_resume(&mut data.world);
+        self.set_visibility(&mut data.world, true);
     }
 
     fn on_stop(&mut self, mut data: StateData<GameData>) {
         self.button_yes = None;
         self.button_no = None;
-        self.on_stop_or_pause(&mut data.world);
+        self.set_visibility(&mut data.world, false);
     }
 
     fn handle_event(&mut self, _: StateData<GameData>, event: StateEvent) -> SimpleTrans {
@@ -64,7 +75,7 @@ impl SimpleState for QuitState {
                 target,
             }) => {
                 if Some(target) == self.button_yes {
-                    return Trans::Quit;
+                    return (self.on_confirm)();
                 }
 
                 if Some(target) == self.button_no {
@@ -78,12 +89,8 @@ impl SimpleState for QuitState {
     }
 }
 
-impl UiState for QuitState {
-    fn get_ui_root_id(&self) -> &'static str {
-        return ROOT_ID;
-    }
-
-    fn get_ui_root(&self) -> Option<Entity> {
-        return self.ui_root;
+impl UiState for ConfirmState {
+    fn get_root(&self) -> Option<Entity> {
+        return self.root;
     }
 }

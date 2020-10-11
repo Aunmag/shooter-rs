@@ -1,4 +1,4 @@
-use crate::states::menu::HomeState;
+use crate::states::ui::HomeState;
 use crate::utils::UiAwaiter;
 use amethyst::prelude::*;
 use amethyst::ui::UiCreator;

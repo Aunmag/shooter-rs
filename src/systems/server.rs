@@ -42,6 +42,7 @@ impl ServerSystem {
                 ServerMessage::ActorSpawn {
                     id: 0,
                     entity_id,
+                    // TODO: Pass transform sync
                     x: transform.translation().x,
                     y: transform.translation().y,
                     angle: transform.euler_angles().2,

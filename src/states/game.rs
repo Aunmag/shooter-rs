@@ -2,7 +2,6 @@ use crate::components::Actor;
 use crate::components::Player;
 use crate::components::Terrain;
 use crate::components::TransformSync;
-use crate::data::LAYER_ACTOR;
 use crate::data::LAYER_ACTOR_PLAYER;
 use crate::data::LAYER_CAMERA;
 use crate::input;
@@ -11,7 +10,7 @@ use crate::resources::EntityIndexMap;
 use crate::resources::GameTask;
 use crate::resources::GameTaskResource;
 use crate::resources::ServerMessageResource;
-use crate::states::menu::HomeState;
+use crate::states::ui::HomeState;
 use crate::systems::CameraSystem;
 use crate::systems::ClientSystem;
 use crate::systems::InputSyncSystem;
@@ -30,12 +29,7 @@ use amethyst::ecs::DispatcherBuilder;
 use amethyst::ecs::Entity;
 use amethyst::input::is_key_down;
 use amethyst::prelude::*;
-use amethyst::renderer::resources::Tint;
 use amethyst::renderer::Camera;
-use amethyst::renderer::SpriteRender;
-use amethyst::renderer::Transparent;
-
-use amethyst::renderer::palette::Srgba;
 use amethyst::winit::DeviceEvent;
 use amethyst::winit::Event;
 use amethyst::winit::VirtualKeyCode;
@@ -50,41 +44,19 @@ pub struct GameState<'a, 'b> {
     root: Option<Entity>,
     dispatcher: Option<Dispatcher<'a, 'b>>,
     ghost: Option<Entity>,
-    temp_server: Option<ServerSystem>,
-    temp_client: Option<ClientSystem>,
 }
 
 impl GameState<'_, '_> {
     pub fn new(game_type: GameType) -> Self {
-        let temp_server;
-        let temp_client;
-
-        match game_type {
-            GameType::Single => {
-                temp_server = None;
-                temp_client = None;
-            }
-            GameType::Join(address) => {
-                temp_server = None;
-                temp_client = Some(ClientSystem::new(address).unwrap());
-            }
-            GameType::Host(port) => {
-                temp_server = Some(ServerSystem::new(port).unwrap());
-                temp_client = None;
-            }
-        }
-
         return Self {
             game_type,
             root: None,
             dispatcher: None,
             ghost: None,
-            temp_server,
-            temp_client,
         };
     }
 
-    fn create_dispatcher(&mut self, world: &mut World) {
+    fn init_dispatcher(&mut self, world: &mut World) {
         let mut builder = DispatcherBuilder::new();
         builder.add(CameraSystem::new(), "", &[]);
         builder.add(InputSyncSystem::new(), "", &[]);
@@ -92,13 +64,15 @@ impl GameState<'_, '_> {
         builder.add(PlayerSystem, "", &[]);
         builder.add(TerrainSystem, "", &[]);
 
-        if let Some(server) = self.temp_server.take() {
-            builder.add(server, "", &[]);
-            builder.add(TransformSyncSystem::new(), "", &[]);
-        }
-
-        if let Some(client) = self.temp_client.take() {
-            builder.add(client, "", &[]);
+        match self.game_type {
+            GameType::Single => {}
+            GameType::Join(address) => {
+                builder.add(ClientSystem::new(address).unwrap(), "", &[]);
+                builder.add(TransformSyncSystem::new(), "", &[]);
+            }
+            GameType::Host(port) => {
+                builder.add(ServerSystem::new(port).unwrap(), "", &[]);
+            }
         }
 
         let mut dispatcher = builder
@@ -110,16 +84,46 @@ impl GameState<'_, '_> {
         self.dispatcher = Some(dispatcher);
     }
 
-    fn process_tasks(&mut self, world: &mut World) {
-        // TODO: Optimize iterations
-        let mut tasks = Vec::new();
+    fn init_resources(&self, world: &mut World) {
+        world.register::<Actor>();
+        world.insert(EntityIndexMap::new());
+        world.insert(GameTaskResource::new());
 
-        if let Some(mut new_tasks) = world.try_fetch_mut::<GameTaskResource>() {
-            tasks.append(&mut new_tasks);
+        match self.game_type {
+            GameType::Single => {}
+            GameType::Join(..) => {
+                world.insert(Some(ClientMessageResource::new()));
+            }
+            GameType::Host(..) => {
+                world.insert(Some(ServerMessageResource::new()));
+            }
+        }
+    }
+
+    fn init_world_entities(&mut self, world: &mut World) {
+        let root = world.create_entity().build();
+        self.root.replace(root);
+
+        if self.is_own_game() {
+            let public_id = world.write_resource::<EntityIndexMap>().generate();
+            Actor::create_entity(world, root, public_id, 0.0, 0.0, 0.0, false);
+            self.take_actor_grant(world, public_id);
         }
 
-        for task in tasks.iter() {
-            match *task {
+        Terrain::create_entity(world, root);
+    }
+
+    fn process_tasks(&mut self, world: &mut World) {
+        let mut tasks = Vec::with_capacity(0);
+
+        {
+            let mut new_tasks = world.fetch_mut::<GameTaskResource>();
+            tasks.reserve_exact(new_tasks.capacity());
+            std::mem::swap(&mut tasks, &mut new_tasks);
+        }
+
+        for task in tasks.drain(..) {
+            match task {
                 GameTask::ActorSpawn {
                     entity_id,
                     x,
@@ -127,7 +131,7 @@ impl GameState<'_, '_> {
                     angle,
                 } => {
                     if let Some(root) = self.root {
-                        create_actor(world, entity_id, x, y, angle, false, root);
+                        Actor::create_entity(world, root, entity_id, x, y, angle, false);
                     }
                 }
                 GameTask::ActorGrant(entity_id) => {
@@ -166,7 +170,7 @@ impl GameState<'_, '_> {
 
             create_camera(world, entity);
 
-            if let GameType::Join(..) = self.game_type {
+            if !self.is_own_game() {
                 if let Some(ghost) = self.ghost.take() {
                     #[allow(unused_must_use)]
                     {
@@ -176,7 +180,7 @@ impl GameState<'_, '_> {
 
                 if let Some(root) = self.root {
                     self.ghost.replace(
-                        create_actor(world, 0, 0.0, 0.0, 0.0, true, root)
+                        Actor::create_entity(world, root, 0, 0.0, 0.0, 0.0, true)
                     );
                 }
             }
@@ -239,46 +243,24 @@ impl GameState<'_, '_> {
             }
         }
     }
+
+    fn is_own_game(&self) -> bool {
+        #[allow(clippy::match_same_arms)]
+        return match self.game_type {
+            GameType::Single => true,
+            GameType::Join(..) => false,
+            GameType::Host(..) => true,
+        };
+    }
 }
 
 impl<'a, 'b> SimpleState for GameState<'a, 'b> {
     fn on_start(&mut self, mut data: StateData<GameData>) {
-        data.world.register::<Actor>();
-        let root = data.world.create_entity().build();
-        self.root = Some(root);
-
-        self.create_dispatcher(&mut data.world);
-
-        Terrain::create_entity(data.world, root);
-
-        data.world.insert(EntityIndexMap::new());
-        data.world.insert(GameTaskResource::new());
-
-        let create_player;
-
-        match self.game_type {
-            GameType::Single => {
-                create_player = true;
-            }
-            GameType::Join(..) => {
-                create_player = false;
-                data.world.insert(Some(ClientMessageResource::new()));
-            }
-            GameType::Host(..) => {
-                create_player = true;
-                data.world.insert(Some(ServerMessageResource::new()));
-            }
-        }
-
-        // TODO: Improve this
-        if create_player {
-            let entity_id = data.world.write_resource::<EntityIndexMap>().generate();
-            create_actor(data.world, entity_id, 0.0, 0.0, 0.0, false, root);
-            self.take_actor_grant(data.world, entity_id);
-        }
-
-        utils::set_cursor_visibility(false, &mut data.world);
+        self.init_dispatcher(&mut data.world);
+        self.init_resources(&mut data.world);
+        self.init_world_entities(&mut data.world);
         input::reset_mouse_delta();
+        utils::set_cursor_visibility(false, &mut data.world);
     }
 
     fn on_stop(&mut self, data: StateData<GameData>) {
@@ -328,54 +310,10 @@ pub enum GameType {
     Host(u16),
 }
 
-fn create_actor(
-    world: &mut World,
-    entity_id: u16,
-    x: f32,
-    y: f32,
-    angle: f32,
-    is_ghost: bool,
-    root: Entity,
-) -> Entity {
-    // TODO: Cache sprite render
-    let renderer = SpriteRender::new(
-        utils::load_sprite_sheet(world, "actors/human/image.png", "actors/human/image.ron"),
-        0,
-    );
-
-    let mut transform = Transform::default();
-    transform.set_translation_xyz(x, y, LAYER_ACTOR);
-    transform.set_rotation_2d(angle);
-
-    let mut actor_builder = world
-        .create_entity()
-        .with(renderer)
-        .with(Actor::new())
-        .with(transform)
-        .with(TransformSync::new(x, y, angle))
-        .with(Parent { entity: root });
-
-    if is_ghost {
-        actor_builder = actor_builder
-            .with(Tint(Srgba::new(0.6, 0.6, 0.6, 0.4)))
-            .with(Transparent);
-    }
-
-    let actor = actor_builder.build();
-
-    if entity_id != 0 {
-        if let Some(mut map) = world.try_fetch_mut::<EntityIndexMap>() {
-            map.insert(actor.id(), entity_id);
-        }
-    }
-
-    return actor;
-}
-
 fn fetch_entity_by_external_id(world: &World, id: u16) -> Option<Entity> {
     return world
-        .try_fetch::<EntityIndexMap>()
-        .and_then(|m| m.to_internal(id))
+        .fetch::<EntityIndexMap>()
+        .to_internal(id)
         .map(|id| world.entities().entity(id)); // TODO: What if entity doesn't exists
 }
 

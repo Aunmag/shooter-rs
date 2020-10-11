@@ -1,9 +1,9 @@
 use crate::resources::UiTask;
 use crate::resources::UiTaskResource;
-use crate::states::menu::ConfirmState;
-use crate::states::menu::NewGameState;
-use crate::states::menu::QuitState;
-use crate::states::menu::UiState;
+use crate::states::ui::ConfirmState;
+use crate::states::ui::NewGameState;
+use crate::states::ui::QuitState;
+use crate::states::ui::UiState;
 use crate::utils;
 use amethyst::ecs::prelude::Entity;
 use amethyst::input::is_key_down;
@@ -24,7 +24,7 @@ const DISCONNECTION_TITLE: &str = "Are you sure you want to disconnect?";
 
 pub struct HomeState {
     is_root: bool,
-    ui_root: Option<Entity>,
+    root: Option<Entity>,
     button_continue: Option<Entity>,
     button_new_game: Option<Entity>,
     button_disconnect: Option<Entity>,
@@ -35,7 +35,7 @@ impl HomeState {
     pub fn new(is_root: bool) -> Self {
         return Self {
             is_root,
-            ui_root: None,
+            root: None,
             button_continue: None,
             button_new_game: None,
             button_disconnect: None,
@@ -46,10 +46,8 @@ impl HomeState {
 
 impl SimpleState for HomeState {
     fn on_start(&mut self, mut data: StateData<GameData>) {
-        self.ui_root = self.find_ui_root(&mut data.world);
-        self.on_start_or_resume(&mut data.world);
-
         data.world.exec(|finder: UiFinder| {
+            self.root = finder.find(ROOT_ID);
             self.button_continue = finder.find(BUTTON_CONTINUE_ID);
             self.button_new_game = finder.find(BUTTON_NEW_GAME_ID);
             self.button_disconnect = finder.find(BUTTON_DISCONNECT_ID);
@@ -64,30 +62,34 @@ impl SimpleState for HomeState {
             utils::set_entity_visibility(button_disconnect, &mut data.world, !self.is_root);
         }
 
-        let mut ui_tasks = data.world.write_resource::<UiTaskResource>();
+        {
+            let mut ui_tasks = data.world.write_resource::<UiTaskResource>();
 
-        ui_tasks.insert(
-            BUTTON_CONTINUE_ID.to_string(),
-            UiTask::SetButtonAvailability(!self.is_root),
-        );
+            ui_tasks.insert(
+                BUTTON_CONTINUE_ID.to_string(),
+                UiTask::SetButtonAvailability(!self.is_root),
+            );
 
-        ui_tasks.insert(
-            BUTTON_HELP_ID.to_string(),
-            UiTask::SetButtonAvailability(false),
-        );
+            ui_tasks.insert(
+                BUTTON_HELP_ID.to_string(),
+                UiTask::SetButtonAvailability(false),
+            );
 
-        ui_tasks.insert(
-            BUTTON_SETTINGS_ID.to_string(),
-            UiTask::SetButtonAvailability(false),
-        );
+            ui_tasks.insert(
+                BUTTON_SETTINGS_ID.to_string(),
+                UiTask::SetButtonAvailability(false),
+            );
+        }
+
+        self.set_visibility(&mut data.world, true);
     }
 
     fn on_pause(&mut self, mut data: StateData<GameData>) {
-        self.on_stop_or_pause(&mut data.world);
+        self.set_visibility(&mut data.world, false);
     }
 
     fn on_resume(&mut self, mut data: StateData<GameData>) {
-        self.on_start_or_resume(&mut data.world);
+        self.set_visibility(&mut data.world, true);
     }
 
     fn on_stop(&mut self, mut data: StateData<GameData>) {
@@ -95,7 +97,7 @@ impl SimpleState for HomeState {
         self.button_new_game = None;
         self.button_disconnect = None;
         self.button_quit = None;
-        self.on_stop_or_pause(&mut data.world);
+        self.set_visibility(&mut data.world, false);
     }
 
     fn handle_event(&mut self, _: StateData<GameData>, event: StateEvent) -> SimpleTrans {
@@ -135,11 +137,7 @@ impl SimpleState for HomeState {
 }
 
 impl UiState for HomeState {
-    fn get_ui_root_id(&self) -> &'static str {
-        return ROOT_ID;
-    }
-
-    fn get_ui_root(&self) -> Option<Entity> {
-        return self.ui_root;
+    fn get_root(&self) -> Option<Entity> {
+        return self.root;
     }
 }
