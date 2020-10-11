@@ -7,14 +7,17 @@
     clippy::cast_precision_loss,
     clippy::default_trait_access,
     clippy::else_if_without_else,
+    clippy::explicit_iter_loop,
     clippy::float_arithmetic,
     clippy::implicit_return, // TODO: Enable later excepting closures
     clippy::integer_arithmetic,
     clippy::match_wildcard_for_single_variants,
     clippy::missing_docs_in_private_items,
     clippy::module_name_repetitions,
+    clippy::modulo_arithmetic,
     clippy::multiple_crate_versions,
     clippy::needless_return,
+    clippy::shadow_unrelated,
     clippy::type_complexity,
     clippy::wildcard_enum_match_arm,
 )]
@@ -25,6 +28,7 @@ mod input;
 mod resources;
 mod states;
 mod systems;
+mod tools;
 mod utils;
 
 use crate::components::Terrain;

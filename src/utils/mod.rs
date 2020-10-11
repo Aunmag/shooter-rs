@@ -11,6 +11,8 @@ use amethyst::renderer::SpriteSheet;
 use amethyst::renderer::SpriteSheetFormat;
 use amethyst::renderer::Texture;
 
+pub mod math;
+
 pub fn set_cursor_visibility(is_visible: bool, world: &mut World) {
     world.write_resource::<HideCursor>().hide = !is_visible;
 }

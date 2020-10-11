@@ -15,9 +15,12 @@ pub use self::quit::*;
 
 pub trait UiState {
     fn on_start_or_resume(&self, world: &mut World) {
+        self.on_start_or_resume_custom(world);
         self.set_visibility(true, world);
         utils::set_cursor_visibility(true, world);
     }
+
+    fn on_start_or_resume_custom(&self, _world: &mut World) {}
 
     fn on_stop_or_pause(&self, world: &mut World) {
         self.set_visibility(false, world);

@@ -1,14 +1,15 @@
 use crate::components::Actor;
 use crate::components::Player;
+use crate::components::TransformSync;
 use crate::input;
 use crate::input::AxisBinding;
 use crate::input::CustomBindingTypes;
+use amethyst::core::math::Vector3;
 use amethyst::core::timing::Time;
 use amethyst::core::transform::Transform;
 use amethyst::derive::SystemDesc;
 use amethyst::ecs::prelude::Join;
 use amethyst::ecs::prelude::Read;
-use amethyst::ecs::prelude::ReadStorage;
 use amethyst::ecs::prelude::System;
 use amethyst::ecs::prelude::SystemData;
 use amethyst::ecs::prelude::WriteStorage;
@@ -23,23 +24,46 @@ impl<'a> System<'a> for PlayerSystem {
     type SystemData = (
         Read<'a, InputHandler<CustomBindingTypes>>,
         Read<'a, Time>,
-        ReadStorage<'a, Player>,
+        WriteStorage<'a, Player>,
         WriteStorage<'a, Transform>,
+        WriteStorage<'a, TransformSync>,
     );
 
-    fn run(&mut self, (input, time, players, mut transforms): Self::SystemData) {
-        for (_, transform) in (&players, &mut transforms).join() {
-            let (mut movement_x, mut movement_y) = normalize_movement_input(
+    fn run(
+        &mut self,
+        (input, time, mut players, mut transforms, mut transforms_sync): Self::SystemData,
+    ) {
+        for (player, transform, transform_sync) in (
+            &mut players,
+            &mut transforms,
+            (&mut transforms_sync).maybe(),
+        )
+            .join()
+        {
+            let rotation = input::take_mouse_delta() as f32 * ROTATION_SENSITIVITY;
+
+            transform.rotate_2d(rotation);
+
+            let (movement_x, movement_y) = normalize_movement_input(
                 input.axis_value(&AxisBinding::MoveAside).unwrap_or(0.0),
                 input.axis_value(&AxisBinding::MoveForward).unwrap_or(0.0),
             );
 
-            movement_x *= Actor::MOVEMENT_VELOCITY * time.delta_seconds();
-            movement_y *= Actor::MOVEMENT_VELOCITY * time.delta_seconds();
+            let movement = transform.rotation()
+                * Vector3::new(movement_x, movement_y, 0.0)
+                * time.delta_seconds();
 
-            transform.rotate_2d(input::take_mouse_delta() as f32 * ROTATION_SENSITIVITY);
-            transform.move_right(movement_x);
-            transform.move_up(movement_y);
+            transform.prepend_translation(movement * Actor::MOVEMENT_VELOCITY);
+
+            if let Some(transform_sync) = transform_sync {
+                transform_sync.target_x += movement.x * Actor::MOVEMENT_VELOCITY;
+                transform_sync.target_y += movement.y * Actor::MOVEMENT_VELOCITY;
+                transform_sync.target_angle = transform.euler_angles().2; // for player set angle as is
+            }
+
+            player
+                .accumulated_input
+                .prepend(movement.x, movement.y, rotation);
         }
     }
 }
