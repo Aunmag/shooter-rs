@@ -1,6 +1,5 @@
 use amethyst::assets::AssetStorage;
 use amethyst::assets::Loader;
-use amethyst::controls::HideCursor;
 use amethyst::core::HiddenPropagate;
 use amethyst::ecs::prelude::Entity;
 use amethyst::ecs::prelude::World;
@@ -13,16 +12,14 @@ use amethyst::renderer::Texture;
 
 pub mod math;
 pub mod ui;
+pub mod world;
 
-pub fn set_cursor_visibility(is_visible: bool, world: &mut World) {
-    world.write_resource::<HideCursor>().hide = !is_visible;
-}
-
-pub fn set_entity_visibility(entity: Entity, world: &mut World, is_visible: bool) {
+pub fn set_entity_visibility(world: &mut World, entity: Entity, is_visibility: bool) {
     let mut storage = world.write_storage::<HiddenPropagate>();
 
-    if is_visible {
+    if is_visibility {
         if storage.remove(entity).is_none() {
+            // TODO: Do I need to warn?
             log::warn!(
                 "There was no HiddenPropagate component to delete from {:?}",
                 entity,
@@ -36,6 +33,22 @@ pub fn set_entity_visibility(entity: Entity, world: &mut World, is_visible: bool
     }
 }
 
+pub fn load_sprite_sheet(world: &mut World, png_path: &str, ron_path: &str) -> SpriteSheetHandle {
+    // TODO: Resolve `ron_path` automatically
+    return world.read_resource::<Loader>().load(
+        ron_path,
+        SpriteSheetFormat(world.read_resource::<Loader>().load(
+            png_path,
+            ImageFormat::default(),
+            (),
+            &world.read_resource::<AssetStorage<Texture>>(),
+        )),
+        (),
+        &world.read_resource::<AssetStorage<SpriteSheet>>(),
+    );
+}
+
+// TODO: Find a better place for it
 /// Workaround utility to wait `UiAwaiter::FRAMES_TO_AWAIT` frames for UI initialization
 pub struct UiAwaiter {
     frames_passed: u8,
@@ -58,18 +71,4 @@ impl UiAwaiter {
     pub fn is_ready(&self) -> bool {
         return self.frames_passed >= Self::FRAMES_TO_AWAIT;
     }
-}
-
-pub fn load_sprite_sheet(world: &mut World, png_path: &str, ron_path: &str) -> SpriteSheetHandle {
-    return world.read_resource::<Loader>().load(
-        ron_path,
-        SpriteSheetFormat(world.read_resource::<Loader>().load(
-            png_path,
-            ImageFormat::default(),
-            (),
-            &world.read_resource::<AssetStorage<Texture>>(),
-        )),
-        (),
-        &world.read_resource::<AssetStorage<SpriteSheet>>(),
-    );
 }

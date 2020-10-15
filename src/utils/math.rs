@@ -1,17 +1,18 @@
-pub const PI_2_0: f32 = std::f32::consts::PI * 2.0;
+use std::f32::consts::PI;
+use std::f32::consts::TAU;
 
 pub fn normalize_radians(radians: f32) -> f32 {
-    return radians % PI_2_0;
+    return radians % TAU;
 }
 
 pub fn get_radians_difference(a: f32, b: f32) -> f32 {
     let mut difference = b - a;
 
-    if f32::abs(difference) > std::f32::consts::PI {
+    if difference.abs() > PI {
         if a < b {
-            difference -= PI_2_0;
+            difference -= TAU;
         } else {
-            difference += PI_2_0;
+            difference += TAU;
         }
     }
 

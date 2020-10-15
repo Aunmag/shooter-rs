@@ -43,20 +43,20 @@ impl<'a> System<'a> for CameraSystem {
             let view_x = 2.0 / (screen_size_x * scale);
             let view_y = -2.0 / (screen_size_y * scale);
             let offset = screen_size_y * scale * OFFSET_RATIO;
-            let mut is_camera = false;
+            let mut is_camera_found = false;
 
             #[allow(clippy::indexing_slicing)]
             for (camera, transform) in (&mut cameras, &mut transforms).join() {
-                // Keep in sync with `Camera::standard_2d` source
+                // Keep in sync with `Camera::standard_2d` sources
                 camera.matrix[(0, 0)] = view_x;
                 camera.matrix[(1, 1)] = view_y;
                 camera.matrix[(0, 3)] = 0.0;
                 camera.matrix[(1, 3)] = 0.0;
                 transform.set_translation_y(offset);
-                is_camera = true;
+                is_camera_found = true;
             }
 
-            if is_camera {
+            if is_camera_found {
                 self.screen_size_x = screen_size_x;
                 self.screen_size_y = screen_size_y;
             }

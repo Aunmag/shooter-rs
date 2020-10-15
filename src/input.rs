@@ -12,6 +12,8 @@ use std::sync::atomic::Ordering;
 // TODO: Maybe it's better to store a decimal value, at least I've seen integers only so far
 static MOUSE_DELTA: AtomicI16 = AtomicI16::new(0);
 
+// -----------------------------------------------------------------------------
+
 #[derive(Clone, Debug, Hash, PartialEq, Eq, Serialize, Deserialize)]
 pub enum AxisBinding {
     MoveForward,
@@ -42,6 +44,8 @@ impl BindingTypes for CustomBindingTypes {
     type Axis = AxisBinding;
     type Action = ActionBinding;
 }
+
+// -----------------------------------------------------------------------------
 
 pub fn reset_mouse_delta() {
     MOUSE_DELTA.store(0, Ordering::Relaxed);

@@ -1,9 +1,5 @@
 use crate::components::Actor;
-use crate::components::Player;
-use crate::components::Terrain;
 use crate::components::TransformSync;
-use crate::data::LAYER_ACTOR_PLAYER;
-use crate::data::LAYER_CAMERA;
 use crate::input;
 use crate::resources::ClientMessageResource;
 use crate::resources::EntityIndexMap;
@@ -20,16 +16,13 @@ use crate::systems::ServerSystem;
 use crate::systems::TerrainSystem;
 use crate::systems::TransformSyncSystem;
 use crate::utils;
-use amethyst::core::transform::Transform;
 use amethyst::core::ArcThreadPool;
-use amethyst::core::Parent;
 use amethyst::ecs::prelude::World;
 use amethyst::ecs::Dispatcher;
 use amethyst::ecs::DispatcherBuilder;
 use amethyst::ecs::Entity;
 use amethyst::input::is_key_down;
 use amethyst::prelude::*;
-use amethyst::renderer::Camera;
 use amethyst::winit::DeviceEvent;
 use amethyst::winit::Event;
 use amethyst::winit::VirtualKeyCode;
@@ -37,13 +30,14 @@ use std::net::SocketAddr;
 use std::sync::Arc;
 use utils::math;
 
-const MAX_TRANSFORM_DESYNC: f32 = 4.0; // TODO: Tweak
+const MAX_TRANSFORM_SYNC_OFFSET: f32 = 4.0; // TODO: Tweak
 
 pub struct GameState<'a, 'b> {
     game_type: GameType,
     root: Option<Entity>,
     dispatcher: Option<Dispatcher<'a, 'b>>,
-    ghost: Option<Entity>,
+    player_actor: Option<Entity>,
+    player_ghost: Option<Entity>,
 }
 
 impl GameState<'_, '_> {
@@ -52,7 +46,8 @@ impl GameState<'_, '_> {
             game_type,
             root: None,
             dispatcher: None,
-            ghost: None,
+            player_actor: None,
+            player_ghost: None,
         };
     }
 
@@ -106,17 +101,18 @@ impl GameState<'_, '_> {
 
         if self.is_own_game() {
             let public_id = world.write_resource::<EntityIndexMap>().generate();
-            Actor::create_entity(world, root, public_id, 0.0, 0.0, 0.0, false);
-            self.take_actor_grant(world, public_id);
+            utils::world::create_actor(world, root, public_id, 0.0, 0.0, 0.0, false);
+            self.on_task_actor_grant(world, public_id); // TODO: Do not call `on_task_actor_grant`
         }
 
-        Terrain::create_entity(world, root);
+        utils::world::create_terrain(world, root);
     }
 
     fn process_tasks(&mut self, world: &mut World) {
         let mut tasks = Vec::with_capacity(0);
 
         {
+            // TODO: Move to tasks resource
             let mut new_tasks = world.fetch_mut::<GameTaskResource>();
             tasks.reserve_exact(new_tasks.capacity());
             std::mem::swap(&mut tasks, &mut new_tasks);
@@ -130,12 +126,10 @@ impl GameState<'_, '_> {
                     y,
                     angle,
                 } => {
-                    if let Some(root) = self.root {
-                        Actor::create_entity(world, root, entity_id, x, y, angle, false);
-                    }
+                    self.on_task_actor_spawn(world, entity_id, x, y, angle);
                 }
                 GameTask::ActorGrant(entity_id) => {
-                    self.take_actor_grant(world, entity_id);
+                    self.on_task_actor_grant(world, entity_id);
                 }
                 GameTask::ActorAction {
                     entity_id,
@@ -143,7 +137,7 @@ impl GameState<'_, '_> {
                     move_y,
                     angle,
                 } => {
-                    self.perform_command(world, entity_id, move_x, move_y, angle);
+                    self.on_task_actor_action(world, entity_id, move_x, move_y, angle);
                 }
                 GameTask::TransformSync {
                     entity_id,
@@ -151,43 +145,33 @@ impl GameState<'_, '_> {
                     y,
                     angle,
                 } => {
-                    self.sync_transform(world, entity_id, x, y, angle);
+                    self.on_task_transform_sync(world, entity_id, x, y, angle);
                 }
             }
         }
     }
 
-    fn take_actor_grant(&mut self, world: &mut World, id: u16) {
-        if let Some(entity) = fetch_entity_by_external_id(world, id) {
-            world
-                .write_storage::<Player>()
-                .insert(entity, Player::new())
-                .unwrap();
+    fn on_task_actor_spawn(&self, world: &mut World, entity_id: u16, x: f32, y: f32, angle: f32) {
+        if let Some(root) = self.root {
+            utils::world::create_actor(world, root, entity_id, x, y, angle, false);
+        }
+    }
 
-            if let Some(transform) = world.write_storage::<Transform>().get_mut(entity) {
-                transform.set_translation_z(LAYER_ACTOR_PLAYER);
-            }
-
-            create_camera(world, entity);
-
-            if !self.is_own_game() {
-                if let Some(ghost) = self.ghost.take() {
-                    #[allow(unused_must_use)]
-                    {
-                        world.delete_entity(ghost);
-                    }
-                }
-
-                if let Some(root) = self.root {
-                    self.ghost.replace(
-                        Actor::create_entity(world, root, 0, 0.0, 0.0, 0.0, true)
-                    );
-                }
+    fn on_task_actor_grant(&mut self, world: &mut World, id: u16) {
+        if let Some(root) = self.root {
+            if let Some(actor) = EntityIndexMap::fetch_entity_by_external_id(world, id) {
+                self.player_actor = Some(actor);
+                self.player_ghost = utils::world::grant_played_actor(
+                    world,
+                    root,
+                    actor,
+                    !self.is_own_game(),
+                );
             }
         }
     }
 
-    fn perform_command(
+    fn on_task_actor_action(
         &self,
         world: &mut World,
         entity_id: u16,
@@ -195,11 +179,11 @@ impl GameState<'_, '_> {
         move_y: f32,
         angle: f32,
     ) {
-        if let Some(entity) = fetch_entity_by_external_id(world, entity_id) {
+        if let Some(entity) = EntityIndexMap::fetch_entity_by_external_id(world, entity_id) {
             let entity_to_update;
 
-            if is_player(entity, world) {
-                entity_to_update = self.ghost;
+            if self.is_player_actor(entity) {
+                entity_to_update = self.player_ghost;
             } else {
                 entity_to_update = Some(entity);
             }
@@ -214,9 +198,9 @@ impl GameState<'_, '_> {
         }
     }
 
-    fn sync_transform(&self, world: &mut World, id: u16, x: f32, y: f32, angle: f32) {
-        if let Some(entity) = fetch_entity_by_external_id(world, id) {
-            let is_player = is_player(entity, world);
+    fn on_task_transform_sync(&self, world: &mut World, id: u16, x: f32, y: f32, angle: f32) {
+        if let Some(entity) = EntityIndexMap::fetch_entity_by_external_id(world, id) {
+            let is_player = self.is_player_actor(entity);
 
             if let Some(transform) = world.write_storage::<TransformSync>().get_mut(entity) {
                 if !is_player || !math::are_close(
@@ -224,7 +208,7 @@ impl GameState<'_, '_> {
                     y,
                     transform.target_x,
                     transform.target_y,
-                    MAX_TRANSFORM_DESYNC,
+                    MAX_TRANSFORM_SYNC_OFFSET,
                 ) {
                     transform.target_x = x;
                     transform.target_y = y;
@@ -233,7 +217,7 @@ impl GameState<'_, '_> {
             }
 
             if is_player {
-                if let Some(ghost) = self.ghost {
+                if let Some(ghost) = self.player_ghost {
                     if let Some(transform) = world.write_storage::<TransformSync>().get_mut(ghost) {
                         transform.target_x = x;
                         transform.target_y = y;
@@ -242,6 +226,10 @@ impl GameState<'_, '_> {
                 }
             }
         }
+    }
+
+    fn is_player_actor(&self, entity: Entity) -> bool {
+        return self.player_actor == Some(entity);
     }
 
     fn is_own_game(&self) -> bool {
@@ -260,7 +248,7 @@ impl<'a, 'b> SimpleState for GameState<'a, 'b> {
         self.init_resources(&mut data.world);
         self.init_world_entities(&mut data.world);
         input::reset_mouse_delta();
-        utils::set_cursor_visibility(false, &mut data.world);
+        utils::ui::set_cursor_visibility(&mut data.world, false);
     }
 
     fn on_stop(&mut self, data: StateData<GameData>) {
@@ -272,7 +260,7 @@ impl<'a, 'b> SimpleState for GameState<'a, 'b> {
     }
 
     fn on_resume(&mut self, mut data: StateData<GameData>) {
-        utils::set_cursor_visibility(false, &mut data.world);
+        utils::ui::set_cursor_visibility(&mut data.world, false);
     }
 
     fn update(&mut self, data: &mut StateData<GameData>) -> SimpleTrans {
@@ -308,28 +296,4 @@ pub enum GameType {
     Single,
     Join(SocketAddr),
     Host(u16),
-}
-
-fn fetch_entity_by_external_id(world: &World, id: u16) -> Option<Entity> {
-    return world
-        .fetch::<EntityIndexMap>()
-        .to_internal(id)
-        .map(|id| world.entities().entity(id)); // TODO: What if entity doesn't exists
-}
-
-fn is_player(entity: Entity, world: &World) -> bool {
-    // TODO: Optimize by caching player entity ID
-    return world.read_storage::<Player>().get(entity).is_some();
-}
-
-fn create_camera(world: &mut World, player: Entity) -> Entity {
-    let mut transform = Transform::default();
-    transform.set_translation_xyz(0.0, 0.0, LAYER_CAMERA);
-
-    return world
-        .create_entity()
-        .with(Camera::standard_2d(1.0, 1.0))
-        .with(transform)
-        .with(Parent { entity: player })
-        .build();
 }

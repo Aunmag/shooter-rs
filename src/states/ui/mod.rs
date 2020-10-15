@@ -15,11 +15,11 @@ pub use self::quit::*;
 pub trait UiState {
     fn set_visibility(&self, world: &mut World, is_visibility: bool) {
         if let Some(root) = self.get_root() {
-            utils::set_entity_visibility(root, world, is_visibility);
+            utils::set_entity_visibility(world, root, is_visibility);
         }
 
         if is_visibility {
-            utils::set_cursor_visibility(true, world);
+            utils::ui::set_cursor_visibility(world, true);
         }
     }
 

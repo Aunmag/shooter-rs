@@ -55,11 +55,11 @@ impl SimpleState for HomeState {
         });
 
         if let Some(button_new_game) = self.button_new_game {
-            utils::set_entity_visibility(button_new_game, &mut data.world, self.is_root);
+            utils::set_entity_visibility(&mut data.world, button_new_game, self.is_root);
         }
 
         if let Some(button_disconnect) = self.button_disconnect {
-            utils::set_entity_visibility(button_disconnect, &mut data.world, !self.is_root);
+            utils::set_entity_visibility(&mut data.world, button_disconnect, !self.is_root);
         }
 
         {

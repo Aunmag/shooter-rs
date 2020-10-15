@@ -1,5 +1,8 @@
 use crate::tools::net::message::ClientMessage;
 use crate::tools::net::message::ServerMessage;
+use amethyst::ecs::prelude::World;
+use amethyst::ecs::Entity;
+use amethyst::prelude::WorldExt;
 use bimap::BiMap;
 use std::collections::HashMap;
 
@@ -49,11 +52,18 @@ impl EntityIndexMap {
         };
     }
 
+    pub fn fetch_entity_by_external_id(world: &World, id: u16) -> Option<Entity> {
+        return world
+            .fetch::<Self>()
+            .to_internal(id)
+            .map(|id| world.entities().entity(id)); // TODO: What if entity doesn't exists
+    }
+
     pub fn insert(&mut self, id_internal: u32, id_external: u16) {
         self.map.insert(id_internal, id_external);
     }
 
-    // TODO: Make sure it call from server only
+    // TODO: Make sure it called from server only
     pub fn generate(&mut self) -> u16 {
         self.last_generated_id = self.last_generated_id.wrapping_add(1);
         return self.last_generated_id;
@@ -67,7 +77,7 @@ impl EntityIndexMap {
         return self.map.get_by_left(&id).copied();
     }
 
-    // TODO: Make sure it call from server only
+    // TODO: Make sure it called from server only
     #[allow(clippy::wrong_self_convention)]
     pub fn to_external_or_generate(&mut self, id: u32) -> u16 {
         if let Some(id_external) = self.to_external(id) {
