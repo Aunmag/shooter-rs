@@ -7,7 +7,7 @@ use crate::tools::net::message::ServerMessage;
 use amethyst::core::transform::Transform;
 use amethyst::derive::SystemDesc;
 use amethyst::ecs::prelude::Join;
-use amethyst::ecs::prelude::Read;
+use amethyst::ecs::prelude::ReadExpect;
 use amethyst::ecs::prelude::ReadStorage;
 use amethyst::ecs::prelude::System;
 use amethyst::ecs::prelude::SystemData;
@@ -36,7 +36,7 @@ impl InputSyncSystem {
 impl<'a> System<'a> for InputSyncSystem {
     type SystemData = (
         Entities<'a>,
-        Read<'a, EntityIndexMap>,
+        ReadExpect<'a, EntityIndexMap>,
         ReadStorage<'a, Transform>,
         Write<'a, Option<ClientMessageResource>>,
         Write<'a, Option<ServerMessageResource>>,
@@ -73,10 +73,10 @@ impl<'a> System<'a> for InputSyncSystem {
                     }
 
                     if let Some(server_messages) = server_messages.as_mut() {
-                        if let Some(entity_id) = id_map.to_external(entity.id()) {
+                        if let Some(public_id) = id_map.to_public_id(entity.id()) {
                             server_messages.push(ServerMessage::ActorAction {
                                 id: 0,
-                                entity_id,
+                                public_id,
                                 move_x: movement_x,
                                 move_y: movement_y,
                                 angle,

@@ -48,45 +48,45 @@ impl NetworkSystem<ClientSystemData<'_>, ClientMessage, ServerMessage> for Clien
                 self.postman.acknowledge_message(address, message_id);
             }
             ServerMessage::ActorSpawn {
-                entity_id,
+                public_id,
                 x,
                 y,
                 angle,
                 ..
             } => {
                 data.tasks.push(GameTask::ActorSpawn {
-                    entity_id,
+                    public_id,
                     x,
                     y,
                     angle,
                 });
             }
-            ServerMessage::ActorGrant { entity_id, .. } => {
-                data.tasks.push(GameTask::ActorGrant(entity_id));
+            ServerMessage::ActorGrant { public_id, .. } => {
+                data.tasks.push(GameTask::ActorGrant(public_id));
             }
             ServerMessage::ActorAction {
-                entity_id,
+                public_id,
                 move_x,
                 move_y,
                 angle,
                 ..
             } => {
                 data.tasks.push(GameTask::ActorAction {
-                    entity_id,
+                    public_id,
                     move_x,
                     move_y,
                     angle,
                 });
             }
             ServerMessage::TransformSync {
-                entity_id,
+                public_id,
                 x,
                 y,
                 angle,
                 ..
             } => {
                 data.tasks.push(GameTask::TransformSync {
-                    entity_id,
+                    public_id,
                     x,
                     y,
                     angle,

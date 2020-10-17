@@ -16,6 +16,7 @@ use amethyst::ecs::prelude::System;
 use amethyst::ecs::prelude::SystemData;
 use amethyst::ecs::Entities;
 use amethyst::ecs::Write;
+use amethyst::ecs::WriteExpect;
 use std::net::SocketAddr;
 use std::net::UdpSocket;
 
@@ -36,28 +37,28 @@ impl ServerSystem {
 
     fn on_connect(&mut self, address: SocketAddr, data: &mut ServerSystemData) {
         for (entity, _, transform) in (&data.entities, &data.actors, &data.transforms).join() {
-            let entity_id = data.id_map.to_external_or_generate(entity.id());
-
-            self.postman.send(
-                ServerMessage::ActorSpawn {
-                    id: 0,
-                    entity_id,
-                    // TODO: Pass transform sync
-                    x: transform.translation().x,
-                    y: transform.translation().y,
-                    angle: transform.euler_angles().2,
-                },
-                &Receiver::Only(address),
-            );
+            if let Some(public_id) = data.id_map.to_public_id(entity.id()) {
+                self.postman.send(
+                    ServerMessage::ActorSpawn {
+                        id: 0,
+                        public_id,
+                        // TODO: Pass transform sync
+                        x: transform.translation().x,
+                        y: transform.translation().y,
+                        angle: transform.euler_angles().2,
+                    },
+                    &Receiver::Only(address),
+                );
+            }
         }
 
-        let entity_id = data.id_map.generate();
-        self.postman.attach_entity_id(address, entity_id);
+        let public_id = data.id_map.generate_public_id();
+        self.postman.attach_public_id(address, public_id);
 
         self.postman.send(
             ServerMessage::ActorSpawn {
                 id: 0,
-                entity_id,
+                public_id,
                 x: 0.0,
                 y: 0.0,
                 angle: 0.0,
@@ -66,12 +67,12 @@ impl ServerSystem {
         );
 
         self.postman.send(
-            ServerMessage::ActorGrant { id: 0, entity_id },
+            ServerMessage::ActorGrant { id: 0, public_id },
             &Receiver::Only(address),
         );
 
         data.tasks.push(GameTask::ActorSpawn {
-            entity_id,
+            public_id,
             x: 0.0,
             y: 0.0,
             angle: 0.0,
@@ -99,11 +100,9 @@ impl NetworkSystem<ServerSystemData<'_>, ServerMessage, ClientMessage> for Serve
                 angle,
                 ..
             } => {
-                let entity_id = self.postman.get_attached_entity_id(address);
-
-                if entity_id != 0 {
+                if let Some(public_id) = self.postman.get_attached_public_id(address) {
                     data.tasks.push(GameTask::ActorAction {
-                        entity_id,
+                        public_id,
                         move_x,
                         move_y,
                         angle,
@@ -112,7 +111,7 @@ impl NetworkSystem<ServerSystemData<'_>, ServerMessage, ClientMessage> for Serve
                     self.postman.send(
                         ServerMessage::ActorAction {
                             id: 0,
-                            entity_id,
+                            public_id,
                             move_x,
                             move_y,
                             angle,
@@ -134,19 +133,19 @@ impl<'a> System<'a> for ServerSystem {
         Entities<'a>,
         ReadStorage<'a, Actor>,
         ReadStorage<'a, Transform>,
-        Write<'a, EntityIndexMap>,
         Write<'a, GameTaskResource>,
         Write<'a, Option<ServerMessageResource>>,
+        WriteExpect<'a, EntityIndexMap>,
     );
 
-    fn run(&mut self, (entities, actors, transforms, id_map, tasks, messages): Self::SystemData) {
+    fn run(&mut self, (entities, actors, transforms, tasks, messages, id_map): Self::SystemData) {
         let mut data = ServerSystemData {
             entities,
             actors,
             transforms,
-            id_map,
             tasks,
             messages,
+            id_map,
         };
 
         NetworkSystem::run(self, &mut data);
@@ -163,7 +162,7 @@ struct ServerSystemData<'a> {
     entities: Entities<'a>,
     actors: ReadStorage<'a, Actor>,
     transforms: ReadStorage<'a, Transform>,
-    id_map: Write<'a, EntityIndexMap>,
     tasks: Write<'a, GameTaskResource>,
     messages: Write<'a, Option<ServerMessageResource>>,
+    id_map: WriteExpect<'a, EntityIndexMap>,
 }

@@ -5,7 +5,6 @@ use crate::resources::ClientMessageResource;
 use crate::resources::EntityIndexMap;
 use crate::resources::GameTask;
 use crate::resources::GameTaskResource;
-use crate::resources::Pull;
 use crate::resources::ServerMessageResource;
 use crate::states::ui::HomeState;
 use crate::systems::CameraSystem;
@@ -17,6 +16,7 @@ use crate::systems::ServerSystem;
 use crate::systems::TerrainSystem;
 use crate::systems::TransformSyncSystem;
 use crate::utils;
+use crate::utils::TakeContent;
 use amethyst::core::ArcThreadPool;
 use amethyst::ecs::prelude::World;
 use amethyst::ecs::Dispatcher;
@@ -103,23 +103,26 @@ impl GameState<'_, '_> {
         self.root.replace(root);
 
         if self.is_own_game() {
-            let public_id = world.write_resource::<EntityIndexMap>().generate();
-            utils::world::create_actor(world, root, public_id, 0.0, 0.0, 0.0, false);
+            let public_id = world
+                .write_resource::<EntityIndexMap>()
+                .generate_public_id();
+
+            utils::world::create_actor(world, root, Some(public_id), 0.0, 0.0, 0.0, false);
             self.on_task_actor_grant(world, public_id); // TODO: Do not call `on_task_actor_grant`
         }
 
         utils::world::create_terrain(world, root);
     }
 
-    fn on_task_actor_spawn(&self, world: &mut World, entity_id: u16, x: f32, y: f32, angle: f32) {
+    fn on_task_actor_spawn(&self, world: &mut World, public_id: u16, x: f32, y: f32, angle: f32) {
         if let Some(root) = self.root {
-            utils::world::create_actor(world, root, entity_id, x, y, angle, false);
+            utils::world::create_actor(world, root, Some(public_id), x, y, angle, false);
         }
     }
 
     fn on_task_actor_grant(&mut self, world: &mut World, id: u16) {
         if let Some(root) = self.root {
-            if let Some(actor) = EntityIndexMap::fetch_entity_by_external_id(world, id) {
+            if let Some(actor) = EntityIndexMap::fetch_entity_by_public_id(world, id) {
                 self.player_actor = Some(actor);
                 self.player_ghost = utils::world::grant_played_actor(
                     world,
@@ -134,12 +137,12 @@ impl GameState<'_, '_> {
     fn on_task_actor_action(
         &self,
         world: &mut World,
-        entity_id: u16,
+        public_id: u16,
         move_x: f32,
         move_y: f32,
         angle: f32,
     ) {
-        if let Some(entity) = EntityIndexMap::fetch_entity_by_external_id(world, entity_id) {
+        if let Some(entity) = EntityIndexMap::fetch_entity_by_public_id(world, public_id) {
             let entity_to_update;
 
             if self.is_player_actor(entity) {
@@ -159,7 +162,7 @@ impl GameState<'_, '_> {
     }
 
     fn on_task_transform_sync(&self, world: &mut World, id: u16, x: f32, y: f32, angle: f32) {
-        if let Some(entity) = EntityIndexMap::fetch_entity_by_external_id(world, id) {
+        if let Some(entity) = EntityIndexMap::fetch_entity_by_public_id(world, id) {
             let is_player = self.is_player_actor(entity);
 
             if let Some(transform) = world.write_storage::<TransformSync>().get_mut(entity) {
@@ -228,36 +231,36 @@ impl<'a, 'b> SimpleState for GameState<'a, 'b> {
             dispatcher.dispatch(data.world);
         }
 
-        let mut tasks = data.world.fetch_mut::<GameTaskResource>().pull();
+        let mut tasks = data.world.fetch_mut::<GameTaskResource>().take_content();
 
         for task in tasks.drain(..) {
             match task {
                 GameTask::ActorSpawn {
-                    entity_id,
+                    public_id,
                     x,
                     y,
                     angle,
                 } => {
-                    self.on_task_actor_spawn(data.world, entity_id, x, y, angle);
+                    self.on_task_actor_spawn(data.world, public_id, x, y, angle);
                 }
-                GameTask::ActorGrant(entity_id) => {
-                    self.on_task_actor_grant(data.world, entity_id);
+                GameTask::ActorGrant(public_id) => {
+                    self.on_task_actor_grant(data.world, public_id);
                 }
                 GameTask::ActorAction {
-                    entity_id,
+                    public_id,
                     move_x,
                     move_y,
                     angle,
                 } => {
-                    self.on_task_actor_action(data.world, entity_id, move_x, move_y, angle);
+                    self.on_task_actor_action(data.world, public_id, move_x, move_y, angle);
                 }
                 GameTask::TransformSync {
-                    entity_id,
+                    public_id,
                     x,
                     y,
                     angle,
                 } => {
-                    self.on_task_transform_sync(data.world, entity_id, x, y, angle);
+                    self.on_task_transform_sync(data.world, public_id, x, y, angle);
                 }
             }
         }

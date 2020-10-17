@@ -8,7 +8,7 @@ use amethyst::ecs::prelude::ReadStorage;
 use amethyst::ecs::prelude::System;
 use amethyst::ecs::prelude::SystemData;
 use amethyst::ecs::Entities;
-use amethyst::ecs::Read;
+use amethyst::ecs::ReadExpect;
 use amethyst::ecs::Write;
 use std::time::Duration;
 use std::time::Instant;
@@ -31,7 +31,7 @@ impl TransformSyncSystem {
 impl<'a> System<'a> for TransformSyncSystem {
     type SystemData = (
         Entities<'a>,
-        Read<'a, EntityIndexMap>,
+        ReadExpect<'a, EntityIndexMap>,
         ReadStorage<'a, TransformSync>,
         Write<'a, Option<ServerMessageResource>>,
     );
@@ -40,10 +40,10 @@ impl<'a> System<'a> for TransformSyncSystem {
         if let Some(messages) = messages.as_mut() {
             if self.last_sync.elapsed() > INTERVAL {
                 for (entity, transform_sync) in (&entities, &transforms_sync).join() {
-                    if let Some(entity_id) = id_map.to_external(entity.id()) {
+                    if let Some(public_id) = id_map.to_public_id(entity.id()) {
                         messages.push(ServerMessage::TransformSync {
                             id: 0,
-                            entity_id,
+                            public_id,
                             x: transform_sync.target_x,
                             y: transform_sync.target_y,
                             angle: transform_sync.target_angle,

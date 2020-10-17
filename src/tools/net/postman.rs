@@ -110,17 +110,17 @@ impl<R: Message> Postman<R> {
         }
     }
 
-    pub fn attach_entity_id(&mut self, address: SocketAddr, entity_id: u16) {
+    pub fn attach_public_id(&mut self, address: SocketAddr, public_id: u16) {
         if let Some(connection) = self.connections.get_mut(&address) {
-            connection.attached_entity_id = entity_id;
+            connection.attached_public_id.replace(public_id);
         }
     }
 
-    pub fn get_attached_entity_id(&self, address: SocketAddr) -> u16 {
+    pub fn get_attached_public_id(&self, address: SocketAddr) -> Option<u16> {
         return self
             .connections
             .get(&address)
-            .map_or(0, |c| c.attached_entity_id);
+            .and_then(|c| c.attached_public_id);
     }
 }
 

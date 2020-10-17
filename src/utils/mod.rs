@@ -48,6 +48,20 @@ pub fn load_sprite_sheet(world: &mut World, png_path: &str, ron_path: &str) -> S
     );
 }
 
+pub trait TakeContent<T> {
+    fn take_content(&mut self) -> T;
+}
+
+impl<T> TakeContent<Vec<T>> for Vec<T> {
+    fn take_content(&mut self) -> Vec<T> {
+        if self.is_empty() {
+            return Vec::with_capacity(0);
+        } else {
+            return std::mem::replace(self, Vec::with_capacity(self.capacity()));
+        }
+    }
+}
+
 // TODO: Find a better place for it
 /// Workaround utility to wait `UiAwaiter::FRAMES_TO_AWAIT` frames for UI initialization
 pub struct UiAwaiter {

@@ -28,7 +28,7 @@ use amethyst::tiles::TileMap;
 pub fn create_actor(
     world: &mut World,
     root: Entity,
-    public_id: u16,
+    public_id: Option<u16>,
     x: f32,
     y: f32,
     angle: f32,
@@ -60,10 +60,10 @@ pub fn create_actor(
 
     let actor = builder.build();
 
-    if public_id != 0 {
+    if let Some(public_id) = public_id {
         world
             .fetch_mut::<EntityIndexMap>()
-            .insert(actor.id(), public_id);
+            .store(actor.id(), public_id);
     }
 
     return actor;
@@ -92,7 +92,7 @@ pub fn grant_played_actor(
 
     if create_ghost {
         // TODO: Maybe make ghost as player's child
-        return Some(create_actor(world, root, 0, 0.0, 0.0, 0.0, true));
+        return Some(create_actor(world, root, None, 0.0, 0.0, 0.0, true));
     } else {
         return None;
     }

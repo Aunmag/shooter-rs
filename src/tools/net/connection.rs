@@ -10,7 +10,7 @@ use std::time::Instant;
 const MESSAGE_RESEND_INTERVAL: Duration = Duration::from_millis(500);
 
 pub struct Connection<R: Message> {
-    pub attached_entity_id: u16,
+    pub attached_public_id: Option<u16>,
     unacknowledged_messages: HashMap<u16, UnacknowledgedMessage>,
     early_messages: HashMap<u16, R>, // TODO: Don't allow it grow to large
     next_incoming_message_id: u16,   // TODO: Handle ID restart
@@ -20,7 +20,7 @@ pub struct Connection<R: Message> {
 impl<R: Message> Connection<R> {
     pub fn new() -> Self {
         return Self {
-            attached_entity_id: 0,
+            attached_public_id: None,
             unacknowledged_messages: HashMap::new(),
             early_messages: HashMap::new(),
             next_incoming_message_id: 0,
