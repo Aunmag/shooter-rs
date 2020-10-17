@@ -15,20 +15,22 @@ pub struct UiTaskSystem;
 
 impl UiTaskSystem {
     fn prepare_tasks(tasks: &mut UiTaskResource) {
-        let mut prepared = HashMap::with_capacity(tasks.len());
+        if !tasks.is_empty() {
+            let mut tasks_additional = HashMap::new();
 
-        for (id, task) in tasks.drain() {
-            if let UiTask::SetButtonAvailability(is_availability) = task {
-                prepared.insert(
-                    format!("{}_btn_txt", id),
-                    UiTask::SetButtonAvailability(is_availability),
-                );
+            for (id, task) in tasks.iter() {
+                if let UiTask::SetButtonAvailability(is_availability) = *task {
+                    tasks_additional.insert(
+                        format!("{}_btn_txt", id),
+                        UiTask::SetButtonAvailability(is_availability),
+                    );
+                }
             }
 
-            prepared.insert(id, task);
+            for (id, task) in tasks_additional.drain() {
+                tasks.insert(id, task);
+            }
         }
-
-        std::mem::swap(tasks, &mut prepared);
     }
 }
 

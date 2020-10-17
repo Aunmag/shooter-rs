@@ -34,6 +34,20 @@ pub enum GameTask {
     },
 }
 
+pub trait Pull<T> {
+    fn pull(&mut self) -> Vec<T>;
+}
+
+impl Pull<GameTask> for GameTaskResource {
+    fn pull(&mut self) -> Vec<GameTask> {
+        if self.is_empty() {
+            return Vec::with_capacity(0);
+        } else {
+            return std::mem::replace(self, Vec::with_capacity(self.capacity()));
+        }
+    }
+}
+
 pub enum UiTask {
     SetButtonAvailability(bool),
     SetText(&'static str),

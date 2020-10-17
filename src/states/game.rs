@@ -5,6 +5,7 @@ use crate::resources::ClientMessageResource;
 use crate::resources::EntityIndexMap;
 use crate::resources::GameTask;
 use crate::resources::GameTaskResource;
+use crate::resources::Pull;
 use crate::resources::ServerMessageResource;
 use crate::states::ui::HomeState;
 use crate::systems::CameraSystem;
@@ -106,49 +107,6 @@ impl GameState<'_, '_> {
         }
 
         utils::world::create_terrain(world, root);
-    }
-
-    fn process_tasks(&mut self, world: &mut World) {
-        let mut tasks = Vec::with_capacity(0);
-
-        {
-            // TODO: Move to tasks resource
-            let mut new_tasks = world.fetch_mut::<GameTaskResource>();
-            tasks.reserve_exact(new_tasks.capacity());
-            std::mem::swap(&mut tasks, &mut new_tasks);
-        }
-
-        for task in tasks.drain(..) {
-            match task {
-                GameTask::ActorSpawn {
-                    entity_id,
-                    x,
-                    y,
-                    angle,
-                } => {
-                    self.on_task_actor_spawn(world, entity_id, x, y, angle);
-                }
-                GameTask::ActorGrant(entity_id) => {
-                    self.on_task_actor_grant(world, entity_id);
-                }
-                GameTask::ActorAction {
-                    entity_id,
-                    move_x,
-                    move_y,
-                    angle,
-                } => {
-                    self.on_task_actor_action(world, entity_id, move_x, move_y, angle);
-                }
-                GameTask::TransformSync {
-                    entity_id,
-                    x,
-                    y,
-                    angle,
-                } => {
-                    self.on_task_transform_sync(world, entity_id, x, y, angle);
-                }
-            }
-        }
     }
 
     fn on_task_actor_spawn(&self, world: &mut World, entity_id: u16, x: f32, y: f32, angle: f32) {
@@ -268,7 +226,39 @@ impl<'a, 'b> SimpleState for GameState<'a, 'b> {
             dispatcher.dispatch(data.world);
         }
 
-        self.process_tasks(data.world);
+        let mut tasks = data.world.fetch_mut::<GameTaskResource>().pull();
+
+        for task in tasks.drain(..) {
+            match task {
+                GameTask::ActorSpawn {
+                    entity_id,
+                    x,
+                    y,
+                    angle,
+                } => {
+                    self.on_task_actor_spawn(data.world, entity_id, x, y, angle);
+                }
+                GameTask::ActorGrant(entity_id) => {
+                    self.on_task_actor_grant(data.world, entity_id);
+                }
+                GameTask::ActorAction {
+                    entity_id,
+                    move_x,
+                    move_y,
+                    angle,
+                } => {
+                    self.on_task_actor_action(data.world, entity_id, move_x, move_y, angle);
+                }
+                GameTask::TransformSync {
+                    entity_id,
+                    x,
+                    y,
+                    angle,
+                } => {
+                    self.on_task_transform_sync(data.world, entity_id, x, y, angle);
+                }
+            }
+        }
 
         return Trans::None;
     }
