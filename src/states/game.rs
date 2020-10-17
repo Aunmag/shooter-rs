@@ -54,20 +54,22 @@ impl GameState<'_, '_> {
 
     fn init_dispatcher(&mut self, world: &mut World) {
         let mut builder = DispatcherBuilder::new();
-        builder.add(CameraSystem::new(), "", &[]);
-        builder.add(InputSyncSystem::new(), "", &[]);
-        builder.add(InterpolationSystem, "", &[]);
-        builder.add(PlayerSystem, "", &[]);
-        builder.add(TerrainSystem, "", &[]);
+        builder.add(PlayerSystem, "Player", &[]);
+        builder.add(CameraSystem::new(), "Camera", &[]);
+        builder.add(TerrainSystem, "Terrain", &[]);
 
         match self.game_type {
             GameType::Single => {}
             GameType::Join(address) => {
-                builder.add(ClientSystem::new(address).unwrap(), "", &[]);
+                builder.add(InputSyncSystem::new(), "InputSync", &["Player"]);
+                builder.add(InterpolationSystem, "Interpolation", &[]);
+                builder.add(ClientSystem::new(address).unwrap(), "Client", &[]);
             }
             GameType::Host(port) => {
-                builder.add(ServerSystem::new(port).unwrap(), "", &[]);
-                builder.add(TransformSyncSystem::new(), "", &[]);
+                builder.add(InputSyncSystem::new(), "InputSync", &["Player"]);
+                builder.add(InterpolationSystem, "Interpolation", &[]);
+                builder.add(ServerSystem::new(port).unwrap(), "Server", &[]);
+                builder.add(TransformSyncSystem::new(), "TransformSync", &[]);
             }
         }
 
