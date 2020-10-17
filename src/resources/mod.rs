@@ -5,7 +5,6 @@ mod ui_task;
 pub use self::entity_index_map::*;
 pub use self::game_task::*;
 pub use self::ui_task::*;
-
 use crate::tools::net::message::ClientMessage;
 use crate::tools::net::message::ServerMessage;
 

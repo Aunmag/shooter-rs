@@ -41,6 +41,12 @@ pub struct GameState<'a, 'b> {
     player_ghost: Option<Entity>,
 }
 
+pub enum GameType {
+    Single,
+    Join(SocketAddr),
+    Host(u16),
+}
+
 impl GameState<'_, '_> {
     pub fn new(game_type: GameType) -> Self {
         return Self {
@@ -52,6 +58,7 @@ impl GameState<'_, '_> {
         };
     }
 
+    #[allow(clippy::unwrap_used)] // TODO: Remove
     fn init_dispatcher(&mut self, world: &mut World) {
         let mut builder = DispatcherBuilder::new();
         builder.add(PlayerSystem, "Player", &[]);
@@ -103,12 +110,19 @@ impl GameState<'_, '_> {
         self.root.replace(root);
 
         if self.is_own_game() {
+            let mut tasks = world.write_resource::<GameTaskResource>();
             let public_id = world
                 .write_resource::<EntityIndexMap>()
                 .generate_public_id();
 
-            utils::world::create_actor(world, root, Some(public_id), 0.0, 0.0, 0.0, false);
-            self.on_task_actor_grant(world, public_id); // TODO: Do not call `on_task_actor_grant`
+            tasks.push(GameTask::ActorSpawn {
+                public_id,
+                x: 0.0,
+                y: 0.0,
+                angle: 0.0,
+            });
+
+            tasks.push(GameTask::ActorGrant(public_id));
         }
 
         utils::world::create_terrain(world, root);
@@ -285,10 +299,4 @@ impl<'a, 'b> SimpleState for GameState<'a, 'b> {
 
         return Trans::None;
     }
-}
-
-pub enum GameType {
-    Single,
-    Join(SocketAddr),
-    Host(u16),
 }

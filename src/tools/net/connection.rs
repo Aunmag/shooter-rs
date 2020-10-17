@@ -96,6 +96,7 @@ impl<R: Message> Connection<R> {
 
     pub fn acknowledge_message(&mut self, id: u16) {
         if self.unacknowledged_messages.remove(&id).is_none() {
+            // TODO: Use logger
             println!(
                 "Got response for {} message but it was not a pending message",
                 id,

@@ -1,3 +1,7 @@
+pub mod math;
+pub mod ui;
+pub mod world;
+
 use amethyst::assets::AssetStorage;
 use amethyst::assets::Loader;
 use amethyst::core::HiddenPropagate;
@@ -9,10 +13,6 @@ use amethyst::renderer::ImageFormat;
 use amethyst::renderer::SpriteSheet;
 use amethyst::renderer::SpriteSheetFormat;
 use amethyst::renderer::Texture;
-
-pub mod math;
-pub mod ui;
-pub mod world;
 
 pub fn set_entity_visibility(world: &mut World, entity: Entity, is_visibility: bool) {
     let mut storage = world.write_storage::<HiddenPropagate>();
@@ -55,7 +55,7 @@ pub trait TakeContent<T> {
 impl<T> TakeContent<Vec<T>> for Vec<T> {
     fn take_content(&mut self) -> Vec<T> {
         if self.is_empty() {
-            return Vec::with_capacity(0);
+            return Vec::new();
         } else {
             return std::mem::replace(self, Vec::with_capacity(self.capacity()));
         }

@@ -69,6 +69,7 @@ pub fn create_actor(
     return actor;
 }
 
+#[allow(clippy::unwrap_used)] // TODO: Remove
 pub fn grant_played_actor(
     world: &mut World,
     root: Entity,
@@ -98,7 +99,7 @@ pub fn grant_played_actor(
     }
 }
 
-pub fn create_camera(world: &mut World, player: Entity) -> Entity {
+pub fn create_camera(world: &mut World, target: Entity) -> Entity {
     let mut transform = Transform::default();
     transform.set_translation_xyz(0.0, 0.0, LAYER_CAMERA);
 
@@ -106,7 +107,7 @@ pub fn create_camera(world: &mut World, player: Entity) -> Entity {
         .create_entity()
         .with(Camera::standard_2d(1.0, 1.0))
         .with(transform)
-        .with(Parent { entity: player })
+        .with(Parent { entity: target })
         .build();
 }
 
