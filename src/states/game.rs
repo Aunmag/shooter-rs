@@ -64,10 +64,10 @@ impl GameState<'_, '_> {
             GameType::Single => {}
             GameType::Join(address) => {
                 builder.add(ClientSystem::new(address).unwrap(), "", &[]);
-                builder.add(TransformSyncSystem::new(), "", &[]);
             }
             GameType::Host(port) => {
                 builder.add(ServerSystem::new(port).unwrap(), "", &[]);
+                builder.add(TransformSyncSystem::new(), "", &[]);
             }
         }
 
