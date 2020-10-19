@@ -28,7 +28,6 @@ mod input;
 mod resources;
 mod states;
 mod systems;
-mod tools;
 mod utils;
 
 use crate::components::Terrain;

@@ -1,7 +1,8 @@
 use crate::components::TransformSync;
 use crate::resources::EntityIndexMap;
-use crate::resources::ServerMessageResource;
-use crate::tools::net::message::ServerMessage;
+use crate::resources::Message;
+use crate::resources::MessageReceiver;
+use crate::resources::MessageResource;
 use amethyst::derive::SystemDesc;
 use amethyst::ecs::prelude::Join;
 use amethyst::ecs::prelude::ReadStorage;
@@ -33,25 +34,28 @@ impl<'a> System<'a> for TransformSyncSystem {
         Entities<'a>,
         ReadExpect<'a, EntityIndexMap>,
         ReadStorage<'a, TransformSync>,
-        Write<'a, Option<ServerMessageResource>>,
+        Write<'a, MessageResource>,
     );
 
     fn run(&mut self, (entities, id_map, transforms_sync, mut messages): Self::SystemData) {
-        if let Some(messages) = messages.as_mut() {
-            if self.last_sync.elapsed() > INTERVAL {
-                for (entity, transform_sync) in (&entities, &transforms_sync).join() {
-                    if let Some(public_id) = id_map.to_public_id(entity.id()) {
-                        messages.push(ServerMessage::TransformSync {
-                            id: 0,
-                            public_id,
-                            x: transform_sync.target_x,
-                            y: transform_sync.target_y,
-                            angle: transform_sync.target_angle,
-                        });
-                    }
-                }
+        if self.last_sync.elapsed() < INTERVAL {
+            return;
+        }
 
-                self.last_sync = Instant::now();
+        self.last_sync = Instant::now();
+
+        for (entity, transform_sync) in (&entities, &transforms_sync).join() {
+            if let Some(public_id) = id_map.to_public_id(entity.id()) {
+                messages.push((
+                    MessageReceiver::Every,
+                    Message::TransformSync {
+                        id: 0,
+                        public_id,
+                        x: transform_sync.target_x,
+                        y: transform_sync.target_y,
+                        angle: transform_sync.target_angle,
+                    },
+                ));
             }
         }
     }

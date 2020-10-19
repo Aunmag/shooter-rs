@@ -1,23 +1,26 @@
 use crate::components::Actor;
 use crate::components::TransformSync;
 use crate::input;
-use crate::resources::ClientMessageResource;
 use crate::resources::EntityIndexMap;
 use crate::resources::GameTask;
 use crate::resources::GameTaskResource;
-use crate::resources::ServerMessageResource;
+use crate::resources::Message;
+use crate::resources::MessageReceiver;
+use crate::resources::MessageResource;
+use crate::resources::NetworkTask;
+use crate::resources::NetworkTaskResource;
 use crate::states::ui::HomeState;
+use crate::systems::net::InputSyncSystem;
+use crate::systems::net::InterpolationSystem;
+use crate::systems::net::NetworkSystem;
+use crate::systems::net::TransformSyncSystem;
 use crate::systems::CameraSystem;
-use crate::systems::ClientSystem;
-use crate::systems::InputSyncSystem;
-use crate::systems::InterpolationSystem;
 use crate::systems::PlayerSystem;
-use crate::systems::ServerSystem;
 use crate::systems::TerrainSystem;
-use crate::systems::TransformSyncSystem;
 use crate::utils;
 use crate::utils::TakeContent;
 use amethyst::core::ArcThreadPool;
+use amethyst::ecs::prelude::Join;
 use amethyst::ecs::prelude::World;
 use amethyst::ecs::Dispatcher;
 use amethyst::ecs::DispatcherBuilder;
@@ -58,24 +61,32 @@ impl GameState<'_, '_> {
         };
     }
 
-    #[allow(clippy::unwrap_used)] // TODO: Remove
     fn init_dispatcher(&mut self, world: &mut World) {
         let mut builder = DispatcherBuilder::new();
         builder.add(PlayerSystem, "Player", &[]);
         builder.add(CameraSystem::new(), "Camera", &[]);
         builder.add(TerrainSystem, "Terrain", &[]);
 
+        #[allow(clippy::unwrap_used)] // TODO: Remove
         match self.game_type {
             GameType::Single => {}
             GameType::Join(address) => {
                 builder.add(InputSyncSystem::new(), "InputSync", &["Player"]);
+                builder.add(
+                    NetworkSystem::new_as_client(address).unwrap(),
+                    "Network",
+                    &["InputSync"],
+                );
                 builder.add(InterpolationSystem, "Interpolation", &[]);
-                builder.add(ClientSystem::new(address).unwrap(), "Client", &[]);
             }
             GameType::Host(port) => {
                 builder.add(InputSyncSystem::new(), "InputSync", &["Player"]);
+                builder.add(
+                    NetworkSystem::new_as_server(port).unwrap(),
+                    "Network",
+                    &["InputSync"],
+                );
                 builder.add(InterpolationSystem, "Interpolation", &[]);
-                builder.add(ServerSystem::new(port).unwrap(), "Server", &[]);
                 builder.add(TransformSyncSystem::new(), "TransformSync", &[]);
             }
         }
@@ -89,20 +100,13 @@ impl GameState<'_, '_> {
         self.dispatcher = Some(dispatcher);
     }
 
+    #[allow(clippy::unused_self)]
     fn init_resources(&self, world: &mut World) {
         world.register::<Actor>();
         world.insert(EntityIndexMap::new());
         world.insert(GameTaskResource::new());
-
-        match self.game_type {
-            GameType::Single => {}
-            GameType::Join(..) => {
-                world.insert(Some(ClientMessageResource::new()));
-            }
-            GameType::Host(..) => {
-                world.insert(Some(ServerMessageResource::new()));
-            }
-        }
+        world.insert(MessageResource::new());
+        world.insert(NetworkTaskResource::new());
     }
 
     fn init_world_entities(&mut self, world: &mut World) {
@@ -126,6 +130,64 @@ impl GameState<'_, '_> {
         }
 
         utils::world::create_terrain(world, root);
+    }
+
+    fn on_task_player_connect(&self, world: &mut World, address: SocketAddr) {
+        let root = match self.root {
+            Some(root) => root,
+            None => return,
+        };
+
+        let public_id = world
+            .write_resource::<EntityIndexMap>()
+            .generate_public_id();
+
+        utils::world::create_actor(world, root, Some(public_id), 0.0, 0.0, 0.0, false);
+
+        let mut messages = world.write_resource::<MessageResource>();
+
+        messages.push((
+            MessageReceiver::Except(address),
+            Message::ActorSpawn {
+                id: 0,
+                public_id,
+                x: 0.0,
+                y: 0.0,
+                angle: 0.0,
+            },
+        ));
+
+        world
+            .write_resource::<NetworkTaskResource>()
+            .push(NetworkTask::AttachPublicId(address, public_id));
+
+        let id_map = world.read_resource::<EntityIndexMap>();
+
+        for (entity, transform, _) in (
+            &world.entities(),
+            &world.read_storage::<TransformSync>(),
+            &world.read_storage::<Actor>(),
+        )
+            .join()
+        {
+            if let Some(public_id) = id_map.to_public_id(entity.id()) {
+                messages.push((
+                    MessageReceiver::Only(address),
+                    Message::ActorSpawn {
+                        id: 0,
+                        public_id,
+                        x: transform.target_x,
+                        y: transform.target_y,
+                        angle: transform.target_angle,
+                    },
+                ));
+            }
+        }
+
+        messages.push((
+            MessageReceiver::Only(address),
+            Message::ActorGrant { id: 0, public_id },
+        ));
     }
 
     fn on_task_actor_spawn(&self, world: &mut World, public_id: u16, x: f32, y: f32, angle: f32) {
@@ -249,6 +311,9 @@ impl<'a, 'b> SimpleState for GameState<'a, 'b> {
 
         for task in tasks.drain(..) {
             match task {
+                GameTask::PlayerConnect(address) => {
+                    self.on_task_player_connect(data.world, address);
+                }
                 GameTask::ActorSpawn {
                     public_id,
                     x,

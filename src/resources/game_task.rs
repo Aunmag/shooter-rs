@@ -1,7 +1,9 @@
+use std::net::SocketAddr;
+
 pub type GameTaskResource = Vec<GameTask>;
 
-#[derive(Debug)]
 pub enum GameTask {
+    PlayerConnect(SocketAddr),
     ActorSpawn {
         public_id: u16,
         x: f32,
