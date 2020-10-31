@@ -1,6 +1,7 @@
-use crate::utils::UiAwaiter;
+use crate::resources::GameStatus;
 use amethyst::derive::SystemDesc;
 use amethyst::ecs::prelude::Join;
+use amethyst::ecs::prelude::Read;
 use amethyst::ecs::prelude::ReadExpect;
 use amethyst::ecs::prelude::System;
 use amethyst::ecs::prelude::SystemData;
@@ -17,7 +18,6 @@ const WALLPAPER_ASPECT_RATIO: f32 = WALLPAPER_SIZE_X / WALLPAPER_SIZE_Y;
 
 #[derive(SystemDesc)]
 pub struct UiResizeSystem {
-    ui_awaiter: UiAwaiter,
     last_size_x: f32,
     last_size_y: f32,
     last_size_quad: f32,
@@ -26,7 +26,6 @@ pub struct UiResizeSystem {
 impl UiResizeSystem {
     pub fn new() -> Self {
         return Self {
-            ui_awaiter: UiAwaiter::new(),
             last_size_x: 0.0,
             last_size_y: 0.0,
             last_size_quad: 0.0,
@@ -73,15 +72,14 @@ impl UiResizeSystem {
 
 impl<'a> System<'a> for UiResizeSystem {
     type SystemData = (
+        Read<'a, GameStatus>,
         ReadExpect<'a, ScreenDimensions>,
         WriteStorage<'a, UiText>,
         WriteStorage<'a, UiTransform>,
     );
 
-    fn run(&mut self, (screen, mut texts, mut transforms): Self::SystemData) {
-        self.ui_awaiter.update();
-
-        if self.ui_awaiter.is_ready() {
+    fn run(&mut self, (game_state, screen, mut texts, mut transforms): Self::SystemData) {
+        if game_state.is_loaded {
             let size_x = screen.width();
             let size_y = screen.height();
             let size_quad = f32::min(size_y, size_x);

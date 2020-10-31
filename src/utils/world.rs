@@ -7,7 +7,8 @@ use crate::data::LAYER_ACTOR_PLAYER;
 use crate::data::LAYER_CAMERA;
 use crate::data::LAYER_TERRAIN;
 use crate::resources::EntityIndexMap;
-use crate::utils;
+use crate::resources::Sprite;
+use crate::resources::SpriteResource;
 use amethyst::core::math::Vector3;
 use amethyst::core::transform::Transform;
 use amethyst::core::Parent;
@@ -38,24 +39,25 @@ pub fn create_actor(
     transform.set_translation_xyz(x, y, LAYER_ACTOR);
     transform.set_rotation_2d(angle);
 
-    // TODO: Cache renderer
-    let renderer = SpriteRender::new(
-        utils::load_sprite_sheet(world, "actors/human/image.png", "actors/human/image.ron"),
-        0,
-    );
+    let mut renderer = world
+        .read_resource::<SpriteResource>()
+        .get(&Sprite::Actor)
+        .map(|s| SpriteRender::new(s, 0));
 
     let mut builder = world
         .create_entity()
         .with(Parent { entity: root })
         .with(Actor)
         .with(transform)
-        .with(TransformSync::new(x, y, angle))
-        .with(renderer);
+        .with(TransformSync::new(x, y, angle));
+
+    if let Some(renderer) = renderer.take() {
+        builder = builder.with(renderer);
+    }
 
     if is_ghost {
-        builder = builder
-            .with(Tint(Srgba::new(0.6, 0.6, 0.6, 0.4)))
-            .with(Transparent);
+        builder = builder.with(Tint(Srgba::new(0.6, 0.6, 0.6, 0.4)));
+        builder = builder.with(Transparent);
     }
 
     let actor = builder.build();
@@ -115,11 +117,7 @@ pub fn create_terrain(world: &mut World, root: Entity) -> Entity {
     let tile_map = TileMap::<Terrain, MortonEncoder>::new(
         Vector3::new(Terrain::QUANTITY, Terrain::QUANTITY, 1),
         Vector3::new(Terrain::SIZE, Terrain::SIZE, 1),
-        Some(utils::load_sprite_sheet(
-            world,
-            "ground/grass.png",
-            "ground/grass.ron",
-        )),
+        world.read_resource::<SpriteResource>().get(&Sprite::Grass),
     );
 
     let mut transform = Transform::default();
