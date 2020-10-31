@@ -1,11 +1,15 @@
 use crate::resources::GameStatus;
 use crate::resources::SpriteResource;
 use crate::states::ui::HomeState;
+use amethyst::assets::AssetStorage;
 use amethyst::assets::Completion;
 use amethyst::assets::ProgressCounter;
 use amethyst::prelude::*;
+use amethyst::renderer::sprite::SpriteSheet;
 use amethyst::ui::UiCreator;
 use amethyst::window::Window;
+
+const PIXELS_PER_METER: f32 = 32.0;
 
 pub struct StartupState {
     progress: ProgressCounter,
@@ -37,16 +41,9 @@ impl SimpleState for StartupState {
                 return Trans::None;
             }
             Completion::Complete => {
-                let window = data.world.read_resource::<Window>();
-
-                #[allow(clippy::never_loop)]
-                for monitor in window.get_available_monitors() {
-                    window.set_fullscreen(Some(monitor));
-                    break;
-                }
-
-                data.world.write_resource::<GameStatus>().is_loaded = true;
-
+                enable_fullscreen_mode(&data.world);
+                resize_sprites(&mut data.world);
+                complete_startup(&mut data.world);
                 return Trans::Switch(Box::new(HomeState::new(true)));
             }
             Completion::Failed => {
@@ -55,4 +52,35 @@ impl SimpleState for StartupState {
             }
         }
     }
+}
+
+fn enable_fullscreen_mode(world: &World) {
+    let window = world.read_resource::<Window>();
+
+    #[allow(clippy::never_loop)]
+    for monitor in window.get_available_monitors() {
+        window.set_fullscreen(Some(monitor));
+        break;
+    }
+}
+
+fn resize_sprites(world: &mut World) {
+    let mut sprite_sheets = world.write_resource::<AssetStorage<SpriteSheet>>();
+
+    for handle in world.write_resource::<SpriteResource>().data.values() {
+        if let Some(sprite_sheet) = sprite_sheets.get_mut(handle) {
+            for sprite in sprite_sheet.sprites.iter_mut() {
+                sprite.width /= PIXELS_PER_METER;
+                sprite.height /= PIXELS_PER_METER;
+
+                for offset in sprite.offsets.iter_mut() {
+                    *offset /= PIXELS_PER_METER;
+                }
+            }
+        }
+    }
+}
+
+fn complete_startup(world: &mut World) {
+    world.write_resource::<GameStatus>().is_loaded = true;
 }

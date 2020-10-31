@@ -6,7 +6,7 @@ use amethyst::tiles::Tile;
 pub struct Terrain;
 
 impl Terrain {
-    pub const SIZE: u32 = 128;
+    pub const SIZE: u32 = 4;
     pub const SIZE_HALF: f32 = Self::SIZE as f32 / 2.0;
     pub const QUANTITY: u32 = 5;
 }

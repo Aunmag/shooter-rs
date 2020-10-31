@@ -8,7 +8,7 @@ use amethyst::ecs::prelude::WriteStorage;
 use amethyst::renderer::Camera;
 use amethyst::window::ScreenDimensions;
 
-const VIEW_DISTANCE: f32 = 475.0;
+const VIEW_DISTANCE: f32 = 15.0;
 const OFFSET_RATIO: f32 = 0.25;
 
 #[derive(SystemDesc)]
