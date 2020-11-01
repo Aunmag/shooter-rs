@@ -1,6 +1,5 @@
 use crate::components::Actor;
 use crate::components::Player;
-use crate::components::TransformSync;
 use crate::input;
 use crate::input::AxisBinding;
 use crate::input::CustomBindingTypes;
@@ -26,20 +25,10 @@ impl<'a> System<'a> for PlayerSystem {
         Read<'a, Time>,
         WriteStorage<'a, Player>,
         WriteStorage<'a, Transform>,
-        WriteStorage<'a, TransformSync>,
     );
 
-    fn run(
-        &mut self,
-        (input, time, mut players, mut transforms, mut transforms_sync): Self::SystemData,
-    ) {
-        for (player, transform, transform_sync) in (
-            &mut players,
-            &mut transforms,
-            (&mut transforms_sync).maybe(),
-        )
-            .join()
-        {
+    fn run(&mut self, (input, time, mut players, mut transforms): Self::SystemData) {
+        for (player, transform) in (&mut players, &mut transforms).join() {
             let rotation = input::take_mouse_delta() as f32 * ROTATION_SENSITIVITY;
 
             transform.rotate_2d(rotation);
@@ -54,12 +43,6 @@ impl<'a> System<'a> for PlayerSystem {
                 * time.delta_seconds();
 
             transform.prepend_translation(movement * Actor::MOVEMENT_VELOCITY);
-
-            if let Some(transform_sync) = transform_sync {
-                transform_sync.target_x += movement.x * Actor::MOVEMENT_VELOCITY;
-                transform_sync.target_y += movement.y * Actor::MOVEMENT_VELOCITY;
-                transform_sync.target_angle = transform.euler_angles().2; // for player set angle as is
-            }
 
             player
                 .accumulated_input

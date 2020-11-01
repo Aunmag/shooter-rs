@@ -1,7 +1,7 @@
 use crate::components::Actor;
+use crate::components::Interpolation;
 use crate::components::Player;
 use crate::components::Terrain;
-use crate::components::TransformSync;
 use crate::data::LAYER_ACTOR;
 use crate::data::LAYER_ACTOR_PLAYER;
 use crate::data::LAYER_CAMERA;
@@ -49,7 +49,7 @@ pub fn create_actor(
         .with(Parent { entity: root })
         .with(Actor)
         .with(transform)
-        .with(TransformSync::new(x, y, angle));
+        .with(Interpolation::new());
 
     if let Some(renderer) = renderer.take() {
         builder = builder.with(renderer);

@@ -1,7 +1,6 @@
+use crate::components::Interpolation;
 use crate::components::Player;
-use crate::components::TransformSync;
 use crate::systems::net::input_sync::INTERVAL as INPUT_SYNC_INTERVAL;
-use crate::utils::math;
 use amethyst::core::timing::Time;
 use amethyst::core::transform::Transform;
 use amethyst::derive::SystemDesc;
@@ -21,41 +20,36 @@ impl<'a> System<'a> for InterpolationSystem {
     type SystemData = (
         Read<'a, Time>,
         ReadStorage<'a, Player>,
-        ReadStorage<'a, TransformSync>,
+        WriteStorage<'a, Interpolation>,
         WriteStorage<'a, Transform>,
     );
 
-    fn run(&mut self, (time, players, transforms_sync, mut transforms): Self::SystemData) {
+    fn run(&mut self, (time, players, mut interpolations, mut transforms): Self::SystemData) {
         // TODO: Use float constant in future
-        let factor =
+        let mut factor =
             time.delta_seconds() / (INTERPOLATION_FACTOR * INPUT_SYNC_INTERVAL.as_secs_f32());
 
-        for (player, transform, transform_sync) in (
-            (&players).maybe(),
-            &mut transforms,
-            &transforms_sync,
-        )
-            .join()
-        {
-            let translation = transform.translation_mut();
-            translation.x = interpolate(translation.x, transform_sync.target_x, factor);
-            translation.y = interpolate(translation.y, transform_sync.target_y, factor);
+        // TODO: Use clamp method in future
+        if factor > 1.0 {
+            factor = 1.0;
+        } else if factor < 0.0 {
+            factor = 0.0;
+        }
+
+        let query = (&mut transforms, &mut interpolations, (&players).maybe()).join();
+
+        for (transform, interpolation, player) in query {
+            transform.prepend_translation_x(interpolation.offset_x * factor);
+            transform.prepend_translation_y(interpolation.offset_y * factor);
 
             if player.is_none() {
-                transform.set_rotation_2d(interpolate_angle(
-                    transform.euler_angles().2,
-                    transform_sync.target_angle,
-                    factor,
-                ));
+                transform.rotate_2d(interpolation.offset_angle * factor);
             }
+
+            let negative_factor = 1.0 - factor;
+            interpolation.offset_x *= negative_factor;
+            interpolation.offset_y *= negative_factor;
+            interpolation.offset_angle *= negative_factor;
         }
     }
-}
-
-fn interpolate(current: f32, target: f32, factor: f32) -> f32 {
-    return current + (target - current) * factor;
-}
-
-fn interpolate_angle(current: f32, target: f32, factor: f32) -> f32 {
-    return current + math::get_radians_difference(current, target) * factor;
 }

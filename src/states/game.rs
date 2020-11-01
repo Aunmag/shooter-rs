@@ -1,5 +1,5 @@
 use crate::components::Actor;
-use crate::components::TransformSync;
+use crate::components::Interpolation;
 use crate::input;
 use crate::resources::EntityIndexMap;
 use crate::resources::GameTask;
@@ -19,6 +19,7 @@ use crate::systems::PlayerSystem;
 use crate::systems::TerrainSystem;
 use crate::utils;
 use crate::utils::TakeContent;
+use amethyst::core::transform::Transform;
 use amethyst::core::ArcThreadPool;
 use amethyst::ecs::prelude::Join;
 use amethyst::ecs::prelude::World;
@@ -30,11 +31,11 @@ use amethyst::prelude::*;
 use amethyst::winit::DeviceEvent;
 use amethyst::winit::Event;
 use amethyst::winit::VirtualKeyCode;
+use std::f32::consts::TAU;
 use std::net::SocketAddr;
 use std::sync::Arc;
-use utils::math;
 
-const MAX_TRANSFORM_SYNC_OFFSET: f32 = 4.0; // TODO: Tweak
+const MAX_PLAYER_OFFSET: f32 = 0.25;
 
 pub struct GameState<'a, 'b> {
     game_type: GameType,
@@ -103,6 +104,7 @@ impl GameState<'_, '_> {
     #[allow(clippy::unused_self)]
     fn init_resources(&self, world: &mut World) {
         world.register::<Actor>();
+        world.register::<Interpolation>();
         world.insert(EntityIndexMap::new());
         world.insert(GameTaskResource::new());
         world.insert(MessageResource::new());
@@ -130,6 +132,39 @@ impl GameState<'_, '_> {
         }
 
         utils::world::create_terrain(world, root);
+    }
+
+    fn sync_transform(&self, world: &mut World, entity: Entity, x: f32, y: f32, angle: f32) {
+        let is_player = self.is_player_actor(entity);
+
+        if let (Some(transform), Some(interpolation)) = (
+            world.read_storage::<Transform>().get(entity),
+            world.write_storage::<Interpolation>().get_mut(entity),
+        ) {
+            let offset_x = x - (transform.translation().x + interpolation.offset_x);
+            let offset_y = y - (transform.translation().y + interpolation.offset_y);
+
+            if !is_player || !utils::math::are_closer_than(
+                offset_x,
+                offset_y,
+                0.0,
+                0.0,
+                MAX_PLAYER_OFFSET,
+            ) {
+                interpolation.offset_x += offset_x;
+                interpolation.offset_y += offset_y;
+                interpolation.offset_angle = utils::math::get_radians_difference(
+                    angle,
+                    transform.euler_angles().2,
+                );
+            }
+        }
+
+        if is_player {
+            if let Some(ghost) = self.player_ghost {
+                self.sync_transform(world, ghost, x, y, angle);
+            }
+        }
     }
 
     fn on_task_player_connect(&self, world: &mut World, address: SocketAddr) {
@@ -163,9 +198,10 @@ impl GameState<'_, '_> {
 
         let id_map = world.read_resource::<EntityIndexMap>();
 
-        for (entity, transform, _) in (
+        for (entity, transform, interpolation, _) in (
             &world.entities(),
-            &world.read_storage::<TransformSync>(),
+            &world.read_storage::<Transform>(),
+            &world.read_storage::<Interpolation>(),
             &world.read_storage::<Actor>(),
         )
             .join()
@@ -176,9 +212,9 @@ impl GameState<'_, '_> {
                     Message::ActorSpawn {
                         id: 0,
                         public_id,
-                        x: transform.target_x,
-                        y: transform.target_y,
-                        angle: transform.target_angle,
+                        x: transform.translation().x + interpolation.offset_x,
+                        y: transform.translation().y + interpolation.offset_y,
+                        angle: (transform.euler_angles().2 + interpolation.offset_angle) % TAU,
                     },
                 ));
             }
@@ -228,10 +264,18 @@ impl GameState<'_, '_> {
             }
 
             if let Some(entity) = entity_to_update {
-                if let Some(transform) = world.write_storage::<TransformSync>().get_mut(entity) {
-                    transform.target_x += move_x * Actor::MOVEMENT_VELOCITY;
-                    transform.target_y += move_y * Actor::MOVEMENT_VELOCITY;
-                    transform.target_angle = angle;
+                let mut interpolations = world.write_storage::<Interpolation>();
+
+                if let Some(interpolation) = interpolations.get_mut(entity) {
+                    interpolation.offset_x += move_x * Actor::MOVEMENT_VELOCITY;
+                    interpolation.offset_y += move_y * Actor::MOVEMENT_VELOCITY;
+                    interpolation.offset_angle = world
+                        .read_storage::<Transform>()
+                        .get(entity)
+                        .map_or(
+                            0.0,
+                            |t| utils::math::get_radians_difference(angle, t.euler_angles().2),
+                        );
                 }
             }
         }
@@ -239,31 +283,7 @@ impl GameState<'_, '_> {
 
     fn on_task_transform_sync(&self, world: &mut World, id: u16, x: f32, y: f32, angle: f32) {
         if let Some(entity) = EntityIndexMap::fetch_entity_by_public_id(world, id) {
-            let is_player = self.is_player_actor(entity);
-
-            if let Some(transform) = world.write_storage::<TransformSync>().get_mut(entity) {
-                if !is_player || !math::are_close(
-                    x,
-                    y,
-                    transform.target_x,
-                    transform.target_y,
-                    MAX_TRANSFORM_SYNC_OFFSET,
-                ) {
-                    transform.target_x = x;
-                    transform.target_y = y;
-                    transform.target_angle = angle;
-                }
-            }
-
-            if is_player {
-                if let Some(ghost) = self.player_ghost {
-                    if let Some(transform) = world.write_storage::<TransformSync>().get_mut(ghost) {
-                        transform.target_x = x;
-                        transform.target_y = y;
-                        transform.target_angle = angle;
-                    }
-                }
-            }
+            self.sync_transform(world, entity, x, y, angle);
         }
     }
 
