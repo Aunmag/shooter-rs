@@ -1,8 +1,9 @@
+use bincode::Options;
 use serde::Deserialize;
 use serde::Serialize;
 use std::net::SocketAddr;
 
-pub const MESSAGE_SIZE_MAX: usize = 20;
+pub const MESSAGE_SIZE_MAX: usize = 17;
 
 pub type MessageResource = Vec<(MessageReceiver, Message)>;
 
@@ -37,7 +38,6 @@ pub enum Message {
         public_id: u16,
         x: f32,
         y: f32,
-        angle: f32,
     },
 }
 
@@ -51,11 +51,16 @@ impl Message {
     pub fn encode(&self) -> Vec<u8> {
         // I use unwrap here since I suppose there's nothing to worry about
         #[allow(clippy::unwrap_used)]
-        return bincode::serialize(self).unwrap();
+        return bincode::DefaultOptions::new()
+            .with_varint_encoding()
+            .serialize(self)
+            .unwrap();
     }
 
     pub fn decode(encoded: &[u8]) -> Result<Self, bincode::Error> {
-        return bincode::deserialize_from(encoded);
+        return bincode::DefaultOptions::new()
+            .with_varint_encoding()
+            .deserialize(encoded);
     }
 
     pub fn set_id(&mut self, id_new: u16) {

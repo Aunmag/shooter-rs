@@ -134,7 +134,7 @@ impl GameState<'_, '_> {
         utils::world::create_terrain(world, root);
     }
 
-    fn sync_transform(&self, world: &mut World, entity: Entity, x: f32, y: f32, angle: f32) {
+    fn sync_transform(&self, world: &mut World, entity: Entity, x: f32, y: f32) {
         let is_player = self.is_player_actor(entity);
 
         if let (Some(transform), Some(interpolation)) = (
@@ -153,16 +153,12 @@ impl GameState<'_, '_> {
             ) {
                 interpolation.offset_x += offset_x;
                 interpolation.offset_y += offset_y;
-                interpolation.offset_angle = utils::math::get_radians_difference(
-                    angle,
-                    transform.euler_angles().2,
-                );
             }
         }
 
         if is_player {
             if let Some(ghost) = self.player_ghost {
-                self.sync_transform(world, ghost, x, y, angle);
+                self.sync_transform(world, ghost, x, y);
             }
         }
     }
@@ -281,9 +277,9 @@ impl GameState<'_, '_> {
         }
     }
 
-    fn on_task_transform_sync(&self, world: &mut World, id: u16, x: f32, y: f32, angle: f32) {
+    fn on_task_transform_sync(&self, world: &mut World, id: u16, x: f32, y: f32) {
         if let Some(entity) = EntityIndexMap::fetch_entity_by_public_id(world, id) {
-            self.sync_transform(world, entity, x, y, angle);
+            self.sync_transform(world, entity, x, y);
         }
     }
 
@@ -353,13 +349,8 @@ impl<'a, 'b> SimpleState for GameState<'a, 'b> {
                 } => {
                     self.on_task_actor_action(data.world, public_id, move_x, move_y, angle);
                 }
-                GameTask::TransformSync {
-                    public_id,
-                    x,
-                    y,
-                    angle,
-                } => {
-                    self.on_task_transform_sync(data.world, public_id, x, y, angle);
+                GameTask::TransformSync { public_id, x, y } => {
+                    self.on_task_transform_sync(data.world, public_id, x, y);
                 }
             }
         }

@@ -12,7 +12,6 @@ use amethyst::ecs::prelude::SystemData;
 use amethyst::ecs::Entities;
 use amethyst::ecs::ReadExpect;
 use amethyst::ecs::Write;
-use std::f32::consts::TAU;
 use std::time::Duration;
 use std::time::Instant;
 
@@ -59,7 +58,6 @@ impl<'a> System<'a> for TransformSyncSystem {
                         public_id,
                         x: transform.translation().x + interpolation.offset_x,
                         y: transform.translation().y + interpolation.offset_y,
-                        angle: (transform.euler_angles().2 + interpolation.offset_angle) % TAU,
                     },
                 ));
             }

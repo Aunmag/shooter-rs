@@ -21,6 +21,5 @@ pub enum GameTask {
         public_id: u16,
         x: f32,
         y: f32,
-        angle: f32,
     },
 }

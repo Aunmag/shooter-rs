@@ -106,12 +106,17 @@ impl NetworkSystem {
             let mut buffer = [0; MESSAGE_SIZE_MAX];
 
             match self.socket.recv_from(&mut buffer) {
-                Ok((_, address)) => {
+                Ok((message_length, address)) => {
                     if !self.connections.contains_key(&address) {
                         log::info!("{} connected", address);
                     }
 
-                    match Message::decode(&buffer) {
+                    let message = buffer
+                        .get(..message_length)
+                        .ok_or_else(|| "Wrong message length".to_string())
+                        .and_then(|m| Message::decode(m).map_err(|e| format!("{}", e)));
+
+                    match message {
                         Ok(message) => {
                             let connection = self
                                 .connections
@@ -258,18 +263,9 @@ impl NetworkSystem {
                 });
             }
             Message::TransformSync {
-                public_id,
-                x,
-                y,
-                angle,
-                ..
+                public_id, x, y, ..
             } => {
-                tasks.push(GameTask::TransformSync {
-                    public_id,
-                    x,
-                    y,
-                    angle,
-                });
+                tasks.push(GameTask::TransformSync { public_id, x, y });
             }
             _ => {}
         }
