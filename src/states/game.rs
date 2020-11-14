@@ -1,12 +1,12 @@
 use crate::components::Actor;
 use crate::components::Interpolation;
-use crate::input;
 use crate::resources::EntityIndexMap;
 use crate::resources::GameTask;
 use crate::resources::GameTaskResource;
 use crate::resources::Message;
 use crate::resources::MessageReceiver;
 use crate::resources::MessageResource;
+use crate::resources::MouseInput;
 use crate::resources::NetworkTask;
 use crate::resources::NetworkTaskResource;
 use crate::states::ui::HomeState;
@@ -132,6 +132,13 @@ impl GameState<'_, '_> {
         }
 
         utils::world::create_terrain(world, root);
+    }
+
+    #[allow(clippy::unused_self)]
+    fn reset_input(&self, world: &World) {
+        let mut mouse_input = world.write_resource::<MouseInput>();
+        mouse_input.delta_x = 0.0;
+        mouse_input.delta_y = 0.0;
     }
 
     fn sync_transform(&self, world: &mut World, entity: Entity, x: f32, y: f32) {
@@ -302,7 +309,7 @@ impl<'a, 'b> SimpleState for GameState<'a, 'b> {
         self.init_dispatcher(&mut data.world);
         self.init_resources(&mut data.world);
         self.init_world_entities(&mut data.world);
-        input::reset_mouse_delta();
+        self.reset_input(&data.world);
         utils::ui::set_cursor_visibility(&mut data.world, false);
     }
 
@@ -355,17 +362,24 @@ impl<'a, 'b> SimpleState for GameState<'a, 'b> {
             }
         }
 
+        self.reset_input(&data.world);
+
         return Trans::None;
     }
 
-    fn handle_event(&mut self, _: StateData<GameData>, event: StateEvent) -> SimpleTrans {
+    fn handle_event(&mut self, data: StateData<GameData>, event: StateEvent) -> SimpleTrans {
         if let StateEvent::Window(event) = event {
             if let Event::DeviceEvent {
                 event: DeviceEvent::MouseMotion { delta },
                 ..
             } = event {
+                let mut mouse_input = data.world.write_resource::<MouseInput>();
+
                 #[allow(clippy::cast_possible_truncation)]
-                input::add_mouse_delta(delta.0 as i16);
+                {
+                    mouse_input.delta_x += delta.0 as f32;
+                    mouse_input.delta_y += delta.1 as f32;
+                }
             }
 
             if is_key_down(&event, VirtualKeyCode::Escape) {

@@ -1,8 +1,8 @@
 use crate::components::Actor;
 use crate::components::Player;
-use crate::input;
 use crate::input::AxisBinding;
 use crate::input::CustomBindingTypes;
+use crate::resources::MouseInput;
 use amethyst::core::math::Vector3;
 use amethyst::core::timing::Time;
 use amethyst::core::transform::Transform;
@@ -22,15 +22,16 @@ pub struct PlayerSystem;
 impl<'a> System<'a> for PlayerSystem {
     type SystemData = (
         Read<'a, InputHandler<CustomBindingTypes>>,
+        Read<'a, MouseInput>,
         Read<'a, Time>,
         WriteStorage<'a, Player>,
         WriteStorage<'a, Transform>,
     );
 
-    fn run(&mut self, (input, time, mut players, mut transforms): Self::SystemData) {
-        for (player, transform) in (&mut players, &mut transforms).join() {
-            let rotation = input::take_mouse_delta() as f32 * ROTATION_SENSITIVITY;
+    fn run(&mut self, (input, input_mouse, time, mut players, mut transforms): Self::SystemData) {
+        let rotation = input_mouse.delta_x * ROTATION_SENSITIVITY;
 
+        for (player, transform) in (&mut players, &mut transforms).join() {
             transform.rotate_2d(rotation);
 
             let (movement_x, movement_y) = normalize_movement_input(
