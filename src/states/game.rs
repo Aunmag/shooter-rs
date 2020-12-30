@@ -19,6 +19,7 @@ use crate::systems::PlayerSystem;
 use crate::systems::TerrainSystem;
 use crate::utils;
 use crate::utils::TakeContent;
+use amethyst::controls::HideCursor;
 use amethyst::core::transform::Transform;
 use amethyst::core::ArcThreadPool;
 use amethyst::ecs::prelude::Join;
@@ -29,8 +30,11 @@ use amethyst::ecs::Entity;
 use amethyst::input::is_key_down;
 use amethyst::prelude::*;
 use amethyst::winit::DeviceEvent;
+use amethyst::winit::ElementState;
 use amethyst::winit::Event;
+use amethyst::winit::MouseButton;
 use amethyst::winit::VirtualKeyCode;
+use amethyst::winit::WindowEvent;
 use std::f32::consts::TAU;
 use std::net::SocketAddr;
 use std::sync::Arc;
@@ -369,21 +373,42 @@ impl<'a, 'b> SimpleState for GameState<'a, 'b> {
 
     fn handle_event(&mut self, data: StateData<GameData>, event: StateEvent) -> SimpleTrans {
         if let StateEvent::Window(event) = event {
-            if let Event::DeviceEvent {
-                event: DeviceEvent::MouseMotion { delta },
-                ..
-            } = event {
-                let mut mouse_input = data.world.write_resource::<MouseInput>();
+            let mut cursor = data.world.write_resource::<HideCursor>();
 
-                #[allow(clippy::cast_possible_truncation)]
-                {
-                    mouse_input.delta_x += delta.0 as f32;
-                    mouse_input.delta_y += delta.1 as f32;
+            match event {
+                Event::DeviceEvent {
+                    event: DeviceEvent::MouseMotion { delta },
+                    ..
+                } => {
+                    if cursor.hide {
+                        let mut mouse_input = data.world.write_resource::<MouseInput>();
+
+                        #[allow(clippy::cast_possible_truncation)]
+                        {
+                            mouse_input.delta_x += delta.0 as f32;
+                            mouse_input.delta_y += delta.1 as f32;
+                        }
+                    }
                 }
+                Event::WindowEvent {
+                    event: WindowEvent::MouseInput {
+                        button: MouseButton::Left,
+                        state: ElementState::Pressed,
+                        ..
+                    },
+                    ..
+                } => {
+                    cursor.hide = true;
+                }
+                _ => {}
             }
 
             if is_key_down(&event, VirtualKeyCode::Escape) {
                 return Trans::Push(Box::new(HomeState::new(false)));
+            }
+
+            if cursor.hide && is_key_down(&event, VirtualKeyCode::Tab) {
+                cursor.hide = false;
             }
         }
 
