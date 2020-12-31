@@ -1,10 +1,10 @@
 (
     axes: {
-        MoveForward: Emulated(
+        MovementForward: Emulated(
             pos: Key(W),
             neg: Key(S),
         ),
-        MoveAside: Emulated(
+        MovementAside: Emulated(
             pos: Key(D),
             neg: Key(A),
         ),

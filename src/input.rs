@@ -7,8 +7,8 @@ use std::fmt::Result as FmtResult;
 
 #[derive(Clone, Debug, Hash, PartialEq, Eq, Serialize, Deserialize)]
 pub enum AxisBinding {
-    MoveForward,
-    MoveAside,
+    MovementForward,
+    MovementAside,
 }
 
 impl Display for AxisBinding {

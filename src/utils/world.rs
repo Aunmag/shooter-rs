@@ -2,6 +2,7 @@ use crate::components::Actor;
 use crate::components::Interpolation;
 use crate::components::Player;
 use crate::components::Terrain;
+use crate::components::TransformSync;
 use crate::data::LAYER_ACTOR;
 use crate::data::LAYER_ACTOR_PLAYER;
 use crate::data::LAYER_CAMERA;
@@ -9,6 +10,7 @@ use crate::data::LAYER_TERRAIN;
 use crate::resources::EntityIndexMap;
 use crate::resources::Sprite;
 use crate::resources::SpriteResource;
+use crate::states::GameType;
 use amethyst::core::math::Vector3;
 use amethyst::core::transform::Transform;
 use amethyst::core::Parent;
@@ -32,12 +34,13 @@ pub fn create_actor(
     public_id: Option<u16>,
     x: f32,
     y: f32,
-    angle: f32,
+    direction: f32,
     is_ghost: bool,
+    game_type: &GameType,
 ) -> Entity {
     let mut transform = Transform::default();
     transform.set_translation_xyz(x, y, LAYER_ACTOR);
-    transform.set_rotation_2d(angle);
+    transform.set_rotation_2d(direction);
 
     let mut renderer = world
         .read_resource::<SpriteResource>()
@@ -47,9 +50,19 @@ pub fn create_actor(
     let mut builder = world
         .create_entity()
         .with(Parent { entity: root })
-        .with(Actor)
-        .with(transform)
-        .with(Interpolation::new());
+        .with(Actor::new())
+        .with(transform);
+
+    match *game_type {
+        GameType::Single => {}
+        GameType::Join(..) => {
+            builder = builder.with(Interpolation::new());
+        }
+        GameType::Host(..) => {
+            builder = builder.with(Interpolation::new());
+            builder = builder.with(TransformSync);
+        }
+    }
 
     if let Some(renderer) = renderer.take() {
         builder = builder.with(renderer);
@@ -76,7 +89,7 @@ pub fn grant_played_actor(
     world: &mut World,
     root: Entity,
     actor: Entity,
-    create_ghost: bool,
+    game_type: &GameType,
 ) -> Option<Entity> {
     // TODO: Remove old player entity
     // TODO: Reset layer for old transform
@@ -84,7 +97,7 @@ pub fn grant_played_actor(
 
     world
         .write_storage::<Player>()
-        .insert(actor, Player::new())
+        .insert(actor, Player)
         .unwrap(); // TODO: No unwrap
 
     if let Some(transform) = world.write_storage::<Transform>().get_mut(actor) {
@@ -93,9 +106,11 @@ pub fn grant_played_actor(
 
     create_camera(world, actor);
 
-    if create_ghost {
+    if let GameType::Join(..) = *game_type {
         // TODO: Maybe make ghost as player's child
-        return Some(create_actor(world, root, None, 0.0, 0.0, 0.0, true));
+        return Some(create_actor(
+            world, root, None, 0.0, 0.0, 0.0, true, game_type,
+        ));
     } else {
         return None;
     }

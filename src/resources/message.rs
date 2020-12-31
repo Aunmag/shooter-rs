@@ -3,11 +3,11 @@ use serde::Deserialize;
 use serde::Serialize;
 use std::net::SocketAddr;
 
-pub const MESSAGE_SIZE_MAX: usize = 17;
+pub const MESSAGE_SIZE_MAX: usize = std::mem::size_of::<Message>();
 
 pub type MessageResource = Vec<(MessageReceiver, Message)>;
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug)]
 pub enum Message {
     Response {
         message_id: u16,
@@ -15,29 +15,32 @@ pub enum Message {
     Greeting {
         id: u16,
     },
+    ClientInput {
+        id: u16,
+        actions: u8,
+        direction: f32,
+    },
+    ClientInputDirection {
+        id: u16,
+        direction: f32,
+    },
     ActorSpawn {
         id: u16,
         public_id: u16,
         x: f32,
         y: f32,
-        angle: f32,
+        direction: f32,
     },
     ActorGrant {
         id: u16,
         public_id: u16,
-    },
-    ActorAction {
-        id: u16,
-        public_id: u16,
-        move_x: f32,
-        move_y: f32,
-        angle: f32,
     },
     TransformSync {
         id: u16,
         public_id: u16,
         x: f32,
         y: f32,
+        direction: f32,
     },
 }
 
@@ -70,13 +73,16 @@ impl Message {
             Self::Greeting { ref mut id } => {
                 *id = id_new;
             }
+            Self::ClientInput { ref mut id, .. } => {
+                *id = id_new;
+            }
+            Self::ClientInputDirection { ref mut id, .. } => {
+                *id = id_new;
+            }
             Self::ActorSpawn { ref mut id, .. } => {
                 *id = id_new;
             }
             Self::ActorGrant { ref mut id, .. } => {
-                *id = id_new;
-            }
-            Self::ActorAction { ref mut id, .. } => {
                 *id = id_new;
             }
             Self::TransformSync { ref mut id, .. } => {
@@ -90,9 +96,10 @@ impl Message {
         return match *self {
             Self::Response { .. } => None,
             Self::Greeting { id } => Some(id),
+            Self::ClientInput { id, .. } => Some(id),
+            Self::ClientInputDirection { id, .. } => Some(id),
             Self::ActorSpawn { id, .. } => Some(id),
             Self::ActorGrant { id, .. } => Some(id),
-            Self::ActorAction { id, .. } => Some(id),
             Self::TransformSync { id, .. } => Some(id),
         };
     }

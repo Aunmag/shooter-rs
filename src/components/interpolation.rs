@@ -4,7 +4,7 @@ use amethyst::ecs::VecStorage;
 pub struct Interpolation {
     pub offset_x: f32,
     pub offset_y: f32,
-    pub offset_angle: f32,
+    pub offset_direction: f32,
 }
 
 impl Interpolation {
@@ -12,7 +12,7 @@ impl Interpolation {
         return Self {
             offset_x: 0.0,
             offset_y: 0.0,
-            offset_angle: 0.0,
+            offset_direction: 0.0,
         };
     }
 }

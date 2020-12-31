@@ -1,4 +1,5 @@
 use crate::components::Actor;
+use crate::components::ActorActions;
 use crate::components::Interpolation;
 use crate::resources::EntityIndexMap;
 use crate::resources::GameTask;
@@ -10,10 +11,11 @@ use crate::resources::MouseInput;
 use crate::resources::NetworkTask;
 use crate::resources::NetworkTaskResource;
 use crate::states::ui::HomeState;
-use crate::systems::net::InputSyncSystem;
+use crate::systems::net::InputSendSystem;
 use crate::systems::net::InterpolationSystem;
 use crate::systems::net::NetworkSystem;
 use crate::systems::net::TransformSyncSystem;
+use crate::systems::ActorSystem;
 use crate::systems::CameraSystem;
 use crate::systems::PlayerSystem;
 use crate::systems::TerrainSystem;
@@ -35,7 +37,6 @@ use amethyst::winit::Event;
 use amethyst::winit::MouseButton;
 use amethyst::winit::VirtualKeyCode;
 use amethyst::winit::WindowEvent;
-use std::f32::consts::TAU;
 use std::net::SocketAddr;
 use std::sync::Arc;
 
@@ -69,6 +70,7 @@ impl GameState<'_, '_> {
     fn init_dispatcher(&mut self, world: &mut World) {
         let mut builder = DispatcherBuilder::new();
         builder.add(PlayerSystem, "Player", &[]);
+        builder.add(ActorSystem, "Actor", &["Player"]);
         builder.add(CameraSystem::new(), "Camera", &[]);
         builder.add(TerrainSystem, "Terrain", &[]);
 
@@ -76,21 +78,16 @@ impl GameState<'_, '_> {
         match self.game_type {
             GameType::Single => {}
             GameType::Join(address) => {
-                builder.add(InputSyncSystem::new(), "InputSync", &["Player"]);
+                builder.add(InputSendSystem::new(), "InputSend", &["Actor"]);
                 builder.add(
                     NetworkSystem::new_as_client(address).unwrap(),
                     "Network",
-                    &["InputSync"],
+                    &["InputSend"],
                 );
                 builder.add(InterpolationSystem, "Interpolation", &[]);
             }
             GameType::Host(port) => {
-                builder.add(InputSyncSystem::new(), "InputSync", &["Player"]);
-                builder.add(
-                    NetworkSystem::new_as_server(port).unwrap(),
-                    "Network",
-                    &["InputSync"],
-                );
+                builder.add(NetworkSystem::new_as_server(port).unwrap(), "Network", &[]);
                 builder.add(InterpolationSystem, "Interpolation", &[]);
                 builder.add(TransformSyncSystem::new(), "TransformSync", &[]);
             }
@@ -107,8 +104,6 @@ impl GameState<'_, '_> {
 
     #[allow(clippy::unused_self)]
     fn init_resources(&self, world: &mut World) {
-        world.register::<Actor>();
-        world.register::<Interpolation>();
         world.insert(EntityIndexMap::new());
         world.insert(GameTaskResource::new());
         world.insert(MessageResource::new());
@@ -129,7 +124,7 @@ impl GameState<'_, '_> {
                 public_id,
                 x: 0.0,
                 y: 0.0,
-                angle: 0.0,
+                direction: 0.0,
             });
 
             tasks.push(GameTask::ActorGrant(public_id));
@@ -145,7 +140,7 @@ impl GameState<'_, '_> {
         mouse_input.delta_y = 0.0;
     }
 
-    fn sync_transform(&self, world: &mut World, entity: Entity, x: f32, y: f32) {
+    fn sync_transform(&self, world: &mut World, entity: Entity, x: f32, y: f32, direction: f32) {
         let is_player = self.is_player_actor(entity);
 
         if let (Some(transform), Some(interpolation)) = (
@@ -164,12 +159,19 @@ impl GameState<'_, '_> {
             ) {
                 interpolation.offset_x += offset_x;
                 interpolation.offset_y += offset_y;
+
+                if !is_player {
+                    interpolation.offset_direction = utils::math::get_radians_difference(
+                        direction,
+                        transform.euler_angles().2,
+                    );
+                }
             }
         }
 
         if is_player {
             if let Some(ghost) = self.player_ghost {
-                self.sync_transform(world, ghost, x, y);
+                self.sync_transform(world, ghost, x, y, direction);
             }
         }
     }
@@ -184,7 +186,16 @@ impl GameState<'_, '_> {
             .write_resource::<EntityIndexMap>()
             .generate_public_id();
 
-        utils::world::create_actor(world, root, Some(public_id), 0.0, 0.0, 0.0, false);
+        utils::world::create_actor(
+            world,
+            root,
+            Some(public_id),
+            0.0,
+            0.0,
+            0.0,
+            false,
+            &self.game_type,
+        );
 
         let mut messages = world.write_resource::<MessageResource>();
 
@@ -195,7 +206,7 @@ impl GameState<'_, '_> {
                 public_id,
                 x: 0.0,
                 y: 0.0,
-                angle: 0.0,
+                direction: 0.0,
             },
         ));
 
@@ -205,10 +216,9 @@ impl GameState<'_, '_> {
 
         let id_map = world.read_resource::<EntityIndexMap>();
 
-        for (entity, transform, interpolation, _) in (
+        for (entity, transform, _) in (
             &world.entities(),
             &world.read_storage::<Transform>(),
-            &world.read_storage::<Interpolation>(),
             &world.read_storage::<Actor>(),
         )
             .join()
@@ -219,9 +229,9 @@ impl GameState<'_, '_> {
                     Message::ActorSpawn {
                         id: 0,
                         public_id,
-                        x: transform.translation().x + interpolation.offset_x,
-                        y: transform.translation().y + interpolation.offset_y,
-                        angle: (transform.euler_angles().2 + interpolation.offset_angle) % TAU,
+                        x: transform.translation().x,
+                        y: transform.translation().y,
+                        direction: transform.euler_angles().2,
                     },
                 ));
             }
@@ -233,9 +243,25 @@ impl GameState<'_, '_> {
         ));
     }
 
-    fn on_task_actor_spawn(&self, world: &mut World, public_id: u16, x: f32, y: f32, angle: f32) {
+    fn on_task_actor_spawn(
+        &self,
+        world: &mut World,
+        public_id: u16,
+        x: f32,
+        y: f32,
+        direction: f32,
+    ) {
         if let Some(root) = self.root {
-            utils::world::create_actor(world, root, Some(public_id), x, y, angle, false);
+            utils::world::create_actor(
+                world,
+                root,
+                Some(public_id),
+                x,
+                y,
+                direction,
+                false,
+                &self.game_type,
+            );
         }
     }
 
@@ -247,50 +273,58 @@ impl GameState<'_, '_> {
                     world,
                     root,
                     actor,
-                    !self.is_own_game(),
+                    &self.game_type,
                 );
             }
         }
     }
 
+    #[allow(clippy::unused_self)]
     fn on_task_actor_action(
         &self,
         world: &mut World,
         public_id: u16,
-        move_x: f32,
-        move_y: f32,
-        angle: f32,
+        actions: Option<ActorActions>,
+        direction: f32,
     ) {
         if let Some(entity) = EntityIndexMap::fetch_entity_by_public_id(world, public_id) {
-            let entity_to_update;
+            let mut is_walking = false;
 
-            if self.is_player_actor(entity) {
-                entity_to_update = self.player_ghost;
-            } else {
-                entity_to_update = Some(entity);
+            if let Some(actor) = world.write_storage::<Actor>().get_mut(entity) {
+                if let Some(actions) = actions {
+                    actor.actions = actions;
+                }
+
+                is_walking = !actor.actions.is_empty();
             }
 
-            if let Some(entity) = entity_to_update {
-                let mut interpolations = world.write_storage::<Interpolation>();
+            let mut transforms = world.write_storage::<Transform>();
+            let mut interpolations = world.write_storage::<Interpolation>();
+
+            if is_walking {
+                if let Some(transform) = transforms.get_mut(entity) {
+                    transform.set_rotation_2d(direction);
+                }
 
                 if let Some(interpolation) = interpolations.get_mut(entity) {
-                    interpolation.offset_x += move_x * Actor::MOVEMENT_VELOCITY;
-                    interpolation.offset_y += move_y * Actor::MOVEMENT_VELOCITY;
-                    interpolation.offset_angle = world
-                        .read_storage::<Transform>()
-                        .get(entity)
-                        .map_or(
-                            0.0,
-                            |t| utils::math::get_radians_difference(angle, t.euler_angles().2),
-                        );
+                    interpolation.offset_direction = 0.0;
+                }
+            } else if let Some(transform) = transforms.get_mut(entity) {
+                if let Some(interpolation) = interpolations.get_mut(entity) {
+                    interpolation.offset_direction = utils::math::get_radians_difference(
+                        direction,
+                        transform.euler_angles().2,
+                    );
+                } else {
+                    transform.set_rotation_2d(direction);
                 }
             }
         }
     }
 
-    fn on_task_transform_sync(&self, world: &mut World, id: u16, x: f32, y: f32) {
+    fn on_task_transform_sync(&self, world: &mut World, id: u16, x: f32, y: f32, direction: f32) {
         if let Some(entity) = EntityIndexMap::fetch_entity_by_public_id(world, id) {
-            self.sync_transform(world, entity, x, y);
+            self.sync_transform(world, entity, x, y, direction);
         }
     }
 
@@ -345,23 +379,33 @@ impl<'a, 'b> SimpleState for GameState<'a, 'b> {
                     public_id,
                     x,
                     y,
-                    angle,
+                    direction,
                 } => {
-                    self.on_task_actor_spawn(data.world, public_id, x, y, angle);
+                    self.on_task_actor_spawn(data.world, public_id, x, y, direction);
                 }
                 GameTask::ActorGrant(public_id) => {
                     self.on_task_actor_grant(data.world, public_id);
                 }
                 GameTask::ActorAction {
                     public_id,
-                    move_x,
-                    move_y,
-                    angle,
+                    actions,
+                    direction,
                 } => {
-                    self.on_task_actor_action(data.world, public_id, move_x, move_y, angle);
+                    self.on_task_actor_action(data.world, public_id, Some(actions), direction);
                 }
-                GameTask::TransformSync { public_id, x, y } => {
-                    self.on_task_transform_sync(data.world, public_id, x, y);
+                GameTask::ActorTurn {
+                    public_id,
+                    direction,
+                } => {
+                    self.on_task_actor_action(data.world, public_id, None, direction);
+                }
+                GameTask::TransformSync {
+                    public_id,
+                    x,
+                    y,
+                    direction,
+                } => {
+                    self.on_task_transform_sync(data.world, public_id, x, y, direction);
                 }
             }
         }

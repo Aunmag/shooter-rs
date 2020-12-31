@@ -18,6 +18,7 @@
     clippy::multiple_crate_versions,
     clippy::needless_return,
     clippy::shadow_unrelated,
+    clippy::too_many_arguments,
     clippy::type_complexity,
     clippy::wildcard_enum_match_arm,
 )]

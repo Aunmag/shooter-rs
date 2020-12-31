@@ -1,3 +1,4 @@
+use crate::components::ActorActions;
 use crate::resources::GameTask;
 use crate::resources::GameTaskResource;
 use crate::resources::Message;
@@ -177,14 +178,13 @@ impl NetworkSystem {
         tasks: &mut GameTaskResource,
     ) {
         if self.is_server {
-            self.on_message_as_server(&address, &message, public_id, tasks);
+            Self::on_message_as_server(&address, &message, public_id, tasks);
         } else {
-            self.on_message_as_client(&message, tasks);
+            Self::on_message_as_client(&message, tasks);
         }
     }
 
     fn on_message_as_server(
-        &mut self,
         address: &SocketAddr,
         message: &Message,
         public_id: Option<u16>,
@@ -194,30 +194,25 @@ impl NetworkSystem {
             Message::Greeting { .. } => {
                 tasks.push(GameTask::PlayerConnect(*address));
             }
-            Message::ActorAction {
-                move_x,
-                move_y,
-                angle,
-                ..
+            Message::ClientInput {
+                actions, direction, ..
             } => {
                 if let Some(public_id) = public_id {
                     tasks.push(GameTask::ActorAction {
                         public_id,
-                        move_x,
-                        move_y,
-                        angle,
+                        actions: ActorActions::from_bits_truncate(actions),
+                        direction,
                     });
-
-                    self.send(
-                        &MessageReceiver::Every,
-                        Message::ActorAction {
-                            id: 0,
-                            public_id,
-                            move_x,
-                            move_y,
-                            angle,
-                        },
-                    );
+                } else {
+                    // TODO: Kick
+                }
+            }
+            Message::ClientInputDirection { direction, .. } => {
+                if let Some(public_id) = public_id {
+                    tasks.push(GameTask::ActorTurn {
+                        public_id,
+                        direction,
+                    });
                 } else {
                     // TODO: Kick
                 }
@@ -228,44 +223,38 @@ impl NetworkSystem {
         }
     }
 
-    #[allow(clippy::unused_self)]
-    fn on_message_as_client(&self, message: &Message, tasks: &mut GameTaskResource) {
+    fn on_message_as_client(message: &Message, tasks: &mut GameTaskResource) {
         match *message {
             Message::ActorSpawn {
                 public_id,
                 x,
                 y,
-                angle,
+                direction,
                 ..
             } => {
                 tasks.push(GameTask::ActorSpawn {
                     public_id,
                     x,
                     y,
-                    angle,
+                    direction,
                 });
             }
             Message::ActorGrant { public_id, .. } => {
                 tasks.push(GameTask::ActorGrant(public_id));
             }
-            Message::ActorAction {
+            Message::TransformSync {
                 public_id,
-                move_x,
-                move_y,
-                angle,
+                x,
+                y,
+                direction,
                 ..
             } => {
-                tasks.push(GameTask::ActorAction {
+                tasks.push(GameTask::TransformSync {
                     public_id,
-                    move_x,
-                    move_y,
-                    angle,
+                    x,
+                    y,
+                    direction,
                 });
-            }
-            Message::TransformSync {
-                public_id, x, y, ..
-            } => {
-                tasks.push(GameTask::TransformSync { public_id, x, y });
             }
             _ => {}
         }

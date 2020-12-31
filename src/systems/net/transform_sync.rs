@@ -1,4 +1,5 @@
 use crate::components::Interpolation;
+use crate::components::TransformSync;
 use crate::resources::EntityIndexMap;
 use crate::resources::Message;
 use crate::resources::MessageReceiver;
@@ -12,20 +13,32 @@ use amethyst::ecs::prelude::SystemData;
 use amethyst::ecs::Entities;
 use amethyst::ecs::ReadExpect;
 use amethyst::ecs::Write;
+use std::collections::HashMap;
+use std::f32::consts::PI;
 use std::time::Duration;
 use std::time::Instant;
 
-const INTERVAL: Duration = Duration::from_secs(2); // TODO: Tweak
+#[allow(clippy::integer_division)]
+pub const INTERVAL: Duration = Duration::from_millis(1000 / 25);
 
 #[derive(SystemDesc)]
 pub struct TransformSyncSystem {
     last_sync: Instant,
+    cache: HashMap<u16, Cached>,
+}
+
+#[derive(PartialEq)]
+struct Cached {
+    x: f32,
+    y: f32,
+    direction: f32,
 }
 
 impl TransformSyncSystem {
     pub fn new() -> Self {
         return Self {
             last_sync: Instant::now(),
+            cache: HashMap::new(),
         };
     }
 }
@@ -36,31 +49,59 @@ impl<'a> System<'a> for TransformSyncSystem {
         ReadExpect<'a, EntityIndexMap>,
         ReadStorage<'a, Interpolation>,
         ReadStorage<'a, Transform>,
+        ReadStorage<'a, TransformSync>,
         Write<'a, MessageResource>,
     );
 
     fn run(
         &mut self,
-        (entities, id_map, interpolations, transforms, mut messages): Self::SystemData,
+        (entities, id_map, interpolation, transforms, transforms_sync, mut messages): Self::SystemData,
     ) {
         if self.last_sync.elapsed() < INTERVAL {
             return;
         }
 
-        self.last_sync = Instant::now();
+        let mut clean_cache = HashMap::with_capacity(self.cache.capacity());
 
-        for (entity, transform, interpolation) in (&entities, &transforms, &interpolations).join() {
+        for (entity, interpolation, transform, _) in (
+            &entities,
+            (&interpolation).maybe(),
+            &transforms,
+            &transforms_sync,
+        )
+            .join()
+        {
             if let Some(public_id) = id_map.to_public_id(entity.id()) {
-                messages.push((
-                    MessageReceiver::Every,
-                    Message::TransformSync {
-                        id: 0,
-                        public_id,
-                        x: transform.translation().x + interpolation.offset_x,
-                        y: transform.translation().y + interpolation.offset_y,
-                    },
-                ));
+                let mut current = Cached {
+                    x: transform.translation().x,
+                    y: transform.translation().y,
+                    direction: transform.euler_angles().2,
+                };
+
+                if let Some(interpolation) = interpolation {
+                    current.x += interpolation.offset_x;
+                    current.y += interpolation.offset_y;
+                    current.direction = (current.direction - interpolation.offset_direction) % PI;
+                }
+
+                if self.cache.get(&public_id).map_or(true, |c| c != &current) {
+                    messages.push((
+                        MessageReceiver::Every,
+                        Message::TransformSync {
+                            id: 0,
+                            public_id,
+                            x: current.x,
+                            y: current.y,
+                            direction: current.direction,
+                        },
+                    ));
+
+                    clean_cache.insert(public_id, current);
+                }
             }
         }
+
+        std::mem::swap(&mut self.cache, &mut clean_cache);
+        self.last_sync = Instant::now();
     }
 }

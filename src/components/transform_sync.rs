@@ -2,8 +2,8 @@ use amethyst::ecs::Component;
 use amethyst::ecs::NullStorage;
 
 #[derive(Default)]
-pub struct Player;
+pub struct TransformSync;
 
-impl Component for Player {
+impl Component for TransformSync {
     type Storage = NullStorage<Self>;
 }
