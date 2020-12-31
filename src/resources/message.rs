@@ -42,6 +42,14 @@ pub enum Message {
         y: f32,
         direction: f32,
     },
+    ProjectileSpawn {
+        id: u16,
+        x: f32,
+        y: f32,
+        velocity_x: f32,
+        velocity_y: f32,
+        acceleration_factor: f32,
+    },
 }
 
 pub enum MessageReceiver {
@@ -88,6 +96,9 @@ impl Message {
             Self::TransformSync { ref mut id, .. } => {
                 *id = id_new;
             }
+            Self::ProjectileSpawn { ref mut id, .. } => {
+                *id = id_new;
+            }
         }
     }
 
@@ -101,6 +112,7 @@ impl Message {
             Self::ActorSpawn { id, .. } => Some(id),
             Self::ActorGrant { id, .. } => Some(id),
             Self::TransformSync { id, .. } => Some(id),
+            Self::ProjectileSpawn { id, .. } => Some(id),
         };
     }
 

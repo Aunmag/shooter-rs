@@ -1,6 +1,9 @@
 use crate::components::Actor;
 use crate::components::ActorActions;
 use crate::components::Interpolation;
+use crate::components::Projectile;
+use crate::components::ProjectileConfig;
+use crate::components::Weapon;
 use crate::resources::EntityIndexMap;
 use crate::resources::GameTask;
 use crate::resources::GameTaskResource;
@@ -19,10 +22,14 @@ use crate::systems::ActorSystem;
 use crate::systems::AiSystem;
 use crate::systems::CameraSystem;
 use crate::systems::PlayerSystem;
+use crate::systems::ProjectileSystem;
 use crate::systems::TerrainSystem;
+use crate::systems::WeaponSystem;
 use crate::utils;
 use crate::utils::TakeContent;
 use amethyst::controls::HideCursor;
+use amethyst::core::math::Point2;
+use amethyst::core::timing::Time;
 use amethyst::core::transform::Transform;
 use amethyst::core::ArcThreadPool;
 use amethyst::ecs::prelude::Join;
@@ -32,6 +39,7 @@ use amethyst::ecs::DispatcherBuilder;
 use amethyst::ecs::Entity;
 use amethyst::input::is_key_down;
 use amethyst::prelude::*;
+use amethyst::renderer::debug_drawing::DebugLines;
 use amethyst::winit::DeviceEvent;
 use amethyst::winit::ElementState;
 use amethyst::winit::Event;
@@ -77,6 +85,7 @@ impl GameState<'_, '_> {
                 builder.add(AiSystem::new(), "Ai", &[]);
                 builder.add(PlayerSystem, "Player", &[]);
                 builder.add(ActorSystem, "Actor", &["Ai", "Player"]);
+                builder.add(WeaponSystem::new(), "Weapon", &["Actor"]);
             }
             GameType::Join(address) => {
                 builder.add(PlayerSystem, "Player", &[]);
@@ -93,12 +102,14 @@ impl GameState<'_, '_> {
                 builder.add(AiSystem::new(), "Ai", &[]);
                 builder.add(PlayerSystem, "Player", &[]);
                 builder.add(ActorSystem, "Actor", &["Ai", "Player"]);
+                builder.add(WeaponSystem::new(), "Weapon", &["Actor"]);
                 builder.add(NetworkSystem::new_as_server(port).unwrap(), "Network", &[]);
                 builder.add(InterpolationSystem, "Interpolation", &[]);
                 builder.add(TransformSyncSystem::new(), "TransformSync", &[]);
             }
         }
 
+        builder.add(ProjectileSystem, "Projectile", &[]);
         builder.add(CameraSystem::new(), "Camera", &[]);
         builder.add(TerrainSystem, "Terrain", &[]);
 
@@ -113,6 +124,8 @@ impl GameState<'_, '_> {
 
     #[allow(clippy::unused_self)]
     fn init_resources(&self, world: &mut World) {
+        world.register::<Weapon>();
+        world.insert(DebugLines::new());
         world.insert(EntityIndexMap::new());
         world.insert(GameTaskResource::new());
         world.insert(MessageResource::new());
@@ -359,6 +372,43 @@ impl GameState<'_, '_> {
         }
     }
 
+    fn on_task_projectile_spawn(
+        &self,
+        world: &mut World,
+        x: f32,
+        y: f32,
+        velocity_x: f32,
+        velocity_y: f32,
+        acceleration_factor: f32,
+    ) {
+        if let Some(root) = self.root {
+            if let GameType::Host(..) = self.game_type {
+                world.write_resource::<MessageResource>().push((
+                    MessageReceiver::Every,
+                    Message::ProjectileSpawn {
+                        id: 0,
+                        x,
+                        y,
+                        velocity_x,
+                        velocity_y,
+                        acceleration_factor,
+                    },
+                ));
+            }
+
+            let projectile = Projectile::new(
+                ProjectileConfig {
+                    acceleration_factor,
+                },
+                world.read_resource::<Time>().absolute_time(),
+                Point2::from([x, y]),
+                Point2::from([velocity_x, velocity_y]),
+            );
+
+            utils::world::create_projectile(world, root, projectile);
+        }
+    }
+
     fn is_player_actor(&self, entity: Entity) -> bool {
         return self.player_actor == Some(entity);
     }
@@ -440,6 +490,22 @@ impl<'a, 'b> SimpleState for GameState<'a, 'b> {
                     direction,
                 } => {
                     self.on_task_transform_sync(data.world, public_id, x, y, direction);
+                }
+                GameTask::ProjectileSpawn {
+                    x,
+                    y,
+                    velocity_x,
+                    velocity_y,
+                    acceleration_factor,
+                } => {
+                    self.on_task_projectile_spawn(
+                        data.world,
+                        x,
+                        y,
+                        velocity_x,
+                        velocity_y,
+                        acceleration_factor,
+                    );
                 }
             }
         }

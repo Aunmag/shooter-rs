@@ -2,8 +2,12 @@ use crate::components::Actor;
 use crate::components::Ai;
 use crate::components::Interpolation;
 use crate::components::Player;
+use crate::components::Projectile;
+use crate::components::ProjectileConfig;
 use crate::components::Terrain;
 use crate::components::TransformSync;
+use crate::components::Weapon;
+use crate::components::WeaponConfig;
 use crate::data::LAYER_ACTOR;
 use crate::data::LAYER_ACTOR_PLAYER;
 use crate::data::LAYER_CAMERA;
@@ -52,7 +56,14 @@ pub fn create_actor(
         .create_entity()
         .with(Parent { entity: root })
         .with(Actor::new())
-        .with(transform);
+        .with(transform)
+        .with(Weapon::new(WeaponConfig {
+            muzzle_velocity: 320.0,
+            fire_rate: 650.0,
+            projectile: ProjectileConfig {
+                acceleration_factor: -7.0,
+            },
+        }));
 
     match *game_type {
         GameType::Single => {}
@@ -154,5 +165,13 @@ pub fn create_terrain(world: &mut World, root: Entity) -> Entity {
         .with(Parent { entity: root })
         .with(tile_map)
         .with(transform)
+        .build();
+}
+
+pub fn create_projectile(world: &mut World, root: Entity, projectile: Projectile) -> Entity {
+    return world
+        .create_entity()
+        .with(Parent { entity: root })
+        .with(projectile)
         .build();
 }

@@ -46,6 +46,7 @@ use amethyst::prelude::*;
 use amethyst::renderer::plugins::RenderFlat2D;
 use amethyst::renderer::plugins::RenderToWindow;
 use amethyst::renderer::types::DefaultBackend;
+use amethyst::renderer::RenderDebugLines;
 use amethyst::renderer::RenderingBundle;
 use amethyst::tiles::MortonEncoder;
 use amethyst::tiles::RenderTiles2D;
@@ -78,7 +79,8 @@ fn main() -> amethyst::Result<()> {
                 )?)
                 .with_plugin(RenderFlat2D::default())
                 .with_plugin(RenderUi::default())
-                .with_plugin(RenderTiles2D::<Terrain, MortonEncoder>::default()),
+                .with_plugin(RenderTiles2D::<Terrain, MortonEncoder>::default())
+                .with_plugin(RenderDebugLines::default()),
         )?;
 
     Application::build(root.join("assets/"), StartupState::new())?

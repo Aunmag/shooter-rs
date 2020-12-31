@@ -1,6 +1,7 @@
 use crate::components::Actor;
 use crate::components::ActorActions;
 use crate::components::Player;
+use crate::input::ActionBinding;
 use crate::input::AxisBinding;
 use crate::input::CustomBindingTypes;
 use crate::resources::MouseInput;
@@ -47,6 +48,13 @@ impl<'a> System<'a> for PlayerSystem {
                 ActorActions::MOVEMENT_RIGHTWARD,
                 ActorActions::MOVEMENT_LEFTWARD,
                 input.axis_value(&AxisBinding::MovementAside).unwrap_or(0.0),
+            );
+
+            actor.actions.set(
+                ActorActions::ATTACK,
+                input
+                    .action_is_down(&ActionBinding::Attack)
+                    .unwrap_or(false),
             );
         }
     }

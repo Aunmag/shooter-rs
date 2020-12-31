@@ -28,4 +28,11 @@ pub enum GameTask {
         y: f32,
         direction: f32,
     },
+    ProjectileSpawn {
+        x: f32,
+        y: f32,
+        velocity_x: f32,
+        velocity_y: f32,
+        acceleration_factor: f32,
+    },
 }

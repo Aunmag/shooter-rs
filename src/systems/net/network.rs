@@ -256,6 +256,22 @@ impl NetworkSystem {
                     direction,
                 });
             }
+            Message::ProjectileSpawn {
+                x,
+                y,
+                velocity_x,
+                velocity_y,
+                acceleration_factor,
+                ..
+            } => {
+                tasks.push(GameTask::ProjectileSpawn {
+                    x,
+                    y,
+                    velocity_x,
+                    velocity_y,
+                    acceleration_factor,
+                });
+            }
             _ => {}
         }
     }
