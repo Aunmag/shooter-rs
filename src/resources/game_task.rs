@@ -12,6 +12,7 @@ pub enum GameTask {
         direction: f32,
     },
     ActorGrant(u16),
+    ActorAiSet(u16),
     ActorAction {
         public_id: u16,
         actions: ActorActions,

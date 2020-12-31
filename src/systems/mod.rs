@@ -1,4 +1,5 @@
 mod actor;
+mod ai;
 mod camera;
 pub mod net;
 mod player;
@@ -7,6 +8,7 @@ mod ui_resize;
 mod ui_task;
 
 pub use self::actor::*;
+pub use self::ai::*;
 pub use self::camera::*;
 pub use self::player::*;
 pub use self::terrain::*;

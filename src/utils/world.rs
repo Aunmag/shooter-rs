@@ -1,4 +1,5 @@
 use crate::components::Actor;
+use crate::components::Ai;
 use crate::components::Interpolation;
 use crate::components::Player;
 use crate::components::Terrain;
@@ -113,6 +114,16 @@ pub fn grant_played_actor(
         ));
     } else {
         return None;
+    }
+}
+
+pub fn set_actor_ai(world: &mut World, actor: Entity) {
+    if let Err(error) = world.write_storage::<Ai>().insert(actor, Ai) {
+        log::error!(
+            "Failed to set AI for an actor ({}). Details: {}",
+            actor.id(),
+            error,
+        );
     }
 }
 

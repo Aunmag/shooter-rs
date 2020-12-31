@@ -16,6 +16,7 @@ use crate::systems::net::InterpolationSystem;
 use crate::systems::net::NetworkSystem;
 use crate::systems::net::TransformSyncSystem;
 use crate::systems::ActorSystem;
+use crate::systems::AiSystem;
 use crate::systems::CameraSystem;
 use crate::systems::PlayerSystem;
 use crate::systems::TerrainSystem;
@@ -69,15 +70,17 @@ impl GameState<'_, '_> {
 
     fn init_dispatcher(&mut self, world: &mut World) {
         let mut builder = DispatcherBuilder::new();
-        builder.add(PlayerSystem, "Player", &[]);
-        builder.add(ActorSystem, "Actor", &["Player"]);
-        builder.add(CameraSystem::new(), "Camera", &[]);
-        builder.add(TerrainSystem, "Terrain", &[]);
 
         #[allow(clippy::unwrap_used)] // TODO: Remove
         match self.game_type {
-            GameType::Single => {}
+            GameType::Single => {
+                builder.add(AiSystem::new(), "Ai", &[]);
+                builder.add(PlayerSystem, "Player", &[]);
+                builder.add(ActorSystem, "Actor", &["Ai", "Player"]);
+            }
             GameType::Join(address) => {
+                builder.add(PlayerSystem, "Player", &[]);
+                builder.add(ActorSystem, "Actor", &["Player"]);
                 builder.add(InputSendSystem::new(), "InputSend", &["Actor"]);
                 builder.add(
                     NetworkSystem::new_as_client(address).unwrap(),
@@ -87,11 +90,17 @@ impl GameState<'_, '_> {
                 builder.add(InterpolationSystem, "Interpolation", &[]);
             }
             GameType::Host(port) => {
+                builder.add(AiSystem::new(), "Ai", &[]);
+                builder.add(PlayerSystem, "Player", &[]);
+                builder.add(ActorSystem, "Actor", &["Ai", "Player"]);
                 builder.add(NetworkSystem::new_as_server(port).unwrap(), "Network", &[]);
                 builder.add(InterpolationSystem, "Interpolation", &[]);
                 builder.add(TransformSyncSystem::new(), "TransformSync", &[]);
             }
         }
+
+        builder.add(CameraSystem::new(), "Camera", &[]);
+        builder.add(TerrainSystem, "Terrain", &[]);
 
         let mut dispatcher = builder
             .with_pool(Arc::clone(&world.read_resource::<ArcThreadPool>()))
@@ -128,6 +137,21 @@ impl GameState<'_, '_> {
             });
 
             tasks.push(GameTask::ActorGrant(public_id));
+
+            for i in 0..2 {
+                let public_id = world
+                    .write_resource::<EntityIndexMap>()
+                    .generate_public_id();
+
+                tasks.push(GameTask::ActorSpawn {
+                    public_id,
+                    x: 5.0 * (0.5 - i as f32),
+                    y: 0.0,
+                    direction: 0.0,
+                });
+
+                tasks.push(GameTask::ActorAiSet(public_id));
+            }
         }
 
         utils::world::create_terrain(world, root);
@@ -280,6 +304,13 @@ impl GameState<'_, '_> {
     }
 
     #[allow(clippy::unused_self)]
+    fn on_task_actor_ai_set(&self, world: &mut World, id: u16) {
+        if let Some(actor) = EntityIndexMap::fetch_entity_by_public_id(world, id) {
+            utils::world::set_actor_ai(world, actor);
+        }
+    }
+
+    #[allow(clippy::unused_self)]
     fn on_task_actor_action(
         &self,
         world: &mut World,
@@ -385,6 +416,9 @@ impl<'a, 'b> SimpleState for GameState<'a, 'b> {
                 }
                 GameTask::ActorGrant(public_id) => {
                     self.on_task_actor_grant(data.world, public_id);
+                }
+                GameTask::ActorAiSet(public_id) => {
+                    self.on_task_actor_ai_set(data.world, public_id);
                 }
                 GameTask::ActorAction {
                     public_id,
