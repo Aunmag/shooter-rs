@@ -16,7 +16,6 @@ use amethyst::ecs::prelude::WriteStorage;
 use rand::Rng;
 use rand::SeedableRng;
 use rand_pcg::Pcg32;
-use std::f32::consts::PI;
 use std::time::SystemTime;
 use std::time::UNIX_EPOCH;
 
@@ -45,10 +44,9 @@ impl WeaponSystem {
         return velocity * self.randomizer.gen_range(min..max) as f32;
     }
 
-    fn deviate_direction(&mut self, mut direction: f32) -> f32 {
-        direction += self.randomizer.gen_range(-DIRECTION_DEVIATION..DIRECTION_DEVIATION) as f32;
-        direction %= PI;
-        return direction;
+    fn deviate_direction(&mut self, direction: f32) -> f32 {
+        let deviation = DIRECTION_DEVIATION;
+        return direction + self.randomizer.gen_range(-deviation..deviation) as f32;
     }
 }
 

@@ -78,7 +78,7 @@ impl<'a> System<'a> for AiSystem {
                 if math::are_closer_than(x, y, 0.0, 0.0, MAX_DISTANCE_FROM_CENTER) {
                     actor.rotation = self.randomizer.gen_range(-FRAC_PI_8..FRAC_PI_8) as f32;
                 } else {
-                    actor.rotation = math::get_radians_difference(
+                    actor.rotation = math::angle_difference(
                         math::angle(x, y, 0.0, 0.0) + FRAC_PI_2,
                         transform.euler_angles().2,
                     );

@@ -13,7 +13,7 @@ use amethyst::ecs::prelude::System;
 use amethyst::ecs::prelude::SystemData;
 use amethyst::ecs::prelude::WriteStorage;
 use amethyst::input::InputHandler;
-use std::f32::consts::PI;
+use std::f32::consts::TAU;
 
 const ROTATION_SENSITIVITY: f32 = 0.01;
 
@@ -29,7 +29,7 @@ impl<'a> System<'a> for PlayerSystem {
     );
 
     fn run(&mut self, (input, input_mouse, players, mut actors): Self::SystemData) {
-        let rotation = (input_mouse.delta_x * ROTATION_SENSITIVITY) % PI;
+        let rotation = (input_mouse.delta_x * ROTATION_SENSITIVITY) % TAU;
 
         for (actor, _) in (&mut actors, &players).join() {
             actor.rotation = rotation;

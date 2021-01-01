@@ -198,7 +198,7 @@ impl GameState<'_, '_> {
                 interpolation.offset_y += offset_y;
 
                 if !is_player {
-                    interpolation.offset_direction = utils::math::get_radians_difference(
+                    interpolation.offset_direction = utils::math::angle_difference(
                         direction,
                         transform.euler_angles().2,
                     );
@@ -355,7 +355,7 @@ impl GameState<'_, '_> {
                 }
             } else if let Some(transform) = transforms.get_mut(entity) {
                 if let Some(interpolation) = interpolations.get_mut(entity) {
-                    interpolation.offset_direction = utils::math::get_radians_difference(
+                    interpolation.offset_direction = utils::math::angle_difference(
                         direction,
                         transform.euler_angles().2,
                     );

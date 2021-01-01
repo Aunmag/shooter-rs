@@ -14,7 +14,7 @@ use amethyst::ecs::Entities;
 use amethyst::ecs::ReadExpect;
 use amethyst::ecs::Write;
 use std::collections::HashMap;
-use std::f32::consts::PI;
+use std::f32::consts::TAU;
 use std::time::Duration;
 use std::time::Instant;
 
@@ -81,7 +81,7 @@ impl<'a> System<'a> for TransformSyncSystem {
                 if let Some(interpolation) = interpolation {
                     current.x += interpolation.offset_x;
                     current.y += interpolation.offset_y;
-                    current.direction = (current.direction - interpolation.offset_direction) % PI;
+                    current.direction = (current.direction - interpolation.offset_direction) % TAU;
                 }
 
                 if self.cache.get(&public_id).map_or(true, |c| c != &current) {
