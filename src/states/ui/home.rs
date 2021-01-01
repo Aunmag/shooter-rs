@@ -45,7 +45,7 @@ impl HomeState {
 }
 
 impl SimpleState for HomeState {
-    fn on_start(&mut self, mut data: StateData<GameData>) {
+    fn on_start(&mut self, data: StateData<GameData>) {
         data.world.exec(|finder: UiFinder| {
             self.root = finder.find(ROOT_ID);
             self.button_continue = finder.find(BUTTON_CONTINUE_ID);
@@ -55,11 +55,11 @@ impl SimpleState for HomeState {
         });
 
         if let Some(button_new_game) = self.button_new_game {
-            utils::set_entity_visibility(&mut data.world, button_new_game, self.is_root);
+            utils::set_entity_visibility(&data.world, button_new_game, self.is_root);
         }
 
         if let Some(button_disconnect) = self.button_disconnect {
-            utils::set_entity_visibility(&mut data.world, button_disconnect, !self.is_root);
+            utils::set_entity_visibility(&data.world, button_disconnect, !self.is_root);
         }
 
         {
@@ -81,23 +81,23 @@ impl SimpleState for HomeState {
             );
         }
 
-        self.set_visibility(&mut data.world, true);
+        self.set_visibility(&data.world, true);
     }
 
-    fn on_pause(&mut self, mut data: StateData<GameData>) {
-        self.set_visibility(&mut data.world, false);
+    fn on_pause(&mut self, data: StateData<GameData>) {
+        self.set_visibility(&data.world, false);
     }
 
-    fn on_resume(&mut self, mut data: StateData<GameData>) {
-        self.set_visibility(&mut data.world, true);
+    fn on_resume(&mut self, data: StateData<GameData>) {
+        self.set_visibility(&data.world, true);
     }
 
-    fn on_stop(&mut self, mut data: StateData<GameData>) {
+    fn on_stop(&mut self, data: StateData<GameData>) {
         self.button_continue = None;
         self.button_new_game = None;
         self.button_disconnect = None;
         self.button_quit = None;
-        self.set_visibility(&mut data.world, false);
+        self.set_visibility(&data.world, false);
     }
 
     fn handle_event(&mut self, _: StateData<GameData>, event: StateEvent) -> SimpleTrans {

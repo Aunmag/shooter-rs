@@ -38,38 +38,36 @@ impl NewGameState {
         };
     }
 
-    fn parse_input_address(world: &World) -> Result<SocketAddr, String> {
-        let ip;
-        let port;
-
-        if let Some(ip_temp) = utils::ui::fetch_text(world, INPUT_IP_ID) {
-            ip = ip_temp;
+    fn parse_input_ip(world: &World) -> Result<String, &str> {
+        if let Some(ip) = utils::ui::fetch_text(world, INPUT_IP_ID) {
+            return Ok(ip);
         } else {
-            return Err("No IP specified".to_string());
+            return Err("No IP specified");
         }
+    }
 
-        if let Some(port_temp) = utils::ui::fetch_text(world, INPUT_PORT_ID) {
-            port = port_temp;
+    #[allow(clippy::map_err_ignore)]
+    fn parse_input_port(world: &World) -> Result<u16, &str> {
+        if let Some(port) = utils::ui::fetch_text(world, INPUT_PORT_ID) {
+            return port.parse().map_err(|_| "Wrong port");
         } else {
-            return Err("No port specified".to_string());
+            return Err("No port specified");
         }
+    }
+
+    #[allow(clippy::map_err_ignore)]
+    fn parse_input_address(world: &World) -> Result<SocketAddr, &str> {
+        let ip = Self::parse_input_ip(world)?;
+        let port = Self::parse_input_port(world)?;
 
         return format!("{}:{}", ip, port)
             .parse()
-            .map_err(|_| "Wrong address".to_string());
-    }
-
-    fn parse_input_port(world: &World) -> Result<u16, String> {
-        if let Some(port) = utils::ui::fetch_text(world, INPUT_PORT_ID) {
-            return port.parse().map_err(|_| "Wrong port".to_string());
-        } else {
-            return Err("No prot specified".to_string());
-        }
+            .map_err(|_| "Wrong address");
     }
 }
 
 impl SimpleState for NewGameState {
-    fn on_start(&mut self, mut data: StateData<GameData>) {
+    fn on_start(&mut self, data: StateData<GameData>) {
         data.world.exec(|finder: UiFinder| {
             self.root = finder.find(ROOT_ID);
             self.button_play_single = finder.find(BUTTON_PLAY_SINGLE_ID);
@@ -78,23 +76,23 @@ impl SimpleState for NewGameState {
             self.button_back = finder.find(BUTTON_BACK_ID);
         });
 
-        self.set_visibility(&mut data.world, true);
+        self.set_visibility(&data.world, true);
     }
 
-    fn on_pause(&mut self, mut data: StateData<GameData>) {
-        self.set_visibility(&mut data.world, false);
+    fn on_pause(&mut self, data: StateData<GameData>) {
+        self.set_visibility(&data.world, false);
     }
 
-    fn on_resume(&mut self, mut data: StateData<GameData>) {
-        self.set_visibility(&mut data.world, true);
+    fn on_resume(&mut self, data: StateData<GameData>) {
+        self.set_visibility(&data.world, true);
     }
 
-    fn on_stop(&mut self, mut data: StateData<GameData>) {
+    fn on_stop(&mut self, data: StateData<GameData>) {
         self.button_play_single = None;
         self.button_join = None;
         self.button_host = None;
         self.button_back = None;
-        self.set_visibility(&mut data.world, false);
+        self.set_visibility(&data.world, false);
     }
 
     fn handle_event(&mut self, data: StateData<GameData>, event: StateEvent) -> SimpleTrans {

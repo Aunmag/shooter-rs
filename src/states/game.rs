@@ -177,7 +177,7 @@ impl GameState<'_, '_> {
         mouse_input.delta_y = 0.0;
     }
 
-    fn sync_transform(&self, world: &mut World, entity: Entity, x: f32, y: f32, direction: f32) {
+    fn sync_transform(&self, world: &World, entity: Entity, x: f32, y: f32, direction: f32) {
         let is_player = self.is_player_actor(entity);
 
         if let (Some(transform), Some(interpolation)) = (
@@ -317,7 +317,7 @@ impl GameState<'_, '_> {
     }
 
     #[allow(clippy::unused_self)]
-    fn on_task_actor_ai_set(&self, world: &mut World, id: u16) {
+    fn on_task_actor_ai_set(&self, world: &World, id: u16) {
         if let Some(actor) = EntityIndexMap::fetch_entity_by_public_id(world, id) {
             utils::world::set_actor_ai(world, actor);
         }
@@ -326,7 +326,7 @@ impl GameState<'_, '_> {
     #[allow(clippy::unused_self)]
     fn on_task_actor_action(
         &self,
-        world: &mut World,
+        world: &World,
         public_id: u16,
         actions: Option<ActorActions>,
         direction: f32,
@@ -366,7 +366,7 @@ impl GameState<'_, '_> {
         }
     }
 
-    fn on_task_transform_sync(&self, world: &mut World, id: u16, x: f32, y: f32, direction: f32) {
+    fn on_task_transform_sync(&self, world: &World, id: u16, x: f32, y: f32, direction: f32) {
         if let Some(entity) = EntityIndexMap::fetch_entity_by_public_id(world, id) {
             self.sync_transform(world, entity, x, y, direction);
         }
@@ -429,7 +429,7 @@ impl<'a, 'b> SimpleState for GameState<'a, 'b> {
         self.init_resources(&mut data.world);
         self.init_world_entities(&mut data.world);
         self.reset_input(&data.world);
-        utils::ui::set_cursor_visibility(&mut data.world, false);
+        utils::ui::set_cursor_visibility(&data.world, false);
     }
 
     fn on_stop(&mut self, data: StateData<GameData>) {
@@ -440,8 +440,8 @@ impl<'a, 'b> SimpleState for GameState<'a, 'b> {
         }
     }
 
-    fn on_resume(&mut self, mut data: StateData<GameData>) {
-        utils::ui::set_cursor_visibility(&mut data.world, false);
+    fn on_resume(&mut self, data: StateData<GameData>) {
+        utils::ui::set_cursor_visibility(&data.world, false);
     }
 
     fn update(&mut self, data: &mut StateData<GameData>) -> SimpleTrans {

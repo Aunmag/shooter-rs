@@ -42,8 +42,8 @@ impl SimpleState for StartupState {
             }
             Completion::Complete => {
                 enable_fullscreen_mode(&data.world);
-                resize_sprites(&mut data.world);
-                complete_startup(&mut data.world);
+                resize_sprites(&data.world);
+                complete_startup(&data.world);
                 return Trans::Switch(Box::new(HomeState::new(true)));
             }
             Completion::Failed => {
@@ -64,7 +64,7 @@ fn enable_fullscreen_mode(world: &World) {
     }
 }
 
-fn resize_sprites(world: &mut World) {
+fn resize_sprites(world: &World) {
     let mut sprite_sheets = world.write_resource::<AssetStorage<SpriteSheet>>();
 
     for handle in world.write_resource::<SpriteResource>().data.values() {
@@ -81,6 +81,6 @@ fn resize_sprites(world: &mut World) {
     }
 }
 
-fn complete_startup(world: &mut World) {
+fn complete_startup(world: &World) {
     world.write_resource::<GameStatus>().is_loaded = true;
 }

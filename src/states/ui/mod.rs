@@ -12,7 +12,7 @@ use amethyst::ecs::prelude::Entity;
 use amethyst::ecs::prelude::World;
 
 pub trait UiState {
-    fn set_visibility(&self, world: &mut World, is_visibility: bool) {
+    fn set_visibility(&self, world: &World, is_visibility: bool) {
         if let Some(root) = self.get_root() {
             utils::set_entity_visibility(world, root, is_visibility);
         }

@@ -7,7 +7,7 @@ use amethyst::ecs::prelude::Entity;
 use amethyst::ecs::prelude::World;
 use amethyst::prelude::*;
 
-pub fn set_entity_visibility(world: &mut World, entity: Entity, is_visibility: bool) {
+pub fn set_entity_visibility(world: &World, entity: Entity, is_visibility: bool) {
     let mut storage = world.write_storage::<HiddenPropagate>();
 
     if is_visibility {

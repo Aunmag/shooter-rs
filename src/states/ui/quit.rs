@@ -28,28 +28,28 @@ impl QuitState {
 }
 
 impl SimpleState for QuitState {
-    fn on_start(&mut self, mut data: StateData<GameData>) {
+    fn on_start(&mut self, data: StateData<GameData>) {
         data.world.exec(|finder: UiFinder| {
             self.root = finder.find(ROOT_ID);
             self.button_yes = finder.find(BUTTON_YES_ID);
             self.button_no = finder.find(BUTTON_NO_ID);
         });
 
-        self.set_visibility(&mut data.world, true);
+        self.set_visibility(&data.world, true);
     }
 
-    fn on_pause(&mut self, mut data: StateData<GameData>) {
-        self.set_visibility(&mut data.world, false);
+    fn on_pause(&mut self, data: StateData<GameData>) {
+        self.set_visibility(&data.world, false);
     }
 
-    fn on_resume(&mut self, mut data: StateData<GameData>) {
-        self.set_visibility(&mut data.world, true);
+    fn on_resume(&mut self, data: StateData<GameData>) {
+        self.set_visibility(&data.world, true);
     }
 
-    fn on_stop(&mut self, mut data: StateData<GameData>) {
+    fn on_stop(&mut self, data: StateData<GameData>) {
         self.button_yes = None;
         self.button_no = None;
-        self.set_visibility(&mut data.world, false);
+        self.set_visibility(&data.world, false);
     }
 
     fn handle_event(&mut self, _: StateData<GameData>, event: StateEvent) -> SimpleTrans {

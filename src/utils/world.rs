@@ -128,7 +128,7 @@ pub fn grant_played_actor(
     }
 }
 
-pub fn set_actor_ai(world: &mut World, actor: Entity) {
+pub fn set_actor_ai(world: &World, actor: Entity) {
     if let Err(error) = world.write_storage::<Ai>().insert(actor, Ai) {
         log::error!(
             "Failed to set AI for an actor ({}). Details: {}",
