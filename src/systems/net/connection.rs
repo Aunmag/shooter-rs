@@ -3,11 +3,15 @@ use std::cmp::Ordering;
 use std::collections::HashMap;
 use std::net::SocketAddr;
 use std::net::UdpSocket;
+use std::time::Duration;
+use std::time::Instant;
+
+const MESSAGE_RESEND_INTERVAL: Duration = Duration::from_millis(400); // TODO: Tweak
 
 pub struct Connection {
     status: ConnectionStatus,
     // TODO: Maybe don't allow grow to large
-    unacknowledged_messages: HashMap<u16, Vec<u8>>,
+    unacknowledged_messages: HashMap<u16, UnacknowledgedMessage>,
     // TODO: Maybe don't allow grow to large
     held_messages: HashMap<u16, Message>,
     // TODO: Handle ID restart
@@ -19,6 +23,11 @@ pub struct Connection {
 pub enum ConnectionStatus {
     Connected,
     Disconnected(String),
+}
+
+struct UnacknowledgedMessage {
+    data: Vec<u8>,
+    last_sent: Instant,
 }
 
 impl Connection {
@@ -56,17 +65,27 @@ impl Connection {
             if let Err(error) = send(socket, address, &encoded) {
                 self.disconnect(error);
             } else if let Some(id) = id {
-                self.unacknowledged_messages.insert(id, encoded);
+                self.unacknowledged_messages.insert(
+                    id,
+                    UnacknowledgedMessage {
+                        data: encoded,
+                        last_sent: Instant::now(),
+                    },
+                );
             }
         }
     }
 
-    pub fn send_unacknowledged_messages(&mut self, socket: &UdpSocket, address: &SocketAddr) {
+    pub fn resend_unacknowledged_messages(&mut self, socket: &UdpSocket, address: &SocketAddr) {
         if self.is_connected() {
-            for message in self.unacknowledged_messages.values() {
-                if let Err(error) = send(socket, address, message) {
-                    self.disconnect(error);
-                    break;
+            for message in self.unacknowledged_messages.values_mut() {
+                if message.last_sent.elapsed() > MESSAGE_RESEND_INTERVAL {
+                    message.last_sent = Instant::now();
+
+                    if let Err(error) = send(socket, address, &message.data) {
+                        self.disconnect(error);
+                        break;
+                    }
                 }
             }
         }

@@ -17,17 +17,12 @@ use std::collections::HashMap;
 use std::io::ErrorKind;
 use std::net::SocketAddr;
 use std::net::UdpSocket;
-use std::time::Duration;
-use std::time::Instant;
-
-const MESSAGE_RESEND_INTERVAL: Duration = Duration::from_millis(400); // TODO: Tweak
 
 #[derive(SystemDesc)]
 pub struct NetworkSystem {
     socket: UdpSocket,
     is_server: bool,
     connections: HashMap<SocketAddr, Connection>,
-    last_message_resend: Instant,
 }
 
 impl NetworkSystem {
@@ -53,7 +48,6 @@ impl NetworkSystem {
             socket,
             is_server,
             connections: HashMap::new(),
-            last_message_resend: Instant::now(),
         });
     }
 
@@ -65,19 +59,9 @@ impl NetworkSystem {
 
     fn update_connections(&mut self) {
         let mut disconnected = Vec::new();
-        let do_resend_messaged;
-
-        if self.last_message_resend.elapsed() >= MESSAGE_RESEND_INTERVAL {
-            self.last_message_resend = Instant::now();
-            do_resend_messaged = true;
-        } else {
-            do_resend_messaged = false;
-        }
 
         for (address, connection) in self.connections.iter_mut() {
-            if do_resend_messaged {
-                connection.send_unacknowledged_messages(&self.socket, &address);
-            }
+            connection.resend_unacknowledged_messages(&self.socket, &address);
 
             if let ConnectionStatus::Disconnected(ref reason) = *connection.get_status() {
                 disconnected.push(*address);
