@@ -16,7 +16,9 @@ use crate::resources::EntityIndexMap;
 use crate::resources::Sprite;
 use crate::resources::SpriteResource;
 use crate::states::GameType;
+use amethyst::core::math::Point2;
 use amethyst::core::math::Vector3;
+use amethyst::core::timing::Time;
 use amethyst::core::transform::Transform;
 use amethyst::core::Parent;
 use amethyst::ecs::prelude::World;
@@ -168,7 +170,24 @@ pub fn create_terrain(world: &mut World, root: Entity) -> Entity {
         .build();
 }
 
-pub fn create_projectile(world: &mut World, root: Entity, projectile: Projectile) -> Entity {
+pub fn create_projectile(
+    world: &mut World,
+    root: Entity,
+    x: f32,
+    y: f32,
+    velocity_x: f32,
+    velocity_y: f32,
+    acceleration_factor: f32,
+) -> Entity {
+    let projectile = Projectile::new(
+        ProjectileConfig {
+            acceleration_factor,
+        },
+        world.read_resource::<Time>().absolute_time(),
+        Point2::from([x, y]),
+        Point2::from([velocity_x, velocity_y]),
+    );
+
     return world
         .create_entity()
         .with(Parent { entity: root })

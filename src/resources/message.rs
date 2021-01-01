@@ -55,7 +55,6 @@ pub enum Message {
 pub enum MessageReceiver {
     Only(SocketAddr),
     Every,
-    Except(SocketAddr),
 }
 
 impl Message {

@@ -1,10 +1,12 @@
 use crate::components::ActorActions;
+use crate::resources::Message;
+use crate::resources::MessageReceiver;
 use std::net::SocketAddr;
 
 pub type GameTaskResource = Vec<GameTask>;
 
 pub enum GameTask {
-    PlayerConnect(SocketAddr),
+    ClientGreet(SocketAddr),
     ActorSpawn {
         public_id: u16,
         x: f32,
@@ -34,5 +36,9 @@ pub enum GameTask {
         velocity_x: f32,
         velocity_y: f32,
         acceleration_factor: f32,
+    },
+    MessageSent {
+        receiver: MessageReceiver,
+        message: Message,
     },
 }

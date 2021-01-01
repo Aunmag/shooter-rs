@@ -176,7 +176,7 @@ impl NetworkSystem {
     ) {
         match *message {
             Message::Greeting { .. } => {
-                tasks.push(GameTask::PlayerConnect(*address));
+                tasks.push(GameTask::ClientGreet(*address));
             }
             Message::ClientInput {
                 actions, direction, ..
@@ -267,19 +267,9 @@ impl NetworkSystem {
                     connection.send(&self.socket, address, &mut message);
                 }
             }
-            MessageReceiver::Every | MessageReceiver::Except(..) => {
-                let excepted;
-
-                if let MessageReceiver::Except(address) = *receiver {
-                    excepted = Some(address);
-                } else {
-                    excepted = None;
-                }
-
+            MessageReceiver::Every => {
                 for (address, connection) in self.connections.iter_mut() {
-                    if Some(*address) != excepted {
-                        connection.send(&self.socket, &address, &mut message);
-                    }
+                    connection.send(&self.socket, &address, &mut message);
                 }
             }
         }
