@@ -46,6 +46,7 @@ use amethyst::winit::Event;
 use amethyst::winit::MouseButton;
 use amethyst::winit::VirtualKeyCode;
 use amethyst::winit::WindowEvent;
+use std::f32::consts::TAU;
 use std::net::SocketAddr;
 use std::sync::Arc;
 
@@ -260,15 +261,25 @@ impl GameState<'_, '_> {
         )
             .join()
         {
+            let mut x = transform.translation().x;
+            let mut y = transform.translation().y;
+            let mut direction = transform.euler_angles().2;
+
+            if let Some(interpolation) = world.read_storage::<Interpolation>().get(entity) {
+                x += interpolation.offset_x;
+                y += interpolation.offset_y;
+                direction = (direction - interpolation.offset_direction) % TAU;
+            }
+
             if let Some(public_id) = id_map.to_public_id(entity.id()) {
                 messages.push((
                     MessageReceiver::Only(address),
                     Message::ActorSpawn {
                         id: 0,
                         public_id,
-                        x: transform.translation().x,
-                        y: transform.translation().y,
-                        direction: transform.euler_angles().2,
+                        x,
+                        y,
+                        direction,
                     },
                 ));
             }
