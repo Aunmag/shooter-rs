@@ -35,6 +35,27 @@ use amethyst::tiles::TileMap;
 // TODO: Maybe name as `new_*` instead of `create_*`
 // TODO: Maybe don't use `EntityIndexMap`
 
+pub fn create_simple_sprite(
+    world: &mut World,
+    root: Entity,
+    x: f32,
+    y: f32,
+    z: f32,
+    direction: f32,
+    sprite: SpriteRender,
+) -> Entity {
+    let mut transform = Transform::default();
+    transform.set_translation_xyz(x, y, z);
+    transform.set_rotation_2d(direction);
+
+    return world
+        .create_entity()
+        .with(Parent { entity: root })
+        .with(transform)
+        .with(sprite)
+        .build();
+}
+
 pub fn create_actor(
     world: &mut World,
     root: Entity,
@@ -153,8 +174,15 @@ pub fn create_camera(world: &mut World, target: Entity) -> Entity {
 }
 
 pub fn create_terrain(world: &mut World, root: Entity) -> Entity {
+    let quantity;
+
+    #[allow(clippy::cast_sign_loss, clippy::cast_possible_truncation)]
+    {
+        quantity = Terrain::QUANTITY.abs().ceil() as u32;
+    }
+
     let tile_map = TileMap::<Terrain, MortonEncoder>::new(
-        Vector3::new(Terrain::QUANTITY, Terrain::QUANTITY, 1),
+        Vector3::new(quantity, quantity, 1),
         Vector3::new(Terrain::SIZE, Terrain::SIZE, 1),
         world.read_resource::<SpriteResource>().get(&Sprite::Grass),
     );

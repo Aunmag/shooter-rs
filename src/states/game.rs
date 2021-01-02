@@ -165,6 +165,7 @@ impl GameState<'_, '_> {
         }
 
         utils::world::create_terrain(world, root);
+        utils::world_decorations::create_decorations(world, root);
     }
 
     #[allow(clippy::unused_self)]

@@ -16,7 +16,12 @@ pub struct SpriteResource {
 #[derive(Hash, PartialEq, Eq)]
 pub enum Sprite {
     Actor,
+    Bluff,
+    BluffCorner,
     Grass,
+    Tree0,
+    Tree1,
+    Tree2,
 }
 
 impl SpriteResource {
@@ -32,8 +37,33 @@ impl SpriteResource {
         );
 
         data.insert(
+            Sprite::Bluff,
+            Sprite::Bluff.load_sprite(&loader, &textures, &sprites),
+        );
+
+        data.insert(
+            Sprite::BluffCorner,
+            Sprite::BluffCorner.load_sprite(&loader, &textures, &sprites),
+        );
+
+        data.insert(
             Sprite::Grass,
             Sprite::Grass.load_sprite(&loader, &textures, &sprites),
+        );
+
+        data.insert(
+            Sprite::Tree0,
+            Sprite::Tree0.load_sprite(&loader, &textures, &sprites),
+        );
+
+        data.insert(
+            Sprite::Tree1,
+            Sprite::Tree1.load_sprite(&loader, &textures, &sprites),
+        );
+
+        data.insert(
+            Sprite::Tree2,
+            Sprite::Tree2.load_sprite(&loader, &textures, &sprites),
         );
 
         return Self { data };
@@ -66,7 +96,12 @@ impl Sprite {
     fn get_path(&self) -> &str {
         return match *self {
             Self::Actor => &"actors/human/image",
-            Self::Grass => &"ground/grass",
+            Self::Bluff => &"terrain/bluff",
+            Self::BluffCorner => &"terrain/bluff_corner",
+            Self::Grass => &"terrain/grass",
+            Self::Tree0 => &"terrain/tree_0",
+            Self::Tree1 => &"terrain/tree_1",
+            Self::Tree2 => &"terrain/tree_2",
         };
     }
 }

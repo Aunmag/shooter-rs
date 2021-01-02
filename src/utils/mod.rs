@@ -1,6 +1,7 @@
 pub mod math;
 pub mod ui;
 pub mod world;
+pub mod world_decorations;
 
 use amethyst::core::HiddenPropagate;
 use amethyst::ecs::prelude::Entity;

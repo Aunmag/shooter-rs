@@ -1,3 +1,4 @@
+use crate::data::VIEW_DISTANCE;
 use amethyst::core::math::Point3;
 use amethyst::ecs::prelude::World;
 use amethyst::tiles::Tile;
@@ -8,7 +9,7 @@ pub struct Terrain;
 impl Terrain {
     pub const SIZE: u32 = 4;
     pub const SIZE_HALF: f32 = Self::SIZE as f32 / 2.0;
-    pub const QUANTITY: u32 = 5;
+    pub const QUANTITY: f32 = VIEW_DISTANCE / Self::SIZE as f32 + 0.5;
 }
 
 impl Tile for Terrain {
