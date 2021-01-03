@@ -1,5 +1,6 @@
 use crate::components::Actor;
 use crate::components::Ai;
+use crate::components::Collision;
 use crate::components::Interpolation;
 use crate::components::Player;
 use crate::components::Projectile;
@@ -106,6 +107,8 @@ pub fn create_actor(
     if is_ghost {
         builder = builder.with(Tint(Srgba::new(0.6, 0.6, 0.6, 0.4)));
         builder = builder.with(Transparent);
+    } else {
+        builder = builder.with(Collision { radius: 0.25 });
     }
 
     let actor = builder.build();

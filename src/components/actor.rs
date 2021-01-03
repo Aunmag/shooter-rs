@@ -12,7 +12,7 @@ bitflags::bitflags! {
         const MOVEMENT_BACKWARD  = 0b0000_0010;
         const MOVEMENT_LEFTWARD  = 0b0000_0100;
         const MOVEMENT_RIGHTWARD = 0b0000_1000;
-        const ATTACK = 0b0001_0000;
+        const ATTACK             = 0b0001_0000;
     }
 }
 

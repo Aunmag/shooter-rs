@@ -19,6 +19,7 @@ use crate::systems::net::TransformSyncSystem;
 use crate::systems::ActorSystem;
 use crate::systems::AiSystem;
 use crate::systems::CameraSystem;
+use crate::systems::CollisionSystem;
 use crate::systems::PlayerSystem;
 use crate::systems::ProjectileSystem;
 use crate::systems::TerrainSystem;
@@ -82,12 +83,15 @@ impl GameState<'_, '_> {
                 builder.add(AiSystem::new(), "Ai", &[]);
                 builder.add(PlayerSystem, "Player", &[]);
                 builder.add(ActorSystem, "Actor", &["Ai", "Player"]);
+                builder.add(CollisionSystem::new(), "Collision", &["Actor"]);
+                builder.add(ProjectileSystem, "Projectile", &["Collision"]);
                 builder.add(WeaponSystem::new(), "Weapon", &["Actor"]);
             }
             GameType::Join(address) => {
                 builder.add(PlayerSystem, "Player", &[]);
                 builder.add(ActorSystem, "Actor", &["Player"]);
                 builder.add(InputSendSystem::new(), "InputSend", &["Actor"]);
+                builder.add(ProjectileSystem, "Projectile", &["Actor"]);
                 builder.add(
                     NetworkSystem::new_as_client(address).unwrap(),
                     "Network",
@@ -100,13 +104,14 @@ impl GameState<'_, '_> {
                 builder.add(PlayerSystem, "Player", &[]);
                 builder.add(ActorSystem, "Actor", &["Ai", "Player"]);
                 builder.add(WeaponSystem::new(), "Weapon", &["Actor"]);
+                builder.add(CollisionSystem::new(), "Collision", &["Actor"]);
+                builder.add(ProjectileSystem, "Projectile", &["Collision"]);
                 builder.add(NetworkSystem::new_as_server(port).unwrap(), "Network", &[]);
                 builder.add(InterpolationSystem, "Interpolation", &[]);
-                builder.add(TransformSyncSystem::new(), "TransformSync", &[]);
+                builder.add(TransformSyncSystem::new(), "TransformSync", &["Collision"]);
             }
         }
 
-        builder.add(ProjectileSystem, "Projectile", &[]);
         builder.add(CameraSystem::new(), "Camera", &[]);
         builder.add(TerrainSystem, "Terrain", &[]);
 
@@ -266,6 +271,13 @@ impl GameState<'_, '_> {
                     velocity_y,
                     acceleration_factor,
                 );
+            }
+            GameTask::ProjectileHit {
+                entity,
+                force_x,
+                force_y,
+            } => {
+                self.on_task_projectile_hit(world, entity, force_x, force_y);
             }
             GameTask::MessageSent { receiver, message } => {
                 self.on_task_message_send(world, receiver, message);
@@ -468,6 +480,21 @@ impl GameState<'_, '_> {
                 velocity_y,
                 acceleration_factor,
             );
+        }
+    }
+
+    #[allow(clippy::unused_self)]
+    fn on_task_projectile_hit(
+        &self,
+        world: &mut World,
+        entity: Entity,
+        force_x: f32,
+        force_y: f32,
+    ) {
+        if let Some(transform) = world.write_storage::<Transform>().get_mut(entity) {
+            let translation = transform.translation_mut();
+            translation.x += force_x;
+            translation.y += force_y;
         }
     }
 

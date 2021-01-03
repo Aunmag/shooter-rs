@@ -1,6 +1,7 @@
 use crate::components::ActorActions;
 use crate::resources::Message;
 use crate::resources::MessageReceiver;
+use amethyst::ecs::Entity;
 use std::net::SocketAddr;
 
 pub type GameTaskResource = Vec<GameTask>;
@@ -36,6 +37,11 @@ pub enum GameTask {
         velocity_x: f32,
         velocity_y: f32,
         acceleration_factor: f32,
+    },
+    ProjectileHit {
+        entity: Entity,
+        force_x: f32,
+        force_y: f32,
     },
     MessageSent {
         receiver: MessageReceiver,
