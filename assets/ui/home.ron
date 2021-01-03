@@ -207,7 +207,7 @@ Container(
                                 opaque: false,
                             ),
                             text: (
-                                text: "v0.1.0",
+                                text: "v0.2.0",
                                 font: File("fonts/regular.ttf", ("TTF", ())),
                                 font_size: 12.0,
                                 color: (0.8, 0.8, 0.8, 0.3),

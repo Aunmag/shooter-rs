@@ -1,8 +1,11 @@
 [package]
 name = "shooter"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["Aunmag <aunmag@gmail.com>"]
 edition = "2018"
+
+[profile.release]
+lto = "fat"
 
 [dependencies]
 amethyst = { version = "0.15.1", features = ["vulkan", "tiles"] }
