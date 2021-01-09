@@ -46,9 +46,9 @@ fn create_trees(world: &mut World, root: Entity) {
 
     {
         let sprites = world.read_resource::<SpriteResource>();
-        sprite_0 = sprites.get(&Sprite::Tree0).map(|s| SpriteRender::new(s, 0));
-        sprite_1 = sprites.get(&Sprite::Tree1).map(|s| SpriteRender::new(s, 0));
-        sprite_2 = sprites.get(&Sprite::Tree2).map(|s| SpriteRender::new(s, 0));
+        sprite_0 = sprites.get(Sprite::Tree0).map(|s| SpriteRender::new(s, 0));
+        sprite_1 = sprites.get(Sprite::Tree1).map(|s| SpriteRender::new(s, 0));
+        sprite_2 = sprites.get(Sprite::Tree2).map(|s| SpriteRender::new(s, 0));
     }
 
     let range = WORLD_SIZE_VISUAL / 2.0;
@@ -100,9 +100,13 @@ fn create_bluffs(world: &mut World, root: Entity) {
 
     {
         let sprites = world.read_resource::<SpriteResource>();
-        sprite_flat = sprites.get(&Sprite::Bluff).map(|s| SpriteRender::new(s, 0));
+
+        sprite_flat = sprites
+            .get(Sprite::Bluff)
+            .map(|s| SpriteRender::new(s, 0));
+
         sprite_corner = sprites
-            .get(&Sprite::BluffCorner)
+            .get(Sprite::BluffCorner)
             .map(|s| SpriteRender::new(s, 0));
     }
 

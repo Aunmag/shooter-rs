@@ -1,5 +1,6 @@
 use amethyst::assets::AssetStorage;
 use amethyst::assets::Loader;
+use amethyst::assets::ProgressCounter;
 use amethyst::ecs::prelude::World;
 use amethyst::ecs::prelude::WorldExt;
 use amethyst::renderer::sprite::SpriteSheet;
@@ -9,11 +10,13 @@ use amethyst::renderer::SpriteSheetFormat;
 use amethyst::renderer::Texture;
 use std::collections::HashMap;
 
+const PIXELS_PER_METER: f32 = 32.0;
+
 pub struct SpriteResource {
-    pub data: HashMap<Sprite, SpriteSheetHandle>,
+    data: HashMap<Sprite, SpriteSheetHandle>,
 }
 
-#[derive(Hash, PartialEq, Eq)]
+#[derive(Hash, PartialEq, Eq, Copy, Clone)]
 pub enum Sprite {
     Actor,
     Bluff,
@@ -25,74 +28,71 @@ pub enum Sprite {
 }
 
 impl SpriteResource {
-    pub fn new(world: &World) -> Self {
-        let mut data = HashMap::with_capacity(2);
+    pub fn new(world: &World, progress: &mut ProgressCounter) -> Self {
+        let mut resource = Self {
+            data: HashMap::with_capacity(7),
+        };
+
         let loader = world.read_resource::<Loader>();
         let textures = world.read_resource::<AssetStorage<Texture>>();
         let sprites = world.read_resource::<AssetStorage<SpriteSheet>>();
 
-        data.insert(
-            Sprite::Actor,
-            Sprite::Actor.load_sprite(&loader, &textures, &sprites),
-        );
+        resource.load(Sprite::Actor, &loader, &textures, &sprites, progress);
+        resource.load(Sprite::Bluff, &loader, &textures, &sprites, progress);
+        resource.load(Sprite::BluffCorner, &loader, &textures, &sprites, progress);
+        resource.load(Sprite::Grass, &loader, &textures, &sprites, progress);
+        resource.load(Sprite::Tree0, &loader, &textures, &sprites, progress);
+        resource.load(Sprite::Tree1, &loader, &textures, &sprites, progress);
+        resource.load(Sprite::Tree2, &loader, &textures, &sprites, progress);
 
-        data.insert(
-            Sprite::Bluff,
-            Sprite::Bluff.load_sprite(&loader, &textures, &sprites),
-        );
-
-        data.insert(
-            Sprite::BluffCorner,
-            Sprite::BluffCorner.load_sprite(&loader, &textures, &sprites),
-        );
-
-        data.insert(
-            Sprite::Grass,
-            Sprite::Grass.load_sprite(&loader, &textures, &sprites),
-        );
-
-        data.insert(
-            Sprite::Tree0,
-            Sprite::Tree0.load_sprite(&loader, &textures, &sprites),
-        );
-
-        data.insert(
-            Sprite::Tree1,
-            Sprite::Tree1.load_sprite(&loader, &textures, &sprites),
-        );
-
-        data.insert(
-            Sprite::Tree2,
-            Sprite::Tree2.load_sprite(&loader, &textures, &sprites),
-        );
-
-        return Self { data };
+        return resource;
     }
 
-    pub fn get(&self, sprite: &Sprite) -> Option<SpriteSheetHandle> {
-        return self.data.get(sprite).cloned();
+    fn load(
+        &mut self,
+        sprite: Sprite,
+        loader: &Loader,
+        textures: &AssetStorage<Texture>,
+        sprites: &AssetStorage<SpriteSheet>,
+        progress: &mut ProgressCounter,
+    ) {
+        let path = sprite.get_path();
+        let path_to_ron = format!("{}.ron", path);
+        let path_to_png = format!("{}.png", path);
+
+        let sprite_sheet = loader.load(
+            &path_to_ron,
+            SpriteSheetFormat(loader.load(&path_to_png, ImageFormat::default(), (), &textures)),
+            progress,
+            &sprites,
+        );
+
+        self.data.insert(sprite, sprite_sheet);
+    }
+
+    pub fn resize_sprites(&self, world: &World) {
+        let mut sprite_sheets = world.write_resource::<AssetStorage<SpriteSheet>>();
+
+        for handle in self.data.values() {
+            if let Some(sprite_sheet) = sprite_sheets.get_mut(handle) {
+                for sprite in sprite_sheet.sprites.iter_mut() {
+                    sprite.width /= PIXELS_PER_METER;
+                    sprite.height /= PIXELS_PER_METER;
+
+                    for offset in sprite.offsets.iter_mut() {
+                        *offset /= PIXELS_PER_METER;
+                    }
+                }
+            }
+        }
+    }
+
+    pub fn get(&self, sprite: Sprite) -> Option<SpriteSheetHandle> {
+        return self.data.get(&sprite).cloned();
     }
 }
 
 impl Sprite {
-    fn load_sprite(
-        &self,
-        loader: &Loader,
-        textures: &AssetStorage<Texture>,
-        sprites: &AssetStorage<SpriteSheet>,
-    ) -> SpriteSheetHandle {
-        let path = self.get_path();
-        let path_to_ron = format!("{}.ron", path);
-        let path_to_png = format!("{}.png", path);
-
-        return loader.load(
-            &path_to_ron,
-            SpriteSheetFormat(loader.load(&path_to_png, ImageFormat::default(), (), &textures)),
-            (),
-            &sprites,
-        );
-    }
-
     fn get_path(&self) -> &str {
         return match *self {
             Self::Actor => &"actors/human/image",

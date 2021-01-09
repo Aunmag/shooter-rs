@@ -80,7 +80,7 @@ pub fn create_actor(
 
     let mut renderer = world
         .read_resource::<SpriteResource>()
-        .get(&Sprite::Actor)
+        .get(Sprite::Actor)
         .map(|s| SpriteRender::new(s, 0));
 
     let mut builder = world
@@ -192,7 +192,7 @@ pub fn create_terrain(world: &mut World, root: Entity) -> Entity {
     let tile_map = TileMap::<Terrain, MortonEncoder>::new(
         Vector3::new(quantity, quantity, 1),
         Vector3::new(Terrain::SIZE, Terrain::SIZE, 1),
-        world.read_resource::<SpriteResource>().get(&Sprite::Grass),
+        world.read_resource::<SpriteResource>().get(Sprite::Grass),
     );
 
     let mut transform = Transform::default();
