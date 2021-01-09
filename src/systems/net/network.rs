@@ -77,9 +77,12 @@ impl NetworkSystem {
     fn process_incoming_tasks(&mut self, tasks: &mut NetworkTaskResource) {
         for task in tasks.drain(..) {
             match task {
-                NetworkTask::AttachPublicId(address, public_id) => {
+                NetworkTask::AttachEntity {
+                    address,
+                    external_id,
+                } => {
                     if let Some(connection) = self.connections.get_mut(&address) {
-                        connection.attached_public_id.replace(public_id);
+                        connection.attached_external_id.replace(external_id);
                     }
                 }
             }
@@ -120,13 +123,13 @@ impl NetworkSystem {
                                 }
 
                                 if let Some(message) = connection.filter_message(message) {
-                                    let public_id = connection.attached_public_id;
+                                    let external_id = connection.attached_external_id;
                                     let next_messages = connection.take_next_held_messages();
 
-                                    self.on_message(&address, &message, public_id, tasks);
+                                    self.on_message(&address, &message, external_id, tasks);
 
                                     for message in next_messages.iter() {
-                                        self.on_message(&address, &message, public_id, tasks);
+                                        self.on_message(&address, &message, external_id, tasks);
                                     }
                                 }
                             }
@@ -158,11 +161,11 @@ impl NetworkSystem {
         &mut self,
         address: &SocketAddr,
         message: &Message,
-        public_id: Option<u16>,
+        external_id: Option<u16>,
         tasks: &mut GameTaskResource,
     ) {
         if self.is_server {
-            Self::on_message_as_server(&address, &message, public_id, tasks);
+            Self::on_message_as_server(&address, &message, external_id, tasks);
         } else {
             Self::on_message_as_client(&message, tasks);
         }
@@ -171,7 +174,7 @@ impl NetworkSystem {
     fn on_message_as_server(
         address: &SocketAddr,
         message: &Message,
-        public_id: Option<u16>,
+        external_id: Option<u16>,
         tasks: &mut GameTaskResource,
     ) {
         match *message {
@@ -181,9 +184,9 @@ impl NetworkSystem {
             Message::ClientInput {
                 actions, direction, ..
             } => {
-                if let Some(public_id) = public_id {
+                if let Some(external_id) = external_id {
                     tasks.push(GameTask::ActorAction {
-                        public_id,
+                        external_id,
                         actions: ActorActions::from_bits_truncate(actions),
                         direction,
                     });
@@ -192,9 +195,9 @@ impl NetworkSystem {
                 }
             }
             Message::ClientInputDirection { direction, .. } => {
-                if let Some(public_id) = public_id {
+                if let Some(external_id) = external_id {
                     tasks.push(GameTask::ActorTurn {
-                        public_id,
+                        external_id,
                         direction,
                     });
                 } else {
@@ -210,31 +213,31 @@ impl NetworkSystem {
     fn on_message_as_client(message: &Message, tasks: &mut GameTaskResource) {
         match *message {
             Message::ActorSpawn {
-                public_id,
+                external_id,
                 x,
                 y,
                 direction,
                 ..
             } => {
                 tasks.push(GameTask::ActorSpawn {
-                    public_id,
+                    external_id,
                     x,
                     y,
                     direction,
                 });
             }
-            Message::ActorGrant { public_id, .. } => {
-                tasks.push(GameTask::ActorGrant(public_id));
+            Message::ActorGrant { external_id, .. } => {
+                tasks.push(GameTask::ActorGrant { external_id });
             }
             Message::TransformSync {
-                public_id,
+                external_id,
                 x,
                 y,
                 direction,
                 ..
             } => {
                 tasks.push(GameTask::TransformSync {
-                    public_id,
+                    external_id,
                     x,
                     y,
                     direction,

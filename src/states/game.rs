@@ -2,7 +2,7 @@ use crate::components::Actor;
 use crate::components::ActorActions;
 use crate::components::Interpolation;
 use crate::components::Weapon;
-use crate::resources::EntityIndexMap;
+use crate::resources::EntityMap;
 use crate::resources::GameTask;
 use crate::resources::GameTaskResource;
 use crate::resources::Message;
@@ -128,7 +128,7 @@ impl GameState<'_, '_> {
     fn init_resources(&self, world: &mut World) {
         world.register::<Weapon>();
         world.insert(DebugLines::new());
-        world.insert(EntityIndexMap::new());
+        world.insert(EntityMap::new());
         world.insert(GameTaskResource::new());
         world.insert(MessageResource::new());
         world.insert(NetworkTaskResource::new());
@@ -140,32 +140,28 @@ impl GameState<'_, '_> {
 
         if self.is_own_game() {
             let mut tasks = world.write_resource::<GameTaskResource>();
-            let public_id = world
-                .write_resource::<EntityIndexMap>()
-                .generate_public_id();
+            let external_id = world.write_resource::<EntityMap>().generate_external_id();
 
             tasks.push(GameTask::ActorSpawn {
-                public_id,
+                external_id,
                 x: 0.0,
                 y: 0.0,
                 direction: 0.0,
             });
 
-            tasks.push(GameTask::ActorGrant(public_id));
+            tasks.push(GameTask::ActorGrant { external_id });
 
             for i in 0..2 {
-                let public_id = world
-                    .write_resource::<EntityIndexMap>()
-                    .generate_public_id();
+                let external_id = world.write_resource::<EntityMap>().generate_external_id();
 
                 tasks.push(GameTask::ActorSpawn {
-                    public_id,
+                    external_id,
                     x: 5.0 * (0.5 - i as f32),
                     y: 0.0,
                     direction: 0.0,
                 });
 
-                tasks.push(GameTask::ActorAiSet(public_id));
+                tasks.push(GameTask::ActorAiSet { external_id });
             }
         }
 
@@ -222,39 +218,39 @@ impl GameState<'_, '_> {
                 self.on_task_client_greet(world, address);
             }
             GameTask::ActorSpawn {
-                public_id,
+                external_id,
                 x,
                 y,
                 direction,
             } => {
-                self.on_task_actor_spawn(world, public_id, x, y, direction);
+                self.on_task_actor_spawn(world, external_id, x, y, direction);
             }
-            GameTask::ActorGrant(public_id) => {
-                self.on_task_actor_grant(world, public_id);
+            GameTask::ActorGrant { external_id } => {
+                self.on_task_actor_grant(world, external_id);
             }
-            GameTask::ActorAiSet(public_id) => {
-                self.on_task_actor_ai_set(world, public_id);
+            GameTask::ActorAiSet { external_id } => {
+                self.on_task_actor_ai_set(world, external_id);
             }
             GameTask::ActorAction {
-                public_id,
+                external_id,
                 actions,
                 direction,
             } => {
-                self.on_task_actor_action(world, public_id, Some(actions), direction);
+                self.on_task_actor_action(world, external_id, Some(actions), direction);
             }
             GameTask::ActorTurn {
-                public_id,
+                external_id,
                 direction,
             } => {
-                self.on_task_actor_action(world, public_id, None, direction);
+                self.on_task_actor_action(world, external_id, None, direction);
             }
             GameTask::TransformSync {
-                public_id,
+                external_id,
                 x,
                 y,
                 direction,
             } => {
-                self.on_task_transform_sync(world, public_id, x, y, direction);
+                self.on_task_transform_sync(world, external_id, x, y, direction);
             }
             GameTask::ProjectileSpawn {
                 x,
@@ -287,7 +283,7 @@ impl GameState<'_, '_> {
 
     #[allow(clippy::unused_self)]
     fn on_task_client_greet(&self, world: &mut World, address: SocketAddr) {
-        let mut id_map = world.write_resource::<EntityIndexMap>();
+        let mut entity_map = world.write_resource::<EntityMap>();
         let mut messages = world.write_resource::<MessageResource>();
 
         for (entity, _, transform, interpolation) in (
@@ -308,12 +304,12 @@ impl GameState<'_, '_> {
                 direction = (direction - interpolation.offset_direction) % TAU;
             }
 
-            if let Some(public_id) = id_map.to_public_id(entity.id()) {
+            if let Some(external_id) = entity_map.get_external_id(entity) {
                 messages.push((
                     MessageReceiver::Only(address),
                     Message::ActorSpawn {
                         id: 0,
-                        public_id,
+                        external_id,
                         x,
                         y,
                         direction,
@@ -322,11 +318,11 @@ impl GameState<'_, '_> {
             }
         }
 
-        let public_id = id_map.generate_public_id();
+        let external_id = entity_map.generate_external_id();
         let mut tasks = world.write_resource::<GameTaskResource>();
 
         tasks.push(GameTask::ActorSpawn {
-            public_id,
+            external_id,
             x: 0.0,
             y: 0.0,
             direction: 0.0,
@@ -334,18 +330,21 @@ impl GameState<'_, '_> {
 
         tasks.push(GameTask::MessageSent {
             receiver: MessageReceiver::Only(address),
-            message: Message::ActorGrant { id: 0, public_id },
+            message: Message::ActorGrant { id: 0, external_id },
         });
 
         world
             .write_resource::<NetworkTaskResource>()
-            .push(NetworkTask::AttachPublicId(address, public_id));
+            .push(NetworkTask::AttachEntity {
+                address,
+                external_id,
+            });
     }
 
     fn on_task_actor_spawn(
         &self,
         world: &mut World,
-        public_id: u16,
+        external_id: u16,
         x: f32,
         y: f32,
         direction: f32,
@@ -354,7 +353,7 @@ impl GameState<'_, '_> {
             utils::world::create_actor(
                 world,
                 root,
-                Some(public_id),
+                Some(external_id),
                 x,
                 y,
                 direction,
@@ -367,7 +366,7 @@ impl GameState<'_, '_> {
                     MessageReceiver::Every,
                     Message::ActorSpawn {
                         id: 0,
-                        public_id,
+                        external_id,
                         x,
                         y,
                         direction,
@@ -377,9 +376,9 @@ impl GameState<'_, '_> {
         }
     }
 
-    fn on_task_actor_grant(&mut self, world: &mut World, id: u16) {
+    fn on_task_actor_grant(&mut self, world: &mut World, external_id: u16) {
         if let Some(root) = self.root {
-            if let Some(actor) = EntityIndexMap::fetch_entity_by_public_id(world, id) {
+            if let Some(actor) = utils::world::get_entity(world, external_id) {
                 self.player_actor = Some(actor);
                 self.player_ghost = utils::world::grant_played_actor(
                     world,
@@ -392,8 +391,8 @@ impl GameState<'_, '_> {
     }
 
     #[allow(clippy::unused_self)]
-    fn on_task_actor_ai_set(&self, world: &World, id: u16) {
-        if let Some(actor) = EntityIndexMap::fetch_entity_by_public_id(world, id) {
+    fn on_task_actor_ai_set(&self, world: &World, external_id: u16) {
+        if let Some(actor) = utils::world::get_entity(world, external_id) {
             utils::world::set_actor_ai(world, actor);
         }
     }
@@ -402,11 +401,11 @@ impl GameState<'_, '_> {
     fn on_task_actor_action(
         &self,
         world: &World,
-        public_id: u16,
+        external_id: u16,
         actions: Option<ActorActions>,
         direction: f32,
     ) {
-        if let Some(entity) = EntityIndexMap::fetch_entity_by_public_id(world, public_id) {
+        if let Some(entity) = utils::world::get_entity(world, external_id) {
             let mut is_walking = false;
 
             if let Some(actor) = world.write_storage::<Actor>().get_mut(entity) {
@@ -441,8 +440,15 @@ impl GameState<'_, '_> {
         }
     }
 
-    fn on_task_transform_sync(&self, world: &World, id: u16, x: f32, y: f32, direction: f32) {
-        if let Some(entity) = EntityIndexMap::fetch_entity_by_public_id(world, id) {
+    fn on_task_transform_sync(
+        &self,
+        world: &World,
+        external_id: u16,
+        x: f32,
+        y: f32,
+        direction: f32,
+    ) {
+        if let Some(entity) = utils::world::get_entity(world, external_id) {
             self.sync_transform(world, entity, x, y, direction);
         }
     }

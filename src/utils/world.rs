@@ -13,7 +13,7 @@ use crate::data::LAYER_ACTOR;
 use crate::data::LAYER_ACTOR_PLAYER;
 use crate::data::LAYER_CAMERA;
 use crate::data::LAYER_TERRAIN;
-use crate::resources::EntityIndexMap;
+use crate::resources::EntityMap;
 use crate::resources::Sprite;
 use crate::resources::SpriteResource;
 use crate::states::GameType;
@@ -34,7 +34,14 @@ use amethyst::tiles::MortonEncoder;
 use amethyst::tiles::TileMap;
 
 // TODO: Maybe name as `new_*` instead of `create_*`
-// TODO: Maybe don't use `EntityIndexMap`
+// TODO: Maybe don't use `EntityMap`
+
+pub fn get_entity(world: &World, external_id: u16) -> Option<Entity> {
+    return world
+        .read_resource::<EntityMap>()
+        .get_entity(external_id)
+        .filter(|e| world.is_alive(*e));
+}
 
 pub fn create_simple_sprite(
     world: &mut World,
@@ -60,7 +67,7 @@ pub fn create_simple_sprite(
 pub fn create_actor(
     world: &mut World,
     root: Entity,
-    public_id: Option<u16>,
+    external_id: Option<u16>,
     x: f32,
     y: f32,
     direction: f32,
@@ -113,10 +120,8 @@ pub fn create_actor(
 
     let actor = builder.build();
 
-    if let Some(public_id) = public_id {
-        world
-            .fetch_mut::<EntityIndexMap>()
-            .store(actor.id(), public_id);
+    if let Some(external_id) = external_id {
+        world.fetch_mut::<EntityMap>().store(actor, external_id);
     }
 
     return actor;

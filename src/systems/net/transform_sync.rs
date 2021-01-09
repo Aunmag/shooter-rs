@@ -1,6 +1,6 @@
 use crate::components::Interpolation;
 use crate::components::TransformSync;
-use crate::resources::EntityIndexMap;
+use crate::resources::EntityMap;
 use crate::resources::Message;
 use crate::resources::MessageReceiver;
 use crate::resources::MessageResource;
@@ -46,7 +46,7 @@ impl TransformSyncSystem {
 impl<'a> System<'a> for TransformSyncSystem {
     type SystemData = (
         Entities<'a>,
-        ReadExpect<'a, EntityIndexMap>,
+        ReadExpect<'a, EntityMap>,
         ReadStorage<'a, Interpolation>,
         ReadStorage<'a, Transform>,
         ReadStorage<'a, TransformSync>,
@@ -55,7 +55,7 @@ impl<'a> System<'a> for TransformSyncSystem {
 
     fn run(
         &mut self,
-        (entities, id_map, interpolation, transforms, transforms_sync, mut messages): Self::SystemData,
+        (entities, entity_map, interpolation, transforms, transforms_sync, mut messages): Self::SystemData,
     ) {
         if self.last_sync.elapsed() < INTERVAL {
             return;
@@ -71,7 +71,7 @@ impl<'a> System<'a> for TransformSyncSystem {
         )
             .join()
         {
-            if let Some(public_id) = id_map.to_public_id(entity.id()) {
+            if let Some(external_id) = entity_map.get_external_id(entity) {
                 let mut current = Cached {
                     x: transform.translation().x,
                     y: transform.translation().y,
@@ -84,19 +84,19 @@ impl<'a> System<'a> for TransformSyncSystem {
                     current.direction = (current.direction - interpolation.offset_direction) % TAU;
                 }
 
-                if self.cache.get(&public_id).map_or(true, |c| c != &current) {
+                if self.cache.get(&external_id).map_or(true, |c| c != &current) {
                     messages.push((
                         MessageReceiver::Every,
                         Message::TransformSync {
                             id: 0,
-                            public_id,
+                            external_id,
                             x: current.x,
                             y: current.y,
                             direction: current.direction,
                         },
                     ));
 
-                    clean_cache.insert(public_id, current);
+                    clean_cache.insert(external_id, current);
                 }
             }
         }

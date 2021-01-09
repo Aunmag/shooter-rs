@@ -9,24 +9,28 @@ pub type GameTaskResource = Vec<GameTask>;
 pub enum GameTask {
     ClientGreet(SocketAddr),
     ActorSpawn {
-        public_id: u16,
+        external_id: u16,
         x: f32,
         y: f32,
         direction: f32,
     },
-    ActorGrant(u16),
-    ActorAiSet(u16),
+    ActorGrant {
+        external_id: u16,
+    },
+    ActorAiSet {
+        external_id: u16,
+    },
     ActorAction {
-        public_id: u16,
+        external_id: u16,
         actions: ActorActions,
         direction: f32,
     },
     ActorTurn {
-        public_id: u16,
+        external_id: u16,
         direction: f32,
     },
     TransformSync {
-        public_id: u16,
+        external_id: u16,
         x: f32,
         y: f32,
         direction: f32,

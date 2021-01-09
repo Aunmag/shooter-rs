@@ -26,18 +26,18 @@ pub enum Message {
     },
     ActorSpawn {
         id: u16,
-        public_id: u16,
+        external_id: u16,
         x: f32,
         y: f32,
         direction: f32,
     },
     ActorGrant {
         id: u16,
-        public_id: u16,
+        external_id: u16,
     },
     TransformSync {
         id: u16,
-        public_id: u16,
+        external_id: u16,
         x: f32,
         y: f32,
         direction: f32,

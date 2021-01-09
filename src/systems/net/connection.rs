@@ -17,7 +17,7 @@ pub struct Connection {
     // TODO: Handle ID restart
     next_incoming_message_id: u16,
     next_outgoing_message_id: u16,
-    pub attached_public_id: Option<u16>,
+    pub attached_external_id: Option<u16>,
 }
 
 pub enum ConnectionStatus {
@@ -38,7 +38,7 @@ impl Connection {
             held_messages: HashMap::new(),
             next_incoming_message_id: 0,
             next_outgoing_message_id: 0,
-            attached_public_id: None,
+            attached_external_id: None,
         };
     }
 
