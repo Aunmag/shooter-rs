@@ -13,31 +13,12 @@ Container(
     children: [
         Container(
             transform: (
-                id: "new_game.wallpaper",
+                id: "wallpaper",
                 z: 0.5,
                 width: 1.0,
                 height: 1.0,
                 opaque: false,
             ),
-            // TODO: Use different image
-            background: Texture(File("wallpapers/home.png", ("IMAGE", (
-                sampler_info: (
-                    // TODO: Copy-pasted config, I don't know what most of these parameters do, keep them as defaults, don't modify unnecessary since I need only nearest stretching
-                    min_filter: Nearest,
-                    mag_filter: Nearest,
-                    mip_filter: Nearest,
-                    wrap_mode: (Tile, Tile, Tile),
-                    lod_bias: (0),
-                    lod_range: (
-                        start: ( 0 ),
-                        end: ( 8000 ),
-                    ),
-                    comparison: None,
-                    border: (0),
-                    normalized: true,
-                    anisotropic: Off,
-                ),
-            )))),
             children: [],
         ),
         Container(

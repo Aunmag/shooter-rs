@@ -6,6 +6,7 @@ mod message;
 mod network_task;
 mod sprite;
 mod ui_task;
+mod wallpaper;
 
 pub use self::entity_map::*;
 pub use self::game_status::*;
@@ -15,3 +16,4 @@ pub use self::message::*;
 pub use self::network_task::*;
 pub use self::sprite::*;
 pub use self::ui_task::*;
+pub use self::wallpaper::*;

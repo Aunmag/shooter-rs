@@ -1,3 +1,4 @@
+use crate::resources::Wallpaper;
 use crate::states::game::GameType;
 use crate::states::ui::UiState;
 use crate::states::GameState;
@@ -76,6 +77,7 @@ impl SimpleState for NewGameState {
             self.button_back = finder.find(BUTTON_BACK_ID);
         });
 
+        self.set_wallpaper(&data.world, Wallpaper::Home); // TODO: Change wallpaper
         self.set_visibility(&data.world, true);
     }
 

@@ -1,5 +1,6 @@
 use crate::resources::GameStatus;
 use crate::resources::SpriteResource;
+use crate::resources::WallpaperResource;
 use crate::states::ui::HomeState;
 use amethyst::assets::Completion;
 use amethyst::assets::ProgressCounter;
@@ -25,11 +26,13 @@ impl SimpleState for StartupState {
             creator.create("ui/confirm.ron", &mut self.progress);
             creator.create("ui/home.ron", &mut self.progress);
             creator.create("ui/new_game.ron", &mut self.progress);
-            creator.create("ui/quit.ron", &mut self.progress);
         });
 
         data.world
             .insert(SpriteResource::new(&data.world, &mut self.progress));
+
+        data.world
+            .insert(WallpaperResource::new(&data.world, &mut self.progress));
     }
 
     fn update(&mut self, data: &mut StateData<GameData>) -> SimpleTrans {

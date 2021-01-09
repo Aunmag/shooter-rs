@@ -1,8 +1,8 @@
 use crate::resources::UiTask;
 use crate::resources::UiTaskResource;
+use crate::resources::Wallpaper;
 use crate::states::ui::ConfirmState;
 use crate::states::ui::NewGameState;
-use crate::states::ui::QuitState;
 use crate::states::ui::UiState;
 use crate::utils;
 use amethyst::ecs::prelude::Entity;
@@ -21,6 +21,7 @@ const BUTTON_SETTINGS_ID: &str = "home.settings";
 const BUTTON_HELP_ID: &str = "home.help";
 const BUTTON_QUIT_ID: &str = "home.quit";
 const DISCONNECTION_TITLE: &str = "Are you sure you want to disconnect?";
+const QUIT_TITLE: &str = "Are you sure you want to quit?";
 
 pub struct HomeState {
     is_root: bool,
@@ -81,6 +82,7 @@ impl SimpleState for HomeState {
             );
         }
 
+        self.set_wallpaper(&data.world, Wallpaper::Home);
         self.set_visibility(&data.world, true);
     }
 
@@ -120,13 +122,19 @@ impl SimpleState for HomeState {
                 }
 
                 if Some(target) == self.button_disconnect {
-                    return Trans::Push(Box::new(ConfirmState::new(DISCONNECTION_TITLE, || {
-                        Trans::Replace(Box::new(HomeState::new(true)))
-                    })));
+                    return Trans::Push(Box::new(ConfirmState::new(
+                        DISCONNECTION_TITLE,
+                        Wallpaper::Home, // TODO: Change
+                        || Trans::Replace(Box::new(HomeState::new(true))),
+                    )));
                 }
 
                 if Some(target) == self.button_quit {
-                    return Trans::Push(Box::new(QuitState::new()));
+                    return Trans::Push(Box::new(ConfirmState::new(
+                        QUIT_TITLE,
+                        Wallpaper::Quit,
+                        || Trans::Quit,
+                    )));
                 }
             }
             _ => {}

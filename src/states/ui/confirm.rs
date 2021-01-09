@@ -1,5 +1,6 @@
 use crate::resources::UiTask;
 use crate::resources::UiTaskResource;
+use crate::resources::Wallpaper;
 use crate::states::ui::UiState;
 use amethyst::ecs::prelude::Entity;
 use amethyst::input::is_key_down;
@@ -19,16 +20,18 @@ pub struct ConfirmState {
     root: Option<Entity>,
     button_yes: Option<Entity>,
     button_no: Option<Entity>,
+    wallpaper: Wallpaper,
     on_confirm: fn() -> SimpleTrans,
 }
 
 impl ConfirmState {
-    pub fn new(title: &'static str, on_confirm: fn() -> SimpleTrans) -> Self {
+    pub fn new(title: &'static str, wallpaper: Wallpaper, on_confirm: fn() -> SimpleTrans) -> Self {
         return Self {
             title,
             root: None,
             button_yes: None,
             button_no: None,
+            wallpaper,
             on_confirm,
         };
     }
@@ -46,6 +49,7 @@ impl SimpleState for ConfirmState {
             .write_resource::<UiTaskResource>()
             .insert(LABEL_TITLE_ID.to_string(), UiTask::SetText(self.title));
 
+        self.set_wallpaper(&data.world, self.wallpaper);
         self.set_visibility(&data.world, true);
     }
 
