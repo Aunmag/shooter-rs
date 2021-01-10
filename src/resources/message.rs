@@ -49,6 +49,7 @@ pub enum Message {
         velocity_x: f32,
         velocity_y: f32,
         acceleration_factor: f32,
+        shooter_id: Option<u16>,
     },
 }
 

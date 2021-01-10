@@ -258,6 +258,7 @@ impl GameState<'_, '_> {
                 velocity_x,
                 velocity_y,
                 acceleration_factor,
+                shooter_id,
             } => {
                 self.on_task_projectile_spawn(
                     world,
@@ -266,6 +267,7 @@ impl GameState<'_, '_> {
                     velocity_x,
                     velocity_y,
                     acceleration_factor,
+                    shooter_id,
                 );
             }
             GameTask::ProjectileHit {
@@ -461,6 +463,7 @@ impl GameState<'_, '_> {
         velocity_x: f32,
         velocity_y: f32,
         acceleration_factor: f32,
+        shooter_id: Option<u16>,
     ) {
         if let Some(root) = self.root {
             if let GameType::Host(..) = self.game_type {
@@ -473,6 +476,7 @@ impl GameState<'_, '_> {
                         velocity_x,
                         velocity_y,
                         acceleration_factor,
+                        shooter_id,
                     },
                 ));
             }
@@ -485,6 +489,7 @@ impl GameState<'_, '_> {
                 velocity_x,
                 velocity_y,
                 acceleration_factor,
+                shooter_id,
             );
         }
     }

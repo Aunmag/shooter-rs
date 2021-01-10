@@ -1,8 +1,10 @@
 use crate::components::Actor;
 use crate::components::ActorActions;
 use crate::components::Weapon;
+use crate::resources::EntityMap;
 use crate::resources::GameTask;
 use crate::resources::GameTaskResource;
+use amethyst::core::ecs::ReadExpect;
 use amethyst::core::timing::Time;
 use amethyst::core::transform::Transform;
 use amethyst::derive::SystemDesc;
@@ -13,6 +15,7 @@ use amethyst::ecs::prelude::System;
 use amethyst::ecs::prelude::SystemData;
 use amethyst::ecs::prelude::Write;
 use amethyst::ecs::prelude::WriteStorage;
+use amethyst::ecs::Entities;
 use rand::Rng;
 use rand::SeedableRng;
 use rand_pcg::Pcg32;
@@ -52,6 +55,8 @@ impl WeaponSystem {
 
 impl<'a> System<'a> for WeaponSystem {
     type SystemData = (
+        Entities<'a>,
+        ReadExpect<'a, EntityMap>,
         Read<'a, Time>,
         ReadStorage<'a, Actor>,
         ReadStorage<'a, Transform>,
@@ -59,8 +64,26 @@ impl<'a> System<'a> for WeaponSystem {
         WriteStorage<'a, Weapon>,
     );
 
-    fn run(&mut self, (time, actors, transforms, mut tasks, mut weapons): Self::SystemData) {
-        for (actor, transform, weapon) in (&actors, &transforms, &mut weapons).join() {
+    fn run(
+        &mut self,
+        (
+            entities,
+            entity_map,
+            time,
+            actors,
+            transforms,
+            mut tasks,
+            mut weapons
+        ): Self::SystemData,
+    ) {
+        for (entity, actor, transform, weapon) in (
+            &entities,
+            &actors,
+            &transforms,
+            &mut weapons
+        )
+            .join()
+        {
             if actor.actions.contains(ActorActions::ATTACK) && weapon.fire(time.absolute_time()) {
                 let velocity = self.deviate_velocity(weapon.config.muzzle_velocity);
                 let (sin, cos) = (-self.deviate_direction(transform.euler_angles().2)).sin_cos();
@@ -71,6 +94,7 @@ impl<'a> System<'a> for WeaponSystem {
                     velocity_x: sin * velocity,
                     velocity_y: cos * velocity,
                     acceleration_factor: weapon.config.projectile.acceleration_factor,
+                    shooter_id: entity_map.get_external_id(entity),
                 });
             }
         }

@@ -249,6 +249,7 @@ impl NetworkSystem {
                 velocity_x,
                 velocity_y,
                 acceleration_factor,
+                shooter_id,
                 ..
             } => {
                 tasks.push(GameTask::ProjectileSpawn {
@@ -257,6 +258,7 @@ impl NetworkSystem {
                     velocity_x,
                     velocity_y,
                     acceleration_factor,
+                    shooter_id,
                 });
             }
             _ => {}

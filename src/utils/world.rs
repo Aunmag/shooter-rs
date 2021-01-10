@@ -17,7 +17,7 @@ use crate::resources::EntityMap;
 use crate::resources::Sprite;
 use crate::resources::SpriteResource;
 use crate::states::GameType;
-use amethyst::core::math::Point2;
+use amethyst::core::math::Vector2;
 use amethyst::core::math::Vector3;
 use amethyst::core::timing::Time;
 use amethyst::core::transform::Transform;
@@ -214,14 +214,20 @@ pub fn create_projectile(
     velocity_x: f32,
     velocity_y: f32,
     acceleration_factor: f32,
+    shooter_id: Option<u16>,
 ) -> Entity {
+    let shooter = shooter_id
+        .and_then(|id| world.read_resource::<EntityMap>().get_entity(id))
+        .filter(|e| world.is_alive(*e));
+
     let projectile = Projectile::new(
         ProjectileConfig {
             acceleration_factor,
         },
         world.read_resource::<Time>().absolute_time(),
-        Point2::from([x, y]),
-        Point2::from([velocity_x, velocity_y]),
+        Vector2::new(x, y),
+        Vector2::new(velocity_x, velocity_y),
+        shooter,
     );
 
     return world

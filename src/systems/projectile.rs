@@ -4,8 +4,10 @@ use crate::components::Projectile;
 use crate::data::LAYER_PROJECTILE;
 use crate::resources::GameTask;
 use crate::resources::GameTaskResource;
+use crate::utils;
 use crate::utils::math;
 use amethyst::core::math::Point3;
+use amethyst::core::math::Vector2;
 use amethyst::core::timing::Time;
 use amethyst::core::transform::Transform;
 use amethyst::derive::SystemDesc;
@@ -20,7 +22,8 @@ use amethyst::ecs::Entity;
 use amethyst::renderer::debug_drawing::DebugLines;
 use amethyst::renderer::palette::Srgba;
 
-const FORCE_FACTOR: f32 = 1.0 / 4_000.0;
+const PUSH_FACTOR: f32 = 0.00025;
+const VELOCITY_MIN: f32 = 5.0;
 
 #[derive(SystemDesc)]
 pub struct ProjectileSystem;
@@ -55,8 +58,12 @@ impl<'a> System<'a> for ProjectileSystem {
             mut debug
         ): Self::SystemData,
     ) {
+        let time_current = time.absolute_time();
+        let time_previous = utils::sub_duration(time_current, time.delta_time());
+
         for (entity, projectile) in (&entities, &projectiles).join() {
-            let mut data = projectile.calc_data(time.absolute_time(), time.delta_seconds());
+            let (mut head_position, head_velocity) = projectile.calc_data(time_current);
+            let (tail_position, _) = projectile.calc_data(time_previous);
             let mut obstacle: Option<Obstacle> = None;
 
             for (entity, collision, transform, interpolation) in (
@@ -67,31 +74,32 @@ impl<'a> System<'a> for ProjectileSystem {
             )
                 .join()
             {
-                let mut obstacle_x = transform.translation().x;
-                let mut obstacle_y = transform.translation().y;
+                if projectile.shooter == Some(entity) {
+                    continue;
+                }
 
+                let mut obstacle_position = transform.translation().xy();
+
+                // TODO: Do I need interpolation?
                 if let Some(interpolation) = interpolation {
-                    obstacle_x += interpolation.offset_x;
-                    obstacle_y += interpolation.offset_y;
+                    obstacle_position.x += interpolation.offset_x;
+                    obstacle_position.y += interpolation.offset_y;
                 }
 
                 if is_collision(
-                    data.head.x,
-                    data.head.y,
-                    data.tail.x,
-                    data.tail.y,
-                    obstacle_x,
-                    obstacle_y,
+                    head_position,
+                    tail_position,
+                    obstacle_position,
                     collision.radius,
                 ) {
                     let distance_squared = math::distance_squared(
-                        data.head.x,
-                        data.head.y,
-                        obstacle_x,
-                        obstacle_y,
+                        tail_position.x,
+                        tail_position.y,
+                        obstacle_position.x,
+                        obstacle_position.y,
                     );
 
-                    if obstacle.as_ref().map_or(true, |o| o.distance_squared < distance_squared) {
+                    if obstacle.as_ref().map_or(true, |o| o.distance_squared > distance_squared) {
                         obstacle = Some(Obstacle {
                             entity,
                             distance_squared,
@@ -102,31 +110,31 @@ impl<'a> System<'a> for ProjectileSystem {
 
             if let Some(obstacle) = obstacle.as_ref() {
                 let (sin, cos) = math::angle(
-                    data.head.x,
-                    data.head.y,
-                    data.tail.x,
-                    data.tail.y,
+                    head_position.x,
+                    head_position.y,
+                    tail_position.x,
+                    tail_position.y,
                 ).sin_cos();
 
-                let distance = obstacle.distance_squared.sqrt();
+                let length = obstacle.distance_squared.sqrt();
+                head_position.x = tail_position.x + length * cos;
+                head_position.y = tail_position.y + length * sin;
 
-                data.head.x -= distance * cos;
-                data.head.y -= distance * sin;
-
+                // TODO: Better don't use head velocity, calc actual velocity at collision point
                 tasks.push(GameTask::ProjectileHit {
                     entity: obstacle.entity,
-                    force_x: data.velocity.x * FORCE_FACTOR,
-                    force_y: data.velocity.y * FORCE_FACTOR,
-                })
+                    force_x: head_velocity.x * PUSH_FACTOR,
+                    force_y: head_velocity.y * PUSH_FACTOR,
+                });
             }
 
             debug.draw_line(
-                Point3::from([data.head.x, data.head.y, LAYER_PROJECTILE]),
-                Point3::from([data.tail.x, data.tail.y, LAYER_PROJECTILE]),
+                Point3::from([head_position.x, head_position.y, LAYER_PROJECTILE]),
+                Point3::from([tail_position.x, tail_position.y, LAYER_PROJECTILE]),
                 Srgba::new(1.0, 1.0, 0.0, 1.0),
             );
 
-            if obstacle.is_some() || data.has_stopped() {
+            if obstacle.is_some() || has_stopped(head_velocity) {
                 if let Err(error) = entities.delete(entity) {
                     log::error!("Failed to delete a stopped bullet: {}", error);
                 }
@@ -136,18 +144,15 @@ impl<'a> System<'a> for ProjectileSystem {
 }
 
 fn is_collision(
-    line_head_x: f32,
-    line_head_y: f32,
-    line_tail_x: f32,
-    line_tail_y: f32,
-    obstacle_x: f32,
-    obstacle_y: f32,
+    line_head: Vector2<f32>,
+    line_tail: Vector2<f32>,
+    obstacle: Vector2<f32>,
     obstacle_radius: f32,
 ) -> bool {
-    let x1 = obstacle_x - line_head_x;
-    let y1 = obstacle_y - line_head_y;
-    let x2 = obstacle_x - line_tail_x - x1;
-    let y2 = obstacle_y - line_tail_y - y1;
+    let x1 = obstacle.x - line_head.x;
+    let y1 = obstacle.y - line_head.y;
+    let x2 = obstacle.x - line_tail.x - x1;
+    let y2 = obstacle.y - line_tail.y - y1;
 
     let a = x2 * x2 + y2 * y2;
     let b = (x1 * x2 + y1 * y2) * 2.0;
@@ -160,4 +165,8 @@ fn is_collision(
     } else {
         return a + b + c < 0.0;
     }
+}
+
+fn has_stopped(velocity: Vector2<f32>) -> bool {
+    return math::are_closer_than(velocity.x, velocity.y, 0.0, 0.0, VELOCITY_MIN);
 }
