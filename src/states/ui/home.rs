@@ -124,7 +124,7 @@ impl SimpleState for HomeState {
                 if Some(target) == self.button_disconnect {
                     return Trans::Push(Box::new(ConfirmState::new(
                         DISCONNECTION_TITLE,
-                        Wallpaper::Home, // TODO: Change
+                        Wallpaper::Disconnect,
                         || Trans::Replace(Box::new(HomeState::new(true))),
                     )));
                 }

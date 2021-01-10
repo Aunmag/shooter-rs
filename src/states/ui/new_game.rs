@@ -77,7 +77,7 @@ impl SimpleState for NewGameState {
             self.button_back = finder.find(BUTTON_BACK_ID);
         });
 
-        self.set_wallpaper(&data.world, Wallpaper::Home); // TODO: Change wallpaper
+        self.set_wallpaper(&data.world, Wallpaper::Play);
         self.set_visibility(&data.world, true);
     }
 
