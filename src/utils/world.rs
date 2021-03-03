@@ -6,7 +6,6 @@ use crate::components::Player;
 use crate::components::Projectile;
 use crate::components::ProjectileConfig;
 use crate::components::Terrain;
-use crate::components::TransformSync;
 use crate::components::Weapon;
 use crate::components::WeaponConfig;
 use crate::data::LAYER_ACTOR;
@@ -98,12 +97,8 @@ pub fn create_actor(
 
     match *game_type {
         GameType::Single => {}
-        GameType::Join(..) => {
+        GameType::Join(..) | GameType::Host(..) => {
             builder = builder.with(Interpolation::new());
-        }
-        GameType::Host(..) => {
-            builder = builder.with(Interpolation::new());
-            builder = builder.with(TransformSync);
         }
     }
 

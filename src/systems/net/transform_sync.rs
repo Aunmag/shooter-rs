@@ -1,5 +1,5 @@
+use crate::components::Actor;
 use crate::components::Interpolation;
-use crate::components::TransformSync;
 use crate::resources::EntityMap;
 use crate::resources::Message;
 use crate::resources::MessageReceiver;
@@ -47,30 +47,24 @@ impl<'a> System<'a> for TransformSyncSystem {
     type SystemData = (
         Entities<'a>,
         ReadExpect<'a, EntityMap>,
+        ReadStorage<'a, Actor>,
         ReadStorage<'a, Interpolation>,
         ReadStorage<'a, Transform>,
-        ReadStorage<'a, TransformSync>,
         Write<'a, MessageResource>,
     );
 
     fn run(
         &mut self,
-        (entities, entity_map, interpolation, transforms, transforms_sync, mut messages): Self::SystemData,
+        (entities, entity_map, actors, interpolations, transforms, mut messages): Self::SystemData,
     ) {
         if self.last_sync.elapsed() < INTERVAL {
             return;
         }
 
         let mut clean_cache = HashMap::with_capacity(self.cache.capacity());
+        let query = (&entities, &actors, (&interpolations).maybe(), &transforms).join();
 
-        for (entity, interpolation, transform, _) in (
-            &entities,
-            (&interpolation).maybe(),
-            &transforms,
-            &transforms_sync,
-        )
-            .join()
-        {
+        for (entity, _, interpolation, transform) in query {
             if let Some(external_id) = entity_map.get_external_id(entity) {
                 let mut current = Cached {
                     x: transform.translation().x,
