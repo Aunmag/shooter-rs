@@ -13,18 +13,16 @@ use amethyst::winit::VirtualKeyCode;
 use std::net::SocketAddr;
 
 const ROOT_ID: &str = "new_game";
-const BUTTON_PLAY_SINGLE_ID: &str = "new_game.single";
-const BUTTON_JOIN_ID: &str = "new_game.join";
 const BUTTON_HOST_ID: &str = "new_game.host";
+const BUTTON_JOIN_ID: &str = "new_game.join";
 const BUTTON_BACK_ID: &str = "new_game.back";
 const INPUT_IP_ID: &str = "new_game.ip";
 const INPUT_PORT_ID: &str = "new_game.port";
 
 pub struct NewGameState {
     root: Option<Entity>,
-    button_play_single: Option<Entity>,
-    button_join: Option<Entity>,
     button_host: Option<Entity>,
+    button_join: Option<Entity>,
     button_back: Option<Entity>,
 }
 
@@ -32,9 +30,8 @@ impl NewGameState {
     pub fn new() -> Self {
         return Self {
             root: None,
-            button_play_single: None,
-            button_join: None,
             button_host: None,
+            button_join: None,
             button_back: None,
         };
     }
@@ -71,9 +68,8 @@ impl SimpleState for NewGameState {
     fn on_start(&mut self, data: StateData<GameData>) {
         data.world.exec(|finder: UiFinder| {
             self.root = finder.find(ROOT_ID);
-            self.button_play_single = finder.find(BUTTON_PLAY_SINGLE_ID);
-            self.button_join = finder.find(BUTTON_JOIN_ID);
             self.button_host = finder.find(BUTTON_HOST_ID);
+            self.button_join = finder.find(BUTTON_JOIN_ID);
             self.button_back = finder.find(BUTTON_BACK_ID);
         });
 
@@ -90,9 +86,8 @@ impl SimpleState for NewGameState {
     }
 
     fn on_stop(&mut self, data: StateData<GameData>) {
-        self.button_play_single = None;
-        self.button_join = None;
         self.button_host = None;
+        self.button_join = None;
         self.button_back = None;
         self.set_visibility(&data.world, false);
     }
@@ -108,14 +103,10 @@ impl SimpleState for NewGameState {
                 event_type: UiEventType::Click,
                 target,
             }) => {
-                if Some(target) == self.button_play_single {
-                    return Trans::Replace(Box::new(GameState::new(GameType::Single)));
-                }
-
-                if Some(target) == self.button_join {
-                    match Self::parse_input_address(&data.world) {
-                        Ok(address) => {
-                            let game_type = GameType::Join(address);
+                if Some(target) == self.button_host {
+                    match Self::parse_input_port(&data.world) {
+                        Ok(port) => {
+                            let game_type = GameType::Host(port);
                             return Trans::Replace(Box::new(GameState::new(game_type)));
                         }
                         Err(error) => {
@@ -124,10 +115,10 @@ impl SimpleState for NewGameState {
                     }
                 }
 
-                if Some(target) == self.button_host {
-                    match Self::parse_input_port(&data.world) {
-                        Ok(port) => {
-                            let game_type = GameType::Host(port);
+                if Some(target) == self.button_join {
+                    match Self::parse_input_address(&data.world) {
+                        Ok(address) => {
+                            let game_type = GameType::Join(address);
                             return Trans::Replace(Box::new(GameState::new(game_type)));
                         }
                         Err(error) => {

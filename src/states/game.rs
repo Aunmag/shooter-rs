@@ -57,9 +57,8 @@ pub struct GameState<'a, 'b> {
 }
 
 pub enum GameType {
-    Single,
-    Join(SocketAddr),
     Host(u16),
+    Join(SocketAddr),
 }
 
 impl GameState<'_, '_> {
@@ -76,15 +75,17 @@ impl GameState<'_, '_> {
     fn init_dispatcher(&mut self, world: &mut World) {
         let mut builder = DispatcherBuilder::new();
 
-        #[allow(clippy::unwrap_used)] // TODO: Remove
+        #[allow(clippy::unwrap_used)] // TODO: Resolve
         match self.game_type {
-            GameType::Single => {
+            GameType::Host(port) => {
                 builder.add(AiSystem::new(), "Ai", &[]);
                 builder.add(PlayerSystem, "Player", &[]);
                 builder.add(ActorSystem, "Actor", &["Ai", "Player"]);
+                builder.add(WeaponSystem::new(), "Weapon", &["Actor"]);
                 builder.add(CollisionSystem::new(), "Collision", &["Actor"]);
                 builder.add(ProjectileSystem, "Projectile", &["Collision"]);
-                builder.add(WeaponSystem::new(), "Weapon", &["Actor"]);
+                builder.add(NetworkSystem::new_as_server(port).unwrap(), "Network", &[]);
+                builder.add(TransformSyncSystem::new(), "TransformSync", &["Collision"]);
             }
             GameType::Join(address) => {
                 builder.add(PlayerSystem, "Player", &[]);
@@ -97,16 +98,6 @@ impl GameState<'_, '_> {
                     &["InputSend"],
                 );
                 builder.add(InterpolationSystem, "Interpolation", &[]);
-            }
-            GameType::Host(port) => {
-                builder.add(AiSystem::new(), "Ai", &[]);
-                builder.add(PlayerSystem, "Player", &[]);
-                builder.add(ActorSystem, "Actor", &["Ai", "Player"]);
-                builder.add(WeaponSystem::new(), "Weapon", &["Actor"]);
-                builder.add(CollisionSystem::new(), "Collision", &["Actor"]);
-                builder.add(ProjectileSystem, "Projectile", &["Collision"]);
-                builder.add(NetworkSystem::new_as_server(port).unwrap(), "Network", &[]);
-                builder.add(TransformSyncSystem::new(), "TransformSync", &["Collision"]);
             }
         }
 
@@ -136,7 +127,7 @@ impl GameState<'_, '_> {
         let root = world.create_entity().build();
         self.root.replace(root);
 
-        if self.is_own_game() {
+        if self.is_host() {
             let mut tasks = world.write_resource::<GameTaskResource>();
             let external_id = world.write_resource::<EntityMap>().generate_external_id();
 
@@ -485,12 +476,10 @@ impl GameState<'_, '_> {
         return self.player_actor == Some(entity);
     }
 
-    fn is_own_game(&self) -> bool {
-        #[allow(clippy::match_same_arms)]
+    fn is_host(&self) -> bool {
         return match self.game_type {
-            GameType::Single => true,
-            GameType::Join(..) => false,
             GameType::Host(..) => true,
+            GameType::Join(..) => false,
         };
     }
 }
