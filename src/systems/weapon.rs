@@ -73,17 +73,12 @@ impl<'a> System<'a> for WeaponSystem {
             actors,
             transforms,
             mut tasks,
-            mut weapons
+            mut weapons,
         ): Self::SystemData,
     ) {
-        for (entity, actor, transform, weapon) in (
-            &entities,
-            &actors,
-            &transforms,
-            &mut weapons
-        )
-            .join()
-        {
+        let query = (&entities, &actors, &transforms, &mut weapons).join();
+
+        for (entity, actor, transform, weapon) in query {
             if actor.actions.contains(ActorActions::ATTACK) && weapon.fire(time.absolute_time()) {
                 let velocity = self.deviate_velocity(weapon.config.muzzle_velocity);
                 let (sin, cos) = (-self.deviate_direction(transform.euler_angles().2)).sin_cos();
