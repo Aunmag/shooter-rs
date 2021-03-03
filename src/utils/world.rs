@@ -95,11 +95,8 @@ pub fn create_actor(
             },
         }));
 
-    match *game_type {
-        GameType::Single => {}
-        GameType::Join(..) | GameType::Host(..) => {
-            builder = builder.with(Interpolation::new());
-        }
+    if let GameType::Join(..) = *game_type {
+        builder = builder.with(Interpolation::new());
     }
 
     if let Some(renderer) = renderer.take() {

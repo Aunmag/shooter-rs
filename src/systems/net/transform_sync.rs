@@ -1,5 +1,4 @@
 use crate::components::Actor;
-use crate::components::Interpolation;
 use crate::resources::EntityMap;
 use crate::resources::Message;
 use crate::resources::MessageReceiver;
@@ -14,7 +13,6 @@ use amethyst::ecs::Entities;
 use amethyst::ecs::ReadExpect;
 use amethyst::ecs::Write;
 use std::collections::HashMap;
-use std::f32::consts::TAU;
 use std::time::Duration;
 use std::time::Instant;
 
@@ -48,35 +46,24 @@ impl<'a> System<'a> for TransformSyncSystem {
         Entities<'a>,
         ReadExpect<'a, EntityMap>,
         ReadStorage<'a, Actor>,
-        ReadStorage<'a, Interpolation>,
         ReadStorage<'a, Transform>,
         Write<'a, MessageResource>,
     );
 
-    fn run(
-        &mut self,
-        (entities, entity_map, actors, interpolations, transforms, mut messages): Self::SystemData,
-    ) {
+    fn run(&mut self, (entities, entity_map, actors, transforms, mut messages): Self::SystemData) {
         if self.last_sync.elapsed() < INTERVAL {
             return;
         }
 
         let mut clean_cache = HashMap::with_capacity(self.cache.capacity());
-        let query = (&entities, &actors, (&interpolations).maybe(), &transforms).join();
 
-        for (entity, _, interpolation, transform) in query {
+        for (entity, _, transform) in (&entities, &actors, &transforms).join() {
             if let Some(external_id) = entity_map.get_external_id(entity) {
-                let mut current = Cached {
+                let current = Cached {
                     x: transform.translation().x,
                     y: transform.translation().y,
                     direction: transform.euler_angles().2,
                 };
-
-                if let Some(interpolation) = interpolation {
-                    current.x += interpolation.offset_x;
-                    current.y += interpolation.offset_y;
-                    current.direction = (current.direction - interpolation.offset_direction) % TAU;
-                }
 
                 if self.cache.get(&external_id).map_or(true, |c| c != &current) {
                     messages.push((

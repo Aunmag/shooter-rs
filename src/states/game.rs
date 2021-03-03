@@ -43,7 +43,6 @@ use amethyst::winit::Event;
 use amethyst::winit::MouseButton;
 use amethyst::winit::VirtualKeyCode;
 use amethyst::winit::WindowEvent;
-use std::f32::consts::TAU;
 use std::net::SocketAddr;
 use std::sync::Arc;
 
@@ -107,7 +106,6 @@ impl GameState<'_, '_> {
                 builder.add(CollisionSystem::new(), "Collision", &["Actor"]);
                 builder.add(ProjectileSystem, "Projectile", &["Collision"]);
                 builder.add(NetworkSystem::new_as_server(port).unwrap(), "Network", &[]);
-                builder.add(InterpolationSystem, "Interpolation", &[]);
                 builder.add(TransformSyncSystem::new(), "TransformSync", &["Collision"]);
             }
         }
@@ -288,33 +286,22 @@ impl GameState<'_, '_> {
         let mut entity_map = world.write_resource::<EntityMap>();
         let mut messages = world.write_resource::<MessageResource>();
 
-        for (entity, _, transform, interpolation) in (
+        for (entity, _, transform) in (
             &world.entities(),
             &world.read_storage::<Actor>(),
             &world.read_storage::<Transform>(),
-            (&world.read_storage::<Interpolation>()).maybe(),
         )
             .join()
         {
-            let mut x = transform.translation().x;
-            let mut y = transform.translation().y;
-            let mut direction = transform.euler_angles().2;
-
-            if let Some(interpolation) = interpolation {
-                x += interpolation.offset_x;
-                y += interpolation.offset_y;
-                direction = (direction - interpolation.offset_direction) % TAU;
-            }
-
             if let Some(external_id) = entity_map.get_external_id(entity) {
                 messages.push((
                     MessageReceiver::Only(address),
                     Message::ActorSpawn {
                         id: 0,
                         external_id,
-                        x,
-                        y,
-                        direction,
+                        x: transform.translation().x,
+                        y: transform.translation().y,
+                        direction: transform.euler_angles().2,
                     },
                 ));
             }
@@ -408,36 +395,14 @@ impl GameState<'_, '_> {
         direction: f32,
     ) {
         if let Some(entity) = utils::world::get_entity(world, external_id) {
-            let mut is_walking = false;
-
-            if let Some(actor) = world.write_storage::<Actor>().get_mut(entity) {
-                if let Some(actions) = actions {
+            if let Some(actions) = actions {
+                if let Some(actor) = world.write_storage::<Actor>().get_mut(entity) {
                     actor.actions = actions;
                 }
-
-                is_walking = !actor.actions.is_empty();
             }
 
-            let mut transforms = world.write_storage::<Transform>();
-            let mut interpolations = world.write_storage::<Interpolation>();
-
-            if is_walking {
-                if let Some(transform) = transforms.get_mut(entity) {
-                    transform.set_rotation_2d(direction);
-                }
-
-                if let Some(interpolation) = interpolations.get_mut(entity) {
-                    interpolation.offset_direction = 0.0;
-                }
-            } else if let Some(transform) = transforms.get_mut(entity) {
-                if let Some(interpolation) = interpolations.get_mut(entity) {
-                    interpolation.offset_direction = utils::math::angle_difference(
-                        direction,
-                        transform.euler_angles().2,
-                    );
-                } else {
-                    transform.set_rotation_2d(direction);
-                }
+            if let Some(transform) = world.write_storage::<Transform>().get_mut(entity) {
+                transform.set_rotation_2d(direction);
             }
         }
     }
