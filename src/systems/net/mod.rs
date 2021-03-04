@@ -1,10 +1,11 @@
-mod connection;
+mod connection_update;
 mod input_send;
 mod interpolation;
-mod network;
+mod message_receive;
 mod transform_sync;
 
+pub use self::connection_update::*;
 pub use self::input_send::*;
 pub use self::interpolation::*;
-pub use self::network::*;
+pub use self::message_receive::*;
 pub use self::transform_sync::*;

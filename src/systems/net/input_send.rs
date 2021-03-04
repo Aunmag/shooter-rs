@@ -2,15 +2,14 @@ use crate::components::Actor;
 use crate::components::ActorActions;
 use crate::components::Player;
 use crate::resources::Message;
-use crate::resources::MessageReceiver;
-use crate::resources::MessageResource;
+use crate::resources::NetResource;
 use amethyst::core::transform::Transform;
 use amethyst::derive::SystemDesc;
 use amethyst::ecs::prelude::Join;
 use amethyst::ecs::prelude::ReadStorage;
 use amethyst::ecs::prelude::System;
 use amethyst::ecs::prelude::SystemData;
-use amethyst::ecs::Write;
+use amethyst::shred::WriteExpect;
 use std::time::Duration;
 use std::time::Instant;
 
@@ -43,23 +42,20 @@ impl<'a> System<'a> for InputSendSystem {
         ReadStorage<'a, Actor>,
         ReadStorage<'a, Player>,
         ReadStorage<'a, Transform>,
-        Write<'a, MessageResource>,
+        WriteExpect<'a, NetResource>,
     );
 
-    fn run(&mut self, (actors, players, transforms, mut messages): Self::SystemData) {
+    fn run(&mut self, (actors, players, transforms, mut net): Self::SystemData) {
         #[allow(clippy::float_cmp)]
         for (_, actor, transform) in (&players, &actors, &transforms).join() {
             let direction = transform.euler_angles().2;
 
             if self.last_actions != actor.actions {
-                messages.push((
-                    MessageReceiver::Every,
-                    Message::ClientInput {
-                        id: 0,
-                        actions: actor.actions.bits(),
-                        direction,
-                    },
-                ));
+                net.send_to_all(Message::ClientInput {
+                    id: 0,
+                    actions: actor.actions.bits(),
+                    direction,
+                });
 
                 self.last_actions = actor.actions;
                 self.last_direction = direction;
@@ -74,11 +70,7 @@ impl<'a> System<'a> for InputSendSystem {
                 }
 
                 if self.last_direction_send.elapsed() > direction_sync_interval {
-                    messages.push((
-                        MessageReceiver::Every,
-                        Message::ClientInputDirection { id: 0, direction },
-                    ));
-
+                    net.send_to_all(Message::ClientInputDirection { id: 0, direction });
                     self.last_direction = direction;
                     self.last_direction_send = Instant::now();
                 }

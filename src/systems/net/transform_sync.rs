@@ -1,8 +1,7 @@
 use crate::components::Actor;
 use crate::resources::EntityMap;
 use crate::resources::Message;
-use crate::resources::MessageReceiver;
-use crate::resources::MessageResource;
+use crate::resources::NetResource;
 use amethyst::core::transform::Transform;
 use amethyst::derive::SystemDesc;
 use amethyst::ecs::prelude::Join;
@@ -11,7 +10,7 @@ use amethyst::ecs::prelude::System;
 use amethyst::ecs::prelude::SystemData;
 use amethyst::ecs::Entities;
 use amethyst::ecs::ReadExpect;
-use amethyst::ecs::Write;
+use amethyst::shred::WriteExpect;
 use std::collections::HashMap;
 use std::time::Duration;
 use std::time::Instant;
@@ -47,10 +46,10 @@ impl<'a> System<'a> for TransformSyncSystem {
         ReadExpect<'a, EntityMap>,
         ReadStorage<'a, Actor>,
         ReadStorage<'a, Transform>,
-        Write<'a, MessageResource>,
+        WriteExpect<'a, NetResource>,
     );
 
-    fn run(&mut self, (entities, entity_map, actors, transforms, mut messages): Self::SystemData) {
+    fn run(&mut self, (entities, entity_map, actors, transforms, mut net): Self::SystemData) {
         if self.last_sync.elapsed() < INTERVAL {
             return;
         }
@@ -66,16 +65,13 @@ impl<'a> System<'a> for TransformSyncSystem {
                 };
 
                 if self.cache.get(&external_id).map_or(true, |c| c != &current) {
-                    messages.push((
-                        MessageReceiver::Every,
-                        Message::TransformSync {
-                            id: 0,
-                            external_id,
-                            x: current.x,
-                            y: current.y,
-                            direction: current.direction,
-                        },
-                    ));
+                    net.send_to_all(Message::TransformSync {
+                        id: 0,
+                        external_id,
+                        x: current.x,
+                        y: current.y,
+                        direction: current.direction,
+                    });
 
                     clean_cache.insert(external_id, current);
                 }

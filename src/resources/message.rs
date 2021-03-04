@@ -1,11 +1,8 @@
 use bincode::Options;
 use serde::Deserialize;
 use serde::Serialize;
-use std::net::SocketAddr;
 
 pub const MESSAGE_SIZE_MAX: usize = std::mem::size_of::<Message>();
-
-pub type MessageResource = Vec<(MessageReceiver, Message)>;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub enum Message {
@@ -51,11 +48,6 @@ pub enum Message {
         acceleration_factor: f32,
         shooter_id: Option<u16>,
     },
-}
-
-pub enum MessageReceiver {
-    Only(SocketAddr),
-    Every,
 }
 
 impl Message {

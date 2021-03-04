@@ -8,8 +8,13 @@ use std::time::Instant;
 
 const MESSAGE_RESEND_INTERVAL: Duration = Duration::from_millis(400); // TODO: Tweak
 
-pub struct Connection {
-    status: ConnectionStatus,
+pub struct NetResource {
+    pub socket: UdpSocket,
+    pub connections: HashMap<SocketAddr, NetConnection>,
+}
+
+pub struct NetConnection {
+    status: NetConnectionStatus,
     // TODO: Maybe don't allow grow to large
     unacknowledged_messages: HashMap<u16, UnacknowledgedMessage>,
     // TODO: Maybe don't allow grow to large
@@ -20,7 +25,7 @@ pub struct Connection {
     pub attached_external_id: Option<u16>,
 }
 
-pub enum ConnectionStatus {
+pub enum NetConnectionStatus {
     Connected,
     Disconnected(String),
 }
@@ -30,10 +35,73 @@ struct UnacknowledgedMessage {
     last_sent: Instant,
 }
 
-impl Connection {
+impl NetResource {
+    pub fn new_as_server(port: u16) -> Result<Self, String> {
+        return Self::new(&format!("0.0.0.0:{}", port));
+    }
+
+    pub fn new_as_client(server_address: SocketAddr) -> Result<Self, String> {
+        let mut network = Self::new("0.0.0.0:0")?;
+
+        network
+            .connections
+            .insert(server_address, NetConnection::new());
+
+        network.send_to_all(Message::Greeting { id: 0 });
+
+        return Ok(network);
+    }
+
+    fn new(address: &str) -> Result<Self, String> {
+        let socket = UdpSocket::bind(address).map_err(|e| format!("{}", e))?;
+        socket.set_nonblocking(true).map_err(|e| format!("{}", e))?;
+
+        return Ok(Self {
+            socket,
+            connections: HashMap::new(),
+        });
+    }
+
+    pub fn update_connections(&mut self) {
+        let mut disconnected = Vec::new();
+
+        for (address, connection) in self.connections.iter_mut() {
+            connection.resend_unacknowledged_messages(&self.socket, &address);
+
+            if let NetConnectionStatus::Disconnected(ref reason) = *connection.get_status() {
+                disconnected.push(*address);
+                log::warn!("{} disconnected. {}", address, reason);
+            }
+        }
+
+        for address in disconnected.iter() {
+            self.connections.remove(address);
+        }
+    }
+
+    pub fn send_to(&mut self, address: &SocketAddr, mut message: Message) {
+        if let Some(connection) = self.connections.get_mut(address) {
+            connection.send(&self.socket, address, &mut message);
+        }
+    }
+
+    pub fn send_to_all(&mut self, mut message: Message) {
+        for (address, connection) in self.connections.iter_mut() {
+            connection.send(&self.socket, &address, &mut message);
+        }
+    }
+
+    pub fn attach_external_id(&mut self, address: &SocketAddr, external_id: u16) {
+        if let Some(connection) = self.connections.get_mut(address) {
+            connection.attached_external_id.replace(external_id);
+        }
+    }
+}
+
+impl NetConnection {
     pub fn new() -> Self {
         return Self {
-            status: ConnectionStatus::Connected,
+            status: NetConnectionStatus::Connected,
             unacknowledged_messages: HashMap::new(),
             held_messages: HashMap::new(),
             next_incoming_message_id: 0,
@@ -135,18 +203,18 @@ impl Connection {
         if self.is_connected() {
             self.unacknowledged_messages = HashMap::new();
             self.held_messages = HashMap::new();
-            self.status = ConnectionStatus::Disconnected(reason);
+            self.status = NetConnectionStatus::Disconnected(reason);
         }
     }
 
-    pub fn get_status(&self) -> &ConnectionStatus {
+    pub fn get_status(&self) -> &NetConnectionStatus {
         return &self.status;
     }
 
     pub fn is_connected(&self) -> bool {
         return match self.status {
-            ConnectionStatus::Connected => true,
-            ConnectionStatus::Disconnected(..) => false,
+            NetConnectionStatus::Connected => true,
+            NetConnectionStatus::Disconnected(..) => false,
         };
     }
 }

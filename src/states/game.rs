@@ -6,15 +6,13 @@ use crate::resources::EntityMap;
 use crate::resources::GameTask;
 use crate::resources::GameTaskResource;
 use crate::resources::Message;
-use crate::resources::MessageReceiver;
-use crate::resources::MessageResource;
 use crate::resources::MouseInput;
-use crate::resources::NetworkTask;
-use crate::resources::NetworkTaskResource;
+use crate::resources::NetResource;
 use crate::states::ui::HomeState;
+use crate::systems::net::ConnectionUpdateSystem;
 use crate::systems::net::InputSendSystem;
 use crate::systems::net::InterpolationSystem;
-use crate::systems::net::NetworkSystem;
+use crate::systems::net::MessageReceiveSystem;
 use crate::systems::net::TransformSyncSystem;
 use crate::systems::ActorSystem;
 use crate::systems::AiSystem;
@@ -75,34 +73,32 @@ impl GameState<'_, '_> {
     fn init_dispatcher(&mut self, world: &mut World) {
         let mut builder = DispatcherBuilder::new();
 
-        #[allow(clippy::unwrap_used)] // TODO: Resolve
         match self.game_type {
-            GameType::Host(port) => {
+            GameType::Host(..) => {
                 builder.add(AiSystem::new(), "Ai", &[]);
                 builder.add(PlayerSystem, "Player", &[]);
                 builder.add(ActorSystem, "Actor", &["Ai", "Player"]);
                 builder.add(WeaponSystem::new(), "Weapon", &["Actor"]);
                 builder.add(CollisionSystem::new(), "Collision", &["Actor"]);
                 builder.add(ProjectileSystem, "Projectile", &["Collision"]);
-                builder.add(NetworkSystem::new_as_server(port).unwrap(), "Network", &[]);
                 builder.add(TransformSyncSystem::new(), "TransformSync", &["Collision"]);
+                builder.add(ConnectionUpdateSystem, "ConnectionUpdate", &[]);
+                builder.add(CameraSystem::new(), "Camera", &[]);
+                builder.add(TerrainSystem, "Terrain", &[]);
+                builder.add(MessageReceiveSystem::new(true), "MessageReceiveSystem", &[]);
             }
-            GameType::Join(address) => {
+            GameType::Join(..) => {
                 builder.add(PlayerSystem, "Player", &[]);
                 builder.add(ActorSystem, "Actor", &["Player"]);
-                builder.add(InputSendSystem::new(), "InputSend", &["Actor"]);
+                builder.add(InputSendSystem::new(), "InputSend", &["Actor"]); // TODO: Maybe run right after `PlayerSystem`
                 builder.add(ProjectileSystem, "Projectile", &["Actor"]);
-                builder.add(
-                    NetworkSystem::new_as_client(address).unwrap(),
-                    "Network",
-                    &["InputSend"],
-                );
                 builder.add(InterpolationSystem, "Interpolation", &[]);
+                builder.add(ConnectionUpdateSystem, "ConnectionUpdate", &[]);
+                builder.add(CameraSystem::new(), "Camera", &[]);
+                builder.add(TerrainSystem, "Terrain", &[]);
+                builder.add(MessageReceiveSystem::new(false), "MessageReceiveSystem", &[]);
             }
         }
-
-        builder.add(CameraSystem::new(), "Camera", &[]);
-        builder.add(TerrainSystem, "Terrain", &[]);
 
         let mut dispatcher = builder
             .with_pool(Arc::clone(&world.read_resource::<ArcThreadPool>()))
@@ -119,8 +115,16 @@ impl GameState<'_, '_> {
         world.insert(DebugLines::new());
         world.insert(EntityMap::new());
         world.insert(GameTaskResource::new());
-        world.insert(MessageResource::new());
-        world.insert(NetworkTaskResource::new());
+
+        #[allow(clippy::unwrap_used)] // TODO: Resolve
+        match self.game_type {
+            GameType::Host(port) => {
+                world.insert(NetResource::new_as_server(port).unwrap());
+            }
+            GameType::Join(address) => {
+                world.insert(NetResource::new_as_client(address).unwrap());
+            }
+        }
     }
 
     fn init_world_entities(&mut self, world: &mut World) {
@@ -266,8 +270,11 @@ impl GameState<'_, '_> {
             } => {
                 self.on_task_projectile_hit(world, entity, force_x, force_y);
             }
-            GameTask::MessageSent { receiver, message } => {
-                self.on_task_message_send(world, receiver, message);
+            GameTask::MessageSent {
+                message,
+                address_filter,
+            } => {
+                self.on_task_message_send(world, message, address_filter);
             }
         }
     }
@@ -275,7 +282,7 @@ impl GameState<'_, '_> {
     #[allow(clippy::unused_self)]
     fn on_task_client_greet(&self, world: &mut World, address: SocketAddr) {
         let mut entity_map = world.write_resource::<EntityMap>();
-        let mut messages = world.write_resource::<MessageResource>();
+        let mut net = world.write_resource::<NetResource>();
 
         for (entity, _, transform) in (
             &world.entities(),
@@ -285,8 +292,8 @@ impl GameState<'_, '_> {
             .join()
         {
             if let Some(external_id) = entity_map.get_external_id(entity) {
-                messages.push((
-                    MessageReceiver::Only(address),
+                net.send_to(
+                    &address,
                     Message::ActorSpawn {
                         id: 0,
                         external_id,
@@ -294,7 +301,7 @@ impl GameState<'_, '_> {
                         y: transform.translation().y,
                         direction: transform.euler_angles().2,
                     },
-                ));
+                );
             }
         }
 
@@ -309,16 +316,11 @@ impl GameState<'_, '_> {
         });
 
         tasks.push(GameTask::MessageSent {
-            receiver: MessageReceiver::Only(address),
             message: Message::ActorGrant { id: 0, external_id },
+            address_filter: Some(address),
         });
 
-        world
-            .write_resource::<NetworkTaskResource>()
-            .push(NetworkTask::AttachEntity {
-                address,
-                external_id,
-            });
+        net.attach_external_id(&address, external_id);
     }
 
     fn on_task_actor_spawn(
@@ -342,16 +344,15 @@ impl GameState<'_, '_> {
             );
 
             if let GameType::Host(..) = self.game_type {
-                world.write_resource::<MessageResource>().push((
-                    MessageReceiver::Every,
-                    Message::ActorSpawn {
+                world
+                    .write_resource::<NetResource>()
+                    .send_to_all(Message::ActorSpawn {
                         id: 0,
                         external_id,
                         x,
                         y,
                         direction,
-                    },
-                ));
+                    });
             }
         }
     }
@@ -423,9 +424,9 @@ impl GameState<'_, '_> {
     ) {
         if let Some(root) = self.root {
             if let GameType::Host(..) = self.game_type {
-                world.write_resource::<MessageResource>().push((
-                    MessageReceiver::Every,
-                    Message::ProjectileSpawn {
+                world
+                    .write_resource::<NetResource>()
+                    .send_to_all(Message::ProjectileSpawn {
                         id: 0,
                         x,
                         y,
@@ -433,8 +434,7 @@ impl GameState<'_, '_> {
                         velocity_y,
                         acceleration_factor,
                         shooter_id,
-                    },
-                ));
+                    });
             }
 
             utils::world::create_projectile(
@@ -466,10 +466,19 @@ impl GameState<'_, '_> {
     }
 
     #[allow(clippy::unused_self)]
-    fn on_task_message_send(&self, world: &World, receiver: MessageReceiver, message: Message) {
-        world
-            .write_resource::<MessageResource>()
-            .push((receiver, message));
+    fn on_task_message_send(
+        &self,
+        world: &World,
+        message: Message,
+        address_filter: Option<SocketAddr>,
+    ) {
+        let mut net = world.write_resource::<NetResource>();
+
+        if let Some(address) = address_filter {
+            net.send_to(&address, message);
+        } else {
+            net.send_to_all(message);
+        }
     }
 
     fn is_player_actor(&self, entity: Entity) -> bool {

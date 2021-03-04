@@ -1,6 +1,5 @@
 use crate::components::ActorActions;
 use crate::resources::Message;
-use crate::resources::MessageReceiver;
 use amethyst::ecs::Entity;
 use std::net::SocketAddr;
 
@@ -49,7 +48,7 @@ pub enum GameTask {
         force_y: f32,
     },
     MessageSent {
-        receiver: MessageReceiver,
         message: Message,
+        address_filter: Option<SocketAddr>,
     },
 }
