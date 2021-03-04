@@ -9,7 +9,7 @@ use amethyst::derive::SystemDesc;
 use amethyst::ecs::prelude::System;
 use amethyst::ecs::prelude::SystemData;
 use amethyst::ecs::prelude::Write;
-use amethyst::shred::WriteExpect;
+use amethyst::ecs::WriteExpect;
 use std::io::ErrorKind;
 use std::net::SocketAddr;
 
@@ -94,7 +94,6 @@ impl MessageReceiveSystem {
                 x,
                 y,
                 direction,
-                ..
             } => {
                 tasks.push(GameTask::TransformSync {
                     external_id,

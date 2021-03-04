@@ -9,7 +9,7 @@ use amethyst::ecs::prelude::Join;
 use amethyst::ecs::prelude::ReadStorage;
 use amethyst::ecs::prelude::System;
 use amethyst::ecs::prelude::SystemData;
-use amethyst::shred::WriteExpect;
+use amethyst::ecs::WriteExpect;
 use std::time::Duration;
 use std::time::Instant;
 

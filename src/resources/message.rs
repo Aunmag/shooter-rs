@@ -33,7 +33,6 @@ pub enum Message {
         external_id: u16,
     },
     TransformSync {
-        id: u16,
         external_id: u16,
         x: f32,
         y: f32,
@@ -85,9 +84,7 @@ impl Message {
             Self::ActorGrant { ref mut id, .. } => {
                 *id = id_new;
             }
-            Self::TransformSync { ref mut id, .. } => {
-                *id = id_new;
-            }
+            Self::TransformSync { .. } => {}
             Self::ProjectileSpawn { ref mut id, .. } => {
                 *id = id_new;
             }
@@ -103,7 +100,7 @@ impl Message {
             Self::ClientInputDirection { id, .. } => Some(id),
             Self::ActorSpawn { id, .. } => Some(id),
             Self::ActorGrant { id, .. } => Some(id),
-            Self::TransformSync { id, .. } => Some(id),
+            Self::TransformSync { .. } => None,
             Self::ProjectileSpawn { id, .. } => Some(id),
         };
     }

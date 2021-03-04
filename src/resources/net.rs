@@ -91,6 +91,16 @@ impl NetResource {
         }
     }
 
+    /// A faster way to send a message by skipping acknowledgement and error handling.
+    pub fn send_to_all_unreliably(&self, message: &Message) {
+        let encoded = message.encode();
+
+        #[allow(unused_must_use)]
+        for address in self.connections.keys() {
+            send(&self.socket, address, &encoded);
+        }
+    }
+
     pub fn attach_external_id(&mut self, address: &SocketAddr, external_id: u16) {
         if let Some(connection) = self.connections.get_mut(address) {
             connection.attached_external_id.replace(external_id);

@@ -10,7 +10,6 @@ use amethyst::ecs::prelude::System;
 use amethyst::ecs::prelude::SystemData;
 use amethyst::ecs::Entities;
 use amethyst::ecs::ReadExpect;
-use amethyst::shred::WriteExpect;
 use std::collections::HashMap;
 use std::time::Duration;
 use std::time::Instant;
@@ -44,12 +43,12 @@ impl<'a> System<'a> for TransformSyncSystem {
     type SystemData = (
         Entities<'a>,
         ReadExpect<'a, EntityMap>,
+        ReadExpect<'a, NetResource>,
         ReadStorage<'a, Actor>,
         ReadStorage<'a, Transform>,
-        WriteExpect<'a, NetResource>,
     );
 
-    fn run(&mut self, (entities, entity_map, actors, transforms, mut net): Self::SystemData) {
+    fn run(&mut self, (entities, entity_map, net, actors, transforms): Self::SystemData) {
         if self.last_sync.elapsed() < INTERVAL {
             return;
         }
@@ -65,8 +64,7 @@ impl<'a> System<'a> for TransformSyncSystem {
                 };
 
                 if self.cache.get(&external_id).map_or(true, |c| c != &current) {
-                    net.send_to_all(Message::TransformSync {
-                        id: 0,
+                    net.send_to_all_unreliably(&Message::TransformSync {
                         external_id,
                         x: current.x,
                         y: current.y,
