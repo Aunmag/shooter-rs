@@ -28,12 +28,6 @@ pub enum GameTask {
         external_id: u16,
         direction: f32,
     },
-    TransformSync {
-        external_id: u16,
-        x: f32,
-        y: f32,
-        direction: f32,
-    },
     ProjectileSpawn {
         x: f32,
         y: f32,

@@ -4,6 +4,8 @@ use crate::resources::GameTaskResource;
 use crate::resources::Message;
 use crate::resources::NetConnection;
 use crate::resources::NetResource;
+use crate::resources::PositionUpdate;
+use crate::resources::PositionUpdateResource;
 use crate::resources::MESSAGE_SIZE_MAX;
 use amethyst::derive::SystemDesc;
 use amethyst::ecs::prelude::System;
@@ -29,11 +31,12 @@ impl MessageReceiveSystem {
         message: &Message,
         external_id: Option<u16>,
         tasks: &mut GameTaskResource,
+        position_updates: &mut PositionUpdateResource,
     ) {
         if self.is_server {
             Self::on_message_as_server(&address, &message, external_id, tasks);
         } else {
-            Self::on_message_as_client(&message, tasks);
+            Self::on_message_as_client(&message, tasks, position_updates);
         }
     }
 
@@ -70,7 +73,11 @@ impl MessageReceiveSystem {
         }
     }
 
-    fn on_message_as_client(message: &Message, tasks: &mut GameTaskResource) {
+    fn on_message_as_client(
+        message: &Message,
+        tasks: &mut GameTaskResource,
+        position_updates: &mut PositionUpdateResource,
+    ) {
         match *message {
             Message::ActorSpawn {
                 external_id,
@@ -89,18 +96,13 @@ impl MessageReceiveSystem {
             Message::ActorGrant { external_id, .. } => {
                 tasks.push(GameTask::ActorGrant { external_id });
             }
-            Message::TransformSync {
+            Message::PositionUpdate {
                 external_id,
                 x,
                 y,
                 direction,
             } => {
-                tasks.push(GameTask::TransformSync {
-                    external_id,
-                    x,
-                    y,
-                    direction,
-                });
+                position_updates.insert(external_id, PositionUpdate { x, y, direction });
             }
             Message::ProjectileSpawn {
                 x,
@@ -126,9 +128,13 @@ impl MessageReceiveSystem {
 }
 
 impl<'a> System<'a> for MessageReceiveSystem {
-    type SystemData = (Write<'a, GameTaskResource>, WriteExpect<'a, NetResource>);
+    type SystemData = (
+        Write<'a, GameTaskResource>,
+        Write<'a, PositionUpdateResource>,
+        WriteExpect<'a, NetResource>,
+    );
 
-    fn run(&mut self, (mut tasks, mut net): Self::SystemData) {
+    fn run(&mut self, (mut tasks, mut position_updates, mut net): Self::SystemData) {
         let mut responses = Vec::new(); // TODO: Find a way send responses without vector allocations
 
         loop {
@@ -163,7 +169,13 @@ impl<'a> System<'a> for MessageReceiveSystem {
                                     let external_id = connection.attached_external_id;
                                     let next_messages = connection.take_next_held_messages();
 
-                                    self.on_message(&address, &message, external_id, &mut tasks);
+                                    self.on_message(
+                                        &address,
+                                        &message,
+                                        external_id,
+                                        &mut tasks,
+                                        &mut position_updates,
+                                    );
 
                                     for message in next_messages.iter() {
                                         self.on_message(
@@ -171,6 +183,7 @@ impl<'a> System<'a> for MessageReceiveSystem {
                                             &message,
                                             external_id,
                                             &mut tasks,
+                                            &mut position_updates,
                                         );
                                     }
                                 }

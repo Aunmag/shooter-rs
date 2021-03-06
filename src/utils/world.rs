@@ -119,36 +119,31 @@ pub fn create_actor(
     return actor;
 }
 
-#[allow(clippy::unwrap_used)] // TODO: Remove
-pub fn grant_played_actor(
-    world: &mut World,
-    root: Entity,
-    actor: Entity,
-    game_type: &GameType,
-) -> Option<Entity> {
+pub fn grant_played_actor(world: &mut World, root: Entity, actor: Entity, game_type: &GameType) {
     // TODO: Remove old player entity
     // TODO: Reset layer for old transform
     // TODO: Remove old ghost
+    // TODO: Remove old camera
+    // TODO: Maybe make ghost as player's child
 
-    world
-        .write_storage::<Player>()
-        .insert(actor, Player)
-        .unwrap(); // TODO: No unwrap
+    let ghost;
+
+    if let GameType::Join(..) = *game_type {
+        ghost = Some(create_actor(world, root, None, 0.0, 0.0, 0.0, true, game_type));
+    } else {
+        ghost = None;
+    }
+
+    if let Err(error) = world.write_storage::<Player>().insert(actor, Player::new(ghost)) {
+        log::error!("Failed to insert Player component. Details: {}", error);
+        // TODO: Remove the ghost then
+    }
 
     if let Some(transform) = world.write_storage::<Transform>().get_mut(actor) {
         transform.set_translation_z(LAYER_ACTOR_PLAYER);
     }
 
     create_camera(world, actor);
-
-    if let GameType::Join(..) = *game_type {
-        // TODO: Maybe make ghost as player's child
-        return Some(create_actor(
-            world, root, None, 0.0, 0.0, 0.0, true, game_type,
-        ));
-    } else {
-        return None;
-    }
 }
 
 pub fn set_actor_ai(world: &World, actor: Entity) {

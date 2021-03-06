@@ -1,6 +1,5 @@
 use crate::components::Actor;
 use crate::components::ActorActions;
-use crate::components::Interpolation;
 use crate::components::Weapon;
 use crate::resources::EntityMap;
 use crate::resources::GameTask;
@@ -13,7 +12,8 @@ use crate::systems::net::ConnectionUpdateSystem;
 use crate::systems::net::InputSendSystem;
 use crate::systems::net::InterpolationSystem;
 use crate::systems::net::MessageReceiveSystem;
-use crate::systems::net::TransformSyncSystem;
+use crate::systems::net::PositionUpdateSendSystem;
+use crate::systems::net::PositionUpdateSystem;
 use crate::systems::ActorSystem;
 use crate::systems::AiSystem;
 use crate::systems::CameraSystem;
@@ -44,14 +44,10 @@ use amethyst::winit::WindowEvent;
 use std::net::SocketAddr;
 use std::sync::Arc;
 
-const MAX_PLAYER_OFFSET: f32 = 0.25;
-
 pub struct GameState<'a, 'b> {
     game_type: GameType,
     root: Option<Entity>,
     dispatcher: Option<Dispatcher<'a, 'b>>,
-    player_actor: Option<Entity>,
-    player_ghost: Option<Entity>,
 }
 
 pub enum GameType {
@@ -65,8 +61,6 @@ impl GameState<'_, '_> {
             game_type,
             root: None,
             dispatcher: None,
-            player_actor: None,
-            player_ghost: None,
         };
     }
 
@@ -78,25 +72,26 @@ impl GameState<'_, '_> {
                 builder.add(AiSystem::new(), "Ai", &[]);
                 builder.add(PlayerSystem, "Player", &[]);
                 builder.add(ActorSystem, "Actor", &["Ai", "Player"]);
-                builder.add(WeaponSystem::new(), "Weapon", &["Actor"]);
                 builder.add(CollisionSystem::new(), "Collision", &["Actor"]);
+                builder.add(WeaponSystem::new(), "Weapon", &["Collision"]);
                 builder.add(ProjectileSystem, "Projectile", &["Collision"]);
-                builder.add(TransformSyncSystem::new(), "TransformSync", &["Collision"]);
+                builder.add(PositionUpdateSendSystem::new(), "PositionUpdateSend", &["Collision"]);
                 builder.add(ConnectionUpdateSystem, "ConnectionUpdate", &[]);
                 builder.add(CameraSystem::new(), "Camera", &[]);
                 builder.add(TerrainSystem, "Terrain", &[]);
-                builder.add(MessageReceiveSystem::new(true), "MessageReceiveSystem", &[]);
+                builder.add(MessageReceiveSystem::new(true), "MessageReceive", &[]);
             }
             GameType::Join(..) => {
                 builder.add(PlayerSystem, "Player", &[]);
                 builder.add(ActorSystem, "Actor", &["Player"]);
                 builder.add(InputSendSystem::new(), "InputSend", &["Actor"]); // TODO: Maybe run right after `PlayerSystem`
-                builder.add(ProjectileSystem, "Projectile", &["Actor"]);
-                builder.add(InterpolationSystem, "Interpolation", &[]);
+                builder.add(MessageReceiveSystem::new(false), "MessageReceive", &[]);
+                builder.add(PositionUpdateSystem, "PositionUpdate", &["MessageReceive"]);
+                builder.add(InterpolationSystem, "Interpolation", &["PositionUpdate"]);
+                builder.add(ProjectileSystem, "Projectile", &["Actor", "Interpolation"]);
                 builder.add(ConnectionUpdateSystem, "ConnectionUpdate", &[]);
                 builder.add(CameraSystem::new(), "Camera", &[]);
                 builder.add(TerrainSystem, "Terrain", &[]);
-                builder.add(MessageReceiveSystem::new(false), "MessageReceiveSystem", &[]);
             }
         }
 
@@ -169,42 +164,6 @@ impl GameState<'_, '_> {
         mouse_input.delta_y = 0.0;
     }
 
-    fn sync_transform(&self, world: &World, entity: Entity, x: f32, y: f32, direction: f32) {
-        let is_player = self.is_player_actor(entity);
-
-        if let (Some(transform), Some(interpolation)) = (
-            world.read_storage::<Transform>().get(entity),
-            world.write_storage::<Interpolation>().get_mut(entity),
-        ) {
-            let offset_x = x - (transform.translation().x + interpolation.offset_x);
-            let offset_y = y - (transform.translation().y + interpolation.offset_y);
-
-            if !is_player || !utils::math::are_closer_than(
-                offset_x,
-                offset_y,
-                0.0,
-                0.0,
-                MAX_PLAYER_OFFSET,
-            ) {
-                interpolation.offset_x += offset_x;
-                interpolation.offset_y += offset_y;
-
-                if !is_player {
-                    interpolation.offset_direction = utils::math::angle_difference(
-                        direction,
-                        transform.euler_angles().2,
-                    );
-                }
-            }
-        }
-
-        if is_player {
-            if let Some(ghost) = self.player_ghost {
-                self.sync_transform(world, ghost, x, y, direction);
-            }
-        }
-    }
-
     fn on_task(&mut self, world: &mut World, task: GameTask) {
         match task {
             GameTask::ClientGreet(address) => {
@@ -236,14 +195,6 @@ impl GameState<'_, '_> {
                 direction,
             } => {
                 self.on_task_actor_action(world, external_id, None, direction);
-            }
-            GameTask::TransformSync {
-                external_id,
-                x,
-                y,
-                direction,
-            } => {
-                self.on_task_transform_sync(world, external_id, x, y, direction);
             }
             GameTask::ProjectileSpawn {
                 x,
@@ -360,13 +311,7 @@ impl GameState<'_, '_> {
     fn on_task_actor_grant(&mut self, world: &mut World, external_id: u16) {
         if let Some(root) = self.root {
             if let Some(actor) = utils::world::get_entity(world, external_id) {
-                self.player_actor = Some(actor);
-                self.player_ghost = utils::world::grant_played_actor(
-                    world,
-                    root,
-                    actor,
-                    &self.game_type,
-                );
+                utils::world::grant_played_actor(world, root, actor, &self.game_type);
             }
         }
     }
@@ -396,19 +341,6 @@ impl GameState<'_, '_> {
             if let Some(transform) = world.write_storage::<Transform>().get_mut(entity) {
                 transform.set_rotation_2d(direction);
             }
-        }
-    }
-
-    fn on_task_transform_sync(
-        &self,
-        world: &World,
-        external_id: u16,
-        x: f32,
-        y: f32,
-        direction: f32,
-    ) {
-        if let Some(entity) = utils::world::get_entity(world, external_id) {
-            self.sync_transform(world, entity, x, y, direction);
         }
     }
 
@@ -479,10 +411,6 @@ impl GameState<'_, '_> {
         } else {
             net.send_to_all(message);
         }
-    }
-
-    fn is_player_actor(&self, entity: Entity) -> bool {
-        return self.player_actor == Some(entity);
     }
 
     fn is_host(&self) -> bool {

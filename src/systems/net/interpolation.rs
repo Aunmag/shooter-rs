@@ -1,6 +1,6 @@
 use crate::components::Interpolation;
 use crate::components::Player;
-use crate::systems::net::transform_sync::INTERVAL as TRANSFORM_SYNC_INTERVAL;
+use crate::systems::net::PositionUpdateSendSystem;
 use amethyst::core::timing::Time;
 use amethyst::core::transform::Transform;
 use amethyst::derive::SystemDesc;
@@ -26,8 +26,8 @@ impl<'a> System<'a> for InterpolationSystem {
 
     fn run(&mut self, (time, players, mut interpolations, mut transforms): Self::SystemData) {
         // TODO: Use float constant in future
-        let mut factor =
-            time.delta_seconds() / (INTERPOLATION_FACTOR * TRANSFORM_SYNC_INTERVAL.as_secs_f32());
+        let mut factor = time.delta_seconds()
+            / (INTERPOLATION_FACTOR * PositionUpdateSendSystem::INTERVAL.as_secs_f32());
 
         // TODO: Use clamp method in future
         if factor > 1.0 {

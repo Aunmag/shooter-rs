@@ -1,9 +1,17 @@
 use amethyst::ecs::Component;
-use amethyst::ecs::NullStorage;
+use amethyst::ecs::DenseVecStorage;
+use amethyst::ecs::Entity;
 
-#[derive(Default)]
-pub struct Player;
+pub struct Player {
+    pub ghost: Option<Entity>,
+}
+
+impl Player {
+    pub fn new(ghost: Option<Entity>) -> Self {
+        return Self { ghost };
+    }
+}
 
 impl Component for Player {
-    type Storage = NullStorage<Self>;
+    type Storage = DenseVecStorage<Self>;
 }

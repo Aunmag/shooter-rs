@@ -14,12 +14,9 @@ use std::collections::HashMap;
 use std::time::Duration;
 use std::time::Instant;
 
-#[allow(clippy::integer_division)]
-pub const INTERVAL: Duration = Duration::from_millis(1000 / 25);
-
 #[derive(SystemDesc)]
-pub struct TransformSyncSystem {
-    last_sync: Instant,
+pub struct PositionUpdateSendSystem {
+    last_sent: Instant,
     cache: HashMap<u16, Cached>,
 }
 
@@ -30,16 +27,19 @@ struct Cached {
     direction: f32,
 }
 
-impl TransformSyncSystem {
+impl PositionUpdateSendSystem {
+    #[allow(clippy::integer_division)]
+    pub const INTERVAL: Duration = Duration::from_millis(1000 / 25);
+
     pub fn new() -> Self {
         return Self {
-            last_sync: Instant::now(),
+            last_sent: Instant::now(),
             cache: HashMap::new(),
         };
     }
 }
 
-impl<'a> System<'a> for TransformSyncSystem {
+impl<'a> System<'a> for PositionUpdateSendSystem {
     type SystemData = (
         Entities<'a>,
         ReadExpect<'a, EntityMap>,
@@ -49,7 +49,7 @@ impl<'a> System<'a> for TransformSyncSystem {
     );
 
     fn run(&mut self, (entities, entity_map, net, actors, transforms): Self::SystemData) {
-        if self.last_sync.elapsed() < INTERVAL {
+        if self.last_sent.elapsed() < Self::INTERVAL {
             return;
         }
 
@@ -64,7 +64,7 @@ impl<'a> System<'a> for TransformSyncSystem {
                 };
 
                 if self.cache.get(&external_id).map_or(true, |c| c != &current) {
-                    net.send_to_all_unreliably(&Message::TransformSync {
+                    net.send_to_all_unreliably(&Message::PositionUpdate {
                         external_id,
                         x: current.x,
                         y: current.y,
@@ -77,6 +77,6 @@ impl<'a> System<'a> for TransformSyncSystem {
         }
 
         std::mem::swap(&mut self.cache, &mut clean_cache);
-        self.last_sync = Instant::now();
+        self.last_sent = Instant::now();
     }
 }
