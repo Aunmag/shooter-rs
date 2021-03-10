@@ -57,30 +57,28 @@ impl<'a> System<'a> for PositionUpdateSystem {
                 });
 
             if let Some(update) = update {
-                let offset_x = update.x - transform.translation().x - interpolation.offset_x;
-                let offset_y = update.y - transform.translation().y - interpolation.offset_y;
-                let is_player;
+                let fix_position;
+                let offset_x = update.x - transform.translation().x;
+                let offset_y = update.y - transform.translation().y;
 
                 if let Some(player) = player {
-                    is_player = true;
+                    fix_position = is_offset_noticeable(offset_x, offset_y);
 
                     if let Some(ghost) = player.ghost {
                         ghost_update.replace((ghost, &update));
                     }
                 } else {
-                    is_player = false;
+                    fix_position = true;
+
+                    interpolation.offset_direction = utils::math::angle_difference(
+                        update.direction,
+                        transform.euler_angles().2,
+                    );
                 }
 
-                if !is_player || is_offset_noticeable(offset_x, offset_y) {
-                    interpolation.offset_x += offset_x;
-                    interpolation.offset_y += offset_y;
-
-                    if !is_player {
-                        interpolation.offset_direction = utils::math::angle_difference(
-                            update.direction,
-                            transform.euler_angles().2,
-                        );
-                    }
+                if fix_position {
+                    interpolation.offset_x = offset_x;
+                    interpolation.offset_y = offset_y;
                 }
             }
         }

@@ -1,4 +1,5 @@
 use crate::components::Actor;
+use crate::data::POSITION_UPDATE_INTERVAL;
 use crate::resources::EntityMap;
 use crate::resources::Message;
 use crate::resources::NetResource;
@@ -11,7 +12,6 @@ use amethyst::ecs::prelude::SystemData;
 use amethyst::ecs::Entities;
 use amethyst::ecs::ReadExpect;
 use std::collections::HashMap;
-use std::time::Duration;
 use std::time::Instant;
 
 #[derive(SystemDesc)]
@@ -28,9 +28,6 @@ struct Cached {
 }
 
 impl PositionUpdateSendSystem {
-    #[allow(clippy::integer_division)]
-    pub const INTERVAL: Duration = Duration::from_millis(1000 / 25);
-
     pub fn new() -> Self {
         return Self {
             last_sent: Instant::now(),
@@ -49,7 +46,7 @@ impl<'a> System<'a> for PositionUpdateSendSystem {
     );
 
     fn run(&mut self, (entities, entity_map, net, actors, transforms): Self::SystemData) {
-        if self.last_sent.elapsed() < Self::INTERVAL {
+        if self.last_sent.elapsed() < POSITION_UPDATE_INTERVAL {
             return;
         }
 
