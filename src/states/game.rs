@@ -82,13 +82,13 @@ impl GameState<'_, '_> {
                 builder.add(MessageReceiveSystem::new(true), "MessageReceive", &[]);
             }
             GameType::Join(..) => {
+                builder.add(InterpolationSystem, "Interpolation", &[]);
                 builder.add(PlayerSystem, "Player", &[]);
-                builder.add(ActorSystem, "Actor", &["Player"]);
-                builder.add(InputSendSystem::new(), "InputSend", &["Actor"]); // TODO: Maybe run right after `PlayerSystem`
+                builder.add(ActorSystem, "Actor", &["Player", "Interpolation"]);
+                builder.add(InputSendSystem::new(), "InputSend", &["Player", "Actor"]);
                 builder.add(MessageReceiveSystem::new(false), "MessageReceive", &[]);
-                builder.add(PositionUpdateSystem, "PositionUpdate", &["MessageReceive"]);
-                builder.add(InterpolationSystem, "Interpolation", &["PositionUpdate"]);
-                builder.add(ProjectileSystem, "Projectile", &["Actor", "Interpolation"]);
+                builder.add(PositionUpdateSystem, "PositionUpdate", &["MessageReceive", "Actor"]);
+                builder.add(ProjectileSystem, "Projectile", &["Actor"]);
                 builder.add(ConnectionUpdateSystem, "ConnectionUpdate", &[]);
                 builder.add(CameraSystem::new(), "Camera", &[]);
                 builder.add(TerrainSystem, "Terrain", &[]);
