@@ -1,4 +1,4 @@
-use crate::utils;
+use crate::utils::DurationExt;
 use amethyst::core::math::Vector2;
 use amethyst::ecs::Component;
 use amethyst::ecs::DenseVecStorage;
@@ -39,7 +39,7 @@ impl Projectile {
     }
 
     pub fn calc_data(&self, time: Duration) -> (Vector2<f32>, Vector2<f32>) {
-        let t = utils::sub_duration(time, self.initial_time).as_secs_f32();
+        let t = time.sub_safely(self.initial_time).as_secs_f32();
         let a = self.config.acceleration_factor;
         let p = &self.initial_position;
         let v_0 = &self.initial_velocity;

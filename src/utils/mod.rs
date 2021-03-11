@@ -1,22 +1,14 @@
+mod duration_ext;
 pub mod math;
 pub mod ui;
 pub mod world;
 pub mod world_decorations;
 
+pub use self::duration_ext::*;
 use amethyst::core::HiddenPropagate;
 use amethyst::ecs::prelude::Entity;
 use amethyst::ecs::prelude::World;
 use amethyst::prelude::*;
-use std::time::Duration;
-
-// TODO: Use `Duration::saturating_sub` in future
-pub fn sub_duration(a: Duration, b: Duration) -> Duration {
-    if a > b {
-        return a - b;
-    } else {
-        return Duration::from_millis(0);
-    }
-}
 
 pub fn set_entity_visibility(world: &World, entity: Entity, is_visibility: bool) {
     let mut storage = world.write_storage::<HiddenPropagate>();

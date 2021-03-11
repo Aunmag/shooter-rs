@@ -66,15 +66,7 @@ impl<'a> System<'a> for WeaponSystem {
 
     fn run(
         &mut self,
-        (
-            entities,
-            entity_map,
-            time,
-            actors,
-            transforms,
-            mut tasks,
-            mut weapons,
-        ): Self::SystemData,
+        (entities, entity_map, time, actors, transforms, mut tasks, mut weapons): Self::SystemData,
     ) {
         let query = (&entities, &actors, &transforms, &mut weapons).join();
 

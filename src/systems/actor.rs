@@ -1,5 +1,6 @@
 use crate::components::Actor;
 use crate::components::ActorActions;
+use crate::components::Interpolation;
 use amethyst::core::math::Vector3;
 use amethyst::core::timing::Time;
 use amethyst::core::transform::Transform;
@@ -18,13 +19,21 @@ impl<'a> System<'a> for ActorSystem {
     type SystemData = (
         Read<'a, Time>,
         ReadStorage<'a, Actor>,
+        WriteStorage<'a, Interpolation>,
         WriteStorage<'a, Transform>,
     );
 
-    fn run(&mut self, (time, actors, mut transforms): Self::SystemData) {
+    fn run(&mut self, (time, actors, mut interpolations, mut transforms): Self::SystemData) {
         let velocity = Actor::MOVEMENT_VELOCITY * time.delta_seconds();
 
-        for (actor, transform) in (&actors, &mut transforms).join() {
+        for (actor, transform, interpolation) in (
+            &actors,
+            &mut transforms,
+            (&mut interpolations).maybe(),
+        )
+            .join()
+        {
+            // TODO: Continue the loop immediately if actor's actions are empty
             let mut movement_x = 0.0;
             let mut movement_y = 0.0;
 
@@ -48,11 +57,17 @@ impl<'a> System<'a> for ActorSystem {
 
             transform.rotate_2d(actor.rotation);
 
+            let previous_position = transform.translation().xy();
             let movement = transform.rotation()
                 * Vector3::new(movement_x, movement_y, 0.0)
                 * velocity;
 
             transform.prepend_translation(movement);
+
+            if let Some(interpolation) = interpolation {
+                let shift = transform.translation().xy() - previous_position;
+                interpolation.shift(shift.x, shift.y);
+            }
         }
     }
 }

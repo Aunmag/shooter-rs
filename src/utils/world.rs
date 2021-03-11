@@ -73,6 +73,8 @@ pub fn create_actor(
     is_ghost: bool,
     game_type: &GameType,
 ) -> Entity {
+    let now = world.read_resource::<Time>().absolute_time();
+
     let mut transform = Transform::default();
     transform.set_translation_xyz(x, y, LAYER_ACTOR);
     transform.set_rotation_2d(direction);
@@ -96,7 +98,7 @@ pub fn create_actor(
         }));
 
     if let GameType::Join(..) = *game_type {
-        builder = builder.with(Interpolation::new());
+        builder = builder.with(Interpolation::new(x, y, direction, now));
     }
 
     if let Some(renderer) = renderer.take() {

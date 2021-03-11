@@ -1,11 +1,10 @@
 use crate::components::Collision;
-use crate::components::Interpolation;
 use crate::components::Projectile;
 use crate::data::LAYER_PROJECTILE;
 use crate::resources::GameTask;
 use crate::resources::GameTaskResource;
-use crate::utils;
 use crate::utils::math;
+use crate::utils::DurationExt;
 use amethyst::core::math::Point3;
 use amethyst::core::math::Vector2;
 use amethyst::core::timing::Time;
@@ -40,7 +39,6 @@ impl<'a> System<'a> for ProjectileSystem {
         ReadStorage<'a, Projectile>,
         ReadStorage<'a, Collision>,
         ReadStorage<'a, Transform>,
-        ReadStorage<'a, Interpolation>,
         Write<'a, GameTaskResource>,
         Write<'a, DebugLines>,
     );
@@ -53,38 +51,24 @@ impl<'a> System<'a> for ProjectileSystem {
             projectiles,
             collisions,
             transforms,
-            interpolations,
             mut tasks,
             mut debug
         ): Self::SystemData,
     ) {
         let time_current = time.absolute_time();
-        let time_previous = utils::sub_duration(time_current, time.delta_time());
+        let time_previous = time_current.sub_safely(time.delta_time());
 
         for (entity, projectile) in (&entities, &projectiles).join() {
             let (mut head_position, head_velocity) = projectile.calc_data(time_current);
             let (tail_position, _) = projectile.calc_data(time_previous);
             let mut obstacle: Option<Obstacle> = None;
 
-            for (entity, collision, transform, interpolation) in (
-                &entities,
-                &collisions,
-                &transforms,
-                (&interpolations).maybe(),
-            )
-                .join()
-            {
+            for (entity, collision, transform) in (&entities, &collisions, &transforms).join() {
                 if projectile.shooter == Some(entity) {
                     continue;
                 }
 
-                let mut obstacle_position = transform.translation().xy();
-
-                // TODO: Do I need interpolation?
-                if let Some(interpolation) = interpolation {
-                    obstacle_position.x += interpolation.offset_x;
-                    obstacle_position.y += interpolation.offset_y;
-                }
+                let obstacle_position = transform.translation().xy();
 
                 if is_collision(
                     head_position,

@@ -4,6 +4,7 @@ use crate::resources::EntityMap;
 use crate::resources::PositionUpdate;
 use crate::resources::PositionUpdateResource;
 use crate::utils;
+use amethyst::core::timing::Time;
 use amethyst::core::transform::Transform;
 use amethyst::derive::SystemDesc;
 use amethyst::ecs::prelude::Join;
@@ -13,6 +14,7 @@ use amethyst::ecs::prelude::SystemData;
 use amethyst::ecs::prelude::WriteStorage;
 use amethyst::ecs::Entities;
 use amethyst::ecs::Entity;
+use amethyst::ecs::Read;
 use amethyst::ecs::ReadExpect;
 use amethyst::ecs::Write;
 
@@ -24,6 +26,7 @@ pub struct PositionUpdateSystem;
 impl<'a> System<'a> for PositionUpdateSystem {
     type SystemData = (
         Entities<'a>,
+        Read<'a, Time>,
         ReadExpect<'a, EntityMap>,
         ReadStorage<'a, Player>,
         ReadStorage<'a, Transform>,
@@ -33,16 +36,23 @@ impl<'a> System<'a> for PositionUpdateSystem {
 
     fn run(
         &mut self,
-        (entities, entity_map, players, transforms, mut updates, mut interpolations): Self::SystemData,
+        (entities, time, entity_map, players, transforms, mut updates, mut interpolations): Self::SystemData,
     ) {
         if updates.is_empty() {
             return;
         }
 
-        let query = (&entities, &transforms, &mut interpolations, (&players).maybe()).join();
         let mut ghost_update: Option<(Entity, &PositionUpdate)> = None;
+        let now = time.absolute_time();
 
-        for (entity, transform, interpolation, player) in query {
+        for (entity, transform, interpolation, player) in (
+            &entities,
+            &transforms,
+            &mut interpolations,
+            (&players).maybe(),
+        )
+            .join()
+        {
             let update = entity_map
                 .get_external_id(entity)
                 .and_then(|id| updates.get(&id))
@@ -58,27 +68,19 @@ impl<'a> System<'a> for PositionUpdateSystem {
 
             if let Some(update) = update {
                 let fix_position;
-                let offset_x = update.x - transform.translation().x;
-                let offset_y = update.y - transform.translation().y;
 
                 if let Some(player) = player {
-                    fix_position = is_offset_noticeable(offset_x, offset_y);
+                    fix_position = is_offset_noticeable(transform, update);
 
                     if let Some(ghost) = player.ghost {
                         ghost_update.replace((ghost, &update));
                     }
                 } else {
                     fix_position = true;
-
-                    interpolation.offset_direction = utils::math::angle_difference(
-                        update.direction,
-                        transform.euler_angles().2,
-                    );
                 }
 
                 if fix_position {
-                    interpolation.offset_x = offset_x;
-                    interpolation.offset_y = offset_y;
+                    interpolation.next(update.x, update.y, update.direction, now);
                 }
             }
         }
@@ -87,6 +89,8 @@ impl<'a> System<'a> for PositionUpdateSystem {
     }
 }
 
-fn is_offset_noticeable(offset_x: f32, offset_y: f32) -> bool {
+fn is_offset_noticeable(transform: &Transform, update: &PositionUpdate) -> bool {
+    let offset_x = update.x - transform.translation().x;
+    let offset_y = update.y - transform.translation().y;
     return !utils::math::are_closer_than(offset_x, offset_y, 0.0, 0.0, MAX_PLAYER_OFFSET);
 }
