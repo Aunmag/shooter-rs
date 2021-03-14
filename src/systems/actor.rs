@@ -33,7 +33,12 @@ impl<'a> System<'a> for ActorSystem {
         )
             .join()
         {
-            // TODO: Continue the loop immediately if actor's actions are empty
+            transform.rotate_2d(actor.rotation);
+
+            if actor.actions.is_empty() {
+                continue;
+            }
+
             let mut movement_x = 0.0;
             let mut movement_y = 0.0;
 
@@ -54,8 +59,6 @@ impl<'a> System<'a> for ActorSystem {
             }
 
             let (movement_x, movement_y) = normalize_movement_input(movement_x, movement_y);
-
-            transform.rotate_2d(actor.rotation);
 
             let previous_position = transform.translation().xy();
             let movement = transform.rotation()
