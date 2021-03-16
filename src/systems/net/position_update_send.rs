@@ -50,8 +50,6 @@ impl<'a> System<'a> for PositionUpdateSendSystem {
             return;
         }
 
-        let mut clean_cache = HashMap::with_capacity(self.cache.capacity());
-
         for (entity, _, transform) in (&entities, &actors, &transforms).join() {
             if let Some(external_id) = entity_map.get_external_id(entity) {
                 let current = Cached {
@@ -68,12 +66,11 @@ impl<'a> System<'a> for PositionUpdateSendSystem {
                         direction: current.direction,
                     });
 
-                    clean_cache.insert(external_id, current);
+                    self.cache.insert(external_id, current);
                 }
             }
         }
 
-        std::mem::swap(&mut self.cache, &mut clean_cache);
         self.last_sent = Instant::now();
     }
 }
