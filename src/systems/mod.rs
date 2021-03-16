@@ -1,8 +1,8 @@
 mod actor;
 mod ai;
 mod camera;
-mod collision;
 pub mod net;
+mod physics;
 mod player;
 mod projectile;
 mod terrain;
@@ -13,7 +13,7 @@ mod weapon;
 pub use self::actor::*;
 pub use self::ai::*;
 pub use self::camera::*;
-pub use self::collision::*;
+pub use self::physics::*;
 pub use self::player::*;
 pub use self::projectile::*;
 pub use self::terrain::*;

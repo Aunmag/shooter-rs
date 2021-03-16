@@ -2,9 +2,11 @@ use crate::components::Actor;
 use crate::components::Ai;
 use crate::components::Collision;
 use crate::components::Interpolation;
+use crate::components::Own;
 use crate::components::Player;
 use crate::components::Projectile;
 use crate::components::ProjectileConfig;
+use crate::components::RigidBody;
 use crate::components::Terrain;
 use crate::components::Weapon;
 use crate::components::WeaponConfig;
@@ -96,8 +98,13 @@ pub fn create_actor(
             },
         }));
 
-    if let GameType::Join(..) = *game_type {
-        builder = builder.with(Interpolation::new(position, now));
+    match *game_type {
+        GameType::Host(..) => {
+            builder = builder.with(Own);
+        }
+        GameType::Join(..) => {
+            builder = builder.with(Interpolation::new(position, now));
+        }
     }
 
     if let Some(renderer) = renderer.take() {
@@ -109,6 +116,7 @@ pub fn create_actor(
         builder = builder.with(Transparent);
     } else {
         builder = builder.with(Collision { radius: 0.25 });
+        builder = builder.with(RigidBody::new(80_000.0, 7.0, 8.0, 0.05));
     }
 
     let actor = builder.build();
@@ -125,6 +133,7 @@ pub fn grant_played_actor(world: &mut World, root: Entity, actor: Entity, game_t
     // TODO: Reset layer for old transform
     // TODO: Remove old ghost
     // TODO: Remove old camera
+    // TODO: Remove old ownership
     // TODO: Maybe make ghost as player's child
 
     let ghost;
@@ -142,7 +151,14 @@ pub fn grant_played_actor(world: &mut World, root: Entity, actor: Entity, game_t
         ghost = None;
     }
 
-    if let Err(error) = world.write_storage::<Player>().insert(actor, Player::new(ghost)) {
+    if let Err(error) = world.write_storage::<Own>().insert(actor, Own) {
+        log::error!("Failed to insert Own component. Details: {}", error);
+    }
+
+    if let Err(error) = world
+        .write_storage::<Player>()
+        .insert(actor, Player::new(ghost))
+    {
         log::error!("Failed to insert Player component. Details: {}", error);
         // TODO: Remove the ghost then
     }

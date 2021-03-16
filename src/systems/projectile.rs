@@ -1,4 +1,5 @@
 use crate::components::Collision;
+use crate::components::Own;
 use crate::components::Projectile;
 use crate::data::LAYER_PROJECTILE;
 use crate::resources::GameTask;
@@ -21,7 +22,8 @@ use amethyst::ecs::Entity;
 use amethyst::renderer::debug_drawing::DebugLines;
 use amethyst::renderer::palette::Srgba;
 
-const PUSH_FACTOR: f32 = 0.00025;
+const MASS: f32 = 8.0;
+const PUSH_FACTOR: f32 = 30.0;
 const VELOCITY_MIN: f32 = 5.0;
 
 #[derive(SystemDesc)]
@@ -30,12 +32,14 @@ pub struct ProjectileSystem;
 struct Obstacle {
     entity: Entity,
     distance_squared: f32,
+    is_own: bool,
 }
 
 impl<'a> System<'a> for ProjectileSystem {
     type SystemData = (
         Entities<'a>,
         Read<'a, Time>,
+        ReadStorage<'a, Own>,
         ReadStorage<'a, Projectile>,
         ReadStorage<'a, Collision>,
         ReadStorage<'a, Transform>,
@@ -48,6 +52,7 @@ impl<'a> System<'a> for ProjectileSystem {
         (
             entities,
             time,
+            own,
             projectiles,
             collisions,
             transforms,
@@ -63,7 +68,14 @@ impl<'a> System<'a> for ProjectileSystem {
             let (tail_position, _) = projectile.calc_data(time_previous);
             let mut obstacle: Option<Obstacle> = None;
 
-            for (entity, collision, transform) in (&entities, &collisions, &transforms).join() {
+            for (entity, collision, transform, own) in (
+                &entities,
+                &collisions,
+                &transforms,
+                (&own).maybe(),
+            )
+                .join()
+            {
                 if projectile.shooter == Some(entity) {
                     continue;
                 }
@@ -87,6 +99,7 @@ impl<'a> System<'a> for ProjectileSystem {
                         obstacle = Some(Obstacle {
                             entity,
                             distance_squared,
+                            is_own: own.is_some(),
                         });
                     }
                 }
@@ -104,12 +117,14 @@ impl<'a> System<'a> for ProjectileSystem {
                 head_position.x = tail_position.x + length * cos;
                 head_position.y = tail_position.y + length * sin;
 
-                // TODO: Better don't use head velocity, calc actual velocity at collision point
-                tasks.push(GameTask::ProjectileHit {
-                    entity: obstacle.entity,
-                    force_x: head_velocity.x * PUSH_FACTOR,
-                    force_y: head_velocity.y * PUSH_FACTOR,
-                });
+                if obstacle.is_own {
+                    // TODO: Better don't use head velocity, calc actual velocity at collision point
+                    tasks.push(GameTask::ProjectileHit {
+                        entity: obstacle.entity,
+                        force_x: head_velocity.x * MASS * PUSH_FACTOR,
+                        force_y: head_velocity.y * MASS * PUSH_FACTOR,
+                    });
+                }
             }
 
             debug.draw_line(

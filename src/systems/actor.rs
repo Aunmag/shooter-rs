@@ -1,6 +1,6 @@
 use crate::components::Actor;
 use crate::components::ActorActions;
-use crate::components::Interpolation;
+use crate::components::RigidBody;
 use amethyst::core::math::Vector3;
 use amethyst::core::timing::Time;
 use amethyst::core::transform::Transform;
@@ -19,20 +19,14 @@ impl<'a> System<'a> for ActorSystem {
     type SystemData = (
         Read<'a, Time>,
         ReadStorage<'a, Actor>,
-        WriteStorage<'a, Interpolation>,
+        WriteStorage<'a, RigidBody>,
         WriteStorage<'a, Transform>,
     );
 
-    fn run(&mut self, (time, actors, mut interpolations, mut transforms): Self::SystemData) {
+    fn run(&mut self, (time, actors, mut bodies, mut transforms): Self::SystemData) {
         let velocity = Actor::MOVEMENT_VELOCITY * time.delta_seconds();
 
-        for (actor, transform, interpolation) in (
-            &actors,
-            &mut transforms,
-            (&mut interpolations).maybe(),
-        )
-            .join()
-        {
+        for (actor, body, transform) in (&actors, &mut bodies, &mut transforms).join() {
             transform.rotate_2d(actor.rotation);
 
             if actor.actions.is_empty() {
@@ -57,20 +51,14 @@ impl<'a> System<'a> for ActorSystem {
                 movement.x += 1.0;
             }
 
-            let previous_position = transform.translation().xy();
+            movement = transform.rotation() * normalize_movement(movement) * velocity;
 
-            normalize_movement(&mut movement);
-            transform.prepend_translation(transform.rotation() * movement * velocity);
-
-            if let Some(interpolation) = interpolation {
-                let shift = transform.translation().xy() - previous_position;
-                interpolation.shift(shift.x, shift.y);
-            }
+            body.push(movement.x, movement.y, 0.0, false, true);
         }
     }
 }
 
-fn normalize_movement(movement: &mut Vector3<f32>) {
+fn normalize_movement(mut movement: Vector3<f32>) -> Vector3<f32> {
     let length_squared = movement.x * movement.x + movement.y * movement.y;
 
     if length_squared > 1.0 {
@@ -78,4 +66,6 @@ fn normalize_movement(movement: &mut Vector3<f32>) {
         movement.x /= length;
         movement.y /= length;
     }
+
+    return movement;
 }

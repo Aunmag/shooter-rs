@@ -1,5 +1,6 @@
 use crate::components::Actor;
 use crate::components::ActorActions;
+use crate::components::RigidBody;
 use crate::components::Weapon;
 use crate::resources::EntityMap;
 use crate::resources::GameTask;
@@ -17,7 +18,7 @@ use crate::systems::net::PositionUpdateSystem;
 use crate::systems::ActorSystem;
 use crate::systems::AiSystem;
 use crate::systems::CameraSystem;
-use crate::systems::CollisionSystem;
+use crate::systems::PhysicsSystem;
 use crate::systems::PlayerSystem;
 use crate::systems::ProjectileSystem;
 use crate::systems::TerrainSystem;
@@ -73,10 +74,10 @@ impl GameState<'_, '_> {
                 builder.add(AiSystem::new(), "Ai", &[]);
                 builder.add(PlayerSystem, "Player", &[]);
                 builder.add(ActorSystem, "Actor", &["Ai", "Player"]);
-                builder.add(CollisionSystem::new(), "Collision", &["Actor"]);
-                builder.add(WeaponSystem::new(), "Weapon", &["Collision"]);
-                builder.add(ProjectileSystem, "Projectile", &["Collision"]);
-                builder.add(PositionUpdateSendSystem::new(), "PositionUpdateSend", &["Collision"]);
+                builder.add(PhysicsSystem::new(), "Physics", &["Actor"]);
+                builder.add(WeaponSystem::new(), "Weapon", &["Physics"]);
+                builder.add(ProjectileSystem, "Projectile", &["Physics"]);
+                builder.add(PositionUpdateSendSystem::new(), "PositionUpdateSend", &["Physics"]);
                 builder.add(ConnectionUpdateSystem, "ConnectionUpdate", &[]);
                 builder.add(CameraSystem::new(), "Camera", &[]);
                 builder.add(TerrainSystem, "Terrain", &[]);
@@ -86,10 +87,11 @@ impl GameState<'_, '_> {
                 builder.add(InterpolationSystem, "Interpolation", &[]);
                 builder.add(PlayerSystem, "Player", &[]);
                 builder.add(ActorSystem, "Actor", &["Player", "Interpolation"]);
+                builder.add(PhysicsSystem::new(), "Physics", &["Actor"]);
                 builder.add(InputSendSystem::new(), "InputSend", &["Player", "Actor"]);
                 builder.add(MessageReceiveSystem::new(false), "MessageReceive", &[]);
-                builder.add(PositionUpdateSystem, "PositionUpdate", &["MessageReceive", "Actor"]);
-                builder.add(ProjectileSystem, "Projectile", &["Actor"]);
+                builder.add(PositionUpdateSystem, "PositionUpdate", &["MessageReceive", "Physics"]);
+                builder.add(ProjectileSystem, "Projectile", &["Physics"]);
                 builder.add(ConnectionUpdateSystem, "ConnectionUpdate", &[]);
                 builder.add(CameraSystem::new(), "Camera", &[]);
                 builder.add(TerrainSystem, "Terrain", &[]);
@@ -360,10 +362,8 @@ impl GameState<'_, '_> {
         force_x: f32,
         force_y: f32,
     ) {
-        if let Some(transform) = world.write_storage::<Transform>().get_mut(entity) {
-            let translation = transform.translation_mut();
-            translation.x += force_x;
-            translation.y += force_y;
+        if let Some(body) = world.write_storage::<RigidBody>().get_mut(entity) {
+            body.push(force_x, force_y, 0.0, true, false);
         }
     }
 
