@@ -3,6 +3,7 @@ use crate::data::POSITION_UPDATE_INTERVAL;
 use crate::resources::EntityMap;
 use crate::resources::Message;
 use crate::resources::NetResource;
+use crate::utils::Position;
 use amethyst::core::transform::Transform;
 use amethyst::derive::SystemDesc;
 use amethyst::ecs::prelude::Join;
@@ -17,14 +18,7 @@ use std::time::Instant;
 #[derive(SystemDesc)]
 pub struct PositionUpdateSendSystem {
     last_sent: Instant,
-    cache: HashMap<u16, Cached>,
-}
-
-#[derive(PartialEq)]
-struct Cached {
-    x: f32,
-    y: f32,
-    direction: f32,
+    cache: HashMap<u16, Position>,
 }
 
 impl PositionUpdateSendSystem {
@@ -52,21 +46,19 @@ impl<'a> System<'a> for PositionUpdateSendSystem {
 
         for (entity, _, transform) in (&entities, &actors, &transforms).join() {
             if let Some(external_id) = entity_map.get_external_id(entity) {
-                let current = Cached {
-                    x: transform.translation().x,
-                    y: transform.translation().y,
-                    direction: transform.euler_angles().2,
-                };
+                let position = Position::from(transform);
 
-                if self.cache.get(&external_id).map_or(true, |c| c != &current) {
+                if self
+                    .cache
+                    .get(&external_id)
+                    .map_or(true, |p| p != &position)
+                {
                     net.send_to_all_unreliably(&Message::PositionUpdate {
                         external_id,
-                        x: current.x,
-                        y: current.y,
-                        direction: current.direction,
+                        position,
                     });
 
-                    self.cache.insert(external_id, current);
+                    self.cache.insert(external_id, position);
                 }
             }
         }

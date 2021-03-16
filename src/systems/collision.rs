@@ -1,5 +1,4 @@
 use crate::components::Collision;
-use amethyst::core::math::Point2;
 use amethyst::core::transform::Transform;
 use amethyst::derive::SystemDesc;
 use amethyst::ecs::prelude::Join;
@@ -44,14 +43,14 @@ impl<'a> System<'a> for CollisionSystem {
         self.previous_collisions_count = 0;
 
         for (e1, t1, c1) in (&e, &t, &c).join() {
-            let p1 = to_point(t1);
+            let p1 = t1.translation().xy();
 
             for (e2, t2, c2) in (&e, &t, &c).join() {
                 if e1.id() == e2.id() || e2.id() <= last_checked_entity_id {
                     continue;
                 }
 
-                let p2 = to_point(t2);
+                let p2 = t2.translation().xy();
 
                 if let Some(solution) = Collision::resolve(c1, c2, p1, p2) {
                     append_solution(&mut solutions, e1.id(), solution.x, solution.y);
@@ -95,10 +94,6 @@ impl<'a> System<'a> for CollisionSystem {
             }
         }
     }
-}
-
-fn to_point(transform: &Transform) -> Point2<f32> {
-    return Point2::from([transform.translation().x, transform.translation().y]);
 }
 
 fn append_solution(solutions: &mut Vec<Solution>, entity_id: u32, push_x: f32, push_y: f32) {

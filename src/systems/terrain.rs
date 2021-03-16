@@ -34,7 +34,6 @@ impl<'a> System<'a> for TerrainSystem {
             break;
         }
 
-        // TODO: Cache, do not run every time
         for (_, transform) in (&tiles, &mut transforms).join() {
             transform.set_translation_x(x);
             transform.set_translation_y(y);

@@ -4,7 +4,6 @@ use crate::resources::GameTaskResource;
 use crate::resources::Message;
 use crate::resources::NetConnection;
 use crate::resources::NetResource;
-use crate::resources::PositionUpdate;
 use crate::resources::PositionUpdateResource;
 use crate::resources::MESSAGE_SIZE_MAX;
 use amethyst::derive::SystemDesc;
@@ -81,16 +80,12 @@ impl MessageReceiveSystem {
         match *message {
             Message::ActorSpawn {
                 external_id,
-                x,
-                y,
-                direction,
+                position,
                 ..
             } => {
                 tasks.push(GameTask::ActorSpawn {
                     external_id,
-                    x,
-                    y,
-                    direction,
+                    position,
                 });
             }
             Message::ActorGrant { external_id, .. } => {
@@ -98,26 +93,20 @@ impl MessageReceiveSystem {
             }
             Message::PositionUpdate {
                 external_id,
-                x,
-                y,
-                direction,
+                position,
             } => {
-                position_updates.insert(external_id, PositionUpdate { x, y, direction });
+                position_updates.insert(external_id, position);
             }
             Message::ProjectileSpawn {
-                x,
-                y,
-                velocity_x,
-                velocity_y,
+                position,
+                velocity,
                 acceleration_factor,
                 shooter_id,
                 ..
             } => {
                 tasks.push(GameTask::ProjectileSpawn {
-                    x,
-                    y,
-                    velocity_x,
-                    velocity_y,
+                    position,
+                    velocity,
                     acceleration_factor,
                     shooter_id,
                 });

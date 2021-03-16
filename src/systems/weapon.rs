@@ -4,6 +4,7 @@ use crate::components::Weapon;
 use crate::resources::EntityMap;
 use crate::resources::GameTask;
 use crate::resources::GameTaskResource;
+use crate::utils::Position;
 use amethyst::core::ecs::ReadExpect;
 use amethyst::core::timing::Time;
 use amethyst::core::transform::Transform;
@@ -72,14 +73,12 @@ impl<'a> System<'a> for WeaponSystem {
 
         for (entity, actor, transform, weapon) in query {
             if actor.actions.contains(ActorActions::ATTACK) && weapon.fire(time.absolute_time()) {
-                let velocity = self.deviate_velocity(weapon.config.muzzle_velocity);
-                let (sin, cos) = (-self.deviate_direction(transform.euler_angles().2)).sin_cos();
+                let mut position = Position::from(transform);
+                position.direction = self.deviate_direction(position.direction);
 
                 tasks.push(GameTask::ProjectileSpawn {
-                    x: transform.translation().x,
-                    y: transform.translation().y,
-                    velocity_x: sin * velocity,
-                    velocity_y: cos * velocity,
+                    position,
+                    velocity: self.deviate_velocity(weapon.config.muzzle_velocity),
                     acceleration_factor: weapon.config.projectile.acceleration_factor,
                     shooter_id: entity_map.get_external_id(entity),
                 });

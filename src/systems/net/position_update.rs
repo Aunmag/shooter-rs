@@ -1,9 +1,9 @@
 use crate::components::Interpolation;
 use crate::components::Player;
 use crate::resources::EntityMap;
-use crate::resources::PositionUpdate;
 use crate::resources::PositionUpdateResource;
 use crate::utils;
+use crate::utils::Position;
 use amethyst::core::timing::Time;
 use amethyst::core::transform::Transform;
 use amethyst::derive::SystemDesc;
@@ -42,7 +42,7 @@ impl<'a> System<'a> for PositionUpdateSystem {
             return;
         }
 
-        let mut ghost_update: Option<(Entity, &PositionUpdate)> = None;
+        let mut ghost_update: Option<(Entity, &Position)> = None;
         let now = time.absolute_time();
 
         for (entity, transform, interpolation, player) in (
@@ -80,7 +80,7 @@ impl<'a> System<'a> for PositionUpdateSystem {
                 }
 
                 if fix_position {
-                    interpolation.next(update.x, update.y, update.direction, now);
+                    interpolation.next(*update, now);
                 }
             }
         }
@@ -89,7 +89,7 @@ impl<'a> System<'a> for PositionUpdateSystem {
     }
 }
 
-fn is_offset_noticeable(transform: &Transform, update: &PositionUpdate) -> bool {
+fn is_offset_noticeable(transform: &Transform, update: &Position) -> bool {
     let offset_x = update.x - transform.translation().x;
     let offset_y = update.y - transform.translation().y;
     return !utils::math::are_closer_than(offset_x, offset_y, 0.0, 0.0, MAX_PLAYER_OFFSET);

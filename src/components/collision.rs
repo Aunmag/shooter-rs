@@ -1,5 +1,5 @@
 use crate::utils::math;
-use amethyst::core::math::Point2;
+use amethyst::core::math::Vector2;
 use amethyst::ecs::Component;
 use amethyst::ecs::VecStorage;
 
@@ -10,7 +10,12 @@ pub struct Collision {
 }
 
 impl Collision {
-    pub fn resolve(c1: &Self, c2: &Self, p1: Point2<f32>, p2: Point2<f32>) -> Option<Point2<f32>> {
+    pub fn resolve(
+        c1: &Self,
+        c2: &Self,
+        p1: Vector2<f32>,
+        p2: Vector2<f32>,
+    ) -> Option<Vector2<f32>> {
         let distance_squared = math::distance_squared(p1.x, p1.y, p2.x, p2.y);
         let distance_min = c1.radius + c2.radius;
 
@@ -19,10 +24,7 @@ impl Collision {
             let distance_to_push = (distance_min - distance) / 2.0 + EXTRA_RESOLVE_DISTANCE;
             let (sin, cos) = math::angle(p1.x, p1.y, p2.x, p2.y).sin_cos();
 
-            return Some(Point2::from([
-                distance_to_push * cos,
-                distance_to_push * sin,
-            ]));
+            return Some(Vector2::new(distance_to_push * cos, distance_to_push * sin));
         } else {
             return None;
         }

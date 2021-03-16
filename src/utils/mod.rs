@@ -1,10 +1,12 @@
 mod duration_ext;
 pub mod math;
+mod position;
 pub mod ui;
 pub mod world;
 pub mod world_decorations;
 
 pub use self::duration_ext::*;
+pub use self::position::*;
 use amethyst::core::HiddenPropagate;
 use amethyst::ecs::prelude::Entity;
 use amethyst::ecs::prelude::World;

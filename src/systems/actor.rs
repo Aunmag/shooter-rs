@@ -39,33 +39,28 @@ impl<'a> System<'a> for ActorSystem {
                 continue;
             }
 
-            let mut movement_x = 0.0;
-            let mut movement_y = 0.0;
+            let mut movement = Vector3::new(0.0, 0.0, 0.0);
 
             if actor.actions.contains(ActorActions::MOVEMENT_FORWARD) {
-                movement_y += 1.0;
+                movement.y += 1.0;
             }
 
             if actor.actions.contains(ActorActions::MOVEMENT_BACKWARD) {
-                movement_y -= 1.0;
+                movement.y -= 1.0;
             }
 
             if actor.actions.contains(ActorActions::MOVEMENT_LEFTWARD) {
-                movement_x -= 1.0;
+                movement.x -= 1.0;
             }
 
             if actor.actions.contains(ActorActions::MOVEMENT_RIGHTWARD) {
-                movement_x += 1.0;
+                movement.x += 1.0;
             }
 
-            let (movement_x, movement_y) = normalize_movement_input(movement_x, movement_y);
-
             let previous_position = transform.translation().xy();
-            let movement = transform.rotation()
-                * Vector3::new(movement_x, movement_y, 0.0)
-                * velocity;
 
-            transform.prepend_translation(movement);
+            normalize_movement(&mut movement);
+            transform.prepend_translation(transform.rotation() * movement * velocity);
 
             if let Some(interpolation) = interpolation {
                 let shift = transform.translation().xy() - previous_position;
@@ -75,13 +70,12 @@ impl<'a> System<'a> for ActorSystem {
     }
 }
 
-fn normalize_movement_input(x: f32, y: f32) -> (f32, f32) {
-    let movement_squared = x * x + y * y;
+fn normalize_movement(movement: &mut Vector3<f32>) {
+    let length_squared = movement.x * movement.x + movement.y * movement.y;
 
-    if movement_squared > 1.0 {
-        let movement = movement_squared.sqrt();
-        return (1.0 * x / movement, 1.0 * y / movement);
-    } else {
-        return (x, y);
+    if length_squared > 1.0 {
+        let length = length_squared.sqrt();
+        movement.x /= length;
+        movement.y /= length;
     }
 }

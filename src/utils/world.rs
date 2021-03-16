@@ -16,6 +16,7 @@ use crate::resources::EntityMap;
 use crate::resources::Sprite;
 use crate::resources::SpriteResource;
 use crate::states::GameType;
+use crate::utils::Position;
 use amethyst::core::math::Vector2;
 use amethyst::core::math::Vector3;
 use amethyst::core::timing::Time;
@@ -67,17 +68,15 @@ pub fn create_actor(
     world: &mut World,
     root: Entity,
     external_id: Option<u16>,
-    x: f32,
-    y: f32,
-    direction: f32,
+    position: Position,
     is_ghost: bool,
     game_type: &GameType,
 ) -> Entity {
     let now = world.read_resource::<Time>().absolute_time();
 
     let mut transform = Transform::default();
-    transform.set_translation_xyz(x, y, LAYER_ACTOR);
-    transform.set_rotation_2d(direction);
+    transform.set_translation_xyz(position.x, position.y, LAYER_ACTOR);
+    transform.set_rotation_2d(position.direction);
 
     let mut renderer = world
         .read_resource::<SpriteResource>()
@@ -98,7 +97,7 @@ pub fn create_actor(
         }));
 
     if let GameType::Join(..) = *game_type {
-        builder = builder.with(Interpolation::new(x, y, direction, now));
+        builder = builder.with(Interpolation::new(position, now));
     }
 
     if let Some(renderer) = renderer.take() {
@@ -131,7 +130,14 @@ pub fn grant_played_actor(world: &mut World, root: Entity, actor: Entity, game_t
     let ghost;
 
     if let GameType::Join(..) = *game_type {
-        ghost = Some(create_actor(world, root, None, 0.0, 0.0, 0.0, true, game_type));
+        ghost = Some(create_actor(
+            world,
+            root,
+            None,
+            Position::default(),
+            true,
+            game_type,
+        ));
     } else {
         ghost = None;
     }
@@ -198,10 +204,8 @@ pub fn create_terrain(world: &mut World, root: Entity) -> Entity {
 pub fn create_projectile(
     world: &mut World,
     root: Entity,
-    x: f32,
-    y: f32,
-    velocity_x: f32,
-    velocity_y: f32,
+    position: Position,
+    velocity: f32,
     acceleration_factor: f32,
     shooter_id: Option<u16>,
 ) -> Entity {
@@ -209,13 +213,14 @@ pub fn create_projectile(
         .and_then(|id| world.read_resource::<EntityMap>().get_entity(id))
         .filter(|e| world.is_alive(*e));
 
+    let (sin, cos) = (-position.direction).sin_cos();
     let projectile = Projectile::new(
         ProjectileConfig {
             acceleration_factor,
         },
         world.read_resource::<Time>().absolute_time(),
-        Vector2::new(x, y),
-        Vector2::new(velocity_x, velocity_y),
+        Vector2::new(position.x, position.y),
+        Vector2::new(velocity * sin, velocity * cos),
         shooter,
     );
 

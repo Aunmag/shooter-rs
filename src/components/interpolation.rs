@@ -1,34 +1,29 @@
 use crate::data::POSITION_UPDATE_INTERVAL;
 use crate::utils::math;
 use crate::utils::DurationExt;
+use crate::utils::Position;
 use amethyst::ecs::Component;
 use amethyst::ecs::VecStorage;
 use std::time::Duration;
 
 pub struct Interpolation {
-    origin: InterpolationPosition,
-    target: InterpolationPosition,
+    origin: Position,
+    target: Position,
     start: Duration,
 }
 
-pub struct InterpolationPosition {
-    pub x: f32,
-    pub y: f32,
-    pub direction: f32,
-}
-
 impl Interpolation {
-    pub fn new(x: f32, y: f32, direction: f32, now: Duration) -> Self {
+    pub fn new(position: Position, now: Duration) -> Self {
         return Self {
-            origin: InterpolationPosition::new(x, y, direction),
-            target: InterpolationPosition::new(x, y, direction),
+            origin: position,
+            target: position,
             start: now,
         };
     }
 
-    pub fn next(&mut self, x: f32, y: f32, direction: f32, now: Duration) {
+    pub fn next(&mut self, position: Position, now: Duration) {
         self.origin = self.get_interpolated_position(now);
-        self.target = InterpolationPosition::new(x, y, direction);
+        self.target = position;
         self.start = now;
     }
 
@@ -39,20 +34,14 @@ impl Interpolation {
         self.target.y += y;
     }
 
-    pub fn get_interpolated_position(&self, time: Duration) -> InterpolationPosition {
+    pub fn get_interpolated_position(&self, time: Duration) -> Position {
         let progress = time.get_progress(self.start, self.start + POSITION_UPDATE_INTERVAL);
 
-        return InterpolationPosition::new(
+        return Position::new(
             interpolate(self.origin.x, self.target.x, progress),
             interpolate(self.origin.y, self.target.y, progress),
             interpolate_angle(self.origin.direction, self.target.direction, progress),
         );
-    }
-}
-
-impl InterpolationPosition {
-    pub fn new(x: f32, y: f32, direction: f32) -> Self {
-        return Self { x, y, direction };
     }
 }
 

@@ -23,6 +23,7 @@ use crate::systems::ProjectileSystem;
 use crate::systems::TerrainSystem;
 use crate::systems::WeaponSystem;
 use crate::utils;
+use crate::utils::Position;
 use crate::utils::TakeContent;
 use amethyst::controls::HideCursor;
 use amethyst::core::transform::Transform;
@@ -132,9 +133,7 @@ impl GameState<'_, '_> {
 
             tasks.push(GameTask::ActorSpawn {
                 external_id,
-                x: 0.0,
-                y: 0.0,
-                direction: 0.0,
+                position: Position::default(),
             });
 
             tasks.push(GameTask::ActorGrant { external_id });
@@ -144,9 +143,7 @@ impl GameState<'_, '_> {
 
                 tasks.push(GameTask::ActorSpawn {
                     external_id,
-                    x: 5.0 * (0.5 - i as f32),
-                    y: 0.0,
-                    direction: 0.0,
+                    position: Position::new(5.0 * (0.5 - i as f32), 0.0, 0.0),
                 });
 
                 tasks.push(GameTask::ActorAiSet { external_id });
@@ -171,11 +168,9 @@ impl GameState<'_, '_> {
             }
             GameTask::ActorSpawn {
                 external_id,
-                x,
-                y,
-                direction,
+                position,
             } => {
-                self.on_task_actor_spawn(world, external_id, x, y, direction);
+                self.on_task_actor_spawn(world, external_id, position);
             }
             GameTask::ActorGrant { external_id } => {
                 self.on_task_actor_grant(world, external_id);
@@ -197,19 +192,15 @@ impl GameState<'_, '_> {
                 self.on_task_actor_action(world, external_id, None, direction);
             }
             GameTask::ProjectileSpawn {
-                x,
-                y,
-                velocity_x,
-                velocity_y,
+                position,
+                velocity,
                 acceleration_factor,
                 shooter_id,
             } => {
                 self.on_task_projectile_spawn(
                     world,
-                    x,
-                    y,
-                    velocity_x,
-                    velocity_y,
+                    position,
+                    velocity,
                     acceleration_factor,
                     shooter_id,
                 );
@@ -248,9 +239,7 @@ impl GameState<'_, '_> {
                     Message::ActorSpawn {
                         id: 0,
                         external_id,
-                        x: transform.translation().x,
-                        y: transform.translation().y,
-                        direction: transform.euler_angles().2,
+                        position: transform.into(),
                     },
                 );
             }
@@ -261,9 +250,7 @@ impl GameState<'_, '_> {
 
         tasks.push(GameTask::ActorSpawn {
             external_id,
-            x: 0.0,
-            y: 0.0,
-            direction: 0.0,
+            position: Position::default(),
         });
 
         tasks.push(GameTask::MessageSent {
@@ -274,22 +261,13 @@ impl GameState<'_, '_> {
         net.attach_external_id(&address, external_id);
     }
 
-    fn on_task_actor_spawn(
-        &self,
-        world: &mut World,
-        external_id: u16,
-        x: f32,
-        y: f32,
-        direction: f32,
-    ) {
+    fn on_task_actor_spawn(&self, world: &mut World, external_id: u16, position: Position) {
         if let Some(root) = self.root {
             utils::world::create_actor(
                 world,
                 root,
                 Some(external_id),
-                x,
-                y,
-                direction,
+                position,
                 false,
                 &self.game_type,
             );
@@ -300,9 +278,7 @@ impl GameState<'_, '_> {
                     .send_to_all(Message::ActorSpawn {
                         id: 0,
                         external_id,
-                        x,
-                        y,
-                        direction,
+                        position,
                     });
             }
         }
@@ -347,10 +323,8 @@ impl GameState<'_, '_> {
     fn on_task_projectile_spawn(
         &self,
         world: &mut World,
-        x: f32,
-        y: f32,
-        velocity_x: f32,
-        velocity_y: f32,
+        position: Position,
+        velocity: f32,
         acceleration_factor: f32,
         shooter_id: Option<u16>,
     ) {
@@ -360,10 +334,8 @@ impl GameState<'_, '_> {
                     .write_resource::<NetResource>()
                     .send_to_all(Message::ProjectileSpawn {
                         id: 0,
-                        x,
-                        y,
-                        velocity_x,
-                        velocity_y,
+                        position,
+                        velocity,
                         acceleration_factor,
                         shooter_id,
                     });
@@ -372,10 +344,8 @@ impl GameState<'_, '_> {
             utils::world::create_projectile(
                 world,
                 root,
-                x,
-                y,
-                velocity_x,
-                velocity_y,
+                position,
+                velocity,
                 acceleration_factor,
                 shooter_id,
             );

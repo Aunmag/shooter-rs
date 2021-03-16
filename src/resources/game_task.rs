@@ -1,5 +1,6 @@
 use crate::components::ActorActions;
 use crate::resources::Message;
+use crate::utils::Position;
 use amethyst::ecs::Entity;
 use std::net::SocketAddr;
 
@@ -9,9 +10,7 @@ pub enum GameTask {
     ClientGreet(SocketAddr),
     ActorSpawn {
         external_id: u16,
-        x: f32,
-        y: f32,
-        direction: f32,
+        position: Position,
     },
     ActorGrant {
         external_id: u16,
@@ -29,10 +28,8 @@ pub enum GameTask {
         direction: f32,
     },
     ProjectileSpawn {
-        x: f32,
-        y: f32,
-        velocity_x: f32,
-        velocity_y: f32,
+        position: Position,
+        velocity: f32,
         acceleration_factor: f32,
         shooter_id: Option<u16>,
     },

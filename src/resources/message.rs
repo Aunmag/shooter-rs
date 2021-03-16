@@ -1,3 +1,4 @@
+use crate::utils::Position;
 use bincode::Options;
 use serde::Deserialize;
 use serde::Serialize;
@@ -24,9 +25,7 @@ pub enum Message {
     ActorSpawn {
         id: u16,
         external_id: u16,
-        x: f32,
-        y: f32,
-        direction: f32,
+        position: Position,
     },
     ActorGrant {
         id: u16,
@@ -34,16 +33,12 @@ pub enum Message {
     },
     PositionUpdate {
         external_id: u16,
-        x: f32,
-        y: f32,
-        direction: f32,
+        position: Position,
     },
     ProjectileSpawn {
         id: u16,
-        x: f32,
-        y: f32,
-        velocity_x: f32,
-        velocity_y: f32,
+        position: Position,
+        velocity: f32,
         acceleration_factor: f32,
         shooter_id: Option<u16>,
     },
