@@ -3,7 +3,7 @@ use crate::utils::math;
 use crate::utils::DurationExt;
 use crate::utils::Position;
 use amethyst::ecs::Component;
-use amethyst::ecs::VecStorage;
+use amethyst::ecs::DenseVecStorage;
 use std::time::Duration;
 
 pub struct Interpolation {
@@ -46,7 +46,7 @@ impl Interpolation {
 }
 
 impl Component for Interpolation {
-    type Storage = VecStorage<Self>;
+    type Storage = DenseVecStorage<Self>;
 }
 
 fn interpolate(source: f32, target: f32, progress: f32) -> f32 {

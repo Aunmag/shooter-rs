@@ -1,6 +1,6 @@
 use amethyst::ecs::Component;
-use amethyst::ecs::DenseVecStorage;
 use amethyst::ecs::Entity;
+use amethyst::ecs::VecStorage;
 
 pub struct Player {
     pub ghost: Option<Entity>,
@@ -13,5 +13,5 @@ impl Player {
 }
 
 impl Component for Player {
-    type Storage = DenseVecStorage<Self>;
+    type Storage = VecStorage<Self>;
 }

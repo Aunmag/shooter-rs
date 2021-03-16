@@ -1,5 +1,5 @@
 use amethyst::ecs::Component;
-use amethyst::ecs::DenseVecStorage;
+use amethyst::ecs::VecStorage;
 
 pub struct Actor {
     pub actions: ActorActions,
@@ -28,5 +28,5 @@ impl Actor {
 }
 
 impl Component for Actor {
-    type Storage = DenseVecStorage<Self>;
+    type Storage = VecStorage<Self>;
 }
