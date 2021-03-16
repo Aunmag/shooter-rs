@@ -15,7 +15,7 @@ use amethyst::ecs::prelude::WriteStorage;
 use amethyst::input::InputHandler;
 use std::f32::consts::TAU;
 
-const ROTATION_SENSITIVITY: f32 = 0.01;
+const ROTATION_SENSITIVITY: f32 = 0.003;
 
 #[derive(SystemDesc)]
 pub struct PlayerSystem;
