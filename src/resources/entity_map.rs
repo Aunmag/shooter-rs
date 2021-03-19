@@ -1,6 +1,7 @@
 use amethyst::ecs::Entity;
 use std::collections::HashMap;
 
+#[derive(Default)]
 pub struct EntityMap {
     by_internal: HashMap<u32, u16>,
     by_external: HashMap<u16, Entity>,

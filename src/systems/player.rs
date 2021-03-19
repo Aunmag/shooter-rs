@@ -5,30 +5,28 @@ use crate::input::ActionBinding;
 use crate::input::AxisBinding;
 use crate::input::CustomBindingTypes;
 use crate::resources::MouseInput;
-use amethyst::derive::SystemDesc;
 use amethyst::ecs::prelude::Join;
 use amethyst::ecs::prelude::Read;
 use amethyst::ecs::prelude::ReadStorage;
 use amethyst::ecs::prelude::System;
-use amethyst::ecs::prelude::SystemData;
+use amethyst::ecs::prelude::Write;
 use amethyst::ecs::prelude::WriteStorage;
 use amethyst::input::InputHandler;
 use std::f32::consts::TAU;
 
 const ROTATION_SENSITIVITY: f32 = 0.003;
 
-#[derive(SystemDesc)]
 pub struct PlayerSystem;
 
 impl<'a> System<'a> for PlayerSystem {
     type SystemData = (
         Read<'a, InputHandler<CustomBindingTypes>>,
-        Read<'a, MouseInput>,
         ReadStorage<'a, Player>,
+        Write<'a, MouseInput>,
         WriteStorage<'a, Actor>,
     );
 
-    fn run(&mut self, (input, input_mouse, players, mut actors): Self::SystemData) {
+    fn run(&mut self, (input, players, mut input_mouse, mut actors): Self::SystemData) {
         let rotation = (input_mouse.delta_x * ROTATION_SENSITIVITY) % TAU;
 
         for (actor, _) in (&mut actors, &players).join() {
@@ -57,6 +55,9 @@ impl<'a> System<'a> for PlayerSystem {
                     .unwrap_or(false),
             );
         }
+
+        input_mouse.delta_x = 0.0;
+        input_mouse.delta_y = 0.0;
     }
 }
 

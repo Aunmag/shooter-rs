@@ -10,12 +10,10 @@ use amethyst::core::math::Point3;
 use amethyst::core::math::Vector2;
 use amethyst::core::timing::Time;
 use amethyst::core::transform::Transform;
-use amethyst::derive::SystemDesc;
 use amethyst::ecs::prelude::Join;
 use amethyst::ecs::prelude::Read;
 use amethyst::ecs::prelude::ReadStorage;
 use amethyst::ecs::prelude::System;
-use amethyst::ecs::prelude::SystemData;
 use amethyst::ecs::prelude::Write;
 use amethyst::ecs::Entities;
 use amethyst::ecs::Entity;
@@ -26,7 +24,6 @@ const MASS: f32 = 8.0;
 const PUSH_FACTOR: f32 = 30.0;
 const VELOCITY_MIN: f32 = 5.0;
 
-#[derive(SystemDesc)]
 pub struct ProjectileSystem;
 
 struct Obstacle {

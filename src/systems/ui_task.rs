@@ -1,16 +1,13 @@
 use crate::resources::UiTask;
 use crate::resources::UiTaskResource;
-use amethyst::derive::SystemDesc;
 use amethyst::ecs::prelude::Join;
 use amethyst::ecs::prelude::System;
-use amethyst::ecs::prelude::SystemData;
 use amethyst::ecs::prelude::Write;
 use amethyst::ecs::prelude::WriteStorage;
 use amethyst::ui::UiText;
 use amethyst::ui::UiTransform;
 use std::collections::HashMap;
 
-#[derive(SystemDesc)]
 pub struct UiTaskSystem;
 
 impl UiTaskSystem {

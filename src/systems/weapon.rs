@@ -5,15 +5,12 @@ use crate::resources::EntityMap;
 use crate::resources::GameTask;
 use crate::resources::GameTaskResource;
 use crate::utils::Position;
-use amethyst::core::ecs::ReadExpect;
 use amethyst::core::timing::Time;
 use amethyst::core::transform::Transform;
-use amethyst::derive::SystemDesc;
 use amethyst::ecs::prelude::Join;
 use amethyst::ecs::prelude::Read;
 use amethyst::ecs::prelude::ReadStorage;
 use amethyst::ecs::prelude::System;
-use amethyst::ecs::prelude::SystemData;
 use amethyst::ecs::prelude::Write;
 use amethyst::ecs::prelude::WriteStorage;
 use amethyst::ecs::Entities;
@@ -26,7 +23,6 @@ use std::time::UNIX_EPOCH;
 const VELOCITY_DEVIATION_FACTOR: f32 = 0.1;
 const DIRECTION_DEVIATION: f32 = 0.02;
 
-#[derive(SystemDesc)]
 pub struct WeaponSystem {
     randomizer: Pcg32,
 }
@@ -57,7 +53,7 @@ impl WeaponSystem {
 impl<'a> System<'a> for WeaponSystem {
     type SystemData = (
         Entities<'a>,
-        ReadExpect<'a, EntityMap>,
+        Read<'a, EntityMap>,
         Read<'a, Time>,
         ReadStorage<'a, Actor>,
         ReadStorage<'a, Transform>,

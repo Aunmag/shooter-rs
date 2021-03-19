@@ -5,17 +5,14 @@ use crate::resources::Message;
 use crate::resources::NetResource;
 use crate::utils::Position;
 use amethyst::core::transform::Transform;
-use amethyst::derive::SystemDesc;
 use amethyst::ecs::prelude::Join;
+use amethyst::ecs::prelude::Read;
 use amethyst::ecs::prelude::ReadStorage;
 use amethyst::ecs::prelude::System;
-use amethyst::ecs::prelude::SystemData;
 use amethyst::ecs::Entities;
-use amethyst::ecs::ReadExpect;
 use std::collections::HashMap;
 use std::time::Instant;
 
-#[derive(SystemDesc)]
 pub struct PositionUpdateSendSystem {
     last_sent: Instant,
     cache: HashMap<u16, Position>,
@@ -33,8 +30,8 @@ impl PositionUpdateSendSystem {
 impl<'a> System<'a> for PositionUpdateSendSystem {
     type SystemData = (
         Entities<'a>,
-        ReadExpect<'a, EntityMap>,
-        ReadExpect<'a, NetResource>,
+        Read<'a, EntityMap>,
+        Option<Read<'a, NetResource>>,
         ReadStorage<'a, Actor>,
         ReadStorage<'a, Transform>,
     );
@@ -43,6 +40,11 @@ impl<'a> System<'a> for PositionUpdateSendSystem {
         if self.last_sent.elapsed() < POSITION_UPDATE_INTERVAL {
             return;
         }
+
+        let net = match net {
+            Some(net) => net,
+            None => return,
+        };
 
         for (entity, _, transform) in (&entities, &actors, &transforms).join() {
             if let Some(external_id) = entity_map.get_external_id(entity) {

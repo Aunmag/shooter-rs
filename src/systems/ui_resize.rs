@@ -1,10 +1,8 @@
 use crate::resources::GameStatus;
-use amethyst::derive::SystemDesc;
 use amethyst::ecs::prelude::Join;
 use amethyst::ecs::prelude::Read;
 use amethyst::ecs::prelude::ReadExpect;
 use amethyst::ecs::prelude::System;
-use amethyst::ecs::prelude::SystemData;
 use amethyst::ecs::prelude::WriteStorage;
 use amethyst::ui::UiText;
 use amethyst::ui::UiTransform;
@@ -16,7 +14,6 @@ const WALLPAPER_SIZE_X: f32 = 480.0;
 const WALLPAPER_SIZE_Y: f32 = 270.0;
 const WALLPAPER_ASPECT_RATIO: f32 = WALLPAPER_SIZE_X / WALLPAPER_SIZE_Y;
 
-#[derive(SystemDesc)]
 pub struct UiResizeSystem {
     last_size_x: f32,
     last_size_y: f32,

@@ -9,6 +9,7 @@ use std::time::Instant;
 const MESSAGE_RESEND_INTERVAL: Duration = Duration::from_millis(400); // TODO: Tweak
 
 pub struct NetResource {
+    is_server: bool,
     pub socket: UdpSocket,
     pub connections: HashMap<SocketAddr, NetConnection>,
 }
@@ -37,11 +38,11 @@ struct UnacknowledgedMessage {
 
 impl NetResource {
     pub fn new_as_server(port: u16) -> Result<Self, String> {
-        return Self::new(&format!("0.0.0.0:{}", port));
+        return Self::new(&format!("0.0.0.0:{}", port), true);
     }
 
     pub fn new_as_client(server_address: SocketAddr) -> Result<Self, String> {
-        let mut network = Self::new("0.0.0.0:0")?;
+        let mut network = Self::new("0.0.0.0:0", false)?;
 
         network
             .connections
@@ -52,11 +53,12 @@ impl NetResource {
         return Ok(network);
     }
 
-    fn new(address: &str) -> Result<Self, String> {
+    fn new(address: &str, is_server: bool) -> Result<Self, String> {
         let socket = UdpSocket::bind(address).map_err(|e| format!("{}", e))?;
         socket.set_nonblocking(true).map_err(|e| format!("{}", e))?;
 
         return Ok(Self {
+            is_server,
             socket,
             connections: HashMap::new(),
         });
@@ -105,6 +107,10 @@ impl NetResource {
         if let Some(connection) = self.connections.get_mut(address) {
             connection.attached_external_id.replace(external_id);
         }
+    }
+
+    pub fn is_server(&self) -> bool {
+        return self.is_server;
     }
 }
 

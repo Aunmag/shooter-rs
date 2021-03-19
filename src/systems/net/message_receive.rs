@@ -6,33 +6,23 @@ use crate::resources::NetConnection;
 use crate::resources::NetResource;
 use crate::resources::PositionUpdateResource;
 use crate::resources::MESSAGE_SIZE_MAX;
-use amethyst::derive::SystemDesc;
 use amethyst::ecs::prelude::System;
-use amethyst::ecs::prelude::SystemData;
 use amethyst::ecs::prelude::Write;
-use amethyst::ecs::WriteExpect;
 use std::io::ErrorKind;
 use std::net::SocketAddr;
 
-#[derive(SystemDesc)]
-pub struct MessageReceiveSystem {
-    is_server: bool,
-}
+pub struct MessageReceiveSystem;
 
 impl MessageReceiveSystem {
-    pub fn new(is_server: bool) -> Self {
-        return Self { is_server };
-    }
-
     fn on_message(
-        &mut self,
         address: &SocketAddr,
         message: &Message,
         external_id: Option<u16>,
         tasks: &mut GameTaskResource,
         position_updates: &mut PositionUpdateResource,
+        is_server: bool,
     ) {
-        if self.is_server {
+        if is_server {
             Self::on_message_as_server(&address, &message, external_id, tasks);
         } else {
             Self::on_message_as_client(&message, tasks, position_updates);
@@ -120,10 +110,17 @@ impl<'a> System<'a> for MessageReceiveSystem {
     type SystemData = (
         Write<'a, GameTaskResource>,
         Write<'a, PositionUpdateResource>,
-        WriteExpect<'a, NetResource>,
+        Option<Write<'a, NetResource>>,
     );
 
-    fn run(&mut self, (mut tasks, mut position_updates, mut net): Self::SystemData) {
+    fn run(&mut self, (mut tasks, mut position_updates, net): Self::SystemData) {
+        let mut net = match net {
+            Some(net) => net,
+            None => return,
+        };
+
+        let is_server = net.is_server();
+
         let mut responses = Vec::new(); // TODO: Find a way send responses without vector allocations
 
         loop {
@@ -158,21 +155,23 @@ impl<'a> System<'a> for MessageReceiveSystem {
                                     let external_id = connection.attached_external_id;
                                     let next_messages = connection.take_next_held_messages();
 
-                                    self.on_message(
+                                    Self::on_message(
                                         &address,
                                         &message,
                                         external_id,
                                         &mut tasks,
                                         &mut position_updates,
+                                        is_server,
                                     );
 
                                     for message in next_messages.iter() {
-                                        self.on_message(
+                                        Self::on_message(
                                             &address,
                                             &message,
                                             external_id,
                                             &mut tasks,
                                             &mut position_updates,
+                                            is_server,
                                         );
                                     }
                                 }

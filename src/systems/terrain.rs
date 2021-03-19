@@ -1,16 +1,13 @@
 use crate::components::Terrain;
 use amethyst::core::transform::Transform;
-use amethyst::derive::SystemDesc;
 use amethyst::ecs::prelude::Join;
 use amethyst::ecs::prelude::ReadStorage;
 use amethyst::ecs::prelude::System;
-use amethyst::ecs::prelude::SystemData;
 use amethyst::ecs::prelude::WriteStorage;
 use amethyst::renderer::Camera;
 use amethyst::tiles::MortonEncoder;
 use amethyst::tiles::TileMap;
 
-#[derive(SystemDesc)]
 pub struct TerrainSystem;
 
 impl<'a> System<'a> for TerrainSystem {

@@ -4,12 +4,10 @@ use crate::components::Ai;
 use crate::utils::math;
 use amethyst::core::timing::Time;
 use amethyst::core::transform::Transform;
-use amethyst::derive::SystemDesc;
 use amethyst::ecs::prelude::Join;
 use amethyst::ecs::prelude::Read;
 use amethyst::ecs::prelude::ReadStorage;
 use amethyst::ecs::prelude::System;
-use amethyst::ecs::prelude::SystemData;
 use amethyst::ecs::prelude::WriteStorage;
 use rand::Rng;
 use rand::SeedableRng;
@@ -23,7 +21,6 @@ const CHANGE_MOVEMENT_PROBABILITY: f64 = 1.0;
 const TURN_PROBABILITY: f64 = 2.0;
 const MAX_DISTANCE_FROM_CENTER: f32 = 7.5;
 
-#[derive(SystemDesc)]
 pub struct AiSystem {
     randomizer: Pcg32,
 }

@@ -8,31 +8,15 @@ use crate::resources::GameTaskResource;
 use crate::resources::Message;
 use crate::resources::MouseInput;
 use crate::resources::NetResource;
+use crate::resources::State;
 use crate::states::ui::HomeState;
-use crate::systems::net::ConnectionUpdateSystem;
-use crate::systems::net::InputSendSystem;
-use crate::systems::net::InterpolationSystem;
-use crate::systems::net::MessageReceiveSystem;
-use crate::systems::net::PositionUpdateSendSystem;
-use crate::systems::net::PositionUpdateSystem;
-use crate::systems::ActorSystem;
-use crate::systems::AiSystem;
-use crate::systems::CameraSystem;
-use crate::systems::PhysicsSystem;
-use crate::systems::PlayerSystem;
-use crate::systems::ProjectileSystem;
-use crate::systems::TerrainSystem;
-use crate::systems::WeaponSystem;
 use crate::utils;
 use crate::utils::Position;
 use crate::utils::TakeContent;
 use amethyst::controls::HideCursor;
 use amethyst::core::transform::Transform;
-use amethyst::core::ArcThreadPool;
 use amethyst::ecs::prelude::Join;
 use amethyst::ecs::prelude::World;
-use amethyst::ecs::Dispatcher;
-use amethyst::ecs::DispatcherBuilder;
 use amethyst::ecs::Entity;
 use amethyst::input::is_key_down;
 use amethyst::prelude::*;
@@ -44,12 +28,10 @@ use amethyst::winit::MouseButton;
 use amethyst::winit::VirtualKeyCode;
 use amethyst::winit::WindowEvent;
 use std::net::SocketAddr;
-use std::sync::Arc;
 
-pub struct GameState<'a, 'b> {
+pub struct GameState {
     game_type: GameType,
     root: Option<Entity>,
-    dispatcher: Option<Dispatcher<'a, 'b>>,
 }
 
 pub enum GameType {
@@ -57,54 +39,12 @@ pub enum GameType {
     Join(SocketAddr),
 }
 
-impl GameState<'_, '_> {
+impl GameState {
     pub fn new(game_type: GameType) -> Self {
         return Self {
             game_type,
             root: None,
-            dispatcher: None,
         };
-    }
-
-    fn init_dispatcher(&mut self, world: &mut World) {
-        let mut builder = DispatcherBuilder::new();
-
-        match self.game_type {
-            GameType::Host(..) => {
-                builder.add(AiSystem::new(), "Ai", &[]);
-                builder.add(PlayerSystem, "Player", &[]);
-                builder.add(ActorSystem, "Actor", &["Ai", "Player"]);
-                builder.add(PhysicsSystem::new(), "Physics", &["Actor"]);
-                builder.add(WeaponSystem::new(), "Weapon", &["Physics"]);
-                builder.add(ProjectileSystem, "Projectile", &["Physics"]);
-                builder.add(PositionUpdateSendSystem::new(), "PositionUpdateSend", &["Physics"]);
-                builder.add(ConnectionUpdateSystem, "ConnectionUpdate", &[]);
-                builder.add(CameraSystem::new(), "Camera", &[]);
-                builder.add(TerrainSystem, "Terrain", &[]);
-                builder.add(MessageReceiveSystem::new(true), "MessageReceive", &[]);
-            }
-            GameType::Join(..) => {
-                builder.add(InterpolationSystem, "Interpolation", &[]);
-                builder.add(PlayerSystem, "Player", &[]);
-                builder.add(ActorSystem, "Actor", &["Player", "Interpolation"]);
-                builder.add(PhysicsSystem::new(), "Physics", &["Actor"]);
-                builder.add(InputSendSystem::new(), "InputSend", &["Player", "Actor"]);
-                builder.add(MessageReceiveSystem::new(false), "MessageReceive", &[]);
-                builder.add(PositionUpdateSystem, "PositionUpdate", &["MessageReceive", "Physics"]);
-                builder.add(ProjectileSystem, "Projectile", &["Physics"]);
-                builder.add(ConnectionUpdateSystem, "ConnectionUpdate", &[]);
-                builder.add(CameraSystem::new(), "Camera", &[]);
-                builder.add(TerrainSystem, "Terrain", &[]);
-            }
-        }
-
-        let mut dispatcher = builder
-            .with_pool(Arc::clone(&world.read_resource::<ArcThreadPool>()))
-            .build();
-
-        dispatcher.setup(world);
-
-        self.dispatcher = Some(dispatcher);
     }
 
     #[allow(clippy::unused_self)]
@@ -154,13 +94,6 @@ impl GameState<'_, '_> {
 
         utils::world::create_terrain(world, root);
         utils::world_decorations::create_decorations(world, root);
-    }
-
-    #[allow(clippy::unused_self)]
-    fn reset_input(&self, world: &World) {
-        let mut mouse_input = world.write_resource::<MouseInput>();
-        mouse_input.delta_x = 0.0;
-        mouse_input.delta_y = 0.0;
     }
 
     fn on_task(&mut self, world: &mut World, task: GameTask) {
@@ -383,6 +316,22 @@ impl GameState<'_, '_> {
         }
     }
 
+    fn set_running(&self, world: &mut World, is_running: bool) {
+        let state;
+
+        if is_running {
+            if self.is_host() {
+                state = State::Server;
+            } else {
+                state = State::Client;
+            }
+        } else {
+            state = State::None;
+        }
+
+        world.insert(state);
+    }
+
     fn is_host(&self) -> bool {
         return match self.game_type {
             GameType::Host(..) => true,
@@ -391,16 +340,17 @@ impl GameState<'_, '_> {
     }
 }
 
-impl<'a, 'b> SimpleState for GameState<'a, 'b> {
+impl SimpleState for GameState {
     fn on_start(&mut self, mut data: StateData<GameData>) {
-        self.init_dispatcher(&mut data.world);
         self.init_resources(&mut data.world);
         self.init_world_entities(&mut data.world);
-        self.reset_input(&data.world);
         utils::ui::set_cursor_visibility(&data.world, false);
+        self.set_running(&mut data.world, true);
     }
 
-    fn on_stop(&mut self, data: StateData<GameData>) {
+    fn on_stop(&mut self, mut data: StateData<GameData>) {
+        self.set_running(&mut data.world, false);
+
         if let Some(root) = self.root.take() {
             if let Err(error) = data.world.delete_entity(root) {
                 log::error!("Failed to delete the root entity. Details: {}", error);
@@ -408,15 +358,16 @@ impl<'a, 'b> SimpleState for GameState<'a, 'b> {
         }
     }
 
-    fn on_resume(&mut self, data: StateData<GameData>) {
+    fn on_pause(&mut self, mut data: StateData<GameData>) {
+        self.set_running(&mut data.world, false);
+    }
+
+    fn on_resume(&mut self, mut data: StateData<GameData>) {
         utils::ui::set_cursor_visibility(&data.world, false);
+        self.set_running(&mut data.world, true);
     }
 
     fn update(&mut self, data: &mut StateData<GameData>) -> SimpleTrans {
-        if let Some(dispatcher) = self.dispatcher.as_mut() {
-            dispatcher.dispatch(data.world);
-        }
-
         loop {
             let tasks = data.world.fetch_mut::<GameTaskResource>().take_content();
 
@@ -428,8 +379,6 @@ impl<'a, 'b> SimpleState for GameState<'a, 'b> {
                 self.on_task(&mut data.world, task);
             }
         }
-
-        self.reset_input(&data.world);
 
         return Trans::None;
     }

@@ -6,28 +6,24 @@ use crate::utils;
 use crate::utils::Position;
 use amethyst::core::timing::Time;
 use amethyst::core::transform::Transform;
-use amethyst::derive::SystemDesc;
 use amethyst::ecs::prelude::Join;
 use amethyst::ecs::prelude::ReadStorage;
 use amethyst::ecs::prelude::System;
-use amethyst::ecs::prelude::SystemData;
 use amethyst::ecs::prelude::WriteStorage;
 use amethyst::ecs::Entities;
 use amethyst::ecs::Entity;
 use amethyst::ecs::Read;
-use amethyst::ecs::ReadExpect;
 use amethyst::ecs::Write;
 
 const MAX_PLAYER_OFFSET: f32 = 0.25;
 
-#[derive(SystemDesc)]
 pub struct PositionUpdateSystem;
 
 impl<'a> System<'a> for PositionUpdateSystem {
     type SystemData = (
         Entities<'a>,
+        Read<'a, EntityMap>,
         Read<'a, Time>,
-        ReadExpect<'a, EntityMap>,
         ReadStorage<'a, Player>,
         ReadStorage<'a, Transform>,
         Write<'a, PositionUpdateResource>,
@@ -36,12 +32,8 @@ impl<'a> System<'a> for PositionUpdateSystem {
 
     fn run(
         &mut self,
-        (entities, time, entity_map, players, transforms, mut updates, mut interpolations): Self::SystemData,
+        (entities, entity_map, time, players, transforms, mut updates, mut interpolations): Self::SystemData,
     ) {
-        if updates.is_empty() {
-            return;
-        }
-
         let mut ghost_update: Option<(Entity, &Position)> = None;
         let now = time.absolute_time();
 

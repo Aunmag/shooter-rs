@@ -6,13 +6,11 @@ use crate::resources::NetResource;
 use crate::utils::DurationExt;
 use amethyst::core::timing::Time;
 use amethyst::core::transform::Transform;
-use amethyst::derive::SystemDesc;
 use amethyst::ecs::Join;
 use amethyst::ecs::Read;
 use amethyst::ecs::ReadStorage;
 use amethyst::ecs::System;
-use amethyst::ecs::SystemData;
-use amethyst::ecs::WriteExpect;
+use amethyst::ecs::Write;
 use std::time::Duration;
 
 /// 25 Hz
@@ -21,7 +19,6 @@ const DIRECTION_SEND_INTERVAL_ACTIVE: Duration = Duration::from_millis(40);
 /// 10 Hz
 const DIRECTION_SEND_INTERVAL_PASSIVE: Duration = Duration::from_millis(100);
 
-#[derive(SystemDesc)]
 pub struct InputSendSystem {
     previous: InputSend,
 }
@@ -50,10 +47,15 @@ impl<'a> System<'a> for InputSendSystem {
         ReadStorage<'a, Actor>,
         ReadStorage<'a, Player>,
         ReadStorage<'a, Transform>,
-        WriteExpect<'a, NetResource>,
+        Option<Write<'a, NetResource>>,
     );
 
-    fn run(&mut self, (time, actors, players, transforms, mut net): Self::SystemData) {
+    fn run(&mut self, (time, actors, players, transforms, net): Self::SystemData) {
+        let mut net = match net {
+            Some(net) => net,
+            None => return,
+        };
+
         #[allow(clippy::never_loop)]
         for (_, actor, transform) in (&players, &actors, &transforms).join() {
             let current = InputSend {

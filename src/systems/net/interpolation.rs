@@ -3,15 +3,12 @@ use crate::components::Player;
 use crate::components::RigidBody;
 use amethyst::core::timing::Time;
 use amethyst::core::transform::Transform;
-use amethyst::derive::SystemDesc;
 use amethyst::ecs::prelude::Join;
 use amethyst::ecs::prelude::Read;
 use amethyst::ecs::prelude::ReadStorage;
 use amethyst::ecs::prelude::System;
-use amethyst::ecs::prelude::SystemData;
 use amethyst::ecs::prelude::WriteStorage;
 
-#[derive(SystemDesc)]
 pub struct InterpolationSystem;
 
 impl<'a> System<'a> for InterpolationSystem {

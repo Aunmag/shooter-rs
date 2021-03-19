@@ -35,9 +35,24 @@ mod utils;
 
 use crate::components::Terrain;
 use crate::input::CustomBindingTypes;
+use crate::resources::State;
 use crate::states::StartupState;
+use crate::systems::net::ConnectionUpdateSystem;
+use crate::systems::net::InputSendSystem;
+use crate::systems::net::InterpolationSystem;
+use crate::systems::net::MessageReceiveSystem;
+use crate::systems::net::PositionUpdateSendSystem;
+use crate::systems::net::PositionUpdateSystem;
+use crate::systems::ActorSystem;
+use crate::systems::AiSystem;
+use crate::systems::CameraSystem;
+use crate::systems::PhysicsSystem;
+use crate::systems::PlayerSystem;
+use crate::systems::ProjectileSystem;
+use crate::systems::TerrainSystem;
 use crate::systems::UiResizeSystem;
 use crate::systems::UiTaskSystem;
+use crate::systems::WeaponSystem;
 use amethyst::controls::CursorHideSystemDesc;
 use amethyst::controls::MouseFocusUpdateSystemDesc;
 use amethyst::core::frame_limiter::FrameRateLimitStrategy;
@@ -63,17 +78,35 @@ fn main() -> amethyst::Result<()> {
 
     let root = application_root_dir()?;
     let game_data = GameDataBuilder::default()
+        // Base
         .with_bundle(TransformBundle::new())?
         .with_bundle(
             InputBundle::<CustomBindingTypes>::new()
                 .with_bindings_from_file(root.join("config/input.ron"))?,
         )?
+        // Game
+        .with(InterpolationSystem.pausable(State::Client), "interpolation", &[])
+        .with(AiSystem::new().pausable(State::Server), "ai", &[])
+        .with(PlayerSystem.pausable(State::Any), "player", &["input_system"])
+        .with(ActorSystem.pausable(State::Any), "actor", &["ai", "player", "interpolation"])
+        .with(PhysicsSystem::new().pausable(State::Any), "physics", &["actor"])
+        .with(InputSendSystem::new().pausable(State::Client), "input_send", &["player", "actor"])
+        .with(WeaponSystem::new().pausable(State::Server), "weapon", &["physics"])
+        .with(ProjectileSystem.pausable(State::Any), "projectile", &["physics"])
+        .with(PositionUpdateSendSystem::new().pausable(State::Server), "position_update_send", &["physics"])
+        .with(MessageReceiveSystem.pausable(State::Any), "message_receive", &[])
+        .with(PositionUpdateSystem.pausable(State::Client), "position_update", &["message_receive", "physics"])
+        .with(ConnectionUpdateSystem.pausable(State::Any), "connection_update", &[])
+        .with(CameraSystem.pausable(State::Any), "camera", &[])
+        .with(TerrainSystem.pausable(State::Any), "terrain", &[])
+        // UI
         .with_system_desc(MouseFocusUpdateSystemDesc::default(), "mouse_focus", &[])
-        .with_system_desc(CursorHideSystemDesc::default(), "", &["mouse_focus"])
-        .with_system_desc(UiResizeSystem::new(), "", &[])
-        .with_system_desc(UiTaskSystem, "", &[])
-        .with_system_desc(HideHierarchySystemDesc::default(), "", &[]) // TODO: Maybe this system depends on something?
+        .with_system_desc(CursorHideSystemDesc::default(), "cursor_hide", &["mouse_focus"])
+        .with_system_desc(HideHierarchySystemDesc::default(), "hide_hierarchy", &[])
+        .with(UiResizeSystem::new(), "ui_resize", &[])
+        .with(UiTaskSystem, "ui_task", &[])
         .with_bundle(UiBundle::<CustomBindingTypes>::new())?
+        // Rendering
         .with_bundle(
             RenderingBundle::<DefaultBackend>::new()
                 .with_plugin(RenderToWindow::from_config_path(
