@@ -1,5 +1,3 @@
-use crate::resources::UiTask;
-use crate::resources::UiTaskResource;
 use crate::resources::Wallpaper;
 use crate::states::ui::ConfirmState;
 use crate::states::ui::NewGameState;
@@ -63,24 +61,9 @@ impl SimpleState for HomeState {
             utils::set_entity_visibility(&data.world, button_disconnect, !self.is_root);
         }
 
-        {
-            let mut ui_tasks = data.world.write_resource::<UiTaskResource>();
-
-            ui_tasks.insert(
-                BUTTON_CONTINUE_ID.to_string(),
-                UiTask::SetButtonAvailability(!self.is_root),
-            );
-
-            ui_tasks.insert(
-                BUTTON_HELP_ID.to_string(),
-                UiTask::SetButtonAvailability(false),
-            );
-
-            ui_tasks.insert(
-                BUTTON_SETTINGS_ID.to_string(),
-                UiTask::SetButtonAvailability(false),
-            );
-        }
+        utils::ui::set_button_availability(&data.world, &BUTTON_CONTINUE_ID, !self.is_root);
+        utils::ui::set_button_availability(&data.world, &BUTTON_HELP_ID, false);
+        utils::ui::set_button_availability(&data.world, &BUTTON_SETTINGS_ID, false);
 
         self.set_wallpaper(&data.world, Wallpaper::Home);
         self.set_visibility(&data.world, true);

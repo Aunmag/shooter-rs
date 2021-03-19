@@ -1,7 +1,6 @@
-use crate::resources::UiTask;
-use crate::resources::UiTaskResource;
 use crate::resources::Wallpaper;
 use crate::states::ui::UiState;
+use crate::utils;
 use amethyst::ecs::Entity;
 use amethyst::input::is_key_down;
 use amethyst::prelude::*;
@@ -45,9 +44,7 @@ impl SimpleState for ConfirmState {
             self.button_no = finder.find(BUTTON_NO_ID);
         });
 
-        data.world
-            .write_resource::<UiTaskResource>()
-            .insert(LABEL_TITLE_ID.to_string(), UiTask::SetText(self.title));
+        utils::ui::set_text(&data.world, self.title, LABEL_TITLE_ID.to_string());
 
         self.set_wallpaper(&data.world, self.wallpaper);
         self.set_visibility(&data.world, true);

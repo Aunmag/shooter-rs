@@ -51,7 +51,6 @@ use crate::systems::PlayerSystem;
 use crate::systems::ProjectileSystem;
 use crate::systems::TerrainSystem;
 use crate::systems::UiResizeSystem;
-use crate::systems::UiTaskSystem;
 use crate::systems::WeaponSystem;
 use amethyst::controls::CursorHideSystemDesc;
 use amethyst::controls::MouseFocusUpdateSystemDesc;
@@ -104,7 +103,6 @@ fn main() -> amethyst::Result<()> {
         .with_system_desc(CursorHideSystemDesc::default(), "cursor_hide", &["mouse_focus"])
         .with_system_desc(HideHierarchySystemDesc::default(), "hide_hierarchy", &[])
         .with(UiResizeSystem::new(), "ui_resize", &[])
-        .with(UiTaskSystem, "ui_task", &[])
         .with_bundle(UiBundle::<CustomBindingTypes>::new())?
         // Rendering
         .with_bundle(

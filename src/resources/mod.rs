@@ -7,7 +7,6 @@ mod net;
 mod position_update;
 mod sprite;
 mod state;
-mod ui_task;
 mod wallpaper;
 
 pub use self::entity_map::*;
@@ -19,5 +18,4 @@ pub use self::net::*;
 pub use self::position_update::*;
 pub use self::sprite::*;
 pub use self::state::*;
-pub use self::ui_task::*;
 pub use self::wallpaper::*;

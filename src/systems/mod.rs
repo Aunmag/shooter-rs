@@ -7,7 +7,6 @@ mod player;
 mod projectile;
 mod terrain;
 mod ui_resize;
-mod ui_task;
 mod weapon;
 
 pub use self::actor::*;
@@ -18,5 +17,4 @@ pub use self::player::*;
 pub use self::projectile::*;
 pub use self::terrain::*;
 pub use self::ui_resize::*;
-pub use self::ui_task::*;
 pub use self::weapon::*;
