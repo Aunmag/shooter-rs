@@ -8,6 +8,7 @@ use crate::resources::GameTaskResource;
 use crate::resources::Message;
 use crate::resources::MouseInput;
 use crate::resources::NetResource;
+use crate::resources::PositionUpdateResource;
 use crate::resources::State;
 use crate::states::ui::HomeState;
 use crate::utils;
@@ -53,6 +54,7 @@ impl GameState {
         world.insert(DebugLines::new());
         world.insert(EntityMap::new());
         world.insert(GameTaskResource::new());
+        world.insert(PositionUpdateResource::new());
 
         #[allow(clippy::unwrap_used)] // TODO: Resolve
         match self.game_type {
@@ -350,6 +352,7 @@ impl SimpleState for GameState {
 
     fn on_stop(&mut self, mut data: StateData<GameData>) {
         self.set_running(&mut data.world, false);
+        data.world.remove::<NetResource>();
 
         if let Some(root) = self.root.take() {
             if let Err(error) = data.world.delete_entity(root) {
