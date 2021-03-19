@@ -6,8 +6,8 @@ use crate::resources::NetConnection;
 use crate::resources::NetResource;
 use crate::resources::PositionUpdateResource;
 use crate::resources::MESSAGE_SIZE_MAX;
-use amethyst::ecs::prelude::System;
-use amethyst::ecs::prelude::Write;
+use amethyst::ecs::System;
+use amethyst::ecs::Write;
 use std::io::ErrorKind;
 use std::net::SocketAddr;
 

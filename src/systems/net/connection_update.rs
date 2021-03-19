@@ -1,6 +1,6 @@
 use crate::resources::NetResource;
-use amethyst::ecs::prelude::System;
-use amethyst::ecs::prelude::Write;
+use amethyst::ecs::System;
+use amethyst::ecs::Write;
 
 pub struct ConnectionUpdateSystem;
 

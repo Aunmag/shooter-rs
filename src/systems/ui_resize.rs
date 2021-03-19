@@ -1,9 +1,9 @@
 use crate::resources::GameStatus;
-use amethyst::ecs::prelude::Join;
-use amethyst::ecs::prelude::Read;
-use amethyst::ecs::prelude::ReadExpect;
-use amethyst::ecs::prelude::System;
-use amethyst::ecs::prelude::WriteStorage;
+use amethyst::ecs::Join;
+use amethyst::ecs::Read;
+use amethyst::ecs::ReadExpect;
+use amethyst::ecs::System;
+use amethyst::ecs::WriteStorage;
 use amethyst::ui::UiText;
 use amethyst::ui::UiTransform;
 use amethyst::window::ScreenDimensions;

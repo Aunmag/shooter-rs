@@ -15,9 +15,9 @@ use crate::utils::Position;
 use crate::utils::TakeContent;
 use amethyst::controls::HideCursor;
 use amethyst::core::transform::Transform;
-use amethyst::ecs::prelude::Join;
-use amethyst::ecs::prelude::World;
 use amethyst::ecs::Entity;
+use amethyst::ecs::Join;
+use amethyst::ecs::World;
 use amethyst::input::is_key_down;
 use amethyst::prelude::*;
 use amethyst::renderer::debug_drawing::DebugLines;
@@ -369,7 +369,10 @@ impl SimpleState for GameState {
 
     fn update(&mut self, data: &mut StateData<GameData>) -> SimpleTrans {
         loop {
-            let tasks = data.world.fetch_mut::<GameTaskResource>().take_content();
+            let tasks = data
+                .world
+                .write_resource::<GameTaskResource>()
+                .take_content();
 
             if tasks.is_empty() {
                 break;

@@ -1,8 +1,8 @@
 use amethyst::assets::AssetStorage;
 use amethyst::assets::Loader;
 use amethyst::assets::ProgressCounter;
-use amethyst::ecs::prelude::World;
-use amethyst::ecs::prelude::WorldExt;
+use amethyst::ecs::World;
+use amethyst::ecs::WorldExt;
 use amethyst::renderer::ImageFormat;
 use amethyst::renderer::Texture;
 use amethyst::ui::UiImage;

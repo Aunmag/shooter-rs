@@ -2,7 +2,7 @@ use crate::resources::UiTask;
 use crate::resources::UiTaskResource;
 use crate::resources::Wallpaper;
 use crate::states::ui::UiState;
-use amethyst::ecs::prelude::Entity;
+use amethyst::ecs::Entity;
 use amethyst::input::is_key_down;
 use amethyst::prelude::*;
 use amethyst::ui::UiEvent;

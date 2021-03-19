@@ -1,9 +1,9 @@
 use crate::resources::UiTask;
 use crate::resources::UiTaskResource;
-use amethyst::ecs::prelude::Join;
-use amethyst::ecs::prelude::System;
-use amethyst::ecs::prelude::Write;
-use amethyst::ecs::prelude::WriteStorage;
+use amethyst::ecs::Join;
+use amethyst::ecs::System;
+use amethyst::ecs::Write;
+use amethyst::ecs::WriteStorage;
 use amethyst::ui::UiText;
 use amethyst::ui::UiTransform;
 use std::collections::HashMap;

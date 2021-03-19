@@ -8,8 +8,8 @@ pub mod world_decorations;
 pub use self::duration_ext::*;
 pub use self::position::*;
 use amethyst::core::HiddenPropagate;
-use amethyst::ecs::prelude::Entity;
-use amethyst::ecs::prelude::World;
+use amethyst::ecs::Entity;
+use amethyst::ecs::World;
 use amethyst::prelude::*;
 
 pub fn set_entity_visibility(world: &World, entity: Entity, is_visibility: bool) {

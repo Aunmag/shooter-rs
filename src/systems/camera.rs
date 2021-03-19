@@ -1,9 +1,9 @@
 use crate::data::VIEW_DISTANCE;
 use amethyst::core::transform::Transform;
-use amethyst::ecs::prelude::Join;
-use amethyst::ecs::prelude::ReadExpect;
-use amethyst::ecs::prelude::System;
-use amethyst::ecs::prelude::WriteStorage;
+use amethyst::ecs::Join;
+use amethyst::ecs::ReadExpect;
+use amethyst::ecs::System;
+use amethyst::ecs::WriteStorage;
 use amethyst::renderer::Camera;
 use amethyst::window::ScreenDimensions;
 

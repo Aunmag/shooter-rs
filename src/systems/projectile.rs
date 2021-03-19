@@ -10,13 +10,13 @@ use amethyst::core::math::Point3;
 use amethyst::core::math::Vector2;
 use amethyst::core::timing::Time;
 use amethyst::core::transform::Transform;
-use amethyst::ecs::prelude::Join;
-use amethyst::ecs::prelude::Read;
-use amethyst::ecs::prelude::ReadStorage;
-use amethyst::ecs::prelude::System;
-use amethyst::ecs::prelude::Write;
 use amethyst::ecs::Entities;
 use amethyst::ecs::Entity;
+use amethyst::ecs::Join;
+use amethyst::ecs::Read;
+use amethyst::ecs::ReadStorage;
+use amethyst::ecs::System;
+use amethyst::ecs::Write;
 use amethyst::renderer::debug_drawing::DebugLines;
 use amethyst::renderer::palette::Srgba;
 

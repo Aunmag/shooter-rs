@@ -5,7 +5,7 @@ use crate::states::ui::ConfirmState;
 use crate::states::ui::NewGameState;
 use crate::states::ui::UiState;
 use crate::utils;
-use amethyst::ecs::prelude::Entity;
+use amethyst::ecs::Entity;
 use amethyst::input::is_key_down;
 use amethyst::prelude::*;
 use amethyst::ui::UiEvent;

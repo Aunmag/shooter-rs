@@ -5,12 +5,12 @@ use crate::input::ActionBinding;
 use crate::input::AxisBinding;
 use crate::input::CustomBindingTypes;
 use crate::resources::MouseInput;
-use amethyst::ecs::prelude::Join;
-use amethyst::ecs::prelude::Read;
-use amethyst::ecs::prelude::ReadStorage;
-use amethyst::ecs::prelude::System;
-use amethyst::ecs::prelude::Write;
-use amethyst::ecs::prelude::WriteStorage;
+use amethyst::ecs::Join;
+use amethyst::ecs::Read;
+use amethyst::ecs::ReadStorage;
+use amethyst::ecs::System;
+use amethyst::ecs::Write;
+use amethyst::ecs::WriteStorage;
 use amethyst::input::InputHandler;
 use std::f32::consts::TAU;
 

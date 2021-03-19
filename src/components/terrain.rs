@@ -1,6 +1,6 @@
 use crate::data::VIEW_DISTANCE;
 use amethyst::core::math::Point3;
-use amethyst::ecs::prelude::World;
+use amethyst::ecs::World;
 use amethyst::tiles::Tile;
 
 #[derive(Default, Clone)]

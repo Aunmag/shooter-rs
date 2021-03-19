@@ -1,7 +1,7 @@
 use amethyst::controls::HideCursor;
-use amethyst::ecs::prelude::Join;
-use amethyst::prelude::World;
-use amethyst::prelude::WorldExt;
+use amethyst::ecs::Join;
+use amethyst::ecs::World;
+use amethyst::ecs::WorldExt;
 use amethyst::ui::UiText;
 use amethyst::ui::UiTransform;
 

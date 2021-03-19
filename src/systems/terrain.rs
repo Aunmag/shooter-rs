@@ -1,9 +1,9 @@
 use crate::components::Terrain;
 use amethyst::core::transform::Transform;
-use amethyst::ecs::prelude::Join;
-use amethyst::ecs::prelude::ReadStorage;
-use amethyst::ecs::prelude::System;
-use amethyst::ecs::prelude::WriteStorage;
+use amethyst::ecs::Join;
+use amethyst::ecs::ReadStorage;
+use amethyst::ecs::System;
+use amethyst::ecs::WriteStorage;
 use amethyst::renderer::Camera;
 use amethyst::tiles::MortonEncoder;
 use amethyst::tiles::TileMap;

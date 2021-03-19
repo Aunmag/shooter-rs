@@ -3,7 +3,7 @@ use crate::states::game::GameType;
 use crate::states::ui::UiState;
 use crate::states::GameState;
 use crate::utils;
-use amethyst::ecs::prelude::Entity;
+use amethyst::ecs::Entity;
 use amethyst::input::is_key_down;
 use amethyst::prelude::*;
 use amethyst::ui::UiEvent;

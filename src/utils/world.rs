@@ -24,8 +24,8 @@ use amethyst::core::math::Vector3;
 use amethyst::core::timing::Time;
 use amethyst::core::transform::Transform;
 use amethyst::core::Parent;
-use amethyst::ecs::prelude::World;
 use amethyst::ecs::Entity;
+use amethyst::ecs::World;
 use amethyst::prelude::*;
 use amethyst::renderer::palette::Srgba;
 use amethyst::renderer::resources::Tint;
@@ -122,7 +122,9 @@ pub fn create_actor(
     let actor = builder.build();
 
     if let Some(external_id) = external_id {
-        world.fetch_mut::<EntityMap>().store(actor, external_id);
+        world
+            .write_resource::<EntityMap>()
+            .store(actor, external_id);
     }
 
     return actor;

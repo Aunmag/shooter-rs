@@ -5,11 +5,11 @@ use crate::resources::Message;
 use crate::resources::NetResource;
 use crate::utils::Position;
 use amethyst::core::transform::Transform;
-use amethyst::ecs::prelude::Join;
-use amethyst::ecs::prelude::Read;
-use amethyst::ecs::prelude::ReadStorage;
-use amethyst::ecs::prelude::System;
 use amethyst::ecs::Entities;
+use amethyst::ecs::Join;
+use amethyst::ecs::Read;
+use amethyst::ecs::ReadStorage;
+use amethyst::ecs::System;
 use std::collections::HashMap;
 use std::time::Instant;
 

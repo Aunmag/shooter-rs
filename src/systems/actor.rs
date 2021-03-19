@@ -4,11 +4,11 @@ use crate::components::RigidBody;
 use amethyst::core::math::Vector3;
 use amethyst::core::timing::Time;
 use amethyst::core::transform::Transform;
-use amethyst::ecs::prelude::Join;
-use amethyst::ecs::prelude::Read;
-use amethyst::ecs::prelude::ReadStorage;
-use amethyst::ecs::prelude::System;
-use amethyst::ecs::prelude::WriteStorage;
+use amethyst::ecs::Join;
+use amethyst::ecs::Read;
+use amethyst::ecs::ReadStorage;
+use amethyst::ecs::System;
+use amethyst::ecs::WriteStorage;
 
 pub struct ActorSystem;
 

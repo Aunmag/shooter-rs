@@ -10,9 +10,9 @@ use crate::resources::WallpaperResource;
 use crate::utils;
 use amethyst::core::ecs::Join;
 use amethyst::core::Parent;
-use amethyst::ecs::prelude::Entity;
-use amethyst::ecs::prelude::World;
-use amethyst::ecs::prelude::WorldExt;
+use amethyst::ecs::Entity;
+use amethyst::ecs::World;
+use amethyst::ecs::WorldExt;
 use amethyst::ui::UiImage;
 use amethyst::ui::UiTransform;
 
