@@ -1,12 +1,14 @@
 mod duration_ext;
 pub mod math;
 mod position;
+mod timer;
 pub mod ui;
 pub mod world;
 pub mod world_decorations;
 
 pub use self::duration_ext::*;
 pub use self::position::*;
+pub use self::timer::*;
 use amethyst::core::HiddenPropagate;
 use amethyst::ecs::Entity;
 use amethyst::ecs::World;

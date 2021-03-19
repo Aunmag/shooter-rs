@@ -4,6 +4,8 @@ use crate::resources::EntityMap;
 use crate::resources::Message;
 use crate::resources::NetResource;
 use crate::utils::Position;
+use crate::utils::Timer;
+use amethyst::core::timing::Time;
 use amethyst::core::transform::Transform;
 use amethyst::ecs::Entities;
 use amethyst::ecs::Join;
@@ -11,17 +13,16 @@ use amethyst::ecs::Read;
 use amethyst::ecs::ReadStorage;
 use amethyst::ecs::System;
 use std::collections::HashMap;
-use std::time::Instant;
 
 pub struct PositionUpdateSendSystem {
-    last_sent: Instant,
+    timer: Timer,
     cache: HashMap<u16, Position>,
 }
 
 impl PositionUpdateSendSystem {
     pub fn new() -> Self {
         return Self {
-            last_sent: Instant::now(),
+            timer: Timer::new(POSITION_UPDATE_INTERVAL),
             cache: HashMap::new(),
         };
     }
@@ -31,13 +32,14 @@ impl<'a> System<'a> for PositionUpdateSendSystem {
     type SystemData = (
         Entities<'a>,
         Read<'a, EntityMap>,
+        Read<'a, Time>,
         Option<Read<'a, NetResource>>,
         ReadStorage<'a, Actor>,
         ReadStorage<'a, Transform>,
     );
 
-    fn run(&mut self, (entities, entity_map, net, actors, transforms): Self::SystemData) {
-        if self.last_sent.elapsed() < POSITION_UPDATE_INTERVAL {
+    fn run(&mut self, (entities, entity_map, time, net, actors, transforms): Self::SystemData) {
+        if !self.timer.next_if_done(time.absolute_real_time()) {
             return;
         }
 
@@ -64,7 +66,5 @@ impl<'a> System<'a> for PositionUpdateSendSystem {
                 }
             }
         }
-
-        self.last_sent = Instant::now();
     }
 }
