@@ -44,7 +44,7 @@ impl SimpleState for ConfirmState {
             self.button_no = finder.find(BUTTON_NO_ID);
         });
 
-        utils::ui::set_text(&data.world, self.title, LABEL_TITLE_ID.to_string());
+        utils::ui::set_text(&data.world, LABEL_TITLE_ID, self.title.to_string());
 
         self.set_wallpaper(&data.world, self.wallpaper);
         self.set_visibility(&data.world, true);
