@@ -36,8 +36,8 @@ impl MessageReceiveSystem {
         tasks: &mut GameTaskResource,
     ) {
         match *message {
-            Message::Greeting { .. } => {
-                tasks.push(GameTask::ClientGreet(*address));
+            Message::Join { .. } => {
+                tasks.push(GameTask::ClientJoin(*address));
             }
             Message::ClientInput {
                 actions, direction, ..
@@ -68,6 +68,9 @@ impl MessageReceiveSystem {
         position_updates: &mut PositionUpdateResource,
     ) {
         match *message {
+            Message::JoinAccept { .. } => {
+                tasks.push(GameTask::Start);
+            }
             Message::ActorSpawn {
                 external_id,
                 position,

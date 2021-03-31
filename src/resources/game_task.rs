@@ -7,7 +7,8 @@ use std::net::SocketAddr;
 pub type GameTaskResource = Vec<GameTask>;
 
 pub enum GameTask {
-    ClientGreet(SocketAddr),
+    Start,
+    ClientJoin(SocketAddr),
     ActorSpawn {
         external_id: u16,
         position: Position,

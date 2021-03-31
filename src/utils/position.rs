@@ -2,6 +2,7 @@ use amethyst::core::transform::Transform;
 use serde::Deserialize;
 use serde::Serialize;
 
+// TODO: Move to models
 #[derive(Copy, Clone, Default, PartialEq, Serialize, Deserialize, Debug)]
 pub struct Position {
     pub x: f32,

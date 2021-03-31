@@ -14,10 +14,11 @@ use crate::data::LAYER_ACTOR;
 use crate::data::LAYER_ACTOR_PLAYER;
 use crate::data::LAYER_CAMERA;
 use crate::data::LAYER_TERRAIN;
+use crate::models::GameType;
 use crate::resources::EntityMap;
 use crate::resources::Sprite;
 use crate::resources::SpriteResource;
-use crate::states::GameType;
+use crate::resources::State;
 use crate::utils::Position;
 use amethyst::core::math::Vector2;
 use amethyst::core::math::Vector3;
@@ -99,10 +100,10 @@ pub fn create_actor(
         }));
 
     match *game_type {
-        GameType::Host(..) => {
+        GameType::Server(..) => {
             builder = builder.with(Own);
         }
-        GameType::Join(..) => {
+        GameType::Client(..) => {
             builder = builder.with(Interpolation::new(position, now));
         }
     }
@@ -140,17 +141,20 @@ pub fn grant_played_actor(world: &mut World, root: Entity, actor: Entity, game_t
 
     let ghost;
 
-    if let GameType::Join(..) = *game_type {
-        ghost = Some(create_actor(
-            world,
-            root,
-            None,
-            Position::default(),
-            true,
-            game_type,
-        ));
-    } else {
-        ghost = None;
+    match *game_type {
+        GameType::Server(..) => {
+            ghost = None;
+        }
+        GameType::Client(..) => {
+            ghost = Some(create_actor(
+                world,
+                root,
+                None,
+                Position::default(),
+                true,
+                game_type,
+            ));
+        }
     }
 
     if let Err(error) = world.write_storage::<Own>().insert(actor, Own) {
@@ -247,4 +251,14 @@ pub fn create_projectile(
         .with(Parent { entity: root })
         .with(projectile)
         .build();
+}
+
+pub fn set_state(world: &mut World, game_type: Option<GameType>) {
+    let state = match game_type {
+        Some(GameType::Server(..)) => State::Server,
+        Some(GameType::Client(..)) => State::Client,
+        None => State::None,
+    };
+
+    world.insert(state);
 }

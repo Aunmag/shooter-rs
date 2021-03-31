@@ -1,15 +1,13 @@
 use crate::components::Actor;
 use crate::components::ActorActions;
 use crate::components::RigidBody;
-use crate::components::Weapon;
+use crate::models::GameType;
 use crate::resources::EntityMap;
 use crate::resources::GameTask;
 use crate::resources::GameTaskResource;
 use crate::resources::Message;
 use crate::resources::MouseInput;
 use crate::resources::NetResource;
-use crate::resources::PositionUpdateResource;
-use crate::resources::State;
 use crate::states::ui::HomeState;
 use crate::utils;
 use crate::utils::Position;
@@ -21,7 +19,6 @@ use amethyst::ecs::Join;
 use amethyst::ecs::World;
 use amethyst::input::is_key_down;
 use amethyst::prelude::*;
-use amethyst::renderer::debug_drawing::DebugLines;
 use amethyst::winit::DeviceEvent;
 use amethyst::winit::ElementState;
 use amethyst::winit::Event;
@@ -35,11 +32,6 @@ pub struct GameState {
     root: Option<Entity>,
 }
 
-pub enum GameType {
-    Host(u16),
-    Join(SocketAddr),
-}
-
 impl GameState {
     pub fn new(game_type: GameType) -> Self {
         return Self {
@@ -48,30 +40,11 @@ impl GameState {
         };
     }
 
-    #[allow(clippy::unused_self)]
-    fn init_resources(&self, world: &mut World) {
-        world.register::<Weapon>();
-        world.insert(DebugLines::new());
-        world.insert(EntityMap::new());
-        world.insert(GameTaskResource::new());
-        world.insert(PositionUpdateResource::new());
-
-        #[allow(clippy::unwrap_used)] // TODO: Resolve
-        match self.game_type {
-            GameType::Host(port) => {
-                world.insert(NetResource::new_as_server(port).unwrap());
-            }
-            GameType::Join(address) => {
-                world.insert(NetResource::new_as_client(address).unwrap());
-            }
-        }
-    }
-
     fn init_world_entities(&mut self, world: &mut World) {
         let root = world.create_entity().build();
         self.root.replace(root);
 
-        if self.is_host() {
+        if self.game_type.is_server() {
             let mut tasks = world.write_resource::<GameTaskResource>();
             let external_id = world.write_resource::<EntityMap>().generate_external_id();
 
@@ -100,8 +73,11 @@ impl GameState {
 
     fn on_task(&mut self, world: &mut World, task: GameTask) {
         match task {
-            GameTask::ClientGreet(address) => {
-                self.on_task_client_greet(world, address);
+            GameTask::Start => {
+                // Skip since this should be processed while `ConnectingSate`
+            }
+            GameTask::ClientJoin(address) => {
+                self.on_task_client_join(world, address);
             }
             GameTask::ActorSpawn {
                 external_id,
@@ -159,9 +135,11 @@ impl GameState {
     }
 
     #[allow(clippy::unused_self)]
-    fn on_task_client_greet(&self, world: &mut World, address: SocketAddr) {
+    fn on_task_client_join(&self, world: &mut World, address: SocketAddr) {
         let mut entity_map = world.write_resource::<EntityMap>();
         let mut net = world.write_resource::<NetResource>();
+
+        net.send_to(&address, Message::JoinAccept { id: 0 });
 
         for (entity, _, transform) in (
             &world.entities(),
@@ -209,7 +187,7 @@ impl GameState {
                 &self.game_type,
             );
 
-            if let GameType::Host(..) = self.game_type {
+            if self.game_type.is_server() {
                 world
                     .write_resource::<NetResource>()
                     .send_to_all(Message::ActorSpawn {
@@ -266,7 +244,7 @@ impl GameState {
         shooter_id: Option<u16>,
     ) {
         if let Some(root) = self.root {
-            if let GameType::Host(..) = self.game_type {
+            if self.game_type.is_server() {
                 world
                     .write_resource::<NetResource>()
                     .send_to_all(Message::ProjectileSpawn {
@@ -317,42 +295,17 @@ impl GameState {
             net.send_to_all(message);
         }
     }
-
-    fn set_running(&self, world: &mut World, is_running: bool) {
-        let state;
-
-        if is_running {
-            if self.is_host() {
-                state = State::Server;
-            } else {
-                state = State::Client;
-            }
-        } else {
-            state = State::None;
-        }
-
-        world.insert(state);
-    }
-
-    fn is_host(&self) -> bool {
-        return match self.game_type {
-            GameType::Host(..) => true,
-            GameType::Join(..) => false,
-        };
-    }
 }
 
 impl SimpleState for GameState {
     fn on_start(&mut self, mut data: StateData<GameData>) {
-        self.init_resources(&mut data.world);
         self.init_world_entities(&mut data.world);
         utils::ui::set_cursor_visibility(&data.world, false);
-        self.set_running(&mut data.world, true);
+        utils::world::set_state(&mut data.world, Some(self.game_type));
     }
 
     fn on_stop(&mut self, mut data: StateData<GameData>) {
-        self.set_running(&mut data.world, false);
-        data.world.remove::<NetResource>();
+        utils::world::set_state(&mut data.world, None);
 
         if let Some(root) = self.root.take() {
             if let Err(error) = data.world.delete_entity(root) {
@@ -362,12 +315,12 @@ impl SimpleState for GameState {
     }
 
     fn on_pause(&mut self, mut data: StateData<GameData>) {
-        self.set_running(&mut data.world, false);
+        utils::world::set_state(&mut data.world, None);
     }
 
     fn on_resume(&mut self, mut data: StateData<GameData>) {
         utils::ui::set_cursor_visibility(&data.world, false);
-        self.set_running(&mut data.world, true);
+        utils::world::set_state(&mut data.world, Some(self.game_type));
     }
 
     fn update(&mut self, data: &mut StateData<GameData>) -> SimpleTrans {

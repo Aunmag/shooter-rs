@@ -1,7 +1,7 @@
+use crate::models::GameType;
 use crate::resources::Wallpaper;
-use crate::states::game::GameType;
+use crate::states::ui::LoadingState;
 use crate::states::ui::UiState;
-use crate::states::GameState;
 use crate::utils;
 use amethyst::ecs::Entity;
 use amethyst::input::is_key_down;
@@ -106,8 +106,8 @@ impl SimpleState for NewGameState {
                 if Some(target) == self.button_host {
                     match Self::parse_input_port(&data.world) {
                         Ok(port) => {
-                            let game_type = GameType::Host(port);
-                            return Trans::Replace(Box::new(GameState::new(game_type)));
+                            let game_type = GameType::Server(port);
+                            return Trans::Push(Box::new(LoadingState::new(game_type)));
                         }
                         Err(error) => {
                             log::error!("{}", error); // TODO: Show error page
@@ -118,8 +118,8 @@ impl SimpleState for NewGameState {
                 if Some(target) == self.button_join {
                     match Self::parse_input_address(&data.world) {
                         Ok(address) => {
-                            let game_type = GameType::Join(address);
-                            return Trans::Replace(Box::new(GameState::new(game_type)));
+                            let game_type = GameType::Client(address);
+                            return Trans::Push(Box::new(LoadingState::new(game_type)));
                         }
                         Err(error) => {
                             log::error!("{}", error); // TODO: Show error page

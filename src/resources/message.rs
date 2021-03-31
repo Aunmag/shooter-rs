@@ -10,7 +10,10 @@ pub enum Message {
     Response {
         message_id: u16,
     },
-    Greeting {
+    Join {
+        id: u16,
+    },
+    JoinAccept {
         id: u16,
     },
     ClientInput {
@@ -64,7 +67,10 @@ impl Message {
         #[allow(clippy::match_same_arms)]
         match *self {
             Self::Response { .. } => {}
-            Self::Greeting { ref mut id } => {
+            Self::Join { ref mut id } => {
+                *id = id_new;
+            }
+            Self::JoinAccept { ref mut id } => {
                 *id = id_new;
             }
             Self::ClientInput { ref mut id, .. } => {
@@ -90,7 +96,8 @@ impl Message {
         #[allow(clippy::match_same_arms)]
         return match *self {
             Self::Response { .. } => None,
-            Self::Greeting { id } => Some(id),
+            Self::Join { id } => Some(id),
+            Self::JoinAccept { id } => Some(id),
             Self::ClientInput { id, .. } => Some(id),
             Self::ClientInputDirection { id, .. } => Some(id),
             Self::ActorSpawn { id, .. } => Some(id),

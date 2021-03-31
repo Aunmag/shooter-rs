@@ -1,0 +1,109 @@
+#![enable(implicit_some)]
+Container(
+    transform: (
+        id: "loading",
+        hidden: true,
+        opaque: false,
+        stretch: XY(
+            x_margin: 0.0,
+            y_margin: 0.0,
+            keep_aspect_ratio: false,
+        ),
+    ),
+    children: [
+        Container(
+            transform: (
+                id: "wallpaper",
+                z: 0.5,
+                width: 1.0,
+                height: 1.0,
+                opaque: false,
+            ),
+            children: [],
+        ),
+        Container(
+            transform: (
+                z: 1.0,
+                opaque: false,
+                stretch: XY(
+                    x_margin: 0.0,
+                    y_margin: 0.0,
+                    keep_aspect_ratio: false,
+                ),
+            ),
+            background: Texture(Generate(Srgba(0.2, 0.2, 0.2, 0.8))),
+            children: [
+                Container(
+                    transform: (
+                        width: 1.0,
+                        height: 1.0,
+                        opaque: false,
+                        stretch: XY(
+                            x_margin: 0.0,
+                            y_margin: 0.0,
+                            keep_aspect_ratio: true,
+                        ),
+                    ),
+                    children: [
+                        Label(
+                            transform: (
+                                id: "loading.dots",
+                                anchor: TopLeft,
+                                pivot: TopLeft,
+                                percent: true,
+                                x: 0.0,
+                                y: -0.3,
+                                width: 1.0,
+                                height: 0.05,
+                                opaque: false,
+                            ),
+                            text: (
+                                text: "Preparing",
+                                font: File("fonts/bold.ttf", ("TTF", ())),
+                                font_size: 32.0,
+                                color: (0.8, 0.8, 0.8, 1.0),
+                            )
+                        ),
+                        Label(
+                            transform: (
+                                anchor: TopLeft,
+                                pivot: TopLeft,
+                                percent: true,
+                                x: 0.0,
+                                y: -0.35,
+                                width: 1.0,
+                                height: 0.05,
+                                opaque: false,
+                            ),
+                            text: (
+                                text: "Entering the perimeter please wait",
+                                font: File("fonts/regular.ttf", ("TTF", ())),
+                                font_size: 20.0,
+                                color: (0.8, 0.8, 0.8, 1.0),
+                            )
+                        ),
+                        Button(
+                            transform: (
+                                id: "loading.cancel",
+                                anchor: TopLeft,
+                                pivot: TopLeft,
+                                percent: true,
+                                x: 0.35,
+                                y: -0.75,
+                                width: 0.3,
+                                height: 0.05,
+                            ),
+                            button: (
+                                text: "Cancel",
+                                font: File("fonts/regular.ttf", ("TTF", ())),
+                                font_size: 26.0,
+                                normal_text_color: (0.8, 0.8, 0.8, 1.0),
+                                hover_text_color: (0.6, 0.6, 0.6, 1.0),
+                            )
+                        ),
+                    ],
+                ),
+            ],
+        )
+    ],
+)

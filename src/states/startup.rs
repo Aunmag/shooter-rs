@@ -25,6 +25,7 @@ impl SimpleState for StartupState {
         data.world.exec(|mut creator: UiCreator| {
             creator.create("ui/confirm.ron", &mut self.progress);
             creator.create("ui/home.ron", &mut self.progress);
+            creator.create("ui/loading.ron", &mut self.progress);
             creator.create("ui/new_game.ron", &mut self.progress);
         });
 

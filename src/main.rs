@@ -28,6 +28,7 @@
 mod components;
 mod data;
 mod input;
+mod models;
 mod resources;
 mod states;
 mod systems;

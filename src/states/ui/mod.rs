@@ -1,9 +1,11 @@
 mod confirm;
 mod home;
+mod loading;
 mod new_game;
 
 pub use self::confirm::*;
 pub use self::home::*;
+pub use self::loading::*;
 pub use self::new_game::*;
 use crate::resources::Wallpaper;
 use crate::resources::WallpaperResource;

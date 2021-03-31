@@ -48,7 +48,7 @@ impl NetResource {
             .connections
             .insert(server_address, NetConnection::new());
 
-        network.send_to_all(Message::Greeting { id: 0 });
+        network.send_to_all(Message::Join { id: 0 });
 
         return Ok(network);
     }
