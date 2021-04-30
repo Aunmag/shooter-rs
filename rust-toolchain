@@ -1,0 +1,4 @@
+# TODO: Remove after amethyst v1.16 (issue: https://github.com/amethyst/amethyst/issues/2524)
+
+[toolchain]
+channel = "1.47.0"

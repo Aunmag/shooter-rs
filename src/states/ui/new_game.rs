@@ -44,7 +44,6 @@ impl NewGameState {
         }
     }
 
-    #[allow(clippy::map_err_ignore)]
     fn parse_input_port(world: &World) -> Result<u16, &str> {
         if let Some(port) = utils::ui::fetch_text(world, INPUT_PORT_ID) {
             return port.parse().map_err(|_| "Wrong port");
@@ -53,7 +52,6 @@ impl NewGameState {
         }
     }
 
-    #[allow(clippy::map_err_ignore)]
     fn parse_input_address(world: &World) -> Result<SocketAddr, &str> {
         let ip = Self::parse_input_ip(world)?;
         let port = Self::parse_input_port(world)?;
