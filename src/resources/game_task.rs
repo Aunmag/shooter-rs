@@ -43,4 +43,5 @@ pub enum GameTask {
         message: Message,
         address_filter: Option<SocketAddr>,
     },
+    EntityDelete(Entity),
 }

@@ -18,6 +18,7 @@ bitflags::bitflags! {
 
 impl Actor {
     pub const MOVEMENT_VELOCITY: f32 = 2.0;
+    pub const RESISTANCE: f32 = 8000.0;
 
     pub fn new() -> Self {
         return Actor {

@@ -45,6 +45,7 @@ use crate::systems::net::PositionUpdateSystem;
 use crate::systems::ActorSystem;
 use crate::systems::AiSystem;
 use crate::systems::CameraSystem;
+use crate::systems::HealthSystem;
 use crate::systems::PhysicsSystem;
 use crate::systems::PlayerSystem;
 use crate::systems::ProjectileSystem;
@@ -83,6 +84,7 @@ fn main() -> amethyst::Result<()> {
                 .with_bindings_from_file(root.join("config/input.ron"))?,
         )?
         // Game
+        .with(HealthSystem.pausable(State::Server), "health", &[])
         .with(InterpolationSystem.pausable(State::Client), "interpolation", &[])
         .with(AiSystem::new().pausable(State::Server), "ai", &[])
         .with(PlayerSystem.pausable(State::Any), "player", &["input_system"])

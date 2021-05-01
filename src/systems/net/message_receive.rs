@@ -110,6 +110,11 @@ impl MessageReceiveSystem {
                     shooter: shooter_id.map(|id| converter.to_internal(entities, id)),
                 });
             }
+            Message::EntityDelete { entity_id, .. } => {
+                tasks.push(GameTask::EntityDelete(
+                    converter.to_internal(entities, entity_id),
+                ));
+            }
             _ => {}
         }
     }

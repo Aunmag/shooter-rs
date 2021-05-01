@@ -1,4 +1,5 @@
 use crate::data::VIEW_DISTANCE;
+use crate::utils;
 use amethyst::core::transform::Transform;
 use amethyst::ecs::Join;
 use amethyst::ecs::ReadExpect;
@@ -21,7 +22,7 @@ impl<'a> System<'a> for CameraSystem {
     fn run(&mut self, (screen, mut cameras, mut transforms): Self::SystemData) {
         let screen_size_x = screen.width();
         let screen_size_y = screen.height();
-        let scale = VIEW_DISTANCE / to_view_distance(screen_size_x, screen_size_y);
+        let scale = VIEW_DISTANCE / utils::math::length(screen_size_x, screen_size_y);
         let view_x = 2.0 / (screen_size_x * scale);
         let view_y = -2.0 / (screen_size_y * scale);
         let offset = screen_size_y * scale * OFFSET_RATIO;
@@ -36,8 +37,4 @@ impl<'a> System<'a> for CameraSystem {
             transform.set_translation_y(offset);
         }
     }
-}
-
-fn to_view_distance(size_x: f32, size_y: f32) -> f32 {
-    return (size_x * size_x + size_y * size_y).sqrt();
 }

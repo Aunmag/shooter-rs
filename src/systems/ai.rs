@@ -1,6 +1,7 @@
 use crate::components::Actor;
 use crate::components::ActorActions;
 use crate::components::Ai;
+use crate::components::Health;
 use crate::utils::math;
 use amethyst::core::timing::Time;
 use amethyst::core::transform::Transform;
@@ -51,16 +52,22 @@ impl<'a> System<'a> for AiSystem {
     type SystemData = (
         Read<'a, Time>,
         ReadStorage<'a, Ai>,
+        ReadStorage<'a, Health>,
         ReadStorage<'a, Transform>,
         WriteStorage<'a, Actor>,
     );
 
-    fn run(&mut self, (time, ais, transforms, mut actors): Self::SystemData) {
+    fn run(&mut self, (time, ais, healths, transforms, mut actors): Self::SystemData) {
         let delta = time.delta_seconds() as f64;
         let change_movement_probability = CHANGE_MOVEMENT_PROBABILITY * delta;
         let turn_probability = TURN_PROBABILITY * delta;
 
-        for (_, actor, transform) in (&ais, &mut actors, &transforms).join() {
+        for (_, actor, health, transform) in (&ais, &mut actors, &healths, &transforms).join() {
+            if !health.is_alive() {
+                actor.actions = ActorActions::empty();
+                continue;
+            }
+
             if self.gen_chance(change_movement_probability) {
                 actor.actions.toggle(ActorActions::MOVEMENT_FORWARD);
             }

@@ -1,6 +1,7 @@
 use crate::components::Actor;
 use crate::components::Ai;
 use crate::components::Collision;
+use crate::components::Health;
 use crate::components::Interpolation;
 use crate::components::Own;
 use crate::components::Player;
@@ -88,6 +89,7 @@ pub fn create_actor(
     match *game_type {
         GameType::Server(..) => {
             world.add(entity, Own);
+            world.add(entity, Health::new(Actor::RESISTANCE));
         }
         GameType::Client(..) => {
             let now = world.read_resource::<Time>().absolute_time();

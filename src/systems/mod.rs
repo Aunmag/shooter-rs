@@ -1,6 +1,7 @@
 mod actor;
 mod ai;
 mod camera;
+mod health;
 pub mod net;
 mod physics;
 mod player;
@@ -12,6 +13,7 @@ mod weapon;
 pub use self::actor::*;
 pub use self::ai::*;
 pub use self::camera::*;
+pub use self::health::*;
 pub use self::physics::*;
 pub use self::player::*;
 pub use self::projectile::*;

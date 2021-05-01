@@ -1,6 +1,7 @@
 mod actor;
 mod ai;
 mod collision;
+mod health;
 mod interpolation;
 mod own;
 mod player;
@@ -12,6 +13,7 @@ mod weapon;
 pub use self::actor::*;
 pub use self::ai::*;
 pub use self::collision::*;
+pub use self::health::*;
 pub use self::interpolation::*;
 pub use self::own::*;
 pub use self::player::*;

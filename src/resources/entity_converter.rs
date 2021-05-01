@@ -33,4 +33,13 @@ impl EntityConverter {
 
         return entity;
     }
+
+    pub fn remove(&mut self, entity: Entity) {
+        for (i, record) in self.data.iter().enumerate() {
+            if record.entity == entity {
+                self.data.swap_remove(i);
+                break;
+            }
+        }
+    }
 }

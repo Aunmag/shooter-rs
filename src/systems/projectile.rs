@@ -20,10 +20,6 @@ use amethyst::ecs::Write;
 use amethyst::renderer::debug_drawing::DebugLines;
 use amethyst::renderer::palette::Srgba;
 
-const MASS: f32 = 8.0;
-const PUSH_FACTOR: f32 = 30.0;
-const VELOCITY_MIN: f32 = 5.0;
-
 pub struct ProjectileSystem;
 
 struct Obstacle {
@@ -118,8 +114,8 @@ impl<'a> System<'a> for ProjectileSystem {
                     // TODO: Better don't use head velocity, calc actual velocity at collision point
                     tasks.push(GameTask::ProjectileHit {
                         entity: obstacle.entity,
-                        force_x: head_velocity.x * MASS * PUSH_FACTOR,
-                        force_y: head_velocity.y * MASS * PUSH_FACTOR,
+                        force_x: head_velocity.x * Projectile::MASS,
+                        force_y: head_velocity.y * Projectile::MASS,
                     });
                 }
             }
@@ -164,5 +160,5 @@ fn is_collision(
 }
 
 fn has_stopped(velocity: Vector2<f32>) -> bool {
-    return math::are_closer_than(velocity.x, velocity.y, 0.0, 0.0, VELOCITY_MIN);
+    return math::are_closer_than(velocity.x, velocity.y, 0.0, 0.0, Projectile::VELOCITY_MIN);
 }

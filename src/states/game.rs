@@ -1,7 +1,10 @@
 use crate::components::Actor;
 use crate::components::ActorActions;
+use crate::components::Health;
+use crate::components::Projectile;
 use crate::components::RigidBody;
 use crate::models::GameType;
+use crate::resources::EntityConverter;
 use crate::resources::GameTask;
 use crate::resources::GameTaskResource;
 use crate::resources::Message;
@@ -13,6 +16,7 @@ use crate::utils::Position;
 use crate::utils::TakeContent;
 use amethyst::controls::HideCursor;
 use amethyst::core::transform::Transform;
+use amethyst::core::Time;
 use amethyst::ecs::Entity;
 use amethyst::ecs::Join;
 use amethyst::ecs::World;
@@ -123,6 +127,9 @@ impl GameState {
                 address_filter,
             } => {
                 self.on_task_message_send(world, message, address_filter);
+            }
+            GameTask::EntityDelete(entity) => {
+                self.on_task_entity_delete(world, entity);
             }
         }
     }
@@ -256,7 +263,20 @@ impl GameState {
         force_y: f32,
     ) {
         if let Some(body) = world.write_storage::<RigidBody>().get_mut(entity) {
-            body.push(force_x, force_y, 0.0, true, false);
+            body.push(
+                force_x * Projectile::PUSH_FACTOR,
+                force_y * Projectile::PUSH_FACTOR,
+                0.0,
+                true,
+                false,
+            );
+        }
+
+        if let Some(health) = world.write_storage::<Health>().get_mut(entity) {
+            health.damage(
+                utils::math::length(force_x, force_y),
+                world.read_resource::<Time>().absolute_time(),
+            );
         }
     }
 
@@ -273,6 +293,24 @@ impl GameState {
             net.send_to(&address, message);
         } else {
             net.send_to_all(message);
+        }
+    }
+
+    #[allow(clippy::unused_self)]
+    fn on_task_entity_delete(&self, world: &mut World, entity: Entity) {
+        if self.game_type.is_server() {
+            world
+                .write_resource::<NetResource>()
+                .send_to_all(Message::EntityDelete {
+                    id: 0,
+                    entity_id: entity.id(),
+                });
+        }
+
+        world.write_resource::<EntityConverter>().remove(entity);
+
+        if let Err(error) = world.delete_entity(entity) {
+            log::error!("Failed to delete an entity: {}", error);
         }
     }
 }

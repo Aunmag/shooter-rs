@@ -22,6 +22,10 @@ pub struct ProjectileConfig {
 }
 
 impl Projectile {
+    pub const MASS: f32 = 8.0;
+    pub const PUSH_FACTOR: f32 = 30.0;
+    pub const VELOCITY_MIN: f32 = 5.0;
+
     pub fn new(
         config: ProjectileConfig,
         time: Duration,

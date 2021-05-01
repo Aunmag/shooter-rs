@@ -45,6 +45,10 @@ pub enum Message {
         acceleration_factor: f32,
         shooter_id: Option<u32>,
     },
+    EntityDelete {
+        id: u16,
+        entity_id: u32,
+    },
 }
 
 impl Message {
@@ -89,6 +93,9 @@ impl Message {
             Self::ProjectileSpawn { ref mut id, .. } => {
                 *id = id_new;
             }
+            Self::EntityDelete { ref mut id, .. } => {
+                *id = id_new;
+            }
         }
     }
 
@@ -104,6 +111,7 @@ impl Message {
             Self::ActorGrant { id, .. } => Some(id),
             Self::PositionUpdate { .. } => None,
             Self::ProjectileSpawn { id, .. } => Some(id),
+            Self::EntityDelete { id, .. } => Some(id),
         };
     }
 

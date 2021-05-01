@@ -1,6 +1,7 @@
 use crate::components::Actor;
 use crate::components::ActorActions;
 use crate::components::RigidBody;
+use crate::utils;
 use amethyst::core::math::Vector3;
 use amethyst::core::timing::Time;
 use amethyst::core::transform::Transform;
@@ -56,7 +57,7 @@ impl<'a> System<'a> for ActorSystem {
 }
 
 fn normalize_movement(mut movement: Vector3<f32>) -> Vector3<f32> {
-    let length_squared = movement.x * movement.x + movement.y * movement.y;
+    let length_squared = utils::math::length_squared(movement.x, movement.y);
 
     if length_squared > 1.0 {
         let length = length_squared.sqrt();
