@@ -5,10 +5,12 @@ mod timer;
 pub mod ui;
 pub mod world;
 pub mod world_decorations;
+mod world_ext_custom;
 
 pub use self::duration_ext::*;
 pub use self::position::*;
 pub use self::timer::*;
+pub use self::world_ext_custom::*;
 use amethyst::core::HiddenPropagate;
 use amethyst::ecs::Entity;
 use amethyst::ecs::World;
@@ -26,10 +28,7 @@ pub fn set_entity_visibility(world: &World, entity: Entity, is_visibility: bool)
             );
         }
     } else if let Err(error) = storage.insert(entity, HiddenPropagate::new()) {
-        log::error!(
-            "Failed to insert HiddenPropagate component. Details: {}",
-            error,
-        );
+        log::error!("Failed to insert HiddenPropagate component: {}", error);
     }
 }
 

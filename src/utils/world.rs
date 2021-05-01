@@ -15,11 +15,11 @@ use crate::data::LAYER_ACTOR_PLAYER;
 use crate::data::LAYER_CAMERA;
 use crate::data::LAYER_TERRAIN;
 use crate::models::GameType;
-use crate::resources::EntityMap;
 use crate::resources::Sprite;
 use crate::resources::SpriteResource;
 use crate::resources::State;
 use crate::utils::Position;
+use crate::utils::WorldExtCustom;
 use amethyst::core::math::Vector2;
 use amethyst::core::math::Vector3;
 use amethyst::core::timing::Time;
@@ -37,14 +37,6 @@ use amethyst::tiles::MortonEncoder;
 use amethyst::tiles::TileMap;
 
 // TODO: Maybe name as `new_*` instead of `create_*`
-// TODO: Maybe don't use `EntityMap`
-
-pub fn get_entity(world: &World, external_id: u16) -> Option<Entity> {
-    return world
-        .read_resource::<EntityMap>()
-        .get_entity(external_id)
-        .filter(|e| world.is_alive(*e));
-}
 
 pub fn create_simple_sprite(
     world: &mut World,
@@ -70,65 +62,56 @@ pub fn create_simple_sprite(
 pub fn create_actor(
     world: &mut World,
     root: Entity,
-    external_id: Option<u16>,
+    entity: Entity,
     position: Position,
     is_ghost: bool,
     game_type: &GameType,
 ) -> Entity {
-    let now = world.read_resource::<Time>().absolute_time();
-
     let mut transform = Transform::default();
     transform.set_translation_xyz(position.x, position.y, LAYER_ACTOR);
     transform.set_rotation_2d(position.direction);
 
-    let mut renderer = world
-        .read_resource::<SpriteResource>()
-        .get(Sprite::Actor)
-        .map(|s| SpriteRender::new(s, 0));
-
-    let mut builder = world
-        .create_entity()
-        .with(Parent { entity: root })
-        .with(Actor::new())
-        .with(transform)
-        .with(Weapon::new(WeaponConfig {
+    world.add(entity, transform);
+    world.add(entity, Parent { entity: root });
+    world.add(entity, Actor::new());
+    world.add(
+        entity,
+        Weapon::new(WeaponConfig {
             muzzle_velocity: 320.0,
             fire_rate: 650.0,
             projectile: ProjectileConfig {
                 acceleration_factor: -7.0,
             },
-        }));
+        }),
+    );
 
     match *game_type {
         GameType::Server(..) => {
-            builder = builder.with(Own);
+            world.add(entity, Own);
         }
         GameType::Client(..) => {
-            builder = builder.with(Interpolation::new(position, now));
+            let now = world.read_resource::<Time>().absolute_time();
+            world.add(entity, Interpolation::new(position, now));
         }
     }
 
-    if let Some(renderer) = renderer.take() {
-        builder = builder.with(renderer);
+    if let Some(renderer) = world
+        .read_resource::<SpriteResource>()
+        .get(Sprite::Actor)
+        .map(|s| SpriteRender::new(s, 0))
+    {
+        world.add(entity, renderer);
     }
 
     if is_ghost {
-        builder = builder.with(Tint(Srgba::new(0.6, 0.6, 0.6, 0.4)));
-        builder = builder.with(Transparent);
+        world.add(entity, Tint(Srgba::new(0.6, 0.6, 0.6, 0.4)));
+        world.add(entity, Transparent);
     } else {
-        builder = builder.with(Collision { radius: 0.25 });
-        builder = builder.with(RigidBody::new(80_000.0, 7.0, 8.0, 0.05));
+        world.add(entity, Collision { radius: 0.25 });
+        world.add(entity, RigidBody::new(80_000.0, 7.0, 8.0, 0.05));
     }
 
-    let actor = builder.build();
-
-    if let Some(external_id) = external_id {
-        world
-            .write_resource::<EntityMap>()
-            .store(actor, external_id);
-    }
-
-    return actor;
+    return entity;
 }
 
 pub fn grant_played_actor(world: &mut World, root: Entity, actor: Entity, game_type: &GameType) {
@@ -146,10 +129,12 @@ pub fn grant_played_actor(world: &mut World, root: Entity, actor: Entity, game_t
             ghost = None;
         }
         GameType::Client(..) => {
+            let entity = world.entities().create();
+
             ghost = Some(create_actor(
                 world,
                 root,
-                None,
+                entity,
                 Position::default(),
                 true,
                 game_type,
@@ -157,17 +142,8 @@ pub fn grant_played_actor(world: &mut World, root: Entity, actor: Entity, game_t
         }
     }
 
-    if let Err(error) = world.write_storage::<Own>().insert(actor, Own) {
-        log::error!("Failed to insert Own component. Details: {}", error);
-    }
-
-    if let Err(error) = world
-        .write_storage::<Player>()
-        .insert(actor, Player::new(ghost))
-    {
-        log::error!("Failed to insert Player component. Details: {}", error);
-        // TODO: Remove the ghost then
-    }
+    world.add(actor, Own);
+    world.add(actor, Player::new(ghost));
 
     if let Some(transform) = world.write_storage::<Transform>().get_mut(actor) {
         transform.set_translation_z(LAYER_ACTOR_PLAYER);
@@ -177,13 +153,7 @@ pub fn grant_played_actor(world: &mut World, root: Entity, actor: Entity, game_t
 }
 
 pub fn set_actor_ai(world: &World, actor: Entity) {
-    if let Err(error) = world.write_storage::<Ai>().insert(actor, Ai) {
-        log::error!(
-            "Failed to set AI for an actor ({}). Details: {}",
-            actor.id(),
-            error,
-        );
-    }
+    world.add(actor, Ai);
 }
 
 pub fn create_camera(world: &mut World, target: Entity) -> Entity {
@@ -229,12 +199,8 @@ pub fn create_projectile(
     position: Position,
     velocity: f32,
     acceleration_factor: f32,
-    shooter_id: Option<u16>,
+    shooter: Option<Entity>,
 ) -> Entity {
-    let shooter = shooter_id
-        .and_then(|id| world.read_resource::<EntityMap>().get_entity(id))
-        .filter(|e| world.is_alive(*e));
-
     let (sin, cos) = (-position.direction).sin_cos();
     let projectile = Projectile::new(
         ProjectileConfig {

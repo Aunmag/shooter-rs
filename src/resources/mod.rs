@@ -1,4 +1,4 @@
-mod entity_map;
+mod entity_converter;
 mod game_status;
 mod game_task;
 mod input;
@@ -9,7 +9,7 @@ mod sprite;
 mod state;
 mod wallpaper;
 
-pub use self::entity_map::*;
+pub use self::entity_converter::*;
 pub use self::game_status::*;
 pub use self::game_task::*;
 pub use self::input::*;

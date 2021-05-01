@@ -1,5 +1,5 @@
 use crate::models::GameType;
-use crate::resources::EntityMap;
+use crate::resources::EntityConverter;
 use crate::resources::GameTask;
 use crate::resources::GameTaskResource;
 use crate::resources::NetResource;
@@ -57,7 +57,7 @@ impl SimpleState for LoadingState {
 
         data.world.remove::<NetResource>();
         data.world.insert(DebugLines::new());
-        data.world.insert(EntityMap::new());
+        data.world.insert(EntityConverter::new());
         data.world.insert(GameTaskResource::new());
         data.world.insert(PositionUpdateResource::new());
 

@@ -10,12 +10,12 @@ pub use self::new_game::*;
 use crate::resources::Wallpaper;
 use crate::resources::WallpaperResource;
 use crate::utils;
+use crate::utils::WorldExtCustom;
 use amethyst::core::ecs::Join;
 use amethyst::core::Parent;
 use amethyst::ecs::Entity;
 use amethyst::ecs::World;
 use amethyst::ecs::WorldExt;
-use amethyst::ui::UiImage;
 use amethyst::ui::UiTransform;
 
 const WALLPAPER_ID: &str = "wallpaper";
@@ -42,15 +42,7 @@ pub trait UiState {
                     .join()
                 {
                     if parent.entity == root && transform.id == WALLPAPER_ID {
-                        if let Err(error) = world.write_storage::<UiImage>().insert(entity, image) {
-                            log::error!(
-                                "Failed to set {:?} for Entity({}). Details: {}",
-                                wallpaper,
-                                entity.id(),
-                                error,
-                            )
-                        }
-
+                        world.add(entity, image);
                         break;
                     }
                 }

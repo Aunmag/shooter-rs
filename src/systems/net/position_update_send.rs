@@ -1,6 +1,5 @@
 use crate::components::Actor;
 use crate::data::POSITION_UPDATE_INTERVAL;
-use crate::resources::EntityMap;
 use crate::resources::Message;
 use crate::resources::NetResource;
 use crate::utils::Position;
@@ -16,7 +15,7 @@ use std::collections::HashMap;
 
 pub struct PositionUpdateSendSystem {
     timer: Timer,
-    cache: HashMap<u16, Position>,
+    cache: HashMap<u32, Position>,
 }
 
 impl PositionUpdateSendSystem {
@@ -31,14 +30,13 @@ impl PositionUpdateSendSystem {
 impl<'a> System<'a> for PositionUpdateSendSystem {
     type SystemData = (
         Entities<'a>,
-        Read<'a, EntityMap>,
         Read<'a, Time>,
         Option<Read<'a, NetResource>>,
         ReadStorage<'a, Actor>,
         ReadStorage<'a, Transform>,
     );
 
-    fn run(&mut self, (entities, entity_map, time, net, actors, transforms): Self::SystemData) {
+    fn run(&mut self, (entities, time, net, actors, transforms): Self::SystemData) {
         if !self.timer.next_if_done(time.absolute_real_time()) {
             return;
         }
@@ -49,21 +47,16 @@ impl<'a> System<'a> for PositionUpdateSendSystem {
         };
 
         for (entity, _, transform) in (&entities, &actors, &transforms).join() {
-            if let Some(external_id) = entity_map.get_external_id(entity) {
-                let position = Position::from(transform);
+            let position = Position::from(transform);
+            let entity_id = entity.id();
 
-                if self
-                    .cache
-                    .get(&external_id)
-                    .map_or(true, |p| p != &position)
-                {
-                    net.send_to_all_unreliably(&Message::PositionUpdate {
-                        external_id,
-                        position,
-                    });
+            if self.cache.get(&entity_id).map_or(true, |p| p != &position) {
+                net.send_to_all_unreliably(&Message::PositionUpdate {
+                    entity_id,
+                    position,
+                });
 
-                    self.cache.insert(external_id, position);
-                }
+                self.cache.insert(entity_id, position);
             }
         }
     }

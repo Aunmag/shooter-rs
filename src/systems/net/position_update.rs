@@ -1,6 +1,5 @@
 use crate::components::Interpolation;
 use crate::components::Player;
-use crate::resources::EntityMap;
 use crate::resources::PositionUpdateResource;
 use crate::utils;
 use crate::utils::Position;
@@ -22,7 +21,6 @@ pub struct PositionUpdateSystem;
 impl<'a> System<'a> for PositionUpdateSystem {
     type SystemData = (
         Entities<'a>,
-        Read<'a, EntityMap>,
         Read<'a, Time>,
         ReadStorage<'a, Player>,
         ReadStorage<'a, Transform>,
@@ -32,7 +30,7 @@ impl<'a> System<'a> for PositionUpdateSystem {
 
     fn run(
         &mut self,
-        (entities, entity_map, time, players, transforms, mut updates, mut interpolations): Self::SystemData,
+        (entities, time, players, transforms, mut updates, mut interpolations): Self::SystemData,
     ) {
         let mut ghost_update: Option<(Entity, &Position)> = None;
         let now = time.absolute_time();
@@ -45,18 +43,15 @@ impl<'a> System<'a> for PositionUpdateSystem {
         )
             .join()
         {
-            let update = entity_map
-                .get_external_id(entity)
-                .and_then(|id| updates.get(&id))
-                .or_else(|| {
-                    if let Some((ghost, update)) = ghost_update {
-                        if ghost == entity {
-                            return Some(update);
-                        }
+            let update = updates.get(&entity.id()).or_else(|| {
+                if let Some((ghost, update)) = ghost_update {
+                    if ghost == entity {
+                        return Some(update);
                     }
+                }
 
-                    return None;
-                });
+                return None;
+            });
 
             if let Some(update) = update {
                 let fix_position;

@@ -10,29 +10,29 @@ pub enum GameTask {
     Start,
     ClientJoin(SocketAddr),
     ActorSpawn {
-        external_id: u16,
+        entity: Entity,
         position: Position,
     },
     ActorGrant {
-        external_id: u16,
+        entity: Entity,
     },
     ActorAiSet {
-        external_id: u16,
+        entity: Entity,
     },
     ActorAction {
-        external_id: u16,
+        entity: Entity,
         actions: ActorActions,
         direction: f32,
     },
     ActorTurn {
-        external_id: u16,
+        entity: Entity,
         direction: f32,
     },
     ProjectileSpawn {
         position: Position,
         velocity: f32,
         acceleration_factor: f32,
-        shooter_id: Option<u16>,
+        shooter: Option<Entity>,
     },
     ProjectileHit {
         entity: Entity,

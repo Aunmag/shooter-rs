@@ -2,7 +2,6 @@ use crate::components::Actor;
 use crate::components::ActorActions;
 use crate::components::RigidBody;
 use crate::models::GameType;
-use crate::resources::EntityMap;
 use crate::resources::GameTask;
 use crate::resources::GameTaskResource;
 use crate::resources::Message;
@@ -46,24 +45,24 @@ impl GameState {
 
         if self.game_type.is_server() {
             let mut tasks = world.write_resource::<GameTaskResource>();
-            let external_id = world.write_resource::<EntityMap>().generate_external_id();
+            let entity = world.entities().create();
 
             tasks.push(GameTask::ActorSpawn {
-                external_id,
+                entity,
                 position: Position::default(),
             });
 
-            tasks.push(GameTask::ActorGrant { external_id });
+            tasks.push(GameTask::ActorGrant { entity });
 
             for i in 0..2 {
-                let external_id = world.write_resource::<EntityMap>().generate_external_id();
+                let entity = world.entities().create();
 
                 tasks.push(GameTask::ActorSpawn {
-                    external_id,
+                    entity,
                     position: Position::new(5.0 * (0.5 - i as f32), 0.0, 0.0),
                 });
 
-                tasks.push(GameTask::ActorAiSet { external_id });
+                tasks.push(GameTask::ActorAiSet { entity });
             }
         }
 
@@ -79,43 +78,37 @@ impl GameState {
             GameTask::ClientJoin(address) => {
                 self.on_task_client_join(world, address);
             }
-            GameTask::ActorSpawn {
-                external_id,
-                position,
-            } => {
-                self.on_task_actor_spawn(world, external_id, position);
+            GameTask::ActorSpawn { entity, position } => {
+                self.on_task_actor_spawn(world, entity, position);
             }
-            GameTask::ActorGrant { external_id } => {
-                self.on_task_actor_grant(world, external_id);
+            GameTask::ActorGrant { entity } => {
+                self.on_task_actor_grant(world, entity);
             }
-            GameTask::ActorAiSet { external_id } => {
-                self.on_task_actor_ai_set(world, external_id);
+            GameTask::ActorAiSet { entity } => {
+                self.on_task_actor_ai_set(world, entity);
             }
             GameTask::ActorAction {
-                external_id,
+                entity,
                 actions,
                 direction,
             } => {
-                self.on_task_actor_action(world, external_id, Some(actions), direction);
+                self.on_task_actor_action(world, entity, Some(actions), direction);
             }
-            GameTask::ActorTurn {
-                external_id,
-                direction,
-            } => {
-                self.on_task_actor_action(world, external_id, None, direction);
+            GameTask::ActorTurn { entity, direction } => {
+                self.on_task_actor_action(world, entity, None, direction);
             }
             GameTask::ProjectileSpawn {
                 position,
                 velocity,
                 acceleration_factor,
-                shooter_id,
+                shooter,
             } => {
                 self.on_task_projectile_spawn(
                     world,
                     position,
                     velocity,
                     acceleration_factor,
-                    shooter_id,
+                    shooter,
                 );
             }
             GameTask::ProjectileHit {
@@ -136,7 +129,6 @@ impl GameState {
 
     #[allow(clippy::unused_self)]
     fn on_task_client_join(&self, world: &mut World, address: SocketAddr) {
-        let mut entity_map = world.write_resource::<EntityMap>();
         let mut net = world.write_resource::<NetResource>();
 
         net.send_to(&address, Message::JoinAccept { id: 0 });
@@ -148,90 +140,78 @@ impl GameState {
         )
             .join()
         {
-            if let Some(external_id) = entity_map.get_external_id(entity) {
-                net.send_to(
-                    &address,
-                    Message::ActorSpawn {
-                        id: 0,
-                        external_id,
-                        position: transform.into(),
-                    },
-                );
-            }
+            net.send_to(
+                &address,
+                Message::ActorSpawn {
+                    id: 0,
+                    entity_id: entity.id(),
+                    position: transform.into(),
+                },
+            );
         }
 
-        let external_id = entity_map.generate_external_id();
+        let entity = world.entities().create();
         let mut tasks = world.write_resource::<GameTaskResource>();
 
         tasks.push(GameTask::ActorSpawn {
-            external_id,
+            entity,
             position: Position::default(),
         });
 
         tasks.push(GameTask::MessageSent {
-            message: Message::ActorGrant { id: 0, external_id },
+            message: Message::ActorGrant {
+                id: 0,
+                entity_id: entity.id(),
+            },
             address_filter: Some(address),
         });
 
-        net.attach_external_id(&address, external_id);
+        net.attach_entity(&address, entity);
     }
 
-    fn on_task_actor_spawn(&self, world: &mut World, external_id: u16, position: Position) {
+    fn on_task_actor_spawn(&self, world: &mut World, entity: Entity, position: Position) {
         if let Some(root) = self.root {
-            utils::world::create_actor(
-                world,
-                root,
-                Some(external_id),
-                position,
-                false,
-                &self.game_type,
-            );
+            utils::world::create_actor(world, root, entity, position, false, &self.game_type);
 
             if self.game_type.is_server() {
                 world
                     .write_resource::<NetResource>()
                     .send_to_all(Message::ActorSpawn {
                         id: 0,
-                        external_id,
+                        entity_id: entity.id(),
                         position,
                     });
             }
         }
     }
 
-    fn on_task_actor_grant(&mut self, world: &mut World, external_id: u16) {
+    fn on_task_actor_grant(&mut self, world: &mut World, entity: Entity) {
         if let Some(root) = self.root {
-            if let Some(actor) = utils::world::get_entity(world, external_id) {
-                utils::world::grant_played_actor(world, root, actor, &self.game_type);
-            }
+            utils::world::grant_played_actor(world, root, entity, &self.game_type);
         }
     }
 
     #[allow(clippy::unused_self)]
-    fn on_task_actor_ai_set(&self, world: &World, external_id: u16) {
-        if let Some(actor) = utils::world::get_entity(world, external_id) {
-            utils::world::set_actor_ai(world, actor);
-        }
+    fn on_task_actor_ai_set(&self, world: &World, entity: Entity) {
+        utils::world::set_actor_ai(world, entity);
     }
 
     #[allow(clippy::unused_self)]
     fn on_task_actor_action(
         &self,
         world: &World,
-        external_id: u16,
+        entity: Entity,
         actions: Option<ActorActions>,
         direction: f32,
     ) {
-        if let Some(entity) = utils::world::get_entity(world, external_id) {
-            if let Some(actions) = actions {
-                if let Some(actor) = world.write_storage::<Actor>().get_mut(entity) {
-                    actor.actions = actions;
-                }
+        if let Some(actions) = actions {
+            if let Some(actor) = world.write_storage::<Actor>().get_mut(entity) {
+                actor.actions = actions;
             }
+        }
 
-            if let Some(transform) = world.write_storage::<Transform>().get_mut(entity) {
-                transform.set_rotation_2d(direction);
-            }
+        if let Some(transform) = world.write_storage::<Transform>().get_mut(entity) {
+            transform.set_rotation_2d(direction);
         }
     }
 
@@ -241,7 +221,7 @@ impl GameState {
         position: Position,
         velocity: f32,
         acceleration_factor: f32,
-        shooter_id: Option<u16>,
+        shooter: Option<Entity>,
     ) {
         if let Some(root) = self.root {
             if self.game_type.is_server() {
@@ -252,7 +232,7 @@ impl GameState {
                         position,
                         velocity,
                         acceleration_factor,
-                        shooter_id,
+                        shooter_id: shooter.map(Entity::id),
                     });
             }
 
@@ -262,7 +242,7 @@ impl GameState {
                 position,
                 velocity,
                 acceleration_factor,
-                shooter_id,
+                shooter,
             );
         }
     }
@@ -309,7 +289,7 @@ impl SimpleState for GameState {
 
         if let Some(root) = self.root.take() {
             if let Err(error) = data.world.delete_entity(root) {
-                log::error!("Failed to delete the root entity. Details: {}", error);
+                log::error!("Failed to delete the root entity: {}", error);
             }
         }
     }

@@ -1,4 +1,5 @@
 use crate::resources::Message;
+use amethyst::ecs::Entity;
 use std::cmp::Ordering;
 use std::collections::HashMap;
 use std::net::SocketAddr;
@@ -23,7 +24,7 @@ pub struct NetConnection {
     // TODO: Handle ID restart
     next_incoming_message_id: u16,
     next_outgoing_message_id: u16,
-    pub attached_external_id: Option<u16>,
+    pub attached_entity: Option<Entity>,
 }
 
 pub enum NetConnectionStatus {
@@ -103,9 +104,9 @@ impl NetResource {
         }
     }
 
-    pub fn attach_external_id(&mut self, address: &SocketAddr, external_id: u16) {
+    pub fn attach_entity(&mut self, address: &SocketAddr, entity: Entity) {
         if let Some(connection) = self.connections.get_mut(address) {
-            connection.attached_external_id.replace(external_id);
+            connection.attached_entity.replace(entity);
         }
     }
 
@@ -122,7 +123,7 @@ impl NetConnection {
             held_messages: HashMap::new(),
             next_incoming_message_id: 0,
             next_outgoing_message_id: 0,
-            attached_external_id: None,
+            attached_entity: None,
         };
     }
 

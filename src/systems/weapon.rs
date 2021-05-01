@@ -1,7 +1,6 @@
 use crate::components::Actor;
 use crate::components::ActorActions;
 use crate::components::Weapon;
-use crate::resources::EntityMap;
 use crate::resources::GameTask;
 use crate::resources::GameTaskResource;
 use crate::utils::Position;
@@ -53,7 +52,6 @@ impl WeaponSystem {
 impl<'a> System<'a> for WeaponSystem {
     type SystemData = (
         Entities<'a>,
-        Read<'a, EntityMap>,
         Read<'a, Time>,
         ReadStorage<'a, Actor>,
         ReadStorage<'a, Transform>,
@@ -63,7 +61,7 @@ impl<'a> System<'a> for WeaponSystem {
 
     fn run(
         &mut self,
-        (entities, entity_map, time, actors, transforms, mut tasks, mut weapons): Self::SystemData,
+        (entities, time, actors, transforms, mut tasks, mut weapons): Self::SystemData,
     ) {
         let query = (&entities, &actors, &transforms, &mut weapons).join();
 
@@ -76,7 +74,7 @@ impl<'a> System<'a> for WeaponSystem {
                     position,
                     velocity: self.deviate_velocity(weapon.config.muzzle_velocity),
                     acceleration_factor: weapon.config.projectile.acceleration_factor,
-                    shooter_id: entity_map.get_external_id(entity),
+                    shooter: Some(entity),
                 });
             }
         }

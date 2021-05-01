@@ -101,7 +101,6 @@ impl<'a> System<'a> for PhysicsSystem {
             .join()
         {
             let previous_position = transform.translation().xy();
-            let mut applied_solution = None;
 
             for (i, solution) in solutions.iter().enumerate() {
                 if entity.id() == solution.entity_id {
@@ -113,13 +112,9 @@ impl<'a> System<'a> for PhysicsSystem {
                         body.push(solution.push.x, solution.push.y, 0.0, true, false);
                     }
 
-                    applied_solution.replace(i);
+                    solutions.swap_remove(i);
                     break;
                 }
-            }
-
-            if let Some(applied_solution) = applied_solution {
-                solutions.swap_remove(applied_solution);
             }
 
             if let (Some(body), Some(..)) = (body.as_mut(), own) {

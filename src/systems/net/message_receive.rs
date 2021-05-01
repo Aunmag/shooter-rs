@@ -1,4 +1,5 @@
 use crate::components::ActorActions;
+use crate::resources::EntityConverter;
 use crate::resources::GameTask;
 use crate::resources::GameTaskResource;
 use crate::resources::Message;
@@ -6,6 +7,8 @@ use crate::resources::NetConnection;
 use crate::resources::NetResource;
 use crate::resources::PositionUpdateResource;
 use crate::resources::MESSAGE_SIZE_MAX;
+use amethyst::ecs::Entities;
+use amethyst::ecs::Entity;
 use amethyst::ecs::System;
 use amethyst::ecs::Write;
 use std::io::ErrorKind;
@@ -17,22 +20,24 @@ impl MessageReceiveSystem {
     fn on_message(
         address: &SocketAddr,
         message: &Message,
-        external_id: Option<u16>,
+        entity: Option<Entity>,
+        entities: &Entities,
+        converter: &mut EntityConverter,
         tasks: &mut GameTaskResource,
         position_updates: &mut PositionUpdateResource,
         is_server: bool,
     ) {
         if is_server {
-            Self::on_message_as_server(&address, &message, external_id, tasks);
+            Self::on_message_as_server(&address, &message, entity, tasks);
         } else {
-            Self::on_message_as_client(&message, tasks, position_updates);
+            Self::on_message_as_client(&message, entities, converter, tasks, position_updates);
         }
     }
 
     fn on_message_as_server(
         address: &SocketAddr,
         message: &Message,
-        external_id: Option<u16>,
+        entity: Option<Entity>,
         tasks: &mut GameTaskResource,
     ) {
         match *message {
@@ -42,20 +47,17 @@ impl MessageReceiveSystem {
             Message::ClientInput {
                 actions, direction, ..
             } => {
-                if let Some(external_id) = external_id {
+                if let Some(entity) = entity {
                     tasks.push(GameTask::ActorAction {
-                        external_id,
+                        entity,
                         actions: ActorActions::from_bits_truncate(actions),
                         direction,
                     });
                 }
             }
             Message::ClientInputDirection { direction, .. } => {
-                if let Some(external_id) = external_id {
-                    tasks.push(GameTask::ActorTurn {
-                        external_id,
-                        direction,
-                    });
+                if let Some(entity) = entity {
+                    tasks.push(GameTask::ActorTurn { entity, direction });
                 }
             }
             _ => {}
@@ -64,6 +66,8 @@ impl MessageReceiveSystem {
 
     fn on_message_as_client(
         message: &Message,
+        entities: &Entities,
+        converter: &mut EntityConverter,
         tasks: &mut GameTaskResource,
         position_updates: &mut PositionUpdateResource,
     ) {
@@ -72,23 +76,25 @@ impl MessageReceiveSystem {
                 tasks.push(GameTask::Start);
             }
             Message::ActorSpawn {
-                external_id,
+                entity_id,
                 position,
                 ..
             } => {
                 tasks.push(GameTask::ActorSpawn {
-                    external_id,
+                    entity: converter.to_internal(entities, entity_id),
                     position,
                 });
             }
-            Message::ActorGrant { external_id, .. } => {
-                tasks.push(GameTask::ActorGrant { external_id });
+            Message::ActorGrant { entity_id, .. } => {
+                tasks.push(GameTask::ActorGrant {
+                    entity: converter.to_internal(entities, entity_id),
+                });
             }
             Message::PositionUpdate {
-                external_id,
+                entity_id,
                 position,
             } => {
-                position_updates.insert(external_id, position);
+                position_updates.insert(converter.to_internal(entities, entity_id).id(), position);
             }
             Message::ProjectileSpawn {
                 position,
@@ -101,7 +107,7 @@ impl MessageReceiveSystem {
                     position,
                     velocity,
                     acceleration_factor,
-                    shooter_id,
+                    shooter: shooter_id.map(|id| converter.to_internal(entities, id)),
                 });
             }
             _ => {}
@@ -111,12 +117,17 @@ impl MessageReceiveSystem {
 
 impl<'a> System<'a> for MessageReceiveSystem {
     type SystemData = (
+        Entities<'a>,
+        Write<'a, EntityConverter>,
         Write<'a, GameTaskResource>,
         Write<'a, PositionUpdateResource>,
         Option<Write<'a, NetResource>>,
     );
 
-    fn run(&mut self, (mut tasks, mut position_updates, net): Self::SystemData) {
+    fn run(
+        &mut self,
+        (entities, mut converter, mut tasks, mut position_updates, net): Self::SystemData,
+    ) {
         let mut net = match net {
             Some(net) => net,
             None => return,
@@ -155,13 +166,15 @@ impl<'a> System<'a> for MessageReceiveSystem {
                                 }
 
                                 if let Some(message) = connection.filter_message(message) {
-                                    let external_id = connection.attached_external_id;
+                                    let entity = connection.attached_entity;
                                     let next_messages = connection.take_next_held_messages();
 
                                     Self::on_message(
                                         &address,
                                         &message,
-                                        external_id,
+                                        entity,
+                                        &entities,
+                                        &mut converter,
                                         &mut tasks,
                                         &mut position_updates,
                                         is_server,
@@ -171,7 +184,9 @@ impl<'a> System<'a> for MessageReceiveSystem {
                                         Self::on_message(
                                             &address,
                                             &message,
-                                            external_id,
+                                            entity,
+                                            &entities,
+                                            &mut converter,
                                             &mut tasks,
                                             &mut position_updates,
                                             is_server,

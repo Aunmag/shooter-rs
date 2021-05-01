@@ -27,15 +27,15 @@ pub enum Message {
     },
     ActorSpawn {
         id: u16,
-        external_id: u16,
+        entity_id: u32,
         position: Position,
     },
     ActorGrant {
         id: u16,
-        external_id: u16,
+        entity_id: u32,
     },
     PositionUpdate {
-        external_id: u16,
+        entity_id: u32,
         position: Position,
     },
     ProjectileSpawn {
@@ -43,7 +43,7 @@ pub enum Message {
         position: Position,
         velocity: f32,
         acceleration_factor: f32,
-        shooter_id: Option<u16>,
+        shooter_id: Option<u32>,
     },
 }
 
