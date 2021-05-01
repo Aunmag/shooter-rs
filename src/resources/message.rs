@@ -1,3 +1,4 @@
+use crate::components::ActorTypeSerialized;
 use crate::utils::Position;
 use bincode::Options;
 use serde::Deserialize;
@@ -28,6 +29,7 @@ pub enum Message {
     ActorSpawn {
         id: u16,
         entity_id: u32,
+        actor_type: ActorTypeSerialized,
         position: Position,
     },
     ActorGrant {

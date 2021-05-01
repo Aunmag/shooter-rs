@@ -8,6 +8,8 @@ use amethyst::renderer::sprite::SpriteSheetHandle;
 use amethyst::renderer::ImageFormat;
 use amethyst::renderer::SpriteSheetFormat;
 use amethyst::renderer::Texture;
+use serde::Deserialize;
+use serde::Serialize;
 use std::collections::HashMap;
 
 const PIXELS_PER_METER: f32 = 32.0;
@@ -16,9 +18,10 @@ pub struct SpriteResource {
     data: HashMap<Sprite, SpriteSheetHandle>,
 }
 
-#[derive(Hash, PartialEq, Eq, Copy, Clone)]
+#[derive(Hash, PartialEq, Eq, Copy, Clone, Debug, Serialize, Deserialize)]
 pub enum Sprite {
-    Actor,
+    ActorHuman,
+    ActorZombie,
     Bluff,
     BluffCorner,
     Grass,
@@ -37,7 +40,8 @@ impl SpriteResource {
         let textures = world.read_resource::<AssetStorage<Texture>>();
         let sprites = world.read_resource::<AssetStorage<SpriteSheet>>();
 
-        resource.load(Sprite::Actor, &loader, &textures, &sprites, progress);
+        resource.load(Sprite::ActorHuman, &loader, &textures, &sprites, progress);
+        resource.load(Sprite::ActorZombie, &loader, &textures, &sprites, progress);
         resource.load(Sprite::Bluff, &loader, &textures, &sprites, progress);
         resource.load(Sprite::BluffCorner, &loader, &textures, &sprites, progress);
         resource.load(Sprite::Grass, &loader, &textures, &sprites, progress);
@@ -95,7 +99,8 @@ impl SpriteResource {
 impl Sprite {
     fn get_path(&self) -> &str {
         return match *self {
-            Self::Actor => &"actors/human/image",
+            Self::ActorHuman => &"actors/human/image",
+            Self::ActorZombie => &"actors/zombie/image",
             Self::Bluff => &"terrain/bluff",
             Self::BluffCorner => &"terrain/bluff_corner",
             Self::Grass => &"terrain/grass",

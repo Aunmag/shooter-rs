@@ -77,11 +77,13 @@ impl MessageReceiveSystem {
             }
             Message::ActorSpawn {
                 entity_id,
+                actor_type,
                 position,
                 ..
             } => {
                 tasks.push(GameTask::ActorSpawn {
                     entity: converter.to_internal(entities, entity_id),
+                    actor_type: actor_type.into(),
                     position,
                 });
             }

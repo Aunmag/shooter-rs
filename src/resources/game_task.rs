@@ -1,4 +1,5 @@
 use crate::components::ActorActions;
+use crate::components::ActorType;
 use crate::resources::Message;
 use crate::utils::Position;
 use amethyst::ecs::Entity;
@@ -11,6 +12,7 @@ pub enum GameTask {
     ClientJoin(SocketAddr),
     ActorSpawn {
         entity: Entity,
+        actor_type: &'static ActorType,
         position: Position,
     },
     ActorGrant {

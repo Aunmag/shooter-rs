@@ -22,8 +22,6 @@ impl<'a> System<'a> for ActorSystem {
     );
 
     fn run(&mut self, (time, actors, mut bodies, mut transforms): Self::SystemData) {
-        let velocity = Actor::MOVEMENT_VELOCITY * time.delta_seconds();
-
         for (actor, body, transform) in (&actors, &mut bodies, &mut transforms).join() {
             transform.rotate_2d(actor.rotation);
 
@@ -49,7 +47,10 @@ impl<'a> System<'a> for ActorSystem {
                 movement.x += 1.0;
             }
 
-            movement = transform.rotation() * normalize_movement(movement) * velocity;
+            movement = transform.rotation()
+                * normalize_movement(movement)
+                * actor.actor_type.movement_velocity
+                * time.delta_seconds();
 
             body.push(movement.x, movement.y, 0.0, false, true);
         }

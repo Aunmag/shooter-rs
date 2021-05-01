@@ -1,4 +1,5 @@
 use crate::components::Actor;
+use crate::components::ActorType;
 use crate::components::Ai;
 use crate::components::Collision;
 use crate::components::Health;
@@ -64,6 +65,7 @@ pub fn create_actor(
     world: &mut World,
     root: Entity,
     entity: Entity,
+    actor_type: &'static ActorType,
     position: Position,
     is_ghost: bool,
     game_type: &GameType,
@@ -74,7 +76,7 @@ pub fn create_actor(
 
     world.add(entity, transform);
     world.add(entity, Parent { entity: root });
-    world.add(entity, Actor::new());
+    world.add(entity, Actor::new(actor_type));
     world.add(
         entity,
         Weapon::new(WeaponConfig {
@@ -89,7 +91,7 @@ pub fn create_actor(
     match *game_type {
         GameType::Server(..) => {
             world.add(entity, Own);
-            world.add(entity, Health::new(Actor::RESISTANCE));
+            world.add(entity, Health::new(actor_type.resistance));
         }
         GameType::Client(..) => {
             let now = world.read_resource::<Time>().absolute_time();
@@ -99,7 +101,7 @@ pub fn create_actor(
 
     if let Some(renderer) = world
         .read_resource::<SpriteResource>()
-        .get(Sprite::Actor)
+        .get(actor_type.sprite)
         .map(|s| SpriteRender::new(s, 0))
     {
         world.add(entity, renderer);
@@ -109,8 +111,13 @@ pub fn create_actor(
         world.add(entity, Tint(Srgba::new(0.6, 0.6, 0.6, 0.4)));
         world.add(entity, Transparent);
     } else {
-        world.add(entity, Collision { radius: 0.25 });
-        world.add(entity, RigidBody::new(80_000.0, 7.0, 8.0, 0.05));
+        world.add(entity, RigidBody::new(actor_type.mass, 7.0, 8.0, 0.05));
+        world.add(
+            entity,
+            Collision {
+                radius: actor_type.radius,
+            },
+        );
     }
 
     return entity;
@@ -137,6 +144,7 @@ pub fn grant_played_actor(world: &mut World, root: Entity, actor: Entity, game_t
                 world,
                 root,
                 entity,
+                ActorType::HUMAN,
                 Position::default(),
                 true,
                 game_type,

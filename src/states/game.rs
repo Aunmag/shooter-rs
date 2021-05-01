@@ -1,5 +1,6 @@
 use crate::components::Actor;
 use crate::components::ActorActions;
+use crate::components::ActorType;
 use crate::components::Health;
 use crate::components::Projectile;
 use crate::components::RigidBody;
@@ -53,6 +54,7 @@ impl GameState {
 
             tasks.push(GameTask::ActorSpawn {
                 entity,
+                actor_type: ActorType::HUMAN,
                 position: Position::default(),
             });
 
@@ -63,6 +65,7 @@ impl GameState {
 
                 tasks.push(GameTask::ActorSpawn {
                     entity,
+                    actor_type: ActorType::ZOMBIE,
                     position: Position::new(5.0 * (0.5 - i as f32), 0.0, 0.0),
                 });
 
@@ -82,8 +85,12 @@ impl GameState {
             GameTask::ClientJoin(address) => {
                 self.on_task_client_join(world, address);
             }
-            GameTask::ActorSpawn { entity, position } => {
-                self.on_task_actor_spawn(world, entity, position);
+            GameTask::ActorSpawn {
+                entity,
+                actor_type,
+                position,
+            } => {
+                self.on_task_actor_spawn(world, entity, actor_type, position);
             }
             GameTask::ActorGrant { entity } => {
                 self.on_task_actor_grant(world, entity);
@@ -140,7 +147,7 @@ impl GameState {
 
         net.send_to(&address, Message::JoinAccept { id: 0 });
 
-        for (entity, _, transform) in (
+        for (entity, actor, transform) in (
             &world.entities(),
             &world.read_storage::<Actor>(),
             &world.read_storage::<Transform>(),
@@ -152,6 +159,7 @@ impl GameState {
                 Message::ActorSpawn {
                     id: 0,
                     entity_id: entity.id(),
+                    actor_type: actor.actor_type.serialized,
                     position: transform.into(),
                 },
             );
@@ -162,6 +170,7 @@ impl GameState {
 
         tasks.push(GameTask::ActorSpawn {
             entity,
+            actor_type: ActorType::HUMAN,
             position: Position::default(),
         });
 
@@ -176,9 +185,23 @@ impl GameState {
         net.attach_entity(&address, entity);
     }
 
-    fn on_task_actor_spawn(&self, world: &mut World, entity: Entity, position: Position) {
+    fn on_task_actor_spawn(
+        &self,
+        world: &mut World,
+        entity: Entity,
+        actor_type: &'static ActorType,
+        position: Position,
+    ) {
         if let Some(root) = self.root {
-            utils::world::create_actor(world, root, entity, position, false, &self.game_type);
+            utils::world::create_actor(
+                world,
+                root,
+                entity,
+                actor_type,
+                position,
+                false,
+                &self.game_type,
+            );
 
             if self.game_type.is_server() {
                 world
@@ -186,6 +209,7 @@ impl GameState {
                     .send_to_all(Message::ActorSpawn {
                         id: 0,
                         entity_id: entity.id(),
+                        actor_type: actor_type.serialized,
                         position,
                     });
             }
