@@ -55,21 +55,20 @@ impl<'a> System<'a> for ProjectileSystem {
     ) {
         let time_current = time.absolute_time();
         let time_previous = time_current.sub_safely(time.delta_time());
+        let mut sub_query: Option<Vec<(Entity, &Collision, &Transform, Option<&Own>)>> = None;
 
         for (entity, projectile) in (&entities, &projectiles).join() {
             let (mut head_position, head_velocity) = projectile.calc_data(time_current);
             let (tail_position, _) = projectile.calc_data(time_previous);
             let mut obstacle: Option<Obstacle> = None;
+            let sub_query = sub_query.get_or_insert_with(|| {
+                return (&entities, &collisions, &transforms, (&own).maybe())
+                    .join()
+                    .collect();
+            });
 
-            for (entity, collision, transform, own) in (
-                &entities,
-                &collisions,
-                &transforms,
-                (&own).maybe(),
-            )
-                .join()
-            {
-                if projectile.shooter == Some(entity) {
+            for (entity, collision, transform, own) in sub_query.iter() {
+                if projectile.shooter == Some(*entity) {
                     continue;
                 }
 
@@ -88,9 +87,12 @@ impl<'a> System<'a> for ProjectileSystem {
                         obstacle_position.y,
                     );
 
-                    if obstacle.as_ref().map_or(true, |o| o.distance_squared > distance_squared) {
+                    if obstacle
+                        .as_ref()
+                        .map_or(true, |o| o.distance_squared > distance_squared)
+                    {
                         obstacle = Some(Obstacle {
-                            entity,
+                            entity: *entity,
                             distance_squared,
                             is_own: own.is_some(),
                         });

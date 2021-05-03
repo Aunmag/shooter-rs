@@ -6,6 +6,7 @@ use amethyst::core::math::Vector2;
 use amethyst::core::timing::Time;
 use amethyst::core::transform::Transform;
 use amethyst::ecs::Entities;
+use amethyst::ecs::Entity;
 use amethyst::ecs::Join;
 use amethyst::ecs::Read;
 use amethyst::ecs::ReadStorage;
@@ -51,15 +52,18 @@ impl<'a> System<'a> for PhysicsSystem {
 
         self.previous_collisions_count = 0;
 
+        let sub_query: Vec<(Entity, &Transform, &Collision, Option<&RigidBody>, &Own)> =
+            (&e, &t, &c, (&b).maybe(), &o).join().collect();
+
         for (e1, t1, c1, b1) in (&e, &t, &c, (&b).maybe()).join() {
             let p1 = predict_position(t1, b1, delta);
 
-            for (e2, t2, c2, b2, _own) in (&e, &t, &c, (&b).maybe(), &o).join() {
+            for (e2, t2, c2, b2, _own) in sub_query.iter() {
                 if e1.id() == e2.id() || e2.id() <= last_checked_entity_id {
                     continue;
                 }
 
-                let p2 = predict_position(t2, b2, delta);
+                let p2 = predict_position(t2, *b2, delta);
 
                 if let Some(shift) = Collision::resolve(c1, c2, p1, p2) {
                     let mut push_1 = Vector2::new(0.0, 0.0);
@@ -89,6 +93,8 @@ impl<'a> System<'a> for PhysicsSystem {
                 }
             }
         }
+
+        std::mem::drop(sub_query);
 
         for (entity, transform, interpolation, mut body, own, _collision) in (
             &e,

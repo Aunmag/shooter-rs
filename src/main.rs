@@ -17,6 +17,7 @@
     clippy::modulo_arithmetic,
     clippy::multiple_crate_versions,
     clippy::needless_return,
+    clippy::pattern_type_mismatch,
     clippy::shadow_unrelated,
     clippy::too_many_arguments,
     clippy::type_complexity,
