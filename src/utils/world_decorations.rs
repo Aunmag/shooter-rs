@@ -6,7 +6,7 @@ use crate::data::WORLD_SIZE_VISUAL;
 use crate::resources::Sprite;
 use crate::resources::SpriteResource;
 use crate::utils::math::are_closer_than;
-use crate::utils::world::create_simple_sprite;
+use crate::utils::WorldExtCustom;
 use amethyst::ecs::Entity;
 use amethyst::ecs::World;
 use amethyst::ecs::WorldExt;
@@ -68,8 +68,7 @@ fn create_trees(world: &mut World, root: Entity) {
                 };
 
                 if let Some(sprite) = sprite.as_ref() {
-                    create_simple_sprite(
-                        world,
+                    world.create_simple_sprite(
                         root,
                         x,
                         y,
@@ -120,18 +119,18 @@ fn create_bluffs(world: &mut World, root: Entity) {
 
         for i in 1..range {
             let j = BLUFF_SPRITE_SIZE * i as f32 - WORLD_SIZE_HALF;
-            create_simple_sprite(world, root, j, -n, z, r1, sprite.clone());
-            create_simple_sprite(world, root, j, n, z, r2, sprite.clone());
-            create_simple_sprite(world, root, -n, j, z, r3, sprite.clone());
-            create_simple_sprite(world, root, n, j, z, r4, sprite.clone());
+            world.create_simple_sprite(root, j, -n, z, r1, sprite.clone());
+            world.create_simple_sprite(root, j, n, z, r2, sprite.clone());
+            world.create_simple_sprite(root, -n, j, z, r3, sprite.clone());
+            world.create_simple_sprite(root, n, j, z, r4, sprite.clone());
         }
     }
 
     if let Some(sprite) = sprite_corner {
-        create_simple_sprite(world, root, -n, -n, z, r1, sprite.clone());
-        create_simple_sprite(world, root, n, n, z, r2, sprite.clone());
-        create_simple_sprite(world, root, -n, n, z, r3, sprite.clone());
-        create_simple_sprite(world, root, n, -n, z, r4, sprite);
+        world.create_simple_sprite(root, -n, -n, z, r1, sprite.clone());
+        world.create_simple_sprite(root, n, n, z, r2, sprite.clone());
+        world.create_simple_sprite(root, -n, n, z, r3, sprite.clone());
+        world.create_simple_sprite(root, n, -n, z, r4, sprite);
     }
 }
 

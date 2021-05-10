@@ -15,6 +15,7 @@ use crate::states::ui::HomeState;
 use crate::utils;
 use crate::utils::Position;
 use crate::utils::TakeContent;
+use crate::utils::WorldExtCustom;
 use amethyst::controls::HideCursor;
 use amethyst::core::transform::Transform;
 use amethyst::core::Time;
@@ -49,36 +50,41 @@ impl GameState {
         self.root.replace(root);
 
         if self.game_type.is_server() {
-            let mut tasks = world.write_resource::<GameTaskResource>();
             let entity = world.entities().create();
 
-            tasks.push(GameTask::ActorSpawn {
+            world.create_actor(
+                root,
                 entity,
-                actor_type: ActorType::HUMAN,
-                position: Position::default(),
-            });
+                ActorType::HUMAN,
+                Position::default(),
+                false,
+                &self.game_type,
+            );
 
-            tasks.push(GameTask::ActorGrant { entity });
+            world.set_actor_player(root, entity, &self.game_type);
 
             for i in 0..2 {
                 let entity = world.entities().create();
 
-                tasks.push(GameTask::ActorSpawn {
+                world.create_actor(
+                    root,
                     entity,
-                    actor_type: ActorType::ZOMBIE,
-                    position: Position::new(5.0 * (0.5 - i as f32), 0.0, 0.0),
-                });
+                    ActorType::ZOMBIE,
+                    Position::new(5.0 * (0.5 - i as f32), 0.0, 0.0),
+                    false,
+                    &self.game_type,
+                );
 
-                tasks.push(GameTask::ActorAiSet { entity });
+                world.set_actor_ai(entity);
             }
         }
 
-        utils::world::create_terrain(world, root);
+        world.create_terrain(root);
         utils::world_decorations::create_decorations(world, root);
     }
 
-    fn on_task(&mut self, world: &mut World, task: GameTask) {
-        match task {
+    fn on_task(&mut self, world: &mut World, task: &GameTask) {
+        match *task {
             GameTask::Start => {
                 // Skip since this should be processed while `ConnectingSate`
             }
@@ -94,9 +100,6 @@ impl GameState {
             }
             GameTask::ActorGrant { entity } => {
                 self.on_task_actor_grant(world, entity);
-            }
-            GameTask::ActorAiSet { entity } => {
-                self.on_task_actor_ai_set(world, entity);
             }
             GameTask::ActorAction {
                 entity,
@@ -129,12 +132,6 @@ impl GameState {
             } => {
                 self.on_task_projectile_hit(world, entity, force_x, force_y);
             }
-            GameTask::MessageSent {
-                message,
-                address_filter,
-            } => {
-                self.on_task_message_send(world, message, address_filter);
-            }
             GameTask::EntityDelete(entity) => {
                 self.on_task_entity_delete(world, entity);
             }
@@ -143,46 +140,54 @@ impl GameState {
 
     #[allow(clippy::unused_self)]
     fn on_task_client_join(&self, world: &mut World, address: SocketAddr) {
-        let mut net = world.write_resource::<NetResource>();
-
-        net.send_to(&address, Message::JoinAccept { id: 0 });
-
-        for (entity, actor, transform) in (
-            &world.entities(),
-            &world.read_storage::<Actor>(),
-            &world.read_storage::<Transform>(),
-        )
-            .join()
         {
-            net.send_to(
-                &address,
-                Message::ActorSpawn {
-                    id: 0,
-                    entity_id: entity.id(),
-                    actor_type: actor.actor_type.serialized,
-                    position: transform.into(),
-                },
-            );
+            let mut net = world.write_resource::<NetResource>();
+
+            net.send_to(&address, Message::JoinAccept { id: 0 });
+
+            for (entity, actor, transform) in (
+                &world.entities(),
+                &world.read_storage::<Actor>(),
+                &world.read_storage::<Transform>(),
+            )
+                .join()
+            {
+                net.send_to(
+                    &address,
+                    Message::ActorSpawn {
+                        id: 0,
+                        entity_id: entity.id(),
+                        actor_type: actor.actor_type.serialized,
+                        position: transform.into(),
+                    },
+                );
+            }
         }
 
-        let entity = world.entities().create();
-        let mut tasks = world.write_resource::<GameTaskResource>();
+        if let Some(root) = self.root {
+            let entity = world.entities().create();
 
-        tasks.push(GameTask::ActorSpawn {
-            entity,
-            actor_type: ActorType::HUMAN,
-            position: Position::default(),
-        });
+            world.create_actor(
+                root,
+                entity,
+                ActorType::HUMAN,
+                Position::default(),
+                false,
+                &self.game_type,
+            );
 
-        tasks.push(GameTask::MessageSent {
-            message: Message::ActorGrant {
-                id: 0,
-                entity_id: entity.id(),
-            },
-            address_filter: Some(address),
-        });
+            let mut net = world.write_resource::<NetResource>();
 
-        net.attach_entity(&address, entity);
+            net.send_to(
+                &address,
+                Message::ActorGrant {
+                    id: 0,
+                    entity_id: entity.id(),
+                },
+            );
+
+            net.attach_entity(&address, entity);
+        }
     }
 
     fn on_task_actor_spawn(
@@ -193,38 +198,14 @@ impl GameState {
         position: Position,
     ) {
         if let Some(root) = self.root {
-            utils::world::create_actor(
-                world,
-                root,
-                entity,
-                actor_type,
-                position,
-                false,
-                &self.game_type,
-            );
-
-            if self.game_type.is_server() {
-                world
-                    .write_resource::<NetResource>()
-                    .send_to_all(Message::ActorSpawn {
-                        id: 0,
-                        entity_id: entity.id(),
-                        actor_type: actor_type.serialized,
-                        position,
-                    });
-            }
+            world.create_actor(root, entity, actor_type, position, false, &self.game_type);
         }
     }
 
     fn on_task_actor_grant(&mut self, world: &mut World, entity: Entity) {
         if let Some(root) = self.root {
-            utils::world::grant_played_actor(world, root, entity, &self.game_type);
+            world.set_actor_player(root, entity, &self.game_type);
         }
-    }
-
-    #[allow(clippy::unused_self)]
-    fn on_task_actor_ai_set(&self, world: &World, entity: Entity) {
-        utils::world::set_actor_ai(world, entity);
     }
 
     #[allow(clippy::unused_self)]
@@ -267,14 +248,7 @@ impl GameState {
                     });
             }
 
-            utils::world::create_projectile(
-                world,
-                root,
-                position,
-                velocity,
-                acceleration_factor,
-                shooter,
-            );
+            world.create_projectile(root, position, velocity, acceleration_factor, shooter);
         }
     }
 
@@ -305,22 +279,6 @@ impl GameState {
     }
 
     #[allow(clippy::unused_self)]
-    fn on_task_message_send(
-        &self,
-        world: &World,
-        message: Message,
-        address_filter: Option<SocketAddr>,
-    ) {
-        let mut net = world.write_resource::<NetResource>();
-
-        if let Some(address) = address_filter {
-            net.send_to(&address, message);
-        } else {
-            net.send_to_all(message);
-        }
-    }
-
-    #[allow(clippy::unused_self)]
     fn on_task_entity_delete(&self, world: &mut World, entity: Entity) {
         if self.game_type.is_server() {
             world
@@ -343,11 +301,11 @@ impl SimpleState for GameState {
     fn on_start(&mut self, mut data: StateData<GameData>) {
         self.init_world_entities(&mut data.world);
         utils::ui::set_cursor_visibility(&data.world, false);
-        utils::world::set_state(&mut data.world, Some(self.game_type));
+        data.world.set_state(Some(self.game_type));
     }
 
-    fn on_stop(&mut self, mut data: StateData<GameData>) {
-        utils::world::set_state(&mut data.world, None);
+    fn on_stop(&mut self, data: StateData<GameData>) {
+        data.world.set_state(None);
 
         if let Some(root) = self.root.take() {
             if let Err(error) = data.world.delete_entity(root) {
@@ -356,13 +314,13 @@ impl SimpleState for GameState {
         }
     }
 
-    fn on_pause(&mut self, mut data: StateData<GameData>) {
-        utils::world::set_state(&mut data.world, None);
+    fn on_pause(&mut self, data: StateData<GameData>) {
+        data.world.set_state(None);
     }
 
-    fn on_resume(&mut self, mut data: StateData<GameData>) {
+    fn on_resume(&mut self, data: StateData<GameData>) {
         utils::ui::set_cursor_visibility(&data.world, false);
-        utils::world::set_state(&mut data.world, Some(self.game_type));
+        data.world.set_state(Some(self.game_type));
     }
 
     fn update(&mut self, data: &mut StateData<GameData>) -> SimpleTrans {
@@ -376,7 +334,7 @@ impl SimpleState for GameState {
                 break;
             }
 
-            for task in tasks {
+            for task in tasks.iter() {
                 self.on_task(&mut data.world, task);
             }
         }

@@ -1,6 +1,5 @@
 use crate::components::ActorActions;
 use crate::components::ActorType;
-use crate::resources::Message;
 use crate::utils::Position;
 use amethyst::ecs::Entity;
 use std::net::SocketAddr;
@@ -16,9 +15,6 @@ pub enum GameTask {
         position: Position,
     },
     ActorGrant {
-        entity: Entity,
-    },
-    ActorAiSet {
         entity: Entity,
     },
     ActorAction {
@@ -40,10 +36,6 @@ pub enum GameTask {
         entity: Entity,
         force_x: f32,
         force_y: f32,
-    },
-    MessageSent {
-        message: Message,
-        address_filter: Option<SocketAddr>,
     },
     EntityDelete(Entity),
 }

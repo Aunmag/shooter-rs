@@ -9,6 +9,7 @@ use crate::states::ui::UiState;
 use crate::states::GameState;
 use crate::utils;
 use crate::utils::Timer;
+use crate::utils::WorldExtCustom;
 use amethyst::core::timing::Time;
 use amethyst::ecs::Entity;
 use amethyst::input::is_key_down;
@@ -46,7 +47,7 @@ impl LoadingState {
 }
 
 impl SimpleState for LoadingState {
-    fn on_start(&mut self, mut data: StateData<GameData>) {
+    fn on_start(&mut self, data: StateData<GameData>) {
         data.world.exec(|finder: UiFinder| {
             self.root = finder.find(ROOT_ID);
             self.button_cancel = finder.find(BUTTON_CANCEL_ID);
@@ -72,23 +73,23 @@ impl SimpleState for LoadingState {
             }
         }
 
-        utils::world::set_state(&mut data.world, Some(self.game_type));
+        data.world.set_state(Some(self.game_type));
     }
 
-    fn on_pause(&mut self, mut data: StateData<GameData>) {
+    fn on_pause(&mut self, data: StateData<GameData>) {
         self.set_visibility(&data.world, false);
-        utils::world::set_state(&mut data.world, None);
+        data.world.set_state(None);
     }
 
-    fn on_resume(&mut self, mut data: StateData<GameData>) {
+    fn on_resume(&mut self, data: StateData<GameData>) {
         self.set_visibility(&data.world, true);
-        utils::world::set_state(&mut data.world, Some(self.game_type));
+        data.world.set_state(Some(self.game_type));
     }
 
-    fn on_stop(&mut self, mut data: StateData<GameData>) {
+    fn on_stop(&mut self, data: StateData<GameData>) {
         self.button_cancel = None;
         self.set_visibility(&data.world, false);
-        utils::world::set_state(&mut data.world, None);
+        data.world.set_state(None);
     }
 
     fn update(&mut self, data: &mut StateData<GameData>) -> SimpleTrans {
