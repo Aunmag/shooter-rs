@@ -36,8 +36,8 @@ bitflags::bitflags! {
 }
 
 impl Actor {
-    pub fn new(actor_type: &'static ActorType) -> Self {
-        return Actor {
+    pub const fn new(actor_type: &'static ActorType) -> Self {
+        return Self {
             actor_type,
             actions: ActorActions::empty(),
             rotation: 0.0,
@@ -72,8 +72,8 @@ impl ActorType {
 impl Into<&'static ActorType> for ActorTypeSerialized {
     fn into(self) -> &'static ActorType {
         return match self {
-            ActorTypeSerialized::Human => ActorType::HUMAN,
-            ActorTypeSerialized::Zombie => ActorType::ZOMBIE,
+            Self::Human => ActorType::HUMAN,
+            Self::Zombie => ActorType::ZOMBIE,
         };
     }
 }

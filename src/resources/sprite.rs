@@ -66,9 +66,9 @@ impl SpriteResource {
 
         let sprite_sheet = loader.load(
             &path_to_ron,
-            SpriteSheetFormat(loader.load(&path_to_png, ImageFormat::default(), (), &textures)),
+            SpriteSheetFormat(loader.load(&path_to_png, ImageFormat::default(), (), textures)),
             progress,
-            &sprites,
+            sprites,
         );
 
         self.data.insert(sprite, sprite_sheet);
@@ -79,11 +79,11 @@ impl SpriteResource {
 
         for handle in self.data.values() {
             if let Some(sprite_sheet) = sprite_sheets.get_mut(handle) {
-                for sprite in sprite_sheet.sprites.iter_mut() {
+                for sprite in &mut sprite_sheet.sprites {
                     sprite.width /= PIXELS_PER_METER;
                     sprite.height /= PIXELS_PER_METER;
 
-                    for offset in sprite.offsets.iter_mut() {
+                    for offset in &mut sprite.offsets {
                         *offset /= PIXELS_PER_METER;
                     }
                 }
@@ -97,16 +97,16 @@ impl SpriteResource {
 }
 
 impl Sprite {
-    fn get_path(&self) -> &str {
+    const fn get_path(&self) -> &str {
         return match *self {
-            Self::ActorHuman => &"actors/human/image",
-            Self::ActorZombie => &"actors/zombie/image",
-            Self::Bluff => &"terrain/bluff",
-            Self::BluffCorner => &"terrain/bluff_corner",
-            Self::Grass => &"terrain/grass",
-            Self::Tree0 => &"terrain/tree_0",
-            Self::Tree1 => &"terrain/tree_1",
-            Self::Tree2 => &"terrain/tree_2",
+            Self::ActorHuman => "actors/human/image",
+            Self::ActorZombie => "actors/zombie/image",
+            Self::Bluff => "terrain/bluff",
+            Self::BluffCorner => "terrain/bluff_corner",
+            Self::Grass => "terrain/grass",
+            Self::Tree0 => "terrain/tree_0",
+            Self::Tree1 => "terrain/tree_1",
+            Self::Tree2 => "terrain/tree_2",
         };
     }
 }

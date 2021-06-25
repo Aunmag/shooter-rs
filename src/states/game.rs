@@ -38,7 +38,7 @@ pub struct GameState {
 }
 
 impl GameState {
-    pub fn new(game_type: GameType) -> Self {
+    pub const fn new(game_type: GameType) -> Self {
         return Self {
             game_type,
             root: None,
@@ -300,7 +300,7 @@ impl GameState {
 impl SimpleState for GameState {
     fn on_start(&mut self, mut data: StateData<GameData>) {
         self.init_world_entities(&mut data.world);
-        utils::ui::set_cursor_visibility(&data.world, false);
+        utils::ui::set_cursor_visibility(data.world, false);
         data.world.set_state(Some(self.game_type));
     }
 
@@ -319,7 +319,7 @@ impl SimpleState for GameState {
     }
 
     fn on_resume(&mut self, data: StateData<GameData>) {
-        utils::ui::set_cursor_visibility(&data.world, false);
+        utils::ui::set_cursor_visibility(data.world, false);
         data.world.set_state(Some(self.game_type));
     }
 
@@ -334,7 +334,7 @@ impl SimpleState for GameState {
                 break;
             }
 
-            for task in tasks.iter() {
+            for task in &tasks {
                 self.on_task(&mut data.world, task);
             }
         }

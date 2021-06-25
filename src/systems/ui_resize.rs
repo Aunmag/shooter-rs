@@ -21,7 +21,7 @@ pub struct UiResizeSystem {
 }
 
 impl UiResizeSystem {
-    pub fn new() -> Self {
+    pub const fn new() -> Self {
         return Self {
             last_size_x: 0.0,
             last_size_y: 0.0,

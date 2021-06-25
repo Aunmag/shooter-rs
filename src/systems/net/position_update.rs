@@ -60,7 +60,7 @@ impl<'a> System<'a> for PositionUpdateSystem {
                     fix_position = is_offset_noticeable(transform, update);
 
                     if let Some(ghost) = player.ghost {
-                        ghost_update.replace((ghost, &update));
+                        ghost_update.replace((ghost, update));
                     }
                 } else {
                     fix_position = true;

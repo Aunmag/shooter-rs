@@ -16,7 +16,7 @@ pub struct WeaponConfig {
 }
 
 impl Weapon {
-    pub fn new(config: WeaponConfig) -> Self {
+    pub const fn new(config: WeaponConfig) -> Self {
         return Self {
             config,
             next_shoot_time: Duration::from_secs(0),

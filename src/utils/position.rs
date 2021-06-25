@@ -11,7 +11,7 @@ pub struct Position {
 }
 
 impl Position {
-    pub fn new(x: f32, y: f32, direction: f32) -> Self {
+    pub const fn new(x: f32, y: f32, direction: f32) -> Self {
         return Self { x, y, direction };
     }
 }
@@ -20,7 +20,7 @@ impl From<&Transform> for Position {
     fn from(transform: &Transform) -> Self {
         let translation = transform.translation();
 
-        return Position {
+        return Self {
             x: translation.x,
             y: translation.y,
             direction: transform.euler_angles().2,

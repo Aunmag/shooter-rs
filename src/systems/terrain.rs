@@ -25,7 +25,7 @@ impl<'a> System<'a> for TerrainSystem {
         for (_, transform) in (&cameras, &transforms).join() {
             // TODO: Use `global_translation` in future amethyst version
             // TODO: Maybe there's a way to avoid global matrix calculation
-            let translation = transform.global_matrix().column(3).xyz();
+            let translation = transform.global_matrix().column(3).xy();
             x = align(translation.x, Terrain::SIZE as f32) + Terrain::SIZE_HALF;
             y = align(translation.y, Terrain::SIZE as f32) - Terrain::SIZE_HALF;
             break;

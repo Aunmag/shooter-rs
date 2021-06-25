@@ -31,7 +31,7 @@ pub struct HomeState {
 }
 
 impl HomeState {
-    pub fn new(is_root: bool) -> Self {
+    pub const fn new(is_root: bool) -> Self {
         return Self {
             is_root,
             root: None,
@@ -54,27 +54,27 @@ impl SimpleState for HomeState {
         });
 
         if let Some(button_new_game) = self.button_new_game {
-            utils::set_entity_visibility(&data.world, button_new_game, self.is_root);
+            utils::set_entity_visibility(data.world, button_new_game, self.is_root);
         }
 
         if let Some(button_disconnect) = self.button_disconnect {
-            utils::set_entity_visibility(&data.world, button_disconnect, !self.is_root);
+            utils::set_entity_visibility(data.world, button_disconnect, !self.is_root);
         }
 
-        utils::ui::set_button_availability(&data.world, &BUTTON_CONTINUE_ID, !self.is_root);
-        utils::ui::set_button_availability(&data.world, &BUTTON_HELP_ID, false);
-        utils::ui::set_button_availability(&data.world, &BUTTON_SETTINGS_ID, false);
+        utils::ui::set_button_availability(data.world, BUTTON_CONTINUE_ID, !self.is_root);
+        utils::ui::set_button_availability(data.world, BUTTON_HELP_ID, false);
+        utils::ui::set_button_availability(data.world, BUTTON_SETTINGS_ID, false);
 
-        self.set_wallpaper(&data.world, Wallpaper::Home);
-        self.set_visibility(&data.world, true);
+        self.set_wallpaper(data.world, Wallpaper::Home);
+        self.set_visibility(data.world, true);
     }
 
     fn on_pause(&mut self, data: StateData<GameData>) {
-        self.set_visibility(&data.world, false);
+        self.set_visibility(data.world, false);
     }
 
     fn on_resume(&mut self, data: StateData<GameData>) {
-        self.set_visibility(&data.world, true);
+        self.set_visibility(data.world, true);
     }
 
     fn on_stop(&mut self, data: StateData<GameData>) {
@@ -82,7 +82,7 @@ impl SimpleState for HomeState {
         self.button_new_game = None;
         self.button_disconnect = None;
         self.button_quit = None;
-        self.set_visibility(&data.world, false);
+        self.set_visibility(data.world, false);
     }
 
     fn handle_event(&mut self, _: StateData<GameData>, event: StateEvent) -> SimpleTrans {
@@ -108,7 +108,7 @@ impl SimpleState for HomeState {
                     return Trans::Push(Box::new(ConfirmState::new(
                         DISCONNECTION_TITLE,
                         Wallpaper::Disconnect,
-                        || Trans::Replace(Box::new(HomeState::new(true))),
+                        || Trans::Replace(Box::new(Self::new(true))),
                     )));
                 }
 

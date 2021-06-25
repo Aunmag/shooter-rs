@@ -30,7 +30,7 @@ struct InputSend {
 }
 
 impl InputSendSystem {
-    pub fn new() -> Self {
+    pub const fn new() -> Self {
         return Self {
             previous: InputSend {
                 time: Duration::from_millis(0),

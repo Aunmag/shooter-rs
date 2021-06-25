@@ -30,10 +30,10 @@ impl SimpleState for StartupState {
         });
 
         data.world
-            .insert(SpriteResource::new(&data.world, &mut self.progress));
+            .insert(SpriteResource::new(data.world, &mut self.progress));
 
         data.world
-            .insert(WallpaperResource::new(&data.world, &mut self.progress));
+            .insert(WallpaperResource::new(data.world, &mut self.progress));
     }
 
     fn update(&mut self, data: &mut StateData<GameData>) -> SimpleTrans {
@@ -42,8 +42,8 @@ impl SimpleState for StartupState {
                 return Trans::None;
             }
             Completion::Complete => {
-                enable_fullscreen_mode(&data.world);
-                complete_startup(&data.world);
+                enable_fullscreen_mode(data.world);
+                complete_startup(data.world);
                 return Trans::Switch(Box::new(HomeState::new(true)));
             }
             Completion::Failed => {

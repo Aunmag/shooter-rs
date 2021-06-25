@@ -22,7 +22,7 @@ impl Health {
             resistance = 1.0;
         }
 
-        return Health {
+        return Self {
             value: 1.0,
             resistance,
             death_time: Duration::from_secs(0),

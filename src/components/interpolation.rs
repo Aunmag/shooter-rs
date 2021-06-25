@@ -14,7 +14,7 @@ pub struct Interpolation {
 }
 
 impl Interpolation {
-    pub fn new(position: Position, now: Duration) -> Self {
+    pub const fn new(position: Position, now: Duration) -> Self {
         return Self {
             origin: position,
             target: position,

@@ -44,24 +44,24 @@ impl SimpleState for ConfirmState {
             self.button_no = finder.find(BUTTON_NO_ID);
         });
 
-        utils::ui::set_text(&data.world, LABEL_TITLE_ID, self.title.to_string());
+        utils::ui::set_text(data.world, LABEL_TITLE_ID, self.title.to_string());
 
-        self.set_wallpaper(&data.world, self.wallpaper);
-        self.set_visibility(&data.world, true);
+        self.set_wallpaper(data.world, self.wallpaper);
+        self.set_visibility(data.world, true);
     }
 
     fn on_pause(&mut self, data: StateData<GameData>) {
-        self.set_visibility(&data.world, false);
+        self.set_visibility(data.world, false);
     }
 
     fn on_resume(&mut self, data: StateData<GameData>) {
-        self.set_visibility(&data.world, true);
+        self.set_visibility(data.world, true);
     }
 
     fn on_stop(&mut self, data: StateData<GameData>) {
         self.button_yes = None;
         self.button_no = None;
-        self.set_visibility(&data.world, false);
+        self.set_visibility(data.world, false);
     }
 
     fn handle_event(&mut self, _: StateData<GameData>, event: StateEvent) -> SimpleTrans {

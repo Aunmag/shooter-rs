@@ -27,7 +27,7 @@ pub struct NewGameState {
 }
 
 impl NewGameState {
-    pub fn new() -> Self {
+    pub const fn new() -> Self {
         return Self {
             root: None,
             button_host: None,
@@ -71,23 +71,23 @@ impl SimpleState for NewGameState {
             self.button_back = finder.find(BUTTON_BACK_ID);
         });
 
-        self.set_wallpaper(&data.world, Wallpaper::Play);
-        self.set_visibility(&data.world, true);
+        self.set_wallpaper(data.world, Wallpaper::Play);
+        self.set_visibility(data.world, true);
     }
 
     fn on_pause(&mut self, data: StateData<GameData>) {
-        self.set_visibility(&data.world, false);
+        self.set_visibility(data.world, false);
     }
 
     fn on_resume(&mut self, data: StateData<GameData>) {
-        self.set_visibility(&data.world, true);
+        self.set_visibility(data.world, true);
     }
 
     fn on_stop(&mut self, data: StateData<GameData>) {
         self.button_host = None;
         self.button_join = None;
         self.button_back = None;
-        self.set_visibility(&data.world, false);
+        self.set_visibility(data.world, false);
     }
 
     fn handle_event(&mut self, data: StateData<GameData>, event: StateEvent) -> SimpleTrans {
@@ -102,7 +102,7 @@ impl SimpleState for NewGameState {
                 target,
             }) => {
                 if Some(target) == self.button_host {
-                    match Self::parse_input_port(&data.world) {
+                    match Self::parse_input_port(data.world) {
                         Ok(port) => {
                             let game_type = GameType::Server(port);
                             return Trans::Push(Box::new(LoadingState::new(game_type)));
@@ -114,7 +114,7 @@ impl SimpleState for NewGameState {
                 }
 
                 if Some(target) == self.button_join {
-                    match Self::parse_input_address(&data.world) {
+                    match Self::parse_input_address(data.world) {
                         Ok(address) => {
                             let game_type = GameType::Client(address);
                             return Trans::Push(Box::new(LoadingState::new(game_type)));

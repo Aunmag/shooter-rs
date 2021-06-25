@@ -7,7 +7,7 @@ pub struct Player {
 }
 
 impl Player {
-    pub fn new(ghost: Option<Entity>) -> Self {
+    pub const fn new(ghost: Option<Entity>) -> Self {
         return Self { ghost };
     }
 }

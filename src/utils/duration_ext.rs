@@ -12,7 +12,7 @@ impl DurationExt for Duration {
         if self > other {
             return self - other;
         } else {
-            return Duration::from_millis(0);
+            return Self::from_millis(0);
         }
     }
 
@@ -35,78 +35,21 @@ impl DurationExt for Duration {
 mod tests {
     use super::*;
 
+    fn get_progress(duration: u64, min: u64, max: u64) -> f32 {
+        let duration_min = Duration::from_millis(min);
+        let duration_max = Duration::from_millis(max);
+        return Duration::from_millis(duration).get_progress(duration_min, duration_max);
+    }
+
     #[test]
     fn test_get_progress() {
-        assert_eq!(
-            0.0,
-            Duration::from_millis(4).get_progress(
-                Duration::from_millis(4),
-                Duration::from_millis(8),
-            ),
-            "Min",
-        );
-
-        assert_eq!(
-            1.0,
-            Duration::from_millis(8).get_progress(
-                Duration::from_millis(4),
-                Duration::from_millis(8),
-            ),
-            "Middle",
-        );
-
-        assert_eq!(
-            0.5,
-            Duration::from_millis(6).get_progress(
-                Duration::from_millis(4),
-                Duration::from_millis(8),
-            ),
-            "Max",
-        );
-
-        assert_eq!(
-            0.0,
-            Duration::from_millis(2).get_progress(
-                Duration::from_millis(4),
-                Duration::from_millis(8),
-            ),
-            "Smaller than min",
-        );
-
-        assert_eq!(
-            1.0,
-            Duration::from_millis(10).get_progress(
-                Duration::from_millis(4),
-                Duration::from_millis(8),
-            ),
-            "Greater than max",
-        );
-
-        assert_eq!(
-            1.0,
-            Duration::from_millis(5).get_progress(
-                Duration::from_millis(5),
-                Duration::from_millis(5),
-            ),
-            "All equal",
-        );
-
-        assert_eq!(
-            1.0,
-            Duration::from_millis(0).get_progress(
-                Duration::from_millis(0),
-                Duration::from_millis(0),
-            ),
-            "Zeros",
-        );
-
-        assert_eq!(
-            1.0,
-            Duration::from_millis(5).get_progress(
-                Duration::from_millis(0),
-                Duration::from_millis(0),
-            ),
-            "Zeros and greater than max",
-        );
+        assert_eq!(0.0, get_progress(4, 4, 8), "Min");
+        assert_eq!(1.0, get_progress(8, 4, 8), "Middle");
+        assert_eq!(0.5, get_progress(6, 4, 8), "Max");
+        assert_eq!(0.0, get_progress(2, 4, 8), "Smaller than min");
+        assert_eq!(1.0, get_progress(10, 4, 8), "Greater than max");
+        assert_eq!(1.0, get_progress(5, 5, 5), "All equal");
+        assert_eq!(1.0, get_progress(0, 0, 0), "Zeros");
+        assert_eq!(1.0, get_progress(5, 0, 0), "Zeros and greater than max");
     }
 }

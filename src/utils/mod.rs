@@ -36,11 +36,11 @@ pub trait TakeContent<T> {
 }
 
 impl<T> TakeContent<Vec<T>> for Vec<T> {
-    fn take_content(&mut self) -> Vec<T> {
+    fn take_content(&mut self) -> Self {
         if self.is_empty() {
-            return Vec::new();
+            return Self::new();
         } else {
-            return std::mem::replace(self, Vec::with_capacity(self.capacity()));
+            return std::mem::replace(self, Self::with_capacity(self.capacity()));
         }
     }
 }

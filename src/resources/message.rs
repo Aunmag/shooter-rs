@@ -101,7 +101,7 @@ impl Message {
         }
     }
 
-    pub fn get_id(&self) -> Option<u16> {
+    pub const fn get_id(&self) -> Option<u16> {
         #[allow(clippy::match_same_arms)]
         return match *self {
             Self::Response { .. } => None,
@@ -117,7 +117,7 @@ impl Message {
         };
     }
 
-    pub fn has_id(&self) -> bool {
+    pub const fn has_id(&self) -> bool {
         if let Self::Response { .. } = *self {
             return false;
         } else {

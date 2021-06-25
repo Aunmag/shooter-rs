@@ -25,7 +25,7 @@ struct Solution {
 }
 
 impl PhysicsSystem {
-    pub fn new() -> Self {
+    pub const fn new() -> Self {
         return Self {
             is_optimal: true,
             previous_collisions_count: 0,
@@ -58,7 +58,7 @@ impl<'a> System<'a> for PhysicsSystem {
         for (e1, t1, c1, b1) in (&e, &t, &c, (&b).maybe()).join() {
             let p1 = predict_position(t1, b1, delta);
 
-            for (e2, t2, c2, b2, _own) in sub_query.iter() {
+            for (e2, t2, c2, b2, _own) in &sub_query {
                 if e1.id() == e2.id() || e2.id() <= last_checked_entity_id {
                     continue;
                 }

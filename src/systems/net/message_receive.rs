@@ -17,6 +17,7 @@ use std::net::SocketAddr;
 pub struct MessageReceiveSystem;
 
 impl MessageReceiveSystem {
+    #[allow(clippy::too_many_arguments)] // TODO: Simplify later
     fn on_message(
         address: &SocketAddr,
         message: &Message,
@@ -28,9 +29,9 @@ impl MessageReceiveSystem {
         is_server: bool,
     ) {
         if is_server {
-            Self::on_message_as_server(&address, &message, entity, tasks);
+            Self::on_message_as_server(address, message, entity, tasks);
         } else {
-            Self::on_message_as_client(&message, entities, converter, tasks, position_updates);
+            Self::on_message_as_client(message, entities, converter, tasks, position_updates);
         }
     }
 
@@ -187,10 +188,10 @@ impl<'a> System<'a> for MessageReceiveSystem {
                                         is_server,
                                     );
 
-                                    for message in next_messages.iter() {
+                                    for message in &next_messages {
                                         Self::on_message(
                                             &address,
-                                            &message,
+                                            message,
                                             entity,
                                             &entities,
                                             &mut converter,

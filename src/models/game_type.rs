@@ -7,7 +7,7 @@ pub enum GameType {
 }
 
 impl GameType {
-    pub fn is_server(&self) -> bool {
+    pub const fn is_server(&self) -> bool {
         return match *self {
             Self::Server(..) => true,
             Self::Client(..) => false,

@@ -1,26 +1,29 @@
-#![warn(clippy::all, clippy::cargo, clippy::pedantic, clippy::restriction)]
+#![deny(
+    clippy::all,
+    clippy::cargo,
+    clippy::nursery,
+    clippy::pedantic,
+    clippy::restriction
+)]
 #![allow(
     clippy::as_conversions,
     clippy::blanket_clippy_restriction_lints,
     clippy::cargo_common_metadata,
     clippy::cast_lossless,
     clippy::cast_precision_loss,
-    clippy::default_trait_access,
     clippy::else_if_without_else,
-    clippy::explicit_iter_loop,
     clippy::float_arithmetic,
-    clippy::implicit_return, // TODO: Enable later excepting closures
+    clippy::implicit_return, // TODO: Enable later excepting closures (https://github.com/rust-lang/rust-clippy/issues/6480)
     clippy::integer_arithmetic,
-    clippy::match_wildcard_for_single_variants,
     clippy::missing_docs_in_private_items,
     clippy::module_name_repetitions,
     clippy::modulo_arithmetic,
     clippy::multiple_crate_versions,
     clippy::needless_return,
-    clippy::pattern_type_mismatch,
-    clippy::shadow_unrelated,
-    clippy::too_many_arguments,
-    clippy::type_complexity,
+    clippy::pattern_type_mismatch, // Maybe deny later
+    clippy::suboptimal_flops, // TODO: Deny later
+    clippy::type_complexity, // Maybe deny later
+    clippy::useless_let_if_seq, // Maybe deny later
     clippy::wildcard_enum_match_arm,
 )]
 
@@ -70,11 +73,12 @@ use amethyst::tiles::RenderTiles2D;
 use amethyst::ui::RenderUi;
 use amethyst::ui::UiBundle;
 use amethyst::utils::application_root_dir;
+use amethyst::LoggerConfig;
 
 const FRAME_RATE: u32 = 144;
 
 fn main() -> amethyst::Result<()> {
-    amethyst::start_logger(Default::default());
+    amethyst::start_logger(LoggerConfig::default());
 
     let root = application_root_dir()?;
     let game_data = GameDataBuilder::default()

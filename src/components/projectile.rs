@@ -3,7 +3,6 @@ use amethyst::core::math::Vector2;
 use amethyst::ecs::Component;
 use amethyst::ecs::DenseVecStorage;
 use amethyst::ecs::Entity;
-use std::f32::consts::E;
 use std::time::Duration;
 
 const VISUAL_VELOCITY_FACTOR: f32 = 1.0 / 5.0;
@@ -26,7 +25,7 @@ impl Projectile {
     pub const PUSH_FACTOR: f32 = 30.0;
     pub const VELOCITY_MIN: f32 = 5.0;
 
-    pub fn new(
+    pub const fn new(
         config: ProjectileConfig,
         time: Duration,
         position: Vector2<f32>,
@@ -47,7 +46,7 @@ impl Projectile {
         let a = self.config.acceleration_factor;
         let p = &self.initial_position;
         let v_0 = &self.initial_velocity;
-        let v_1 = v_0 * E.powf(t * a);
+        let v_1 = v_0 * (t * a).exp();
 
         return (p + (v_1 - v_0) / a * VISUAL_VELOCITY_FACTOR, v_1);
     }

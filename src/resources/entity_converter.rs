@@ -12,13 +12,13 @@ struct Record {
 }
 
 impl EntityConverter {
-    pub fn new() -> Self {
+    pub const fn new() -> Self {
         return Self { data: Vec::new() };
     }
 
     #[allow(clippy::wrong_self_convention)]
     pub fn to_internal(&mut self, entities: &Entities, external_id: u32) -> Entity {
-        for record in self.data.iter() {
+        for record in &self.data {
             if record.external_id == external_id {
                 return record.entity;
             }

@@ -35,7 +35,7 @@ pub struct LoadingState {
 }
 
 impl LoadingState {
-    pub fn new(game_type: GameType) -> Self {
+    pub const fn new(game_type: GameType) -> Self {
         return Self {
             game_type,
             root: None,
@@ -53,8 +53,8 @@ impl SimpleState for LoadingState {
             self.button_cancel = finder.find(BUTTON_CANCEL_ID);
         });
 
-        self.set_wallpaper(&data.world, Wallpaper::Play);
-        self.set_visibility(&data.world, true);
+        self.set_wallpaper(data.world, Wallpaper::Play);
+        self.set_visibility(data.world, true);
 
         data.world.remove::<NetResource>();
         data.world.insert(DebugLines::new());
@@ -77,18 +77,18 @@ impl SimpleState for LoadingState {
     }
 
     fn on_pause(&mut self, data: StateData<GameData>) {
-        self.set_visibility(&data.world, false);
+        self.set_visibility(data.world, false);
         data.world.set_state(None);
     }
 
     fn on_resume(&mut self, data: StateData<GameData>) {
-        self.set_visibility(&data.world, true);
+        self.set_visibility(data.world, true);
         data.world.set_state(Some(self.game_type));
     }
 
     fn on_stop(&mut self, data: StateData<GameData>) {
         self.button_cancel = None;
-        self.set_visibility(&data.world, false);
+        self.set_visibility(data.world, false);
         data.world.set_state(None);
     }
 
@@ -133,7 +133,7 @@ impl SimpleState for LoadingState {
                 }
             }
 
-            utils::ui::set_text(&data.world, DOTS_ID, dots);
+            utils::ui::set_text(data.world, DOTS_ID, dots);
         }
 
         return Trans::None;

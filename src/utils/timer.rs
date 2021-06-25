@@ -6,7 +6,7 @@ pub struct Timer {
 }
 
 impl Timer {
-    pub fn new(duration: Duration) -> Self {
+    pub const fn new(duration: Duration) -> Self {
         return Self {
             duration,
             target: Duration::from_millis(0),

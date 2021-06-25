@@ -48,7 +48,7 @@ impl WallpaperResource {
             wallpaper.get_path(),
             ImageFormat::default(),
             progress,
-            &textures,
+            textures,
         ));
 
         self.data.insert(wallpaper, texture);
@@ -60,12 +60,12 @@ impl WallpaperResource {
 }
 
 impl Wallpaper {
-    fn get_path(&self) -> &str {
+    const fn get_path(&self) -> &str {
         return match *self {
-            Self::Disconnect => &"wallpapers/disconnect.png",
-            Self::Home => &"wallpapers/home.png",
-            Self::Play => &"wallpapers/play.png",
-            Self::Quit => &"wallpapers/quit.png",
+            Self::Disconnect => "wallpapers/disconnect.png",
+            Self::Home => "wallpapers/home.png",
+            Self::Play => "wallpapers/play.png",
+            Self::Quit => "wallpapers/quit.png",
         };
     }
 }

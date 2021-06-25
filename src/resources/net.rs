@@ -68,8 +68,8 @@ impl NetResource {
     pub fn update_connections(&mut self) {
         let mut disconnected = Vec::new();
 
-        for (address, connection) in self.connections.iter_mut() {
-            connection.resend_unacknowledged_messages(&self.socket, &address);
+        for (address, connection) in &mut self.connections {
+            connection.resend_unacknowledged_messages(&self.socket, address);
 
             if let NetConnectionStatus::Disconnected(ref reason) = *connection.get_status() {
                 disconnected.push(*address);
@@ -77,7 +77,7 @@ impl NetResource {
             }
         }
 
-        for address in disconnected.iter() {
+        for address in &disconnected {
             self.connections.remove(address);
         }
     }
@@ -89,8 +89,8 @@ impl NetResource {
     }
 
     pub fn send_to_all(&mut self, mut message: Message) {
-        for (address, connection) in self.connections.iter_mut() {
-            connection.send(&self.socket, &address, &mut message);
+        for (address, connection) in &mut self.connections {
+            connection.send(&self.socket, address, &mut message);
         }
     }
 
@@ -110,7 +110,7 @@ impl NetResource {
         }
     }
 
-    pub fn is_server(&self) -> bool {
+    pub const fn is_server(&self) -> bool {
         return self.is_server;
     }
 }
@@ -224,11 +224,11 @@ impl NetConnection {
         }
     }
 
-    pub fn get_status(&self) -> &NetConnectionStatus {
+    pub const fn get_status(&self) -> &NetConnectionStatus {
         return &self.status;
     }
 
-    pub fn is_connected(&self) -> bool {
+    pub const fn is_connected(&self) -> bool {
         return match self.status {
             NetConnectionStatus::Connected => true,
             NetConnectionStatus::Disconnected(..) => false,
