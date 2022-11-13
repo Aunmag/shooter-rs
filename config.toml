@@ -1,0 +1,23 @@
+[display]
+fullscreen = true
+window_size_x = 800
+window_size_y = 800
+v_sync = false
+
+[controls]
+mouse_sensitivity = 0.003
+
+[net]
+message_resend_interval = "300ms"
+
+[net.server]
+port = 2001
+sync_interval = "40ms" # 25 Hz
+
+[net.client]
+join = "127.0.0.1:2001" # TODO: chane tihs
+
+[misc]
+lock_cursor = true
+show_ghost = true # TODO: set to false
+with_stress_test = true # TODO: set to false
