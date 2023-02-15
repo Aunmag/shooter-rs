@@ -51,6 +51,6 @@ pub fn player(
             .actions
             .set(ActorActions::ATTACK, mouse.pressed(MouseButton::Left));
 
-        actor.rotation = rotation;
+        actor.look_at += rotation;
     }
 }

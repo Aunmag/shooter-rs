@@ -7,7 +7,7 @@ use serde::Serialize;
 pub struct Actor {
     pub config: &'static ActorConfig,
     pub actions: ActorActions,
-    pub rotation: f32,
+    pub look_at: f32,
 }
 
 #[derive(Serialize, Deserialize, Debug, Copy, Clone)]
@@ -20,6 +20,7 @@ pub struct ActorConfig {
     pub sprite: &'static str,
     pub sprite_offset: SpriteOffset,
     pub movement_velocity: f32,
+    pub rotation_velocity: f32,
     pub resistance: f32,
     pub radius: f32,
     pub mass: f32,
@@ -42,7 +43,7 @@ impl Actor {
         return Self {
             config,
             actions: ActorActions::empty(),
-            rotation: 0.0,
+            look_at: 0.0,
         };
     }
 }
@@ -51,7 +52,8 @@ impl ActorConfig {
     pub const HUMAN: &'static Self = &Self {
         sprite: "actors/human/image.png",
         sprite_offset: SpriteOffset::new(None, Some(9.0)),
-        movement_velocity: 2.0,
+        movement_velocity: 2.5,
+        rotation_velocity: 8.0,
         resistance: 8000.0,
         radius: 0.25,
         mass: 80_000.0,
@@ -62,6 +64,7 @@ impl ActorConfig {
         sprite: "actors/zombie/image.png",
         sprite_offset: SpriteOffset::new(None, Some(6.5)),
         movement_velocity: Self::HUMAN.movement_velocity * 0.4,
+        rotation_velocity: Self::HUMAN.rotation_velocity * 0.4,
         resistance: Self::HUMAN.resistance * 0.4,
         radius: 0.21,
         mass: 70_000.0,

@@ -22,7 +22,7 @@
     clippy::multiple_crate_versions,
     clippy::needless_return,
     clippy::too_many_arguments,
-    clippy::type_complexity,
+    clippy::type_complexity
 )]
 
 mod command;

@@ -13,7 +13,7 @@ use bevy::prelude::Transform;
 use bevy::prelude::With;
 use rand::Rng;
 use rand_pcg::Pcg32;
-use std::f64::consts::FRAC_PI_8;
+use std::f32::consts::FRAC_PI_8;
 
 const CHANGE_MOVEMENT_PROBABILITY: f64 = 1.0;
 const TURN_PROBABILITY: f64 = 2.0;
@@ -44,12 +44,10 @@ pub fn ai(
             let position = transform.translation.xy();
 
             if position.is_shorter_than(MAX_DISTANCE_FROM_CENTER) {
-                actor.rotation = randomizer.gen_range(-FRAC_PI_8..FRAC_PI_8) as f32;
+                actor.look_at += randomizer.gen_range(-FRAC_PI_8..FRAC_PI_8);
             } else {
-                actor.rotation = math::angle_difference(position.direction(), transform.rotation.z);
+                actor.look_at += math::angle_difference(position.direction(), transform.rotation.z);
             }
-        } else {
-            actor.rotation = 0.0;
         }
     }
 }
