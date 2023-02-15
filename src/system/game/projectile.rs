@@ -78,9 +78,8 @@ fn find_obstacle(
 
         let obstacle = transform.translation.xy();
         let contact = obstacle.project_on(projectaile);
-        let contact_distance = obstacle.distance_squared(contact);
 
-        if collision.radius * collision.radius > contact_distance {
+        if (obstacle - contact).is_shorter_than(collision.radius) {
             let tail_distance = obstacle.distance_squared(projectaile.1);
 
             if result.map_or(true, |o| o.3 > tail_distance) {

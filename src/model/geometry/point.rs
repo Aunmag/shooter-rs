@@ -43,7 +43,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_project_on() {
+    fn test_project_on_line_segment() {
         let line = (Vec2::new(37.0, 84.0), Vec2::new(63.0, 24.0));
         assert_eq!(Vec2::new(38.0, 93.0).project_on(&line), line.0);
         assert_eq!(Vec2::new(53.0, 11.0).project_on(&line), line.1);
@@ -51,10 +51,7 @@ mod tests {
             Vec2::new(92.0, 82.0).project_on(&line).round(),
             Vec2::new(46.0, 62.0),
         );
-    }
 
-    #[test]
-    fn test_project_on_zero_size_line() {
         let line = (Vec2::new(1.0, 2.0), Vec2::new(1.0, 2.0));
         assert_eq!(Vec2::new(4.0, 77.0).project_on(&line), line.0);
     }

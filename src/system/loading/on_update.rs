@@ -22,7 +22,11 @@ pub fn on_update(
 
     if is_loaded {
         loading_assets.assets.clear();
-        state.set(AppState::Game).unwrap();
+
+        if let Err(error) = state.set(AppState::Game) {
+            log::error!("Failed to set state: {:?}", error);
+        }
+
         // TODO: remove resource `LoadingAssets`
     }
 }

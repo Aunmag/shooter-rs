@@ -79,7 +79,7 @@ impl Command for ActorSet {
                     color,
                     ..Default::default()
                 },
-                transform: self.position.to_transform(LAYER_ACTOR),
+                transform: self.position.as_transform(LAYER_ACTOR),
                 texture,
                 ..Default::default()
             })

@@ -15,13 +15,13 @@ pub fn projectile_hit(
 ) {
     let time = time.time_since_startup();
 
-    while let Some((entity, force, spin)) = hits.pop() {
+    while let Some((entity, force, force_angular)) = hits.pop() {
         let momentum = force.length();
 
         if let Ok((mut inertia, mut health)) = entities.get_mut(entity) {
             inertia.push(
                 force * Projectile::PUSH_FACTOR,
-                momentum * spin * Projectile::PUSH_FACTOR_SPIN,
+                momentum * force_angular * Projectile::PUSH_FACTOR_ANGULAR,
                 true,
                 false,
             );

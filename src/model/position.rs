@@ -20,9 +20,9 @@ impl Position {
     }
 
     // TODO: impl trait
-    pub fn to_transform(&self, z: f32) -> Transform {
+    pub fn as_transform(&self, z: f32) -> Transform {
         let mut transform = Transform::from_xyz(self.x, self.y, z);
-        transform.rotate(self.to_quaternion());
+        transform.rotate(self.as_quaternion());
         transform.scale.x = 1.0 / PIXELS_PER_METER;
         transform.scale.y = 1.0 / PIXELS_PER_METER;
         transform.scale.z = 1.0;
@@ -30,7 +30,7 @@ impl Position {
     }
 
     // TODO: impl trait
-    pub fn to_quaternion(&self) -> Quat {
+    pub fn as_quaternion(&self) -> Quat {
         return Quat::from_rotation_z(self.direction);
     }
 

@@ -11,8 +11,8 @@ pub fn inertia(mut query: Query<(&mut Transform, &mut Inertia)>, time: Res<Time>
     for (mut transform, mut inertia) in query.iter_mut() {
         transform.translation.x += inertia.velocity.x * delta;
         transform.translation.y += inertia.velocity.y * delta;
-        transform.rotate(Quat::from_rotation_z(inertia.spinning * delta));
+        transform.rotate(Quat::from_rotation_z(inertia.velocity_angular * delta));
         inertia.velocity *= 1.0 - delta * Inertia::DRAG;
-        inertia.spinning *= 1.0 - delta * Inertia::DRAG_ANGULAR;
+        inertia.velocity_angular *= 1.0 - delta * Inertia::DRAG_ANGULAR;
     }
 }

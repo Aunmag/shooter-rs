@@ -11,6 +11,7 @@ use crate::data::WORLD_SIZE_HALF;
 use crate::data::WORLD_SIZE_VISUAL;
 use crate::model::Position;
 use crate::resource::GameType;
+use crate::util::ext::Vec2Ext;
 use bevy::asset::AssetServer;
 use bevy::asset::Handle;
 use bevy::math::Vec2;
@@ -105,13 +106,7 @@ fn spawn_bluffs(commands: &mut Commands, assets: &AssetServer) {
 
 fn spawn_trees(commands: &mut Commands, assets: &AssetServer) {
     let mut randomizer = Pcg32::seed_from_u64(100);
-
-    // TODO: simplify
-    let trees_quantity = if TREES_QUANTITY >= 0.0 {
-        TREES_QUANTITY.abs().round() as usize
-    } else {
-        0
-    };
+    let trees_quantity = f32::max(0.0, TREES_QUANTITY) as usize;
 
     let textures = [
         assets.get_handle("terrain/tree_0.png"),
@@ -160,7 +155,7 @@ fn spawn_sprite(
     texture: Handle<Image>,
 ) {
     commands.spawn_bundle(SpriteBundle {
-        transform: Position::new(x, y, direction).to_transform(z),
+        transform: Position::new(x, y, direction).as_transform(z),
         texture,
         ..Default::default()
     });
@@ -171,9 +166,9 @@ fn is_position_free(position: Vec2, occupied_positions: &[Vec2]) -> bool {
         return false;
     }
 
-    return !occupied_positions
+    return occupied_positions
         .iter()
-        .any(|p| p.distance_squared(position) < TREE_BUFFER_ZONE * TREE_BUFFER_ZONE);
+        .all(|p| (*p - position).is_longer_than(TREE_BUFFER_ZONE));
 }
 
 fn is_position_on_bluff(n: f32) -> bool {

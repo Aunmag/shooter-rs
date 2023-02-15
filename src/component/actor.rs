@@ -69,11 +69,11 @@ impl ActorConfig {
     };
 }
 
-impl Into<&'static ActorConfig> for ActorType {
-    fn into(self) -> &'static ActorConfig {
-        return match self {
-            Self::Human => ActorConfig::HUMAN,
-            Self::Zombie => ActorConfig::ZOMBIE,
+impl From<ActorType> for &'static ActorConfig {
+    fn from(actor_type: ActorType) -> Self {
+        return match actor_type {
+            ActorType::Human => ActorConfig::HUMAN,
+            ActorType::Zombie => ActorConfig::ZOMBIE,
         };
     }
 }

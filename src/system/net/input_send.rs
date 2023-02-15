@@ -13,7 +13,7 @@ use bevy::prelude::With;
 use std::time::Duration;
 
 /// 25 Hz
-const DIRECTION_SEND_INTERVAL_ACTIVE: Duration = Duration::from_millis(40); // TODO: from server
+const DIRECTION_SEND_INTERVAL_ACTIVE: Duration = Duration::from_millis(40); // TODO: get from server
 
 /// 10 Hz
 const DIRECTION_SEND_INTERVAL_PASSIVE: Duration = Duration::from_millis(100);
@@ -48,13 +48,11 @@ pub fn input_send(
                 direction: current.direction,
             });
         } else if current.direction != previous.direction {
-            let interval;
-
-            if current.actions.is_empty() {
-                interval = DIRECTION_SEND_INTERVAL_PASSIVE;
+            let interval = if current.actions.is_empty() {
+                DIRECTION_SEND_INTERVAL_PASSIVE
             } else {
-                interval = DIRECTION_SEND_INTERVAL_ACTIVE;
-            }
+                DIRECTION_SEND_INTERVAL_ACTIVE
+            };
 
             if current.time.saturating_sub(previous.time) > interval {
                 message = Some(Message::ClientInputDirection {

@@ -50,10 +50,10 @@ pub fn weapon(
 fn deviate_velocity(randomizer: &mut Pcg32, velocity: f32) -> f32 {
     let min = 1.0 - VELOCITY_DEVIATION_FACTOR;
     let max = 1.0 + VELOCITY_DEVIATION_FACTOR;
-    return velocity * randomizer.gen_range(min..max) as f32;
+    return velocity * randomizer.gen_range(min..max);
 }
 
 fn deviate_direction(randomizer: &mut Pcg32, direction: f32) -> f32 {
     let deviation = DIRECTION_DEVIATION;
-    return direction + randomizer.gen_range(-deviation..deviation) as f32;
+    return direction + randomizer.gen_range(-deviation..deviation);
 }

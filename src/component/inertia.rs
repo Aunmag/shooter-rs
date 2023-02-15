@@ -5,7 +5,7 @@ use bevy::math::Vec2;
 pub struct Inertia {
     pub mass: f32,
     pub velocity: Vec2,
-    pub spinning: f32,
+    pub velocity_angular: f32,
 }
 
 impl Inertia {
@@ -18,7 +18,7 @@ impl Inertia {
         return Self {
             mass,
             velocity: Vec2::new(0.0, 0.0),
-            spinning: 0.0,
+            velocity_angular: 0.0,
         };
     }
 
@@ -56,7 +56,7 @@ impl Inertia {
         }
 
         self.velocity += force;
-        self.spinning += force_angular;
+        self.velocity_angular += force_angular;
     }
 
     pub fn get_inverse_mass(&self) -> f32 {

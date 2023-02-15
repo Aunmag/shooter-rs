@@ -148,15 +148,13 @@ impl NetConnection {
 
     pub fn send(&mut self, socket: &UdpSocket, address: &SocketAddr, message: &mut Message) {
         if self.is_connected() {
-            let id;
-
-            if message.has_id() {
+            let id = if message.has_id() {
                 let generated_id = self.generate_message_id();
                 message.set_id(generated_id);
-                id = Some(generated_id);
+                Some(generated_id)
             } else {
-                id = None;
-            }
+                None
+            };
 
             let encoded = message.encode();
 
