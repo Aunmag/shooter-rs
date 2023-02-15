@@ -57,6 +57,10 @@ pub fn actor(
             * actor.config.movement_velocity
             * time_delta;
 
+        if actor.actions.contains(ActorActions::SPRINT) {
+            movement *= actor.config.sprint_factor;
+        }
+
         inertia.push(movement.xy(), 0.0, false, true);
     }
 }

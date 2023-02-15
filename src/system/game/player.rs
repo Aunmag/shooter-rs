@@ -49,6 +49,10 @@ pub fn player(
 
         actor
             .actions
+            .set(ActorActions::SPRINT, keyboard.pressed(KeyCode::LShift));
+
+        actor
+            .actions
             .set(ActorActions::ATTACK, mouse.pressed(MouseButton::Left));
 
         actor.look_at += rotation;
