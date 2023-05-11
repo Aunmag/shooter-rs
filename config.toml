@@ -15,7 +15,7 @@ port = 2001
 sync_interval = "40ms" # 25 Hz
 
 [net.client]
-join = "127.0.0.1:2001" # TODO: chane tihs
+join = "127.0.0.1:2001" # TODO: change this
 
 [misc]
 lock_cursor = true

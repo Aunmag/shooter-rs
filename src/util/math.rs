@@ -1,5 +1,7 @@
+use bevy::prelude::Vec2;
 use std::f32::consts::PI;
 use std::f32::consts::TAU;
+use std::ops::Neg;
 
 pub fn angle_difference(a: f32, b: f32) -> f32 {
     let difference = (b - a) % TAU;
@@ -11,6 +13,24 @@ pub fn angle_difference(a: f32, b: f32) -> f32 {
     } else {
         return difference;
     }
+}
+
+pub fn find_meet_point(
+    origin_position: Vec2,
+    origin_velocity: Vec2,
+    target_position: Vec2,
+    target_velocity: Vec2,
+) -> Vec2 {
+    if target_velocity.length_squared() == 0.0 {
+        return target_position;
+    }
+
+    let origin_velocity_opposite = origin_velocity.length() * target_velocity.normalize().neg();
+    let distance = (target_position - origin_position).length_squared();
+    let velocity = (target_velocity - origin_velocity_opposite).length_squared();
+    let advance = (distance / velocity).sqrt();
+
+    return target_velocity * advance + target_position;
 }
 
 #[cfg(test)]

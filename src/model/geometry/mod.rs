@@ -1,6 +1,8 @@
+mod line;
 mod line_segment;
 mod point;
 
+pub use self::line::*;
 pub use self::line_segment::*;
 pub use self::point::*;
 

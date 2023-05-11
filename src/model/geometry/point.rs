@@ -3,9 +3,18 @@ use crate::model::geometry::line_segment::LineSegmentTrait;
 use crate::model::geometry::Geometry;
 use crate::model::geometry::GeometryDistance;
 use crate::model::geometry::GeometryProjection;
+use crate::model::geometry::Line;
 use bevy::math::Vec2;
 
 impl Geometry for Vec2 {}
+
+impl GeometryProjection<Line> for Vec2 {
+    /// NOTE: Line direction must be normalized
+    fn project_on(self, l: &Line) -> Vec2 {
+        debug_assert!(l.direction.is_normalized(), "Direction must be normalized");
+        return l.origin + l.direction * l.direction.dot(self - l.origin);
+    }
+}
 
 impl GeometryProjection<LineSegment> for Vec2 {
     fn project_on(self, l: &LineSegment) -> Vec2 {
@@ -29,6 +38,12 @@ impl GeometryProjection<LineSegment> for Vec2 {
         }
 
         return v + t * (u - v);
+    }
+}
+
+impl GeometryDistance<Line> for Vec2 {
+    fn distance_squared(&self, l: &Line) -> f32 {
+        return Vec2::distance_squared(*self, self.project_on(l));
     }
 }
 

@@ -1,4 +1,4 @@
-use crate::command::ActorAiSet;
+use crate::command::ActorBotSet;
 use crate::command::ActorSet;
 use crate::component::ActorConfig;
 use crate::model::Position;
@@ -17,6 +17,7 @@ pub struct StressTestPlugin;
 impl Plugin for StressTestPlugin {
     fn build(&self, app: &mut App) {
         log::info!("Starting with StressTestPlugin plugin");
+        // TODO: run on update
         app.add_plugin(FrameTimeDiagnosticsPlugin::default())
             .add_plugin(EntityCountDiagnosticsPlugin::default())
             .add_system(system);
@@ -52,7 +53,7 @@ fn spawn_actors(count: usize, commands: &mut Commands) {
             is_ghost: false,
         });
 
-        commands.add(ActorAiSet(entity));
+        commands.add(ActorBotSet(entity));
     }
 
     log::info!("Spawned +{} entities", count)

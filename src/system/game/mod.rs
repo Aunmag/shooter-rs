@@ -1,5 +1,4 @@
 mod actor;
-mod ai;
 mod camera;
 mod collision_find;
 mod collision_resolve;
@@ -15,7 +14,6 @@ mod terrain;
 mod weapon;
 
 pub use self::actor::*;
-pub use self::ai::*;
 pub use self::camera::*;
 pub use self::collision_find::*;
 pub use self::collision_resolve::*;

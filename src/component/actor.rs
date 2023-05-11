@@ -10,7 +10,7 @@ pub struct Actor {
     pub look_at: f32,
 }
 
-#[derive(Serialize, Deserialize, Debug, Copy, Clone)]
+#[derive(Serialize, Deserialize, Debug, Copy, Clone, PartialEq, Eq)]
 pub enum ActorType {
     Human,
     Zombie,

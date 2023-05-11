@@ -1,5 +1,5 @@
 mod actor;
-mod ai;
+mod bot;
 mod collision;
 mod health;
 mod inertia;
@@ -10,7 +10,7 @@ mod terrain;
 mod weapon;
 
 pub use self::actor::*;
-pub use self::ai::*;
+pub use self::bot::*;
 pub use self::collision::*;
 pub use self::health::*;
 pub use self::inertia::*;

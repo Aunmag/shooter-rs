@@ -1,4 +1,4 @@
-use crate::command::ActorAiSet;
+use crate::command::ActorBotSet;
 use crate::command::ActorPlayerSet;
 use crate::command::ActorSet;
 use crate::command::CursorLock;
@@ -74,7 +74,7 @@ fn spawn_zombie(commands: &mut Commands, position_x: f32) {
         is_ghost: false,
     });
 
-    commands.add(ActorAiSet(entity));
+    commands.add(ActorBotSet(entity));
 }
 
 // TODO: maybe render bluff corner as tile map
