@@ -7,6 +7,7 @@ use crate::util;
 use crate::util::ext::Vec2Ext;
 use crate::util::Timer;
 use bevy::ecs::system::Res;
+use bevy::ecs::system::Resource;
 use bevy::math::Vec3Swizzles;
 use bevy::prelude::Entity;
 use bevy::prelude::Query;
@@ -23,6 +24,7 @@ use std::time::Duration;
 const RUN_INTERVAL: Duration = Duration::from_millis(200);
 const DETOUR_DISTANCE_MIN: f32 = 2.0;
 
+#[derive(Resource)]
 pub struct TargetUpdateData {
     timer: Timer,
 }
@@ -41,7 +43,7 @@ pub fn target_update(
     mut data: ResMut<TargetUpdateData>,
     time: Res<Time>,
 ) {
-    if !data.timer.next_if_done(time.time_since_startup()) {
+    if !data.timer.next_if_done(time.elapsed()) {
         return;
     }
 
@@ -52,7 +54,7 @@ pub fn target_update(
             .map(|a| (a.0.translation.xy(), a.1.velocity))
         {
             let bot_position = bot_transform.translation.xy();
-            let mut rng = Pcg32::seed_from_u64(u64::from(entity.id()));
+            let mut rng = Pcg32::seed_from_u64(u64::from(entity.index()));
             let mut target_final = util::math::find_meet_point(
                 bot_position,
                 bot_inertia.velocity,

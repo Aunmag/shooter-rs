@@ -34,7 +34,7 @@ impl Command for ActorPlayerSet {
         let mut ghost = None;
 
         if is_client && world.config().misc.show_ghost {
-            let entity = world.spawn().id();
+            let entity = world.spawn_empty().id();
 
             ActorSet {
                 entity,

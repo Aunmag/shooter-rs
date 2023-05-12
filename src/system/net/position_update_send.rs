@@ -3,6 +3,7 @@ use crate::model::Position;
 use crate::resource::Message;
 use crate::resource::NetResource;
 use crate::util::Timer;
+use bevy::ecs::system::Resource;
 use bevy::prelude::Entity;
 use bevy::prelude::Query;
 use bevy::prelude::Res;
@@ -13,6 +14,7 @@ use bevy::prelude::With;
 use std::collections::HashMap;
 use std::time::Duration;
 
+#[derive(Resource)]
 pub struct PositionUpdateSendData {
     timer: Timer,
     cache: HashMap<u32, Position>,
@@ -37,21 +39,25 @@ pub fn position_update_send(
         return;
     }
 
-    if !data.timer.next_if_done(time.time_since_startup()) {
+    if !data.timer.next_if_done(time.elapsed()) {
         return;
     }
 
     for (entity, transform) in query.iter() {
         let position = Position::from(transform);
-        let entity_id = entity.id();
+        let entity_index = entity.index();
 
-        if data.cache.get(&entity_id).map_or(true, |p| p != &position) {
+        if data
+            .cache
+            .get(&entity_index)
+            .map_or(true, |p| p != &position)
+        {
             net.send_unreliably_to_all(&Message::PositionUpdate {
-                entity_id,
+                entity_index,
                 position,
             });
 
-            data.cache.insert(entity_id, position);
+            data.cache.insert(entity_index, position);
         }
     }
 }

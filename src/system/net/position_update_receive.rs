@@ -17,11 +17,11 @@ pub fn position_update_receive(
     config: Res<Config>,
     time: Res<Time>,
 ) {
-    let time = time.time_since_startup();
+    let time = time.elapsed();
     let sync_interval = config.net.server.sync_interval; // TODO: don't get from config, get from server instead
 
-    while let Some((entity_id, update)) = updates.pop() {
-        let entity = Entity::from_raw(entity_id);
+    while let Some((entity_index, update)) = updates.pop() {
+        let entity = Entity::from_raw(entity_index);
         let mut ghost = None;
 
         if let Ok((mut transform, mut interpolation, player)) = query.get_mut(entity) {

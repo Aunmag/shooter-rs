@@ -24,7 +24,7 @@ impl Command for ClientJoin {
             {
                 messages.push(Message::ActorSpawn {
                     id: 0,
-                    entity_id: entity.id(),
+                    entity_index: entity.index(),
                     actor_type: actor.config.actor_type,
                     position: transform.into(),
                 });
@@ -36,7 +36,7 @@ impl Command for ClientJoin {
             }
         }
 
-        let entity = world.spawn().id();
+        let entity = world.spawn_empty().id();
 
         ActorSet {
             entity,
@@ -51,7 +51,7 @@ impl Command for ClientJoin {
             &self.0,
             Message::ActorGrant {
                 id: 0,
-                entity_id: entity.id(),
+                entity_index: entity.index(),
             },
         );
         net.attach_entity(&self.0, entity);

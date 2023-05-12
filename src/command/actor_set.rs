@@ -40,13 +40,13 @@ impl Command for ActorSet {
                 .resource_mut::<NetResource>()
                 .send_to_all(Message::ActorSpawn {
                     id: 0,
-                    entity_id: self.entity.id(),
+                    entity_index: self.entity.index(),
                     actor_type: self.config.actor_type,
                     position: self.position,
                 });
         }
 
-        let now = world.resource::<Time>().time_since_startup();
+        let now = world.resource::<Time>().elapsed();
         let texture = world
             .resource::<AssetServer>()
             .get_handle(self.config.sprite);
@@ -73,7 +73,7 @@ impl Command for ActorSet {
         // TODO: reduce components on client
 
         entity_mut
-            .insert_bundle(SpriteBundle {
+            .insert(SpriteBundle {
                 sprite: Sprite {
                     anchor,
                     color,

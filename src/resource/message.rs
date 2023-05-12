@@ -4,6 +4,8 @@ use bincode::Options;
 use serde::Deserialize;
 use serde::Serialize;
 
+// TODO: move to model
+
 pub const MESSAGE_SIZE_MAX: usize = std::mem::size_of::<Message>();
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -28,16 +30,16 @@ pub enum Message {
     },
     ActorSpawn {
         id: u16,
-        entity_id: u32,
+        entity_index: u32,
         actor_type: ActorType,
         position: Position,
     },
     ActorGrant {
         id: u16,
-        entity_id: u32,
+        entity_index: u32,
     },
     PositionUpdate {
-        entity_id: u32,
+        entity_index: u32,
         position: Position,
     },
     ProjectileSpawn {
@@ -49,7 +51,7 @@ pub enum Message {
     },
     EntityDelete {
         id: u16,
-        entity_id: u32,
+        entity_index: u32,
     },
 }
 

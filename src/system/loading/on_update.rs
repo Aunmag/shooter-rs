@@ -13,7 +13,7 @@ pub fn on_update(
 ) {
     let mut is_loaded = true;
 
-    for asset in &loading_assets.assets {
+    for asset in loading_assets.iter() {
         if let LoadState::Loading = asset_server.get_load_state(asset) {
             is_loaded = false;
             break;
@@ -21,7 +21,7 @@ pub fn on_update(
     }
 
     if is_loaded {
-        loading_assets.assets.clear();
+        loading_assets.clear();
 
         if let Err(error) = state.set(AppState::Game) {
             log::error!("Failed to set state: {:?}", error);

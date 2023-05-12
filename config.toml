@@ -18,6 +18,6 @@ sync_interval = "40ms" # 25 Hz
 join = "127.0.0.1:2001" # TODO: change this
 
 [misc]
-lock_cursor = true
+grab_cursor = true
 show_ghost = true # TODO: set to false
 with_stress_test = true # TODO: set to false

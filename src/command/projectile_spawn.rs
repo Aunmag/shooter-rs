@@ -37,7 +37,7 @@ impl Command for ProjectileSpawn {
                     position: self.position,
                     velocity: self.velocity,
                     acceleration_factor: self.acceleration_factor,
-                    shooter_id: self.shooter.map(Entity::id),
+                    shooter_id: self.shooter.map(Entity::index),
                 });
         }
 
@@ -46,7 +46,7 @@ impl Command for ProjectileSpawn {
             ProjectileConfig {
                 acceleration_factor: self.acceleration_factor,
             },
-            world.resource::<Time>().time_since_startup(),
+            world.resource::<Time>().elapsed(),
             Vec2::new(self.position.x, self.position.y),
             Vec2::new(self.velocity * sin, self.velocity * cos),
             self.shooter,
@@ -65,8 +65,7 @@ impl Command for ProjectileSpawn {
             .add(ProjectileMaterial { image });
 
         world
-            .spawn()
-            .insert_bundle(MaterialMesh2dBundle {
+            .spawn(MaterialMesh2dBundle {
                 transform: Transform {
                     translation: Vec3::new(self.position.x, self.position.y, LAYER_PROJECTILE),
                     scale: Vec3::new(0.0, 0.0, 1.0),

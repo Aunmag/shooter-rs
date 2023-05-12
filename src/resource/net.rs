@@ -1,5 +1,6 @@
 use crate::resource::Message;
 use crate::resource::NetConfig;
+use bevy::ecs::system::Resource;
 use bevy::prelude::Entity;
 use std::cmp::Ordering;
 use std::collections::HashMap;
@@ -8,6 +9,7 @@ use std::net::UdpSocket;
 use std::time::Duration;
 use std::time::Instant;
 
+#[derive(Resource)]
 pub struct NetResource {
     pub socket: UdpSocket,
     pub connections: HashMap<SocketAddr, NetConnection>,

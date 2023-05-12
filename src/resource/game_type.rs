@@ -1,6 +1,7 @@
 use crate::model::Arguments;
+use bevy::ecs::system::Resource;
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, Resource)]
 pub enum GameType {
     Server,
     Client,

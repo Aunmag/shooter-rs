@@ -1,6 +1,7 @@
 use bevy::asset::HandleUntyped;
+use bevy::ecs::system::Resource;
+use derive_more::Deref;
+use derive_more::DerefMut;
 
-#[derive(Default)]
-pub struct LoadingAssets {
-    pub assets: Vec<HandleUntyped>,
-}
+#[derive(Default, Resource, Deref, DerefMut)]
+pub struct LoadingAssets(Vec<HandleUntyped>);

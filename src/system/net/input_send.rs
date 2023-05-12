@@ -4,6 +4,7 @@ use crate::component::Player;
 use crate::resource::Message;
 use crate::resource::NetResource;
 use crate::util::ext::TransformExt;
+use bevy::ecs::system::Resource;
 use bevy::prelude::Query;
 use bevy::prelude::Res;
 use bevy::prelude::ResMut;
@@ -18,7 +19,7 @@ const DIRECTION_SEND_INTERVAL_ACTIVE: Duration = Duration::from_millis(40); // T
 /// 10 Hz
 const DIRECTION_SEND_INTERVAL_PASSIVE: Duration = Duration::from_millis(100);
 
-#[derive(Default)]
+#[derive(Default, Resource)]
 pub struct InputSendData {
     time: Duration,
     actions: ActorActions,
@@ -33,7 +34,7 @@ pub fn input_send(
 ) {
     if let Some((actor, transform)) = query.iter().next() {
         let current = InputSendData {
-            time: time.time_since_startup(),
+            time: time.elapsed(),
             actions: actor.actions,
             direction: transform.direction(),
         };

@@ -1,5 +1,6 @@
 use anyhow::Context;
 use anyhow::Result;
+use bevy::ecs::system::Resource;
 use bevy::window::PresentMode;
 use bevy::window::WindowMode;
 use serde::Deserialize;
@@ -8,7 +9,7 @@ use std::time::Duration;
 
 // TODO: logging config
 
-#[derive(Clone, Deserialize, Debug)]
+#[derive(Clone, Deserialize, Debug, Resource)]
 pub struct Config {
     pub display: DisplayConfig,
     pub controls: ControlsConfig,
@@ -51,7 +52,7 @@ pub struct ControlsConfig {
 
 #[derive(Clone, Deserialize, Debug)]
 pub struct MiscConfig {
-    pub lock_cursor: bool,
+    pub grab_cursor: bool,
     pub show_ghost: bool,
     pub with_stress_test: bool,
 }

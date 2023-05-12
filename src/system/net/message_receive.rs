@@ -161,26 +161,31 @@ fn on_message_as_client(
             commands.add(Start);
         }
         Message::ActorSpawn {
-            entity_id,
+            entity_index,
             actor_type,
             position,
             ..
         } => {
             commands.add(ActorSet {
-                entity: converter.to_internal(entities, entity_id),
+                entity: converter.to_internal(entities, entity_index),
                 config: actor_type.into(),
                 position,
                 is_ghost: false,
             });
         }
-        Message::ActorGrant { entity_id, .. } => {
-            commands.add(ActorPlayerSet(converter.to_internal(entities, entity_id)));
+        Message::ActorGrant { entity_index, .. } => {
+            commands.add(ActorPlayerSet(
+                converter.to_internal(entities, entity_index),
+            ));
         }
         Message::PositionUpdate {
-            entity_id,
+            entity_index,
             position,
         } => {
-            position_updates.push((converter.to_internal(entities, entity_id).id(), position));
+            position_updates.push((
+                converter.to_internal(entities, entity_index).index(),
+                position,
+            ));
         }
         Message::ProjectileSpawn {
             position,
@@ -196,8 +201,8 @@ fn on_message_as_client(
                 shooter: shooter_id.map(|id| converter.to_internal(entities, id)),
             });
         }
-        Message::EntityDelete { entity_id, .. } => {
-            commands.add(EntityDelete(converter.to_internal(entities, entity_id)));
+        Message::EntityDelete { entity_index, .. } => {
+            commands.add(EntityDelete(converter.to_internal(entities, entity_index)));
         }
         _ => {}
     }

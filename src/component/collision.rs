@@ -26,7 +26,7 @@ impl Collision {
 }
 
 pub struct CollisionSolution {
-    pub entity_id: u32,
+    pub entity_index: u32,
     pub shift: Vec2,
     pub push: Vec2,
 }

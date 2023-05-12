@@ -13,7 +13,7 @@ pub fn projectile_hit(
     mut entities: Query<(&mut Inertia, &mut Health)>,
     time: Res<Time>,
 ) {
-    let time = time.time_since_startup();
+    let time = time.elapsed();
 
     while let Some((entity, force, force_angular)) = hits.pop() {
         let momentum = force.length();

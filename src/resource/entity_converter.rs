@@ -1,7 +1,8 @@
 use bevy::ecs::entity::Entities;
+use bevy::ecs::system::Resource;
 use bevy::prelude::Entity;
 
-#[derive(Default)]
+#[derive(Default, Resource)]
 pub struct EntityConverter {
     data: Vec<Record>,
 }

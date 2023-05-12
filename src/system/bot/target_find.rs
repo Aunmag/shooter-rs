@@ -4,6 +4,7 @@ use crate::component::Inertia;
 use crate::util;
 use crate::util::ext::IteratorExt;
 use crate::util::Timer;
+use bevy::ecs::system::Resource;
 use bevy::math::Vec2;
 use bevy::math::Vec3Swizzles;
 use bevy::prelude::Entity;
@@ -16,6 +17,7 @@ use std::time::Duration;
 
 const RUN_INTERVAL: Duration = Duration::from_secs(2);
 
+#[derive(Resource)]
 pub struct TargetFindData {
     timer: Timer,
 }
@@ -34,7 +36,7 @@ pub fn target_find(
     mut data: ResMut<TargetFindData>,
     time: Res<Time>,
 ) {
-    if !data.timer.next_if_done(time.time_since_startup()) {
+    if !data.timer.next_if_done(time.elapsed()) {
         return;
     }
 

@@ -26,7 +26,7 @@ pub fn projectile(
     time: Res<Time>,
 ) -> Vec<(Entity, Vec2, f32)> {
     let mut hits = Vec::new();
-    let t0 = time.time_since_startup();
+    let t0 = time.elapsed();
     let t1 = t0.saturating_sub(time.delta());
     let t2 = t0.saturating_sub(Duration::max(time.delta(), TIME_DELTA_FOR_RENDER));
 

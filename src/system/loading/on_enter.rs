@@ -15,7 +15,7 @@ fn load_folder_or_log(
 ) {
     match asset_server.load_folder(path) {
         Ok(assets) => {
-            loading_assets.assets.extend(assets);
+            loading_assets.extend(assets);
         }
         Err(error) => {
             log::error!("Failed to load assets folder from {}: {:?}", path, error);

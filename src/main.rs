@@ -49,15 +49,15 @@ use crate::resource::PositionUpdateResource;
 use crate::util::ext::AppExt;
 use bevy::prelude::App;
 use bevy::prelude::DefaultPlugins;
-use bevy::prelude::IntoChainSystem;
-use bevy::prelude::ParallelSystemDescriptorCoercion;
+use bevy::prelude::IntoPipeSystem;
+use bevy::prelude::IntoSystemDescriptor;
+use bevy::prelude::PluginGroup;
 use bevy::prelude::SystemSet;
 use bevy::prelude::WindowDescriptor;
-use bevy::render::texture::ImageSettings;
+use bevy::render::texture::ImagePlugin;
 use bevy::sprite::Material2dPlugin;
+use bevy::window::WindowPlugin;
 use clap::Parser;
-use rand::SeedableRng;
-use rand_pcg::Pcg32;
 
 fn main() {
     let arguments = Arguments::parse();
@@ -79,23 +79,27 @@ fn main() {
     };
 
     App::new()
-        .insert_resource(WindowDescriptor {
-            title: APP_TITLE.to_string(),
-            mode: config.display.mode(),
-            width: config.display.window_size_x,
-            height: config.display.window_size_y,
-            present_mode: config.display.present_mode(),
-            ..Default::default()
-        })
-        .insert_resource(ImageSettings::default_nearest())
-        .add_plugins(DefaultPlugins)
+        .add_plugins(DefaultPlugins
+            .set(ImagePlugin::default_nearest())
+            .set(WindowPlugin {
+                window: WindowDescriptor {
+                    title: APP_TITLE.to_string(),
+                    mode: config.display.mode(),
+                    width: config.display.window_size_x,
+                    height: config.display.window_size_y,
+                    present_mode: config.display.present_mode(),
+                    ..Default::default()
+                },
+                ..Default::default()
+            })
+        )
         .add_plugin(Material2dPlugin::<ProjectileMaterial>::default())
         .add_plugin_if(config.misc.with_stress_test, || StressTestPlugin)
         .insert_resource(net)
-        .insert_resource(Pcg32::seed_from_u64(0))
         .insert_resource(system::bot::TargetFindData::default()) // TODO: on server only
         .insert_resource(system::bot::TargetUpdateData::default()) // TODO: on server only
         .insert_resource(system::game::CollisionSystemData::default())
+        .insert_resource(system::game::WeaponData::default())
         .insert_resource(system::net::InputSendData::default()) // TODO: on client only
         .insert_resource(system::net::PositionUpdateSendData::new(config.net.server.sync_interval)) // TODO: on server only
         .insert_resource(game_type)
@@ -138,7 +142,7 @@ fn init_server_game_systems() -> SystemSet {
     use system::game::*;
     use system::net::*;
 
-    let collision = collision_find.chain(collision_resolve).label("collision");
+    let collision = collision_find.pipe(collision_resolve).label("collision");
 
     return SystemSet::on_update(AppState::Game)
         .with_system(input)
@@ -148,7 +152,7 @@ fn init_server_game_systems() -> SystemSet {
         .with_system(inertia.after(actor))
         .with_system(collision.after(inertia))
         .with_system(weapon.after("collision"))
-        .with_system(projectile.chain(projectile_hit).after("collision"))
+        .with_system(projectile.pipe(projectile_hit).after("collision"))
         .with_system(position_update_send.after("collision"))
         .with_system(message_receive)
         .with_system(connection_update)
@@ -170,7 +174,7 @@ fn init_client_game_systems() -> SystemSet {
         .with_system(actor.after(player).after(interpolation))
         .with_system(inertia.after(actor))
         .with_system(input_send.after(player).after(actor))
-        .with_system(projectile.chain(projectile_hit).after(inertia))
+        .with_system(projectile.pipe(projectile_hit).after(inertia))
         .with_system(message_receive)
         .with_system(
             position_update_receive

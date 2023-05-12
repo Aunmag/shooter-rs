@@ -16,7 +16,7 @@ impl Command for EntityDelete {
                 .resource_mut::<NetResource>()
                 .send_to_all(Message::EntityDelete {
                     id: 0,
-                    entity_id: self.0.id(),
+                    entity_index: self.0.index(),
                 });
         }
 

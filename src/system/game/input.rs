@@ -1,4 +1,4 @@
-use crate::command::CursorLock;
+use crate::command::CursorGrab;
 use bevy::app::AppExit;
 use bevy::prelude::Commands;
 use bevy::prelude::EventWriter;
@@ -17,6 +17,6 @@ pub fn input(
 
     if keyboard.just_pressed(KeyCode::Tab) {
         // TODO: hide cursor on widow click
-        commands.add(CursorLock(false));
+        commands.add(CursorGrab(false));
     }
 }

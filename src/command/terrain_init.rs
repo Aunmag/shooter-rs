@@ -17,13 +17,12 @@ impl Command for TerrainInit {
         #[allow(clippy::let_underscore_must_use)] // don't know why it must be used
         for _ in 0..Terrain::get_count().pow(2) {
             let _ = world
-                .spawn()
-                .insert(Terrain)
-                .insert_bundle(SpriteBundle {
+                .spawn(SpriteBundle {
                     transform: Position::default().as_transform(LAYER_TERRAIN),
                     texture: texture.clone(),
                     ..Default::default()
                 })
+                .insert(Terrain)
                 .id();
         }
     }

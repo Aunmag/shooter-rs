@@ -8,10 +8,12 @@ use amethyst::renderer::ImageFormat;
 use amethyst::renderer::Texture;
 use amethyst::ui::UiImage;
 use std::collections::HashMap;
+use bevy::ecs::system::Resource;
+use derive_more::Deref;
+use derive_more::DerefMut;
 
-pub struct WallpaperResource {
-    data: HashMap<Wallpaper, UiImage>,
-}
+#[derive(Resource, Deref, DerefMut)]
+pub struct WallpaperResource(HashMap<Wallpaper, UiImage>);
 
 #[derive(Hash, PartialEq, Eq, Copy, Clone, Debug)]
 pub enum Wallpaper {

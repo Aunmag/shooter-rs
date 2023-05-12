@@ -1,7 +1,7 @@
 use crate::command::ActorBotSet;
 use crate::command::ActorPlayerSet;
 use crate::command::ActorSet;
-use crate::command::CursorLock;
+use crate::command::CursorGrab;
 use crate::command::TerrainInit;
 use crate::component::ActorConfig;
 use crate::data::LAYER_BLUFF;
@@ -35,9 +35,9 @@ const TREE_FIND_POSITION_ATTEMPTS: usize = 32;
 const BLUFF_SPRITE_SIZE: f32 = 4.0;
 
 pub fn on_enter(mut commands: Commands, assets: Res<AssetServer>, game_type: Res<GameType>) {
-    commands.add(CursorLock(true));
+    commands.add(CursorGrab(true));
     commands.add(TerrainInit);
-    commands.spawn_bundle(Camera2dBundle::default());
+    commands.spawn(Camera2dBundle::default());
 
     if game_type.is_server() {
         spawn_player(&mut commands);
@@ -52,7 +52,7 @@ pub fn on_enter(mut commands: Commands, assets: Res<AssetServer>, game_type: Res
 }
 
 fn spawn_player(commands: &mut Commands) {
-    let entity = commands.spawn().id();
+    let entity = commands.spawn_empty().id();
 
     commands.add(ActorSet {
         entity,
@@ -65,7 +65,7 @@ fn spawn_player(commands: &mut Commands) {
 }
 
 fn spawn_zombie(commands: &mut Commands, position_x: f32) {
-    let entity = commands.spawn().id();
+    let entity = commands.spawn_empty().id();
 
     commands.add(ActorSet {
         entity,
@@ -105,7 +105,7 @@ fn spawn_bluffs(commands: &mut Commands, assets: &AssetServer) {
 }
 
 fn spawn_trees(commands: &mut Commands, assets: &AssetServer) {
-    let mut randomizer = Pcg32::seed_from_u64(100);
+    let mut rng = Pcg32::seed_from_u64(100);
     let trees_quantity = f32::max(0.0, TREES_QUANTITY) as usize;
 
     let textures = [
@@ -119,23 +119,17 @@ fn spawn_trees(commands: &mut Commands, assets: &AssetServer) {
 
     for _ in 0..trees_quantity {
         for _ in 0..TREE_FIND_POSITION_ATTEMPTS {
-            let position = Vec2::new(
-                randomizer.gen_range(-range..range),
-                randomizer.gen_range(-range..range),
-            );
+            let position = Vec2::new(rng.gen_range(-range..range), rng.gen_range(-range..range));
 
             if is_position_free(position, &occupied_positions) {
-                let texture = textures
-                    .choose(&mut randomizer)
-                    .unwrap_or(&textures[0])
-                    .clone();
+                let texture = textures.choose(&mut rng).unwrap_or(&textures[0]).clone();
 
                 spawn_sprite(
                     commands,
                     position.x,
                     position.y,
                     LAYER_TREE,
-                    randomizer.gen_range(0.0..TAU),
+                    rng.gen_range(0.0..TAU),
                     texture,
                 );
 
@@ -154,7 +148,7 @@ fn spawn_sprite(
     direction: f32,
     texture: Handle<Image>,
 ) {
-    commands.spawn_bundle(SpriteBundle {
+    commands.spawn(SpriteBundle {
         transform: Position::new(x, y, direction).as_transform(z),
         texture,
         ..Default::default()

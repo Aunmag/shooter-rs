@@ -13,7 +13,7 @@ pub fn interpolation(
     config: Res<Config>,
     time: Res<Time>,
 ) {
-    let time = time.time_since_startup();
+    let time = time.elapsed();
     let interpolation_duration = config.net.server.sync_interval; // TODO: don't get from config, get from server instead
 
     for (interpolation, mut transform) in query.iter_mut() {

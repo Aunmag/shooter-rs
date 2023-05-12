@@ -1,6 +1,7 @@
 use crate::component::Collision;
 use crate::component::CollisionSolution;
 use crate::component::Inertia;
+use bevy::ecs::system::Resource;
 use bevy::math::Vec2;
 use bevy::math::Vec3Swizzles;
 use bevy::prelude::Entity;
@@ -8,7 +9,7 @@ use bevy::prelude::Query;
 use bevy::prelude::ResMut;
 use bevy::prelude::Transform;
 
-#[derive(Default)]
+#[derive(Default, Resource)]
 pub struct CollisionSystemData {
     previous_solutions: usize,
 }
@@ -28,8 +29,8 @@ pub fn collision_find(
                 // TODO: maybe collision solutions would contain relative_angle
                 let relative_angle = (t2.translation - t1.translation).xy().normalize();
                 let push = Inertia::bounce(i1, i2, relative_angle);
-                append_solution(&mut solutions, e1.id(), shift, push);
-                append_solution(&mut solutions, e2.id(), -shift, -push);
+                append_solution(&mut solutions, e1.index(), shift, push);
+                append_solution(&mut solutions, e2.index(), -shift, -push);
             }
         }
     }
@@ -41,12 +42,12 @@ pub fn collision_find(
 
 fn append_solution(
     solutions: &mut Vec<CollisionSolution>,
-    entity_id: u32,
+    entity_index: u32,
     shift: Vec2,
     push: Vec2,
 ) {
     for solution in solutions.iter_mut() {
-        if solution.entity_id == entity_id {
+        if solution.entity_index == entity_index {
             solution.shift += shift;
             solution.push += push;
             return; // return if solution has found and modified
@@ -55,7 +56,7 @@ fn append_solution(
 
     // push a new one otherwise
     solutions.push(CollisionSolution {
-        entity_id,
+        entity_index,
         shift,
         push,
     });

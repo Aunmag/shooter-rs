@@ -44,7 +44,7 @@ fn system(keyboard: Res<Input<KeyCode>>, diagnostics: Res<Diagnostics>, mut comm
 
 fn spawn_actors(count: usize, commands: &mut Commands) {
     for _ in 0..count {
-        let entity = commands.spawn().id();
+        let entity = commands.spawn_empty().id();
 
         commands.add(ActorSet {
             entity,
