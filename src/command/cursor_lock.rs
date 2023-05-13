@@ -1,8 +1,10 @@
 use crate::util::ext::WorldExt;
 use bevy::ecs::system::Command;
-use bevy::prelude::Windows;
+use bevy::prelude::With;
 use bevy::prelude::World;
 use bevy::window::CursorGrabMode;
+use bevy::window::PrimaryWindow;
+use bevy::window::Window;
 
 pub struct CursorGrab(pub bool);
 
@@ -19,9 +21,12 @@ impl CursorGrab {
 impl Command for CursorGrab {
     fn write(self, world: &mut World) {
         if !self.0 || world.config().misc.grab_cursor {
-            if let Some(window) = world.resource_mut::<Windows>().get_primary_mut() {
-                window.set_cursor_grab_mode(self.get_mode());
-                window.set_cursor_visibility(!self.0);
+            for mut window in world
+                .query_filtered::<&mut Window, With<PrimaryWindow>>()
+                .iter_mut(world)
+            {
+                window.cursor.grab_mode = self.get_mode();
+                window.cursor.visible = !self.0;
             }
         }
     }

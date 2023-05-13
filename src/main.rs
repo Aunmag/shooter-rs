@@ -39,24 +39,22 @@ use crate::data::APP_TITLE;
 use crate::material::ProjectileMaterial;
 use crate::model::AppState;
 use crate::model::Arguments;
+use crate::plugin::GameClientPlugin;
+use crate::plugin::GameServerPlugin;
 use crate::plugin::StressTestPlugin;
+use crate::resource::AssetStorage;
 use crate::resource::Config;
-use crate::resource::EntityConverter;
 use crate::resource::GameType;
-use crate::resource::LoadingAssets;
 use crate::resource::NetResource;
-use crate::resource::PositionUpdateResource;
 use crate::util::ext::AppExt;
 use bevy::prelude::App;
 use bevy::prelude::DefaultPlugins;
-use bevy::prelude::IntoPipeSystem;
-use bevy::prelude::IntoSystemDescriptor;
 use bevy::prelude::PluginGroup;
-use bevy::prelude::SystemSet;
-use bevy::prelude::WindowDescriptor;
 use bevy::render::texture::ImagePlugin;
 use bevy::sprite::Material2dPlugin;
+use bevy::window::Window;
 use bevy::window::WindowPlugin;
+use bevy::window::WindowResolution;
 use clap::Parser;
 
 fn main() {
@@ -78,110 +76,53 @@ fn main() {
         }
     };
 
-    App::new()
-        .add_plugins(DefaultPlugins
-            .set(ImagePlugin::default_nearest())
-            .set(WindowPlugin {
-                window: WindowDescriptor {
-                    title: APP_TITLE.to_string(),
-                    mode: config.display.mode(),
-                    width: config.display.window_size_x,
-                    height: config.display.window_size_y,
-                    present_mode: config.display.present_mode(),
+    let mut application = App::new();
+
+    application
+        .add_plugins(
+            DefaultPlugins
+                .set(ImagePlugin::default_nearest())
+                .set(WindowPlugin {
+                    primary_window: Some(Window {
+                        title: APP_TITLE.to_string(),
+                        mode: config.display.mode(),
+                        resolution: WindowResolution::new(
+                            config.display.window_size_x,
+                            config.display.window_size_y,
+                        ),
+                        present_mode: config.display.present_mode(),
+                        ..Default::default()
+                    }),
                     ..Default::default()
-                },
-                ..Default::default()
-            })
+                }),
         )
         .add_plugin(Material2dPlugin::<ProjectileMaterial>::default())
-        .add_plugin_if(config.misc.with_stress_test, || StressTestPlugin)
+        .add_state::<AppState>()
         .insert_resource(net)
-        .insert_resource(system::bot::TargetFindData::default()) // TODO: on server only
-        .insert_resource(system::bot::TargetUpdateData::default()) // TODO: on server only
         .insert_resource(system::game::CollisionSystemData::default())
         .insert_resource(system::game::WeaponData::default())
-        .insert_resource(system::net::InputSendData::default()) // TODO: on client only
-        .insert_resource(system::net::PositionUpdateSendData::new(config.net.server.sync_interval)) // TODO: on server only
         .insert_resource(game_type)
-        .insert_resource(LoadingAssets::default())
-        .insert_resource(EntityConverter::default()) // TODO: on client only
-        .insert_resource(PositionUpdateResource::default()) // TODO: on client only
-        .insert_resource(config)
-        .add_state(AppState::Loading)
-        // loading
-        .add_system_set(
-            SystemSet::on_enter(AppState::Loading)
-                .with_system(system::loading::on_enter)
-        )
-        .add_system_set(
-            SystemSet::on_update(AppState::Loading)
-                .with_system(system::loading::on_update)
-        )
-        // game
-        .add_system_set(
-            SystemSet::on_enter(AppState::Game)
-                .with_system(system::game::on_enter)
-        )
-        .add_system_set(
-            SystemSet::on_resume(AppState::Game)
-                .with_system(system::game::on_resume)
-        )
-        .add_system_set(init_game_systems(&game_type))
-        .run();
-}
+        .insert_resource(AssetStorage::default())
+        .insert_resource(config.clone())
+        .add_state_system_enter(AppState::Loading, system::loading::on_enter)
+        .add_state_system(AppState::Loading, system::loading::on_update)
+        .add_state_system_enter(AppState::Game, system::game::on_enter);
 
-fn init_game_systems(game_type: &GameType) -> SystemSet {
-    return match game_type {
-        GameType::Server => init_server_game_systems(),
-        GameType::Client => init_client_game_systems(),
+    match game_type {
+        GameType::Server => {
+            log::info!("Starting as server");
+            application.add_plugin(GameServerPlugin::new(config.net.server.sync_interval));
+
+            if config.misc.with_stress_test {
+                log::info!("Starting with StressTestPlugin plugin");
+                application.add_plugin(StressTestPlugin);
+            }
+        }
+        GameType::Client => {
+            log::info!("Starting as client");
+            application.add_plugin(GameClientPlugin);
+        }
     };
-}
 
-fn init_server_game_systems() -> SystemSet {
-    use system::bot;
-    use system::game::*;
-    use system::net::*;
-
-    let collision = collision_find.pipe(collision_resolve).label("collision");
-
-    return SystemSet::on_update(AppState::Game)
-        .with_system(input)
-        .with_system(health)
-        .with_system(player.after(input))
-        .with_system(actor.after(player))
-        .with_system(inertia.after(actor))
-        .with_system(collision.after(inertia))
-        .with_system(weapon.after("collision"))
-        .with_system(projectile.pipe(projectile_hit).after("collision"))
-        .with_system(position_update_send.after("collision"))
-        .with_system(message_receive)
-        .with_system(connection_update)
-        .with_system(camera.after("collision"))
-        .with_system(terrain)
-        .with_system(bot::target_find)
-        .with_system(bot::target_update.after(bot::target_find))
-        .with_system(bot::target_follow.after(bot::target_update));
-}
-
-fn init_client_game_systems() -> SystemSet {
-    use system::game::*;
-    use system::net::*;
-
-    return SystemSet::on_update(AppState::Game)
-        .with_system(input)
-        .with_system(interpolation)
-        .with_system(player.after(input))
-        .with_system(actor.after(player).after(interpolation))
-        .with_system(inertia.after(actor))
-        .with_system(input_send.after(player).after(actor))
-        .with_system(projectile.pipe(projectile_hit).after(inertia))
-        .with_system(message_receive)
-        .with_system(
-            position_update_receive
-                .after(message_receive)
-                .after(inertia),
-        )
-        .with_system(connection_update)
-        .with_system(camera.after(inertia))
-        .with_system(terrain);
+    application.run();
 }

@@ -4,4 +4,4 @@ use derive_more::Deref;
 use derive_more::DerefMut;
 
 #[derive(Default, Resource, Deref, DerefMut)]
-pub struct LoadingAssets(Vec<HandleUntyped>);
+pub struct AssetStorage(Vec<HandleUntyped>);

@@ -1,32 +1,31 @@
 use crate::model::AppState;
-use crate::resource::LoadingAssets;
+use crate::resource::AssetStorage;
 use bevy::asset::LoadState;
 use bevy::prelude::AssetServer;
+use bevy::prelude::NextState;
 use bevy::prelude::Res;
 use bevy::prelude::ResMut;
-use bevy::prelude::State;
 
 pub fn on_update(
     asset_server: Res<AssetServer>,
-    mut loading_assets: ResMut<LoadingAssets>, // TODO: try without it
-    mut state: ResMut<State<AppState>>,
+    asset_storage: Res<AssetStorage>,
+    mut next_state: ResMut<NextState<AppState>>,
 ) {
-    let mut is_loaded = true;
-
-    for asset in loading_assets.iter() {
-        if let LoadState::Loading = asset_server.get_load_state(asset) {
-            is_loaded = false;
-            break;
+    for asset in asset_storage.iter() {
+        match asset_server.get_load_state(asset) {
+            LoadState::NotLoaded | LoadState::Loaded | LoadState::Unloaded => {
+                // ok
+            }
+            LoadState::Loading => {
+                return; // still loading
+            }
+            LoadState::Failed => {
+                if let Some(path) = asset_server.get_handle_path(asset) {
+                    log::error!("Failed to asset from {}", path.path().display());
+                }
+            }
         }
     }
 
-    if is_loaded {
-        loading_assets.clear();
-
-        if let Err(error) = state.set(AppState::Game) {
-            log::error!("Failed to set state: {:?}", error);
-        }
-
-        // TODO: remove resource `LoadingAssets`
-    }
+    next_state.set(AppState::Game);
 }

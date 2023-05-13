@@ -1,4 +1,5 @@
-imports_granularity = "Item" # Use with nighliy like `cargo +nightly fmt`
+group_imports = "One" # Use with nightly like `cargo +nightly fmt`
+imports_granularity = "Item" # Use with nightly like `cargo +nightly fmt`
 single_line_if_else_max_width = 0
 use_field_init_shorthand = true
 use_try_shorthand = true

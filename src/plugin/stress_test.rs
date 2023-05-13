@@ -1,7 +1,9 @@
 use crate::command::ActorBotSet;
 use crate::command::ActorSet;
 use crate::component::ActorConfig;
+use crate::model::AppState;
 use crate::model::Position;
+use crate::util::ext::AppExt;
 use bevy::app::App;
 use bevy::app::Plugin;
 use bevy::diagnostic::Diagnostics;
@@ -16,11 +18,9 @@ pub struct StressTestPlugin;
 
 impl Plugin for StressTestPlugin {
     fn build(&self, app: &mut App) {
-        log::info!("Starting with StressTestPlugin plugin");
-        // TODO: run on update
         app.add_plugin(FrameTimeDiagnosticsPlugin::default())
             .add_plugin(EntityCountDiagnosticsPlugin::default())
-            .add_system(system);
+            .add_state_system(AppState::Game, system);
     }
 }
 
