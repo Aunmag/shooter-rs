@@ -6,7 +6,6 @@ use crate::command::ClientJoin;
 use crate::command::EntityDelete;
 use crate::command::ProjectileSpawn;
 use crate::command::Start;
-use crate::component::ActorActions;
 use crate::resource::EntityConverter;
 use crate::resource::Message;
 use crate::resource::NetConnection;
@@ -135,7 +134,7 @@ fn on_message_as_server(
             if let Some(entity) = entity {
                 commands.add(ActorActionsSet {
                     entity,
-                    actions: ActorActions::from_bits_truncate(actions),
+                    actions,
                     direction,
                 });
             }

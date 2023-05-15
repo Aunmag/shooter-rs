@@ -1,6 +1,6 @@
 use crate::command::ProjectileSpawn;
 use crate::component::Actor;
-use crate::component::ActorActions;
+use crate::component::ActorAction;
 use crate::component::Weapon;
 use crate::model::Position;
 use bevy::ecs::system::Query;
@@ -42,7 +42,7 @@ pub fn weapon(
     let now = time.elapsed();
 
     for (entity, actor, transform, mut weapon) in query.iter_mut() {
-        if actor.actions.contains(ActorActions::ATTACK) && weapon.fire(now) {
+        if actor.actions.contains(ActorAction::Attack) && weapon.fire(now) {
             let mut position = Position::from(transform);
             let (sin, cos) = (position.direction + FRAC_PI_2).sin_cos();
             position.x += BARREL_LENGTH * cos;

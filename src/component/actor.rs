@@ -1,12 +1,14 @@
 use crate::model::SpriteOffset;
 use bevy::ecs::component::Component;
+use enumset::EnumSet;
+use enumset::EnumSetType;
 use serde::Deserialize;
 use serde::Serialize;
 
 #[derive(Component)]
 pub struct Actor {
     pub config: &'static ActorConfig,
-    pub actions: ActorActions,
+    pub actions: EnumSet<ActorAction>,
     pub look_at: f32,
 }
 
@@ -28,23 +30,21 @@ pub struct ActorConfig {
     pub actor_type: ActorType,
 }
 
-// TODO: try use enum set
-bitflags::bitflags! {
-    pub struct ActorActions: u8 {
-        const MOVEMENT_FORWARD   = 0b0000_0001;
-        const MOVEMENT_BACKWARD  = 0b0000_0010;
-        const MOVEMENT_LEFTWARD  = 0b0000_0100;
-        const MOVEMENT_RIGHTWARD = 0b0000_1000;
-        const SPRINT             = 0b0001_0000;
-        const ATTACK             = 0b0010_0000;
-    }
+#[derive(Debug, Serialize, Deserialize, EnumSetType)]
+pub enum ActorAction {
+    MovementForward,
+    MovementBackward,
+    MovementLeftward,
+    MovementRightward,
+    Sprint,
+    Attack,
 }
 
 impl Actor {
     pub const fn new(config: &'static ActorConfig) -> Self {
         return Self {
             config,
-            actions: ActorActions::empty(),
+            actions: EnumSet::EMPTY,
             look_at: 0.0,
         };
     }
@@ -85,8 +85,36 @@ impl From<ActorType> for &'static ActorConfig {
     }
 }
 
-impl Default for ActorActions {
-    fn default() -> Self {
-        return Self::empty();
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_action_set_bit_width() {
+        assert_eq!(EnumSet::<ActorAction>::bit_width(), 6);
+    }
+
+    #[test]
+    fn test_action_set_empty() {
+        let actions = EnumSet::<ActorAction>::EMPTY;
+        assert_eq!(actions.len(), 0);
+        assert_eq!(actions.as_u8(), 0b0);
+        assert_eq!(actions.as_u8(), 0);
+    }
+
+    #[test]
+    fn test_action_set_full() {
+        let actions = EnumSet::<ActorAction>::all();
+        assert_eq!(actions.len(), 6);
+        assert_eq!(actions.as_u8(), 0b111111);
+        assert_eq!(actions.as_u8(), 63);
+    }
+
+    #[test]
+    fn test_action_set_complex() {
+        let actions = ActorAction::MovementLeftward | ActorAction::Sprint;
+        assert_eq!(actions.len(), 2);
+        assert_eq!(actions.as_u8(), 0b10100);
+        assert_eq!(actions.as_u8(), 20);
     }
 }

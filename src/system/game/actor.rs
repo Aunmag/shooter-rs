@@ -1,5 +1,5 @@
 use crate::component::Actor;
-use crate::component::ActorActions;
+use crate::component::ActorAction;
 use crate::component::Inertia;
 use crate::component::Player;
 use crate::util::ext::TransformExt;
@@ -36,19 +36,19 @@ pub fn actor(
 
         let mut movement = Vec3::new(0.0, 0.0, 0.0);
 
-        if actor.actions.contains(ActorActions::MOVEMENT_FORWARD) {
+        if actor.actions.contains(ActorAction::MovementForward) {
             movement.y += 1.0;
         }
 
-        if actor.actions.contains(ActorActions::MOVEMENT_BACKWARD) {
+        if actor.actions.contains(ActorAction::MovementBackward) {
             movement.y -= 1.0;
         }
 
-        if actor.actions.contains(ActorActions::MOVEMENT_LEFTWARD) {
+        if actor.actions.contains(ActorAction::MovementLeftward) {
             movement.x -= 1.0;
         }
 
-        if actor.actions.contains(ActorActions::MOVEMENT_RIGHTWARD) {
+        if actor.actions.contains(ActorAction::MovementRightward) {
             movement.x += 1.0;
         }
 
@@ -57,7 +57,7 @@ pub fn actor(
             * actor.config.movement_velocity
             * time_delta;
 
-        if actor.actions.contains(ActorActions::SPRINT) {
+        if actor.actions.contains(ActorAction::Sprint) {
             movement *= actor.config.sprint_factor;
         }
 

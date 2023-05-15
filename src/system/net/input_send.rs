@@ -1,5 +1,5 @@
 use crate::component::Actor;
-use crate::component::ActorActions;
+use crate::component::ActorAction;
 use crate::component::Player;
 use crate::resource::Message;
 use crate::resource::NetResource;
@@ -11,6 +11,7 @@ use bevy::prelude::ResMut;
 use bevy::prelude::Time;
 use bevy::prelude::Transform;
 use bevy::prelude::With;
+use enumset::EnumSet;
 use std::time::Duration;
 
 /// 25 Hz
@@ -22,7 +23,7 @@ const DIRECTION_SEND_INTERVAL_PASSIVE: Duration = Duration::from_millis(100);
 #[derive(Default, Resource)]
 pub struct InputSendData {
     time: Duration,
-    actions: ActorActions,
+    actions: EnumSet<ActorAction>,
     direction: f32,
 }
 
@@ -45,7 +46,7 @@ pub fn input_send(
         if current.actions != previous.actions {
             message = Some(Message::ClientInput {
                 id: 0,
-                actions: current.actions.bits(),
+                actions: current.actions,
                 direction: current.direction,
             });
         } else if current.direction != previous.direction {

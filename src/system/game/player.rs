@@ -1,7 +1,8 @@
 use crate::component::Actor;
-use crate::component::ActorActions;
+use crate::component::ActorAction;
 use crate::component::Player;
 use crate::resource::Config;
+use crate::util::ext::EnumSetExt;
 use bevy::ecs::system::Query;
 use bevy::input::mouse::MouseMotion;
 use bevy::prelude::EventReader;
@@ -30,30 +31,27 @@ pub fn player(
     for mut actor in query.iter_mut() {
         actor
             .actions
-            .set(ActorActions::MOVEMENT_FORWARD, keyboard.pressed(KeyCode::W));
-
-        actor.actions.set(
-            ActorActions::MOVEMENT_BACKWARD,
-            keyboard.pressed(KeyCode::S),
-        );
-
-        actor.actions.set(
-            ActorActions::MOVEMENT_LEFTWARD,
-            keyboard.pressed(KeyCode::A),
-        );
-
-        actor.actions.set(
-            ActorActions::MOVEMENT_RIGHTWARD,
-            keyboard.pressed(KeyCode::D),
-        );
+            .set(ActorAction::MovementForward, keyboard.pressed(KeyCode::W));
 
         actor
             .actions
-            .set(ActorActions::SPRINT, keyboard.pressed(KeyCode::LShift));
+            .set(ActorAction::MovementBackward, keyboard.pressed(KeyCode::S));
 
         actor
             .actions
-            .set(ActorActions::ATTACK, mouse.pressed(MouseButton::Left));
+            .set(ActorAction::MovementLeftward, keyboard.pressed(KeyCode::A));
+
+        actor
+            .actions
+            .set(ActorAction::MovementRightward, keyboard.pressed(KeyCode::D));
+
+        actor
+            .actions
+            .set(ActorAction::Sprint, keyboard.pressed(KeyCode::LShift));
+
+        actor
+            .actions
+            .set(ActorAction::Attack, mouse.pressed(MouseButton::Left));
 
         actor.look_at += rotation;
     }
