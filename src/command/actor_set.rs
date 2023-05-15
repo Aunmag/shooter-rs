@@ -8,7 +8,7 @@ use crate::component::ProjectileConfig;
 use crate::component::Weapon;
 use crate::component::WeaponConfig;
 use crate::data::LAYER_ACTOR;
-use crate::model::Position;
+use crate::model::TransformLiteU8;
 use crate::resource::Message;
 use crate::resource::NetResource;
 use crate::util::ext::WorldExt;
@@ -27,7 +27,7 @@ use bevy::sprite::Anchor;
 pub struct ActorSet {
     pub entity: Entity,
     pub config: &'static ActorConfig,
-    pub position: Position,
+    pub transform: TransformLiteU8,
     pub is_ghost: bool,
 }
 
@@ -42,7 +42,7 @@ impl Command for ActorSet {
                     id: 0,
                     entity_index: self.entity.index(),
                     actor_type: self.config.actor_type,
-                    position: self.position,
+                    transform: self.transform,
                 });
         }
 
@@ -79,7 +79,7 @@ impl Command for ActorSet {
                     color,
                     ..Default::default()
                 },
-                transform: self.position.as_transform(LAYER_ACTOR),
+                transform: self.transform.as_transform(LAYER_ACTOR),
                 texture,
                 ..Default::default()
             })
@@ -96,7 +96,7 @@ impl Command for ActorSet {
             entity_mut.insert(Health::new(self.config.resistance));
             entity_mut.insert(Inertia::new(self.config.mass));
         } else {
-            entity_mut.insert(Interpolation::new(self.position, now));
+            entity_mut.insert(Interpolation::new(self.transform.into(), now));
         }
 
         if !self.is_ghost {

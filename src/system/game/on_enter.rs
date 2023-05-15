@@ -9,7 +9,8 @@ use crate::data::LAYER_TREE;
 use crate::data::WORLD_SIZE;
 use crate::data::WORLD_SIZE_HALF;
 use crate::data::WORLD_SIZE_VISUAL;
-use crate::model::Position;
+use crate::model::TransformLite;
+use crate::model::TransformLiteU8;
 use crate::resource::GameType;
 use crate::util::ext::Vec2Ext;
 use bevy::asset::AssetServer;
@@ -57,7 +58,7 @@ fn spawn_player(commands: &mut Commands) {
     commands.add(ActorSet {
         entity,
         config: ActorConfig::HUMAN,
-        position: Position::default(),
+        transform: TransformLiteU8::default(),
         is_ghost: false,
     });
 
@@ -70,7 +71,7 @@ fn spawn_zombie(commands: &mut Commands, position_x: f32) {
     commands.add(ActorSet {
         entity,
         config: ActorConfig::ZOMBIE,
-        position: Position::new(position_x, 0.0, 0.0),
+        transform: TransformLiteU8::new(position_x, 0.0, 0),
         is_ghost: false,
     });
 
@@ -149,7 +150,7 @@ fn spawn_sprite(
     texture: Handle<Image>,
 ) {
     commands.spawn(SpriteBundle {
-        transform: Position::new(x, y, direction).as_transform(z),
+        transform: TransformLite::new(x, y, direction).as_transform(z),
         texture,
         ..Default::default()
     });

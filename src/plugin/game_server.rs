@@ -1,6 +1,6 @@
 use crate::model::AppState;
 use crate::resource::EntityConverter;
-use crate::resource::PositionUpdateResource;
+use crate::resource::TransformUpdateResource;
 use crate::util::ext::AppExt;
 use bevy::app::App;
 use bevy::app::Plugin;
@@ -27,10 +27,10 @@ impl Plugin for GameServerPlugin {
         // TODO: do automatically on enter or make it lazy
         // TODO: remove on exit
         app.insert_resource(EntityConverter::default());
-        app.insert_resource(PositionUpdateResource::default()); // TODO: keep it on client only
+        app.insert_resource(TransformUpdateResource::default()); // TODO: keep it on client only
         app.insert_resource(bot::TargetFindData::default());
         app.insert_resource(bot::TargetUpdateData::default());
-        app.insert_resource(net::PositionUpdateSendData::new(self.sync_interval));
+        app.insert_resource(net::TransformUpdateSendData::new(self.sync_interval));
 
         let state = AppState::Game;
         app.add_state_system(state, input);
@@ -44,7 +44,7 @@ impl Plugin for GameServerPlugin {
             state,
             projectile.pipe(projectile_hit).after(collision_resolve),
         );
-        app.add_state_system(state, net::position_update_send.after(collision_resolve));
+        app.add_state_system(state, net::transform_update_send.after(collision_resolve));
         app.add_state_system(state, net::message_receive);
         app.add_state_system(state, net::connection_update);
         app.add_state_system(state, camera.after(collision_resolve));

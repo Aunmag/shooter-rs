@@ -1,4 +1,4 @@
-use crate::model::Position;
+use crate::model::TransformLite;
 use crate::util::ext::DurationExt;
 use crate::util::math;
 use bevy::ecs::component::Component;
@@ -6,33 +6,45 @@ use std::time::Duration;
 
 #[derive(Component)]
 pub struct Interpolation {
-    pub origin: Position,
-    pub target: Position,
+    pub origin: TransformLite,
+    pub target: TransformLite,
     pub start: Duration,
 }
 
 impl Interpolation {
-    pub const fn new(position: Position, time: Duration) -> Self {
+    pub const fn new(transform: TransformLite, time: Duration) -> Self {
         return Self {
-            origin: position,
-            target: position,
+            origin: transform,
+            target: transform,
             start: time,
         };
     }
 
-    pub fn next(&mut self, position: Position, duration: Duration, time: Duration) {
-        self.origin = self.get_interpolated_position(duration, time);
-        self.target = position;
+    pub fn next(&mut self, transform: TransformLite, duration: Duration, time: Duration) {
+        self.origin = self.get_interpolated_transform(duration, time);
+        self.target = transform;
         self.start = time;
     }
 
-    pub fn get_interpolated_position(&self, duration: Duration, time: Duration) -> Position {
+    pub fn get_interpolated_transform(&self, duration: Duration, time: Duration) -> TransformLite {
         let progress = time.get_progress(self.start, self.get_end_time(duration));
 
-        return Position::new(
-            interpolate(self.origin.x, self.target.x, progress),
-            interpolate(self.origin.y, self.target.y, progress),
-            interpolate_angle(self.origin.direction, self.target.direction, progress),
+        return TransformLite::new(
+            interpolate(
+                self.origin.translation.x,
+                self.target.translation.x,
+                progress,
+            ),
+            interpolate(
+                self.origin.translation.y,
+                self.target.translation.y,
+                progress,
+            ),
+            interpolate_angle(
+                self.origin.direction,
+                self.target.direction,
+                progress,
+            ),
         );
     }
 

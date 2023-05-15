@@ -4,7 +4,7 @@ use crate::component::ActorConfig;
 use crate::component::Inertia;
 use crate::component::Player;
 use crate::data::LAYER_ACTOR_PLAYER;
-use crate::model::Position;
+use crate::model::TransformLiteU8;
 use crate::util::ext::WorldExt;
 use bevy::ecs::system::Command;
 use bevy::prelude::Entity;
@@ -16,10 +16,10 @@ pub struct ActorPlayerSet(pub Entity);
 impl Command for ActorPlayerSet {
     fn write(self, world: &mut World) {
         let is_client = world.is_client();
-        let mut ghost_position = Position::default();
+        let mut ghost_transform = TransformLiteU8::default();
 
         if let Some(mut transform) = world.entity_mut(self.0).get_mut::<Transform>() {
-            ghost_position = Position::from(&*transform);
+            ghost_transform = TransformLiteU8::from(&*transform);
             transform.translation.z = LAYER_ACTOR_PLAYER;
         }
 
@@ -39,7 +39,7 @@ impl Command for ActorPlayerSet {
             ActorSet {
                 entity,
                 config,
-                position: ghost_position,
+                transform: ghost_transform,
                 is_ghost: true,
             }
             .write(world);

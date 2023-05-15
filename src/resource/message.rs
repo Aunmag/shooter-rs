@@ -1,6 +1,7 @@
 use crate::component::ActorAction;
 use crate::component::ActorType;
-use crate::model::Position;
+use crate::model::TransformLite;
+use crate::model::TransformLiteU8;
 use bincode::Options;
 use enumset::EnumSet;
 use serde::Deserialize;
@@ -10,7 +11,7 @@ use serde::Serialize;
 
 pub const MESSAGE_SIZE_MAX: usize = std::mem::size_of::<Message>();
 
-#[derive(Serialize, Deserialize, Debug, PartialEq)]
+#[derive(Debug, Serialize, Deserialize)]
 pub enum Message {
     Response {
         message_id: u16,
@@ -24,29 +25,29 @@ pub enum Message {
     ClientInput {
         id: u16,
         actions: EnumSet<ActorAction>,
-        direction: f32,
+        direction: f32, // TODO: maybe compress?
     },
     ClientInputDirection {
         id: u16,
-        direction: f32,
+        direction: f32, // TODO: maybe compress?
     },
     ActorSpawn {
         id: u16,
         entity_index: u32,
         actor_type: ActorType,
-        position: Position,
+        transform: TransformLiteU8,
     },
     ActorGrant {
         id: u16,
         entity_index: u32,
     },
-    PositionUpdate {
+    TransformUpdate {
         entity_index: u32,
-        position: Position,
+        transform: TransformLiteU8,
     },
     ProjectileSpawn {
         id: u16,
-        position: Position,
+        transform: TransformLite,
         velocity: f32,
         acceleration_factor: f32,
         shooter_id: Option<u32>,
@@ -89,7 +90,7 @@ impl Message {
             Self::ActorGrant { ref mut id, .. } => {
                 *id = id_new;
             }
-            Self::PositionUpdate { .. } => {}
+            Self::TransformUpdate { .. } => {}
             Self::ProjectileSpawn { ref mut id, .. } => {
                 *id = id_new;
             }
@@ -109,7 +110,7 @@ impl Message {
             Self::ClientInputDirection { id, .. } => Some(id),
             Self::ActorSpawn { id, .. } => Some(id),
             Self::ActorGrant { id, .. } => Some(id),
-            Self::PositionUpdate { .. } => None,
+            Self::TransformUpdate { .. } => None,
             Self::ProjectileSpawn { id, .. } => Some(id),
             Self::EntityDelete { id, .. } => Some(id),
         };

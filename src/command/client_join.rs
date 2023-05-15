@@ -1,7 +1,7 @@
 use crate::command::ActorSet;
 use crate::component::Actor;
 use crate::component::ActorConfig;
-use crate::model::Position;
+use crate::model::TransformLiteU8;
 use crate::resource::Message;
 use crate::resource::NetResource;
 use bevy::ecs::system::Command;
@@ -26,7 +26,7 @@ impl Command for ClientJoin {
                     id: 0,
                     entity_index: entity.index(),
                     actor_type: actor.config.actor_type,
-                    position: transform.into(),
+                    transform: transform.into(),
                 });
             }
 
@@ -41,7 +41,7 @@ impl Command for ClientJoin {
         ActorSet {
             entity,
             config: ActorConfig::HUMAN,
-            position: Position::default(),
+            transform: TransformLiteU8::default(),
             is_ghost: false,
         }
         .write(world);

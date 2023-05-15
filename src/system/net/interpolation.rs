@@ -17,9 +17,9 @@ pub fn interpolation(
     let interpolation_duration = config.net.server.sync_interval; // TODO: don't get from config, get from server instead
 
     for (interpolation, mut transform) in query.iter_mut() {
-        let interpolated = interpolation.get_interpolated_position(interpolation_duration, time);
-        transform.translation.x = interpolated.x;
-        transform.translation.y = interpolated.y;
+        let interpolated = interpolation.get_interpolated_transform(interpolation_duration, time);
+        transform.translation.x = interpolated.translation.x;
+        transform.translation.y = interpolated.translation.y;
         transform.rotation = Quat::from_rotation_z(interpolated.direction);
     }
 }

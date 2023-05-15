@@ -1,5 +1,5 @@
 use crate::component::Actor;
-use crate::model::Position;
+use crate::model::TransformLiteU8;
 use crate::resource::Message;
 use crate::resource::NetResource;
 use crate::util::Timer;
@@ -15,12 +15,12 @@ use std::collections::HashMap;
 use std::time::Duration;
 
 #[derive(Resource)]
-pub struct PositionUpdateSendData {
+pub struct TransformUpdateSendData {
     timer: Timer,
-    cache: HashMap<u32, Position>,
+    cache: HashMap<u32, TransformLiteU8>,
 }
 
-impl PositionUpdateSendData {
+impl TransformUpdateSendData {
     pub fn new(sync_interval: Duration) -> Self {
         return Self {
             timer: Timer::new(sync_interval),
@@ -29,9 +29,9 @@ impl PositionUpdateSendData {
     }
 }
 
-pub fn position_update_send(
+pub fn transform_update_send(
     query: Query<(Entity, &Transform), With<Actor>>,
-    mut data: ResMut<PositionUpdateSendData>,
+    mut data: ResMut<TransformUpdateSendData>,
     time: Res<Time>,
     net: Res<NetResource>,
 ) {
@@ -44,20 +44,20 @@ pub fn position_update_send(
     }
 
     for (entity, transform) in query.iter() {
-        let position = Position::from(transform);
+        let transform = TransformLiteU8::from(transform);
         let entity_index = entity.index();
 
         if data
             .cache
             .get(&entity_index)
-            .map_or(true, |p| p != &position)
+            .map_or(true, |p| p != &transform)
         {
-            net.send_unreliably_to_all(&Message::PositionUpdate {
+            net.send_unreliably_to_all(&Message::TransformUpdate {
                 entity_index,
-                position,
+                transform,
             });
 
-            data.cache.insert(entity_index, position);
+            data.cache.insert(entity_index, transform);
         }
     }
 }

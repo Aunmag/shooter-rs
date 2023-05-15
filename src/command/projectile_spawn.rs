@@ -2,7 +2,7 @@ use crate::component::Projectile;
 use crate::component::ProjectileConfig;
 use crate::data::LAYER_PROJECTILE;
 use crate::material::ProjectileMaterial;
-use crate::model::Position;
+use crate::model::TransformLite;
 use crate::resource::Message;
 use crate::resource::NetResource;
 use crate::util;
@@ -21,7 +21,7 @@ use bevy::prelude::World;
 use bevy::sprite::MaterialMesh2dBundle;
 
 pub struct ProjectileSpawn {
-    pub position: Position,
+    pub transform: TransformLite,
     pub velocity: f32,
     pub acceleration_factor: f32,
     pub shooter: Option<Entity>,
@@ -34,20 +34,20 @@ impl Command for ProjectileSpawn {
                 .resource_mut::<NetResource>()
                 .send_to_all(Message::ProjectileSpawn {
                     id: 0,
-                    position: self.position,
+                    transform: self.transform,
                     velocity: self.velocity,
                     acceleration_factor: self.acceleration_factor,
                     shooter_id: self.shooter.map(Entity::index),
                 });
         }
 
-        let (sin, cos) = (-self.position.direction).sin_cos();
+        let (sin, cos) = (-self.transform.direction).sin_cos();
         let projectile = Projectile::new(
             ProjectileConfig {
                 acceleration_factor: self.acceleration_factor,
             },
             world.resource::<Time>().elapsed(),
-            Vec2::new(self.position.x, self.position.y),
+            self.transform.translation,
             Vec2::new(self.velocity * sin, self.velocity * cos),
             self.shooter,
         );
@@ -67,7 +67,7 @@ impl Command for ProjectileSpawn {
         world
             .spawn(MaterialMesh2dBundle {
                 transform: Transform {
-                    translation: Vec3::new(self.position.x, self.position.y, LAYER_PROJECTILE),
+                    translation: self.transform.translation.extend(LAYER_PROJECTILE),
                     scale: Vec3::new(0.0, 0.0, 1.0),
                     ..Transform::default()
                 },

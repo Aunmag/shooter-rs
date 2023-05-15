@@ -2,7 +2,7 @@ use crate::command::ProjectileSpawn;
 use crate::component::Actor;
 use crate::component::ActorAction;
 use crate::component::Weapon;
-use crate::model::Position;
+use crate::model::TransformLite;
 use bevy::ecs::system::Query;
 use bevy::ecs::system::Resource;
 use bevy::prelude::Commands;
@@ -43,16 +43,16 @@ pub fn weapon(
 
     for (entity, actor, transform, mut weapon) in query.iter_mut() {
         if actor.actions.contains(ActorAction::Attack) && weapon.fire(now) {
-            let mut position = Position::from(transform);
-            let (sin, cos) = (position.direction + FRAC_PI_2).sin_cos();
-            position.x += BARREL_LENGTH * cos;
-            position.y += BARREL_LENGTH * sin;
+            let mut transform = TransformLite::from(transform);
+            let (sin, cos) = (transform.direction + FRAC_PI_2).sin_cos();
+            transform.translation.x += BARREL_LENGTH * cos;
+            transform.translation.y += BARREL_LENGTH * sin;
 
             for _ in 0..8 {
-                position.direction = deviate_direction(&mut data.rng, position.direction);
+                transform.direction = deviate_direction(&mut data.rng, transform.direction);
 
                 commands.add(ProjectileSpawn {
-                    position,
+                    transform,
                     velocity: deviate_velocity(&mut data.rng, weapon.config.muzzle_velocity),
                     acceleration_factor: weapon.config.projectile.acceleration_factor,
                     shooter: Some(entity),

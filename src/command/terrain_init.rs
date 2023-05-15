@@ -1,6 +1,6 @@
 use crate::component::Terrain;
 use crate::data::LAYER_TERRAIN;
-use crate::model::Position;
+use crate::model::TransformLite;
 use bevy::ecs::system::Command;
 use bevy::prelude::AssetServer;
 use bevy::prelude::SpriteBundle;
@@ -18,7 +18,7 @@ impl Command for TerrainInit {
         for _ in 0..Terrain::get_count().pow(2) {
             let _ = world
                 .spawn(SpriteBundle {
-                    transform: Position::default().as_transform(LAYER_TERRAIN),
+                    transform: TransformLite::default().as_transform(LAYER_TERRAIN),
                     texture: texture.clone(),
                     ..Default::default()
                 })

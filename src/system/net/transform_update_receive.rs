@@ -2,7 +2,7 @@ use crate::component::Interpolation;
 use crate::component::Player;
 use crate::model::geometry::GeometryProjection;
 use crate::resource::Config;
-use crate::resource::PositionUpdateResource;
+use crate::resource::TransformUpdateResource;
 use bevy::ecs::entity::Entity;
 use bevy::math::Vec3Swizzles;
 use bevy::prelude::Query;
@@ -11,8 +11,8 @@ use bevy::prelude::ResMut;
 use bevy::prelude::Time;
 use bevy::prelude::Transform;
 
-pub fn position_update_receive(
-    mut updates: ResMut<PositionUpdateResource>,
+pub fn transform_update_receive(
+    mut updates: ResMut<TransformUpdateResource>,
     mut query: Query<(&mut Transform, &mut Interpolation, Option<&Player>)>,
     config: Res<Config>,
     time: Res<Time>,
@@ -27,8 +27,8 @@ pub fn position_update_receive(
         if let Ok((mut transform, mut interpolation, player)) = query.get_mut(entity) {
             if let Some(player) = player {
                 let p_player = transform.translation.xy();
-                let p_server = update.xy();
-                let p_server_previous = interpolation.target.xy();
+                let p_server = update.translation;
+                let p_server_previous = interpolation.target.translation;
                 let path = (p_server_previous, p_player);
                 let p_intermediate = p_server.project_on(&path);
                 let diff = p_server - p_intermediate;
@@ -37,11 +37,11 @@ pub fn position_update_receive(
                 ghost = player.ghost;
             }
 
-            interpolation.next(update, sync_interval, time);
+            interpolation.next(update.into(), sync_interval, time);
         }
 
         if let Some((_, mut interpolation, _)) = ghost.and_then(|g| query.get_mut(g).ok()) {
-            interpolation.next(update, sync_interval, time);
+            interpolation.next(update.into(), sync_interval, time);
         }
     }
 }

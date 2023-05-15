@@ -1,6 +1,6 @@
 use crate::model::AppState;
 use crate::resource::EntityConverter;
-use crate::resource::PositionUpdateResource;
+use crate::resource::TransformUpdateResource;
 use crate::util::ext::AppExt;
 use bevy::app::App;
 use bevy::app::Plugin;
@@ -17,7 +17,7 @@ impl Plugin for GameClientPlugin {
         // TODO: do automatically on enter or make it lazy
         // TODO: remove on exit
         app.insert_resource(EntityConverter::default());
-        app.insert_resource(PositionUpdateResource::default());
+        app.insert_resource(TransformUpdateResource::default());
         app.insert_resource(net::InputSendData::default());
 
         let state = AppState::Game;
@@ -31,7 +31,7 @@ impl Plugin for GameClientPlugin {
         app.add_state_system(state, net::message_receive);
         app.add_state_system(
             state,
-            net::position_update_receive
+            net::transform_update_receive
                 .after(net::message_receive)
                 .after(inertia),
         );

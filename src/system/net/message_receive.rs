@@ -10,7 +10,7 @@ use crate::resource::EntityConverter;
 use crate::resource::Message;
 use crate::resource::NetConnection;
 use crate::resource::NetResource;
-use crate::resource::PositionUpdateResource;
+use crate::resource::TransformUpdateResource;
 use crate::resource::MESSAGE_SIZE_MAX;
 use bevy::ecs::entity::Entities;
 use bevy::ecs::entity::Entity;
@@ -23,7 +23,7 @@ pub fn message_receive(
     entities: &Entities,
     mut commands: Commands,
     mut entity_converter: ResMut<EntityConverter>,
-    mut position_updates: ResMut<PositionUpdateResource>, // TODO: initialize for client only
+    mut transform_updates: ResMut<TransformUpdateResource>, // TODO: initialize for client only
     mut net: ResMut<NetResource>,
 ) {
     let is_server = net.is_server();
@@ -76,7 +76,7 @@ pub fn message_receive(
                     entities,
                     &mut entity_converter,
                     &mut commands,
-                    &mut position_updates,
+                    &mut transform_updates,
                     is_server,
                 );
 
@@ -88,7 +88,7 @@ pub fn message_receive(
                         entities,
                         &mut entity_converter,
                         &mut commands,
-                        &mut position_updates,
+                        &mut transform_updates,
                         is_server,
                     );
                 }
@@ -108,13 +108,13 @@ fn on_message(
     entities: &Entities,
     converter: &mut EntityConverter,
     commands: &mut Commands,
-    position_updates: &mut PositionUpdateResource,
+    transform_updates: &mut TransformUpdateResource,
     is_server: bool,
 ) {
     if is_server {
         on_message_as_server(address, message, entity, commands);
     } else {
-        on_message_as_client(message, entities, converter, commands, position_updates);
+        on_message_as_client(message, entities, converter, commands, transform_updates);
     }
 }
 
@@ -153,7 +153,7 @@ fn on_message_as_client(
     entities: &Entities,
     converter: &mut EntityConverter,
     commands: &mut Commands,
-    position_updates: &mut PositionUpdateResource,
+    transform_updates: &mut TransformUpdateResource,
 ) {
     match *message {
         Message::JoinAccept { .. } => {
@@ -162,13 +162,13 @@ fn on_message_as_client(
         Message::ActorSpawn {
             entity_index,
             actor_type,
-            position,
+            transform,
             ..
         } => {
             commands.add(ActorSet {
                 entity: converter.to_internal(entities, entity_index),
                 config: actor_type.into(),
-                position,
+                transform,
                 is_ghost: false,
             });
         }
@@ -177,24 +177,24 @@ fn on_message_as_client(
                 converter.to_internal(entities, entity_index),
             ));
         }
-        Message::PositionUpdate {
+        Message::TransformUpdate {
             entity_index,
-            position,
+            transform,
         } => {
-            position_updates.push((
+            transform_updates.push((
                 converter.to_internal(entities, entity_index).index(),
-                position,
+                transform,
             ));
         }
         Message::ProjectileSpawn {
-            position,
+            transform,
             velocity,
             acceleration_factor,
             shooter_id,
             ..
         } => {
             commands.add(ProjectileSpawn {
-                position,
+                transform,
                 velocity,
                 acceleration_factor,
                 shooter: shooter_id.map(|id| converter.to_internal(entities, id)),
