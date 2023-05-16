@@ -1,5 +1,6 @@
 use crate::model::AppState;
 use crate::resource::EntityConverter;
+use crate::resource::ServerData;
 use crate::resource::TransformUpdateResource;
 use crate::util::ext::AppExt;
 use bevy::app::App;
@@ -17,6 +18,7 @@ impl Plugin for GameClientPlugin {
         // TODO: do automatically on enter or make it lazy
         // TODO: remove on exit
         app.insert_resource(EntityConverter::default());
+        app.insert_resource(ServerData::default());
         app.insert_resource(TransformUpdateResource::default());
         app.insert_resource(net::InputSendData::default());
 

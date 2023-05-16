@@ -1,8 +1,8 @@
 use crate::component::Actor;
-use crate::component::ActorAction;
 use crate::component::Player;
+use crate::model::ActorAction;
+use crate::model::ActorActionsExt;
 use crate::resource::Config;
-use crate::util::ext::EnumSetExt;
 use bevy::ecs::system::Query;
 use bevy::input::mouse::MouseMotion;
 use bevy::prelude::EventReader;
@@ -10,11 +10,12 @@ use bevy::prelude::Input;
 use bevy::prelude::KeyCode;
 use bevy::prelude::MouseButton;
 use bevy::prelude::Res;
+use bevy::prelude::Transform;
 use bevy::prelude::With;
 use std::f32::consts::TAU;
 
 pub fn player(
-    mut query: Query<&mut Actor, With<Player>>,
+    mut query: Query<(&mut Actor, &mut Transform), With<Player>>,
     keyboard: Res<Input<KeyCode>>,
     mouse: Res<Input<MouseButton>>,
     mut mouse_motion: EventReader<MouseMotion>,
@@ -28,7 +29,7 @@ pub fn player(
 
     let rotation = (mouse_delta_x * config.controls.mouse_sensitivity) % TAU;
 
-    for mut actor in query.iter_mut() {
+    for (mut actor, mut transform) in query.iter_mut() {
         actor
             .actions
             .set(ActorAction::MovementForward, keyboard.pressed(KeyCode::W));
@@ -53,6 +54,6 @@ pub fn player(
             .actions
             .set(ActorAction::Attack, mouse.pressed(MouseButton::Left));
 
-        actor.look_at += rotation;
+        transform.rotate_local_z(rotation)
     }
 }

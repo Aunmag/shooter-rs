@@ -5,7 +5,7 @@ use crate::command::ActorSet;
 use crate::command::ClientJoin;
 use crate::command::EntityDelete;
 use crate::command::ProjectileSpawn;
-use crate::command::Start;
+use crate::command::StartClient;
 use crate::resource::EntityConverter;
 use crate::resource::Message;
 use crate::resource::NetConnection;
@@ -156,8 +156,8 @@ fn on_message_as_client(
     transform_updates: &mut TransformUpdateResource,
 ) {
     match *message {
-        Message::JoinAccept { .. } => {
-            commands.add(Start);
+        Message::JoinAccept { sync_interval, .. } => {
+            commands.add(StartClient { sync_interval });
         }
         Message::ActorSpawn {
             entity_index,

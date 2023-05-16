@@ -40,11 +40,7 @@ impl Interpolation {
                 self.target.translation.y,
                 progress,
             ),
-            interpolate_angle(
-                self.origin.direction,
-                self.target.direction,
-                progress,
-            ),
+            interpolate_angle(self.origin.direction, self.target.direction, progress),
         );
     }
 

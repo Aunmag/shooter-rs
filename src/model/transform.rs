@@ -9,7 +9,7 @@ use serde::Deserialize;
 use serde::Serialize;
 
 // TODO: no copy
-#[derive(Default, Clone, Copy, Debug, Serialize, Deserialize)]
+#[derive(Default, Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
 pub struct TransformLite {
     pub translation: Vec2,
     pub direction: f32,
@@ -58,7 +58,7 @@ impl From<TransformLiteU8> for TransformLite {
 }
 
 // TODO: no copy
-#[derive(Default, Clone, Copy, Debug, Serialize, Deserialize, PartialEq)]
+#[derive(Default, Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]
 pub struct TransformLiteU8 {
     pub translation: Vec2,
     pub direction: u8,

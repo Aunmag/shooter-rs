@@ -1,15 +1,14 @@
 use crate::component::Actor;
-use crate::component::ActorAction;
+use crate::model::ActorActions;
 use bevy::ecs::system::Command;
 use bevy::math::Quat;
 use bevy::prelude::Entity;
 use bevy::prelude::Transform;
 use bevy::prelude::World;
-use enumset::EnumSet;
 
 pub struct ActorActionsSet {
     pub entity: Entity,
-    pub actions: EnumSet<ActorAction>,
+    pub actions: ActorActions,
     pub direction: f32,
 }
 

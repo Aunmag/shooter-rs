@@ -1,17 +1,17 @@
-use crate::component::ActorAction;
 use crate::component::ActorType;
+use crate::model::ActorActions;
 use crate::model::TransformLite;
 use crate::model::TransformLiteU8;
 use bincode::Options;
-use enumset::EnumSet;
 use serde::Deserialize;
 use serde::Serialize;
+use std::time::Duration;
 
 // TODO: move to model
 
 pub const MESSAGE_SIZE_MAX: usize = std::mem::size_of::<Message>();
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Serialize, Deserialize)]
 pub enum Message {
     Response {
         message_id: u16,
@@ -21,10 +21,11 @@ pub enum Message {
     },
     JoinAccept {
         id: u16,
+        sync_interval: Duration,
     },
     ClientInput {
         id: u16,
-        actions: EnumSet<ActorAction>,
+        actions: ActorActions,
         direction: f32, // TODO: maybe compress?
     },
     ClientInputDirection {
@@ -75,7 +76,7 @@ impl Message {
             Self::Join { ref mut id } => {
                 *id = id_new;
             }
-            Self::JoinAccept { ref mut id } => {
+            Self::JoinAccept { ref mut id, .. } => {
                 *id = id_new;
             }
             Self::ClientInput { ref mut id, .. } => {
@@ -105,7 +106,7 @@ impl Message {
         return match *self {
             Self::Response { .. } => None,
             Self::Join { id } => Some(id),
-            Self::JoinAccept { id } => Some(id),
+            Self::JoinAccept { id, .. } => Some(id),
             Self::ClientInput { id, .. } => Some(id),
             Self::ClientInputDirection { id, .. } => Some(id),
             Self::ActorSpawn { id, .. } => Some(id),
@@ -124,8 +125,10 @@ impl Message {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::model::ActorAction;
 
     #[test]
+    #[allow(clippy::unwrap_used)]
     fn test_encode_with_actor_actions() {
         let initial = Message::ClientInput {
             id: 250,

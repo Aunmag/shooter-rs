@@ -2,6 +2,7 @@ use crate::command::ActorSet;
 use crate::component::Actor;
 use crate::component::ActorConfig;
 use crate::model::TransformLiteU8;
+use crate::resource::Config;
 use crate::resource::Message;
 use crate::resource::NetResource;
 use bevy::ecs::system::Command;
@@ -16,8 +17,12 @@ impl Command for ClientJoin {
     fn write(self, world: &mut World) {
         {
             let mut messages = Vec::with_capacity(64);
+            let sync_interval = world.resource::<Config>().net.server.sync_interval;
 
-            messages.push(Message::JoinAccept { id: 0 });
+            messages.push(Message::JoinAccept {
+                id: 0,
+                sync_interval,
+            });
 
             for (entity, actor, transform) in
                 world.query::<(Entity, &Actor, &Transform)>().iter(world)

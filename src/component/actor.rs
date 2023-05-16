@@ -1,15 +1,14 @@
+use crate::model::ActorActions;
 use crate::model::SpriteOffset;
 use bevy::ecs::component::Component;
-use enumset::EnumSet;
-use enumset::EnumSetType;
 use serde::Deserialize;
 use serde::Serialize;
 
 #[derive(Component)]
 pub struct Actor {
     pub config: &'static ActorConfig,
-    pub actions: EnumSet<ActorAction>,
-    pub look_at: f32,
+    pub actions: ActorActions,
+    pub look_at: Option<f32>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Copy, Clone, PartialEq, Eq)]
@@ -30,22 +29,12 @@ pub struct ActorConfig {
     pub actor_type: ActorType,
 }
 
-#[derive(Debug, Serialize, Deserialize, EnumSetType)]
-pub enum ActorAction {
-    MovementForward,
-    MovementBackward,
-    MovementLeftward,
-    MovementRightward,
-    Sprint,
-    Attack,
-}
-
 impl Actor {
     pub const fn new(config: &'static ActorConfig) -> Self {
         return Self {
             config,
-            actions: EnumSet::EMPTY,
-            look_at: 0.0,
+            actions: ActorActions::EMPTY,
+            look_at: None,
         };
     }
 }
@@ -82,39 +71,5 @@ impl From<ActorType> for &'static ActorConfig {
             ActorType::Human => ActorConfig::HUMAN,
             ActorType::Zombie => ActorConfig::ZOMBIE,
         };
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_action_set_bit_width() {
-        assert_eq!(EnumSet::<ActorAction>::bit_width(), 6);
-    }
-
-    #[test]
-    fn test_action_set_empty() {
-        let actions = EnumSet::<ActorAction>::EMPTY;
-        assert_eq!(actions.len(), 0);
-        assert_eq!(actions.as_u8(), 0b0);
-        assert_eq!(actions.as_u8(), 0);
-    }
-
-    #[test]
-    fn test_action_set_full() {
-        let actions = EnumSet::<ActorAction>::all();
-        assert_eq!(actions.len(), 6);
-        assert_eq!(actions.as_u8(), 0b111111);
-        assert_eq!(actions.as_u8(), 63);
-    }
-
-    #[test]
-    fn test_action_set_complex() {
-        let actions = ActorAction::MovementLeftward | ActorAction::Sprint;
-        assert_eq!(actions.len(), 2);
-        assert_eq!(actions.as_u8(), 0b10100);
-        assert_eq!(actions.as_u8(), 20);
     }
 }

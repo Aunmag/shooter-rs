@@ -1,7 +1,7 @@
 use crate::component::Interpolation;
 use crate::component::Player;
 use crate::model::geometry::GeometryProjection;
-use crate::resource::Config;
+use crate::resource::ServerData;
 use crate::resource::TransformUpdateResource;
 use bevy::ecs::entity::Entity;
 use bevy::math::Vec3Swizzles;
@@ -14,11 +14,11 @@ use bevy::prelude::Transform;
 pub fn transform_update_receive(
     mut updates: ResMut<TransformUpdateResource>,
     mut query: Query<(&mut Transform, &mut Interpolation, Option<&Player>)>,
-    config: Res<Config>,
+    server_data: Res<ServerData>,
     time: Res<Time>,
 ) {
     let time = time.elapsed();
-    let sync_interval = config.net.server.sync_interval; // TODO: don't get from config, get from server instead
+    let sync_interval = server_data.sync_interval;
 
     while let Some((entity_index, update)) = updates.pop() {
         let entity = Entity::from_raw(entity_index);
