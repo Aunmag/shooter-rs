@@ -4,6 +4,7 @@ mod entity_converter;
 mod game_type;
 mod message;
 mod net;
+mod scenario;
 mod server_data;
 mod transform_update;
 
@@ -13,5 +14,6 @@ pub use self::entity_converter::*;
 pub use self::game_type::*;
 pub use self::message::*;
 pub use self::net::*;
+pub use self::scenario::*;
 pub use self::server_data::*;
 pub use self::transform_update::*;

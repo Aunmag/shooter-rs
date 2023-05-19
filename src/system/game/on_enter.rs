@@ -1,17 +1,11 @@
-use crate::command::ActorBotSet;
-use crate::command::ActorPlayerSet;
-use crate::command::ActorSet;
 use crate::command::CursorGrab;
 use crate::command::TerrainInit;
-use crate::component::ActorConfig;
 use crate::data::LAYER_BLUFF;
 use crate::data::LAYER_TREE;
 use crate::data::WORLD_SIZE;
 use crate::data::WORLD_SIZE_HALF;
 use crate::data::WORLD_SIZE_VISUAL;
 use crate::model::TransformLite;
-use crate::model::TransformLiteU8;
-use crate::resource::GameType;
 use crate::util::ext::Vec2Ext;
 use bevy::asset::AssetServer;
 use bevy::asset::Handle;
@@ -35,47 +29,12 @@ const TREE_BUFFER_ZONE: f32 = 3.2;
 const TREE_FIND_POSITION_ATTEMPTS: usize = 32;
 const BLUFF_SPRITE_SIZE: f32 = 4.0;
 
-pub fn on_enter(mut commands: Commands, assets: Res<AssetServer>, game_type: Res<GameType>) {
+pub fn on_enter(mut commands: Commands, assets: Res<AssetServer>) {
     commands.add(CursorGrab(true));
     commands.add(TerrainInit);
     commands.spawn(Camera2dBundle::default());
-
-    if game_type.is_server() {
-        spawn_player(&mut commands);
-
-        for i in 0..2 {
-            spawn_zombie(&mut commands, 5.0 * (0.5 - i as f32));
-        }
-    }
-
     spawn_bluffs(&mut commands, &assets);
     spawn_trees(&mut commands, &assets);
-}
-
-fn spawn_player(commands: &mut Commands) {
-    let entity = commands.spawn_empty().id();
-
-    commands.add(ActorSet {
-        entity,
-        config: ActorConfig::HUMAN,
-        transform: TransformLiteU8::default(),
-        is_ghost: false,
-    });
-
-    commands.add(ActorPlayerSet(entity));
-}
-
-fn spawn_zombie(commands: &mut Commands, position_x: f32) {
-    let entity = commands.spawn_empty().id();
-
-    commands.add(ActorSet {
-        entity,
-        config: ActorConfig::ZOMBIE,
-        transform: TransformLiteU8::new(position_x, 0.0, 0),
-        is_ghost: false,
-    });
-
-    commands.add(ActorBotSet(entity));
 }
 
 // TODO: maybe render bluff corner as tile map

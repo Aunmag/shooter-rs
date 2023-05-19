@@ -32,6 +32,7 @@ mod material;
 mod model;
 mod plugin;
 mod resource;
+mod scenario;
 mod system;
 mod util;
 

@@ -9,6 +9,7 @@ mod on_enter;
 mod player;
 mod projectile;
 mod projectile_hit;
+mod scenario;
 mod terrain;
 mod weapon;
 
@@ -23,5 +24,6 @@ pub use self::on_enter::*;
 pub use self::player::*;
 pub use self::projectile::*;
 pub use self::projectile_hit::*;
+pub use self::scenario::*;
 pub use self::terrain::*;
 pub use self::weapon::*;
