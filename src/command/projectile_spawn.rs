@@ -19,6 +19,7 @@ use bevy::prelude::Transform;
 use bevy::prelude::Vec2;
 use bevy::prelude::World;
 use bevy::sprite::MaterialMesh2dBundle;
+use std::f32::consts::FRAC_PI_2;
 
 pub struct ProjectileSpawn {
     pub transform: TransformLite,
@@ -41,14 +42,18 @@ impl Command for ProjectileSpawn {
                 });
         }
 
-        let (sin, cos) = (-self.transform.direction).sin_cos();
+        let direction = self.transform.direction + FRAC_PI_2;
+
         let projectile = Projectile::new(
             ProjectileConfig {
                 acceleration_factor: self.acceleration_factor,
             },
             world.resource::<Time>().elapsed(),
             self.transform.translation,
-            Vec2::new(self.velocity * sin, self.velocity * cos),
+            Vec2::new(
+                self.velocity * direction.cos(),
+                self.velocity * direction.sin(),
+            ),
             self.shooter,
         );
 

@@ -36,9 +36,9 @@ pub fn camera(
         if let Some((mut transform, mut projection)) = cameras.iter_mut().next() {
             projection.scale = VIEW_DISTANCE / window_size.length();
             let offset = window_size.y * projection.scale * OFFSET_RATIO;
-            let (sin, cos) = (player.direction() + FRAC_PI_2).sin_cos();
-            transform.translation.x = player.translation.x + offset * cos;
-            transform.translation.y = player.translation.y + offset * sin;
+            let direction = player.direction() + FRAC_PI_2;
+            transform.translation.x = player.translation.x + offset * direction.cos();
+            transform.translation.y = player.translation.y + offset * direction.sin();
             transform.rotation = player.rotation;
         }
     }

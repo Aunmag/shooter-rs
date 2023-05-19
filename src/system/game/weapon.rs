@@ -44,9 +44,9 @@ pub fn weapon(
     for (entity, actor, transform, mut weapon) in query.iter_mut() {
         if actor.actions.is_attacking() && weapon.fire(now) {
             let mut transform = TransformLite::from(transform);
-            let (sin, cos) = (transform.direction + FRAC_PI_2).sin_cos();
-            transform.translation.x += BARREL_LENGTH * cos;
-            transform.translation.y += BARREL_LENGTH * sin;
+            let direction = transform.direction + FRAC_PI_2;
+            transform.translation.x += BARREL_LENGTH * direction.cos();
+            transform.translation.y += BARREL_LENGTH * direction.sin();
 
             for _ in 0..8 {
                 transform.direction = deviate_direction(&mut data.rng, transform.direction);
