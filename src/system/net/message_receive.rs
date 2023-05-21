@@ -6,6 +6,7 @@ use crate::command::ClientJoin;
 use crate::command::EntityDelete;
 use crate::command::ProjectileSpawn;
 use crate::command::StartClient;
+use crate::component::ProjectileConfig;
 use crate::resource::EntityConverter;
 use crate::resource::Message;
 use crate::resource::NetConnection;
@@ -189,14 +190,13 @@ fn on_message_as_client(
         Message::ProjectileSpawn {
             transform,
             velocity,
-            acceleration_factor,
             shooter_id,
             ..
         } => {
             commands.add(ProjectileSpawn {
+                config: &ProjectileConfig::LASER, // TODO: fix
                 transform,
                 velocity,
-                acceleration_factor,
                 shooter: shooter_id.map(|id| converter.to_internal(entities, id)),
             });
         }

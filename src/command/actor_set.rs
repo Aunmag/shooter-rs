@@ -5,7 +5,6 @@ use crate::component::Footsteps;
 use crate::component::Health;
 use crate::component::Inertia;
 use crate::component::Interpolation;
-use crate::component::ProjectileConfig;
 use crate::component::Weapon;
 use crate::component::WeaponConfig;
 use crate::data::LAYER_ACTOR;
@@ -86,13 +85,7 @@ impl Command for ActorSet {
             })
             .insert(Actor::new(self.config))
             .insert(Footsteps::default())
-            .insert(Weapon::new(WeaponConfig {
-                muzzle_velocity: 320.0,
-                fire_rate: 650.0,
-                projectile: ProjectileConfig {
-                    acceleration_factor: -7.0,
-                },
-            }));
+            .insert(Weapon::new(&WeaponConfig::AKS_74U));
 
         if is_server {
             entity_mut.insert(Health::new(self.config.resistance));

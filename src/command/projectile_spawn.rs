@@ -22,9 +22,9 @@ use bevy::sprite::MaterialMesh2dBundle;
 use std::f32::consts::FRAC_PI_2;
 
 pub struct ProjectileSpawn {
+    pub config: &'static ProjectileConfig,
     pub transform: TransformLite,
     pub velocity: f32,
-    pub acceleration_factor: f32,
     pub shooter: Option<Entity>,
 }
 
@@ -37,7 +37,7 @@ impl Command for ProjectileSpawn {
                     id: 0,
                     transform: self.transform,
                     velocity: self.velocity,
-                    acceleration_factor: self.acceleration_factor,
+                    acceleration_factor: self.config.acceleration_factor,
                     shooter_id: self.shooter.map(Entity::index),
                 });
         }
@@ -45,9 +45,7 @@ impl Command for ProjectileSpawn {
         let direction = self.transform.direction + FRAC_PI_2;
 
         let projectile = Projectile::new(
-            ProjectileConfig {
-                acceleration_factor: self.acceleration_factor,
-            },
+            self.config,
             world.resource::<Time>().elapsed(),
             self.transform.translation,
             Vec2::new(

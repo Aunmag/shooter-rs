@@ -33,6 +33,7 @@ pub fn projectile_hit(
 
             health.damage(momentum, time);
 
+            // TODO: don't play multiple times if it was a fraction
             commands.add(AudioPlay {
                 path: "sounds/hit_body_{n}.ogg",
                 volume: 1.5,

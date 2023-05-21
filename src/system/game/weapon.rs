@@ -56,13 +56,13 @@ pub fn weapon(
                 ..Default::default()
             });
 
-            for _ in 0..8 {
+            for _ in 0..weapon.config.projectile.fragments {
                 transform.direction = deviate_direction(&mut data.rng, transform.direction);
 
                 commands.add(ProjectileSpawn {
+                    config: weapon.config.projectile,
                     transform,
                     velocity: deviate_velocity(&mut data.rng, weapon.config.muzzle_velocity),
-                    acceleration_factor: weapon.config.projectile.acceleration_factor,
                     shooter: Some(entity),
                 });
             }

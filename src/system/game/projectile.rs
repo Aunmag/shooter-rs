@@ -17,7 +17,6 @@ use std::f32::consts::FRAC_PI_2;
 use std::time::Duration;
 
 const TIME_DELTA_FOR_RENDER: Duration = Duration::from_millis(25); // 40 FPS
-const SIZE: f32 = 0.6;
 
 pub fn projectile(
     mut projectiles: Query<(Entity, &mut Projectile, &mut Transform)>,
@@ -49,7 +48,12 @@ pub fn projectile(
             let angle =
                 math::angle_difference(tail.atan2_to(head), tail.atan2_to(obstacle_position));
 
-            hits.push((obstacle, contact_velocity * Projectile::MASS, angle));
+            hits.push((
+                obstacle,
+                contact_velocity * projectile.config.fragment_mass(),
+                angle,
+            ));
+
             head = contact_position;
             projectile.stopped = true;
         }
@@ -109,7 +113,7 @@ fn update_transform(projectile: &Projectile, head: Vec2, tail: Vec2, transform: 
     transform.translation.x = center.x;
     transform.translation.y = center.y;
     transform.rotation = Quat::from_rotation_z(projectile.initial_velocity.atan2() - FRAC_PI_2);
-    transform.scale.x = SIZE;
+    transform.scale.x = projectile.config.size;
     transform.scale.y = (head - tail).length();
 }
 
