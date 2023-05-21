@@ -19,5 +19,5 @@ join = "127.0.0.1:2001" # TODO: change this
 
 [misc]
 grab_cursor = true
-show_ghost = true # TODO: set to false
-with_stress_test = true # TODO: set to false
+show_ghost = false
+with_stress_test = false
