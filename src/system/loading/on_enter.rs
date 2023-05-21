@@ -6,6 +6,7 @@ use bevy::prelude::ResMut;
 pub fn on_enter(asset_server: Res<AssetServer>, mut asset_storage: ResMut<AssetStorage>) {
     load_folder_or_log(&asset_server, &mut asset_storage, "actors");
     load_folder_or_log(&asset_server, &mut asset_storage, "terrain");
+    load_folder_or_log(&asset_server, &mut asset_storage, "sounds");
 }
 
 fn load_folder_or_log(

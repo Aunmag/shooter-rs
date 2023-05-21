@@ -1,6 +1,7 @@
 mod actor;
 mod bot;
 mod collision;
+mod footsteps;
 mod health;
 mod inertia;
 mod interpolation;
@@ -12,6 +13,7 @@ mod weapon;
 pub use self::actor::*;
 pub use self::bot::*;
 pub use self::collision::*;
+pub use self::footsteps::*;
 pub use self::health::*;
 pub use self::inertia::*;
 pub use self::interpolation::*;

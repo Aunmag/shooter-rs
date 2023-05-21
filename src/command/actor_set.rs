@@ -1,6 +1,7 @@
 use crate::component::Actor;
 use crate::component::ActorConfig;
 use crate::component::Collision;
+use crate::component::Footsteps;
 use crate::component::Health;
 use crate::component::Inertia;
 use crate::component::Interpolation;
@@ -84,6 +85,7 @@ impl Command for ActorSet {
                 ..Default::default()
             })
             .insert(Actor::new(self.config))
+            .insert(Footsteps::default())
             .insert(Weapon::new(WeaponConfig {
                 muzzle_velocity: 320.0,
                 fire_rate: 650.0,

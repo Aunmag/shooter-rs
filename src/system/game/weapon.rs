@@ -1,3 +1,4 @@
+use crate::command::AudioPlay;
 use crate::command::ProjectileSpawn;
 use crate::component::Actor;
 use crate::component::Weapon;
@@ -47,6 +48,13 @@ pub fn weapon(
             let direction = transform.direction + FRAC_PI_2;
             transform.translation.x += BARREL_LENGTH * direction.cos();
             transform.translation.y += BARREL_LENGTH * direction.sin();
+
+            commands.add(AudioPlay {
+                path: "sounds/shot.ogg",
+                volume: 1.0,
+                source: Some(transform.translation),
+                ..Default::default()
+            });
 
             for _ in 0..8 {
                 transform.direction = deviate_direction(&mut data.rng, transform.direction);

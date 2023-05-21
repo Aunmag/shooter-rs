@@ -1,3 +1,4 @@
+use crate::command::AudioPlay;
 use crate::command::CursorGrab;
 use crate::command::TerrainInit;
 use crate::data::LAYER_BLUFF;
@@ -35,6 +36,13 @@ pub fn on_enter(mut commands: Commands, assets: Res<AssetServer>) {
     commands.spawn(Camera2dBundle::default());
     spawn_bluffs(&mut commands, &assets);
     spawn_trees(&mut commands, &assets);
+
+    commands.add(AudioPlay {
+        path: "sounds/ambience.ogg",
+        volume: 0.2,
+        repeat: true,
+        ..Default::default()
+    });
 }
 
 // TODO: maybe render bluff corner as tile map

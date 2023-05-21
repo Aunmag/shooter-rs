@@ -30,12 +30,12 @@ impl Interpolation {
         let progress = time.get_progress(self.start, self.get_end_time(duration));
 
         return TransformLite::new(
-            interpolate(
+            math::interpolate(
                 self.origin.translation.x,
                 self.target.translation.x,
                 progress,
             ),
-            interpolate(
+            math::interpolate(
                 self.origin.translation.y,
                 self.target.translation.y,
                 progress,
@@ -47,10 +47,6 @@ impl Interpolation {
     pub fn get_end_time(&self, duration: Duration) -> Duration {
         return self.start + duration;
     }
-}
-
-fn interpolate(source: f32, target: f32, progress: f32) -> f32 {
-    return source + (target - source) * progress;
 }
 
 fn interpolate_angle(source: f32, target: f32, progress: f32) -> f32 {

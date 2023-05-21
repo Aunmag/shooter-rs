@@ -1,7 +1,9 @@
 mod actor;
+mod ambience_fx;
 mod camera;
 mod collision_find;
 mod collision_resolve;
+mod footsteps;
 mod health;
 mod inertia;
 mod input;
@@ -14,9 +16,11 @@ mod terrain;
 mod weapon;
 
 pub use self::actor::*;
+pub use self::ambience_fx::*;
 pub use self::camera::*;
 pub use self::collision_find::*;
 pub use self::collision_resolve::*;
+pub use self::footsteps::*;
 pub use self::health::*;
 pub use self::inertia::*;
 pub use self::input::*;

@@ -1,5 +1,6 @@
 use crate::model::AppState;
 use crate::resource::EntityConverter;
+use crate::resource::Rng;
 use crate::resource::Scenario;
 use crate::resource::TransformUpdateResource;
 use crate::scenario::WavesScenario;
@@ -28,7 +29,9 @@ impl Plugin for GameServerPlugin {
 
         // TODO: do automatically on enter or make it lazy
         // TODO: remove on exit
+        app.insert_resource(AmbienceFxData::default());
         app.insert_resource(EntityConverter::default());
+        app.insert_resource(Rng::default());
         app.insert_resource(Scenario::new(WavesScenario::new()));
         app.insert_resource(TransformUpdateResource::default()); // TODO: keep it on client only
         app.insert_resource(bot::TargetFindData::default());
@@ -51,10 +54,13 @@ impl Plugin for GameServerPlugin {
         app.add_state_system(state, net::message_receive);
         app.add_state_system(state, net::connection_update);
         app.add_state_system(state, camera.after(collision_resolve));
+        app.add_state_system(state, footsteps);
+        app.add_state_system(state, ambience_fx);
         app.add_state_system(state, terrain);
         app.add_state_system(state, scenario);
         app.add_state_system(state, bot::target_find);
         app.add_state_system(state, bot::target_update.after(bot::target_find));
         app.add_state_system(state, bot::target_follow.after(bot::target_update));
+        app.add_state_system(state, bot::sound);
     }
 }

@@ -3,6 +3,10 @@ use std::f32::consts::PI;
 use std::f32::consts::TAU;
 use std::ops::Neg;
 
+pub fn interpolate(min: f32, max: f32, ratio: f32) -> f32 {
+    return min + (max - min) * ratio;
+}
+
 pub fn angle_difference(a: f32, b: f32) -> f32 {
     let difference = (b - a) % TAU;
 

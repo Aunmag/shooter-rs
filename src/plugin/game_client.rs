@@ -1,5 +1,6 @@
 use crate::model::AppState;
 use crate::resource::EntityConverter;
+use crate::resource::Rng;
 use crate::resource::ServerData;
 use crate::resource::TransformUpdateResource;
 use crate::util::ext::AppExt;
@@ -17,7 +18,9 @@ impl Plugin for GameClientPlugin {
 
         // TODO: do automatically on enter or make it lazy
         // TODO: remove on exit
+        app.insert_resource(AmbienceFxData::default());
         app.insert_resource(EntityConverter::default());
+        app.insert_resource(Rng::default());
         app.insert_resource(ServerData::default());
         app.insert_resource(TransformUpdateResource::default());
         app.insert_resource(net::InputSendData::default());
@@ -39,6 +42,8 @@ impl Plugin for GameClientPlugin {
         );
         app.add_state_system(state, net::connection_update);
         app.add_state_system(state, camera.after(inertia));
+        app.add_state_system(state, footsteps);
+        app.add_state_system(state, ambience_fx);
         app.add_state_system(state, terrain);
     }
 }
