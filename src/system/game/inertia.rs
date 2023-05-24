@@ -1,5 +1,4 @@
 use crate::component::Inertia;
-use bevy::math::Quat;
 use bevy::prelude::Query;
 use bevy::prelude::Res;
 use bevy::prelude::Time;
@@ -11,7 +10,7 @@ pub fn inertia(mut query: Query<(&mut Transform, &mut Inertia)>, time: Res<Time>
     for (mut transform, mut inertia) in query.iter_mut() {
         transform.translation.x += inertia.velocity.x * delta;
         transform.translation.y += inertia.velocity.y * delta;
-        transform.rotate(Quat::from_rotation_z(inertia.velocity_angular * delta));
+        transform.rotate_local_z(inertia.velocity_angular * delta);
         inertia.velocity *= 1.0 - delta * Inertia::DRAG;
         inertia.velocity_angular *= 1.0 - delta * Inertia::DRAG_ANGULAR;
     }

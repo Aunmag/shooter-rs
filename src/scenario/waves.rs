@@ -8,6 +8,7 @@ use crate::data::VIEW_DISTANCE;
 use crate::model::TransformLiteU8;
 use crate::resource::Scenario;
 use crate::resource::ScenarioLogic;
+use crate::util::ext::Vec2Ext;
 use crate::util::math::compress_radians;
 use bevy::ecs::system::Command;
 use bevy::math::Vec2;
@@ -155,10 +156,11 @@ impl Command for SpawnZombie {
         }
 
         let entity = world.spawn_empty().id();
+        let offset = Vec2::from_length(ZOMBIES_SPAWN_DISTANCE, self.direction);
 
         let transform = TransformLiteU8::new(
-            center.x + ZOMBIES_SPAWN_DISTANCE * self.direction.cos(),
-            center.y + ZOMBIES_SPAWN_DISTANCE * self.direction.sin(),
+            center.x + offset.x,
+            center.y + offset.y,
             compress_radians(self.direction),
         );
 

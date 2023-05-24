@@ -27,19 +27,19 @@ pub fn actor(mut query: Query<(&Actor, &mut Transform, &mut Inertia)>, time: Res
         let mut movement = Vec3::new(0.0, 0.0, 0.0);
 
         if actor.actions.contains(ActorAction::MovementForward) {
-            movement.y += 1.0;
+            movement.x += 1.0;
         }
 
         if actor.actions.contains(ActorAction::MovementBackward) {
-            movement.y -= 1.0;
-        }
-
-        if actor.actions.contains(ActorAction::MovementLeftward) {
             movement.x -= 1.0;
         }
 
+        if actor.actions.contains(ActorAction::MovementLeftward) {
+            movement.y += 1.0;
+        }
+
         if actor.actions.contains(ActorAction::MovementRightward) {
-            movement.x += 1.0;
+            movement.y -= 1.0;
         }
 
         movement = transform.rotation

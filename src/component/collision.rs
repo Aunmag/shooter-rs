@@ -17,12 +17,8 @@ impl Collision {
         if distance_squared < distance_min * distance_min {
             let distance = distance_squared.sqrt();
             let distance_to_push = (distance_min - distance) / 2.0 + EXTRA_RESOLVE_DISTANCE;
-            let direction = p1.atan2_to(p2);
-
-            return Some(Vec2::new(
-                distance_to_push * direction.cos(),
-                distance_to_push * direction.sin(),
-            ));
+            let angle = p2.angle_to(p1);
+            return Some(Vec2::from_length(distance_to_push, angle));
         } else {
             return None;
         }

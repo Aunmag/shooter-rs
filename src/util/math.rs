@@ -8,15 +8,19 @@ pub fn interpolate(min: f32, max: f32, ratio: f32) -> f32 {
 }
 
 pub fn angle_difference(a: f32, b: f32) -> f32 {
-    let difference = (b - a) % TAU;
+    return normalize_radians(b - a);
+}
 
-    if difference > PI {
-        return difference - TAU;
-    } else if difference < -PI {
-        return difference + TAU;
-    } else {
-        return difference;
+pub fn normalize_radians(mut radians: f32) -> f32 {
+    radians %= TAU;
+
+    if radians > PI {
+        radians -= TAU;
+    } else if radians < -PI {
+        radians += TAU;
     }
+
+    return radians;
 }
 
 pub fn compress_radians(value: f32) -> u8 {
@@ -53,6 +57,20 @@ pub fn find_meet_point(
 mod tests {
     use super::*;
     use approx::assert_abs_diff_eq;
+    use std::f32::consts::FRAC_PI_2;
+
+    #[test]
+    fn test_normalize_radians() {
+        assert_abs_diff_eq!(normalize_radians(-TAU), 0.0);
+        assert_abs_diff_eq!(normalize_radians(-PI - FRAC_PI_2), FRAC_PI_2);
+        assert_abs_diff_eq!(normalize_radians(-PI), -PI);
+        assert_abs_diff_eq!(normalize_radians(-FRAC_PI_2), -FRAC_PI_2);
+        assert_abs_diff_eq!(normalize_radians(0.0), 0.0);
+        assert_abs_diff_eq!(normalize_radians(FRAC_PI_2), FRAC_PI_2);
+        assert_abs_diff_eq!(normalize_radians(PI), PI);
+        assert_abs_diff_eq!(normalize_radians(PI + FRAC_PI_2), -FRAC_PI_2);
+        assert_abs_diff_eq!(normalize_radians(TAU), 0.0);
+    }
 
     #[test]
     fn test_angle_difference() {

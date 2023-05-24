@@ -6,6 +6,7 @@ use crate::model::TransformLite;
 use crate::resource::Message;
 use crate::resource::NetResource;
 use crate::util;
+use crate::util::ext::Vec2Ext;
 use crate::util::ext::WorldExt;
 use bevy::asset::Assets;
 use bevy::ecs::system::Command;
@@ -19,7 +20,6 @@ use bevy::prelude::Transform;
 use bevy::prelude::Vec2;
 use bevy::prelude::World;
 use bevy::sprite::MaterialMesh2dBundle;
-use std::f32::consts::FRAC_PI_2;
 
 pub struct ProjectileSpawn {
     pub config: &'static ProjectileConfig,
@@ -42,16 +42,11 @@ impl Command for ProjectileSpawn {
                 });
         }
 
-        let direction = self.transform.direction + FRAC_PI_2;
-
         let projectile = Projectile::new(
             self.config,
             world.resource::<Time>().elapsed(),
             self.transform.translation,
-            Vec2::new(
-                self.velocity * direction.cos(),
-                self.velocity * direction.sin(),
-            ),
+            Vec2::from_length(self.velocity, self.transform.direction),
             self.shooter,
         );
 

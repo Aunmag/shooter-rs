@@ -5,6 +5,7 @@ use bevy::math::Vec2;
 use bevy::math::Vec3Swizzles;
 use bevy::prelude::Quat;
 use bevy::prelude::Transform;
+use bevy::prelude::Vec3;
 use serde::Deserialize;
 use serde::Serialize;
 
@@ -23,19 +24,12 @@ impl TransformLite {
         };
     }
 
-    // TODO: impl trait
     pub fn as_transform(self, z: f32) -> Transform {
-        let mut transform = Transform::from_xyz(self.translation.x, self.translation.y, z);
-        transform.rotate(self.as_quaternion());
-        transform.scale.x = 1.0 / PIXELS_PER_METER;
-        transform.scale.y = 1.0 / PIXELS_PER_METER;
-        transform.scale.z = 1.0;
-        return transform;
-    }
-
-    // TODO: impl trait
-    pub fn as_quaternion(&self) -> Quat {
-        return Quat::from_rotation_z(self.direction);
+        return Transform {
+            translation: self.translation.extend(z),
+            rotation: Quat::from_rotation_z(self.direction),
+            scale: Vec3::splat(1.0 / PIXELS_PER_METER),
+        };
     }
 }
 
@@ -72,19 +66,12 @@ impl TransformLiteU8 {
         };
     }
 
-    // TODO: impl trait
     pub fn as_transform(self, z: f32) -> Transform {
-        let mut transform = Transform::from_xyz(self.translation.x, self.translation.y, z);
-        transform.rotate(self.as_quaternion());
-        transform.scale.x = 1.0 / PIXELS_PER_METER;
-        transform.scale.y = 1.0 / PIXELS_PER_METER;
-        transform.scale.z = 1.0;
-        return transform;
-    }
-
-    // TODO: impl trait
-    pub fn as_quaternion(&self) -> Quat {
-        return Quat::from_rotation_z(self.direction_f32());
+        return Transform {
+            translation: self.translation.extend(z),
+            rotation: Quat::from_rotation_z(self.direction_f32()),
+            scale: Vec3::splat(1.0 / PIXELS_PER_METER),
+        };
     }
 
     pub fn direction_f32(&self) -> f32 {

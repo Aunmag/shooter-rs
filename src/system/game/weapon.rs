@@ -4,8 +4,10 @@ use crate::component::Actor;
 use crate::component::Weapon;
 use crate::model::ActorActionsExt;
 use crate::model::TransformLite;
+use crate::util::ext::Vec2Ext;
 use bevy::ecs::system::Query;
 use bevy::ecs::system::Resource;
+use bevy::math::Vec2;
 use bevy::prelude::Commands;
 use bevy::prelude::Entity;
 use bevy::prelude::Res;
@@ -15,7 +17,6 @@ use bevy::prelude::Transform;
 use rand::Rng;
 use rand::SeedableRng;
 use rand_pcg::Pcg32;
-use std::f32::consts::FRAC_PI_2;
 
 const VELOCITY_DEVIATION_FACTOR: f32 = 0.1;
 const DIRECTION_DEVIATION: f32 = 0.02;
@@ -45,9 +46,7 @@ pub fn weapon(
     for (entity, actor, transform, mut weapon) in query.iter_mut() {
         if actor.actions.is_attacking() && weapon.fire(now) {
             let mut transform = TransformLite::from(transform);
-            let direction = transform.direction + FRAC_PI_2;
-            transform.translation.x += BARREL_LENGTH * direction.cos();
-            transform.translation.y += BARREL_LENGTH * direction.sin();
+            transform.translation += Vec2::from_length(BARREL_LENGTH, transform.direction);
 
             commands.add(AudioPlay {
                 path: "sounds/shot.ogg",

@@ -10,8 +10,8 @@ var oputput: sampler;
 fn fragment(
     #import bevy_sprite::mesh2d_vertex_output
 ) -> @location(0) vec4<f32> {
-    var x = 0.010 / abs(0.5 - uv.x);
-    var y0 = saturate((1.0 - uv.y) * 100.0);
-    var y1 = uv.y;
-    return vec4<f32>(vec3<f32>(1.0, 1.0, 0.1), x * y0 * y1);
+    var y = 0.010 / abs(0.5 - uv.y);
+    var x0 = saturate((1.0 - uv.x) * 100.0);
+    var x1 = uv.x;
+    return vec4<f32>(vec3<f32>(1.0, 1.0, 0.1), y * x0 * x1);
 }

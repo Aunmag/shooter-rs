@@ -42,7 +42,7 @@ impl Actor {
 impl ActorConfig {
     pub const HUMAN: &'static Self = &Self {
         sprite: "actors/human/image.png",
-        sprite_offset: SpriteOffset::new(None, Some(9.0)),
+        sprite_offset: SpriteOffset::new(Some(9.0), None),
         movement_velocity: 2.5,
         rotation_velocity: 8.0,
         sprint_factor: 2.0,
@@ -54,7 +54,7 @@ impl ActorConfig {
 
     pub const ZOMBIE: &'static Self = &Self {
         sprite: "actors/zombie/image.png",
-        sprite_offset: SpriteOffset::new(None, Some(6.5)),
+        sprite_offset: SpriteOffset::new(Some(6.5), None),
         movement_velocity: Self::HUMAN.movement_velocity * 0.4,
         rotation_velocity: Self::HUMAN.rotation_velocity * 0.4,
         sprint_factor: 1.8,

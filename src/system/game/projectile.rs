@@ -13,7 +13,6 @@ use bevy::prelude::Time;
 use bevy::prelude::Transform;
 use bevy::prelude::Vec2;
 use bevy::prelude::Without;
-use std::f32::consts::FRAC_PI_2;
 use std::time::Duration;
 
 const TIME_DELTA_FOR_RENDER: Duration = Duration::from_millis(25); // 40 FPS
@@ -46,7 +45,7 @@ pub fn projectile(
                 find_contact_velocity(contact_position, head, tail, head_velocity, tail_velocity);
 
             let angle =
-                math::angle_difference(tail.atan2_to(head), tail.atan2_to(obstacle_position));
+                math::angle_difference(tail.angle_to(head), tail.angle_to(obstacle_position));
 
             hits.push((
                 obstacle,
@@ -112,9 +111,9 @@ fn update_transform(projectile: &Projectile, head: Vec2, tail: Vec2, transform: 
     let center = (head + tail) / 2.0;
     transform.translation.x = center.x;
     transform.translation.y = center.y;
-    transform.rotation = Quat::from_rotation_z(projectile.initial_velocity.atan2() - FRAC_PI_2);
-    transform.scale.x = projectile.config.size;
-    transform.scale.y = (head - tail).length();
+    transform.rotation = Quat::from_rotation_z(projectile.initial_velocity.angle());
+    transform.scale.x = (head - tail).length();
+    transform.scale.y = projectile.config.size;
 }
 
 fn has_stopped(velocity: Vec2) -> bool {

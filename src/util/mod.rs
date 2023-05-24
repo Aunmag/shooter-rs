@@ -1,5 +1,7 @@
 pub mod ext;
 pub mod math;
+#[cfg(test)]
+pub mod test;
 mod timer;
 
 pub use self::timer::*;
