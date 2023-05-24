@@ -9,7 +9,7 @@ use rand::Rng as _;
 use std::time::Duration;
 
 const INTERVAL_MIN: f32 = 15.0;
-const INTERVAL_MAX: f32 = 30.0;
+const INTERVAL_MAX: f32 = 25.0;
 
 #[derive(Default, Resource)]
 pub struct AmbienceFxData {
@@ -31,7 +31,7 @@ pub fn ambience_fx(
     if !data.next.is_zero() {
         commands.add(AudioPlay {
             path: "sounds/ambience_fx_{n}.ogg",
-            volume: 0.2,
+            volume: 0.3,
             choices: 7,
             ..Default::default()
         });
