@@ -8,6 +8,7 @@ use bevy::ecs::system::Query;
 use bevy::math::Quat;
 use bevy::math::Vec3Swizzles;
 use bevy::prelude::Commands;
+use bevy::prelude::DespawnRecursiveExt;
 use bevy::prelude::Res;
 use bevy::prelude::Time;
 use bevy::prelude::Transform;
@@ -30,7 +31,7 @@ pub fn projectile(
 
     for (entity, mut projectile, mut transform) in projectiles.iter_mut() {
         if projectile.stopped {
-            commands.entity(entity).despawn();
+            commands.entity(entity).despawn_recursive();
             continue;
         }
 

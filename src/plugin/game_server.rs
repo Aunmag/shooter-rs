@@ -55,6 +55,7 @@ impl Plugin for GameServerPlugin {
         app.add_state_system(state, net::message_receive);
         app.add_state_system(state, net::connection_update);
         app.add_state_system(state, camera.after(collision_resolve));
+        app.add_state_system(state, health_bar);
         app.add_state_system(state, footsteps);
         app.add_state_system(state, ambience_fx);
         app.add_state_system(state, terrain);

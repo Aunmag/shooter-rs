@@ -4,6 +4,7 @@ use crate::resource::Message;
 use crate::resource::NetResource;
 use crate::util::ext::WorldExt;
 use bevy::ecs::system::Command;
+use bevy::prelude::DespawnRecursiveExt;
 use bevy::prelude::Entity;
 use bevy::prelude::World;
 
@@ -21,10 +22,10 @@ impl Command for EntityDelete {
         }
 
         if let Some(ghost) = world.get::<Player>(self.0).and_then(|p| p.ghost) {
-            world.despawn(ghost);
+            world.entity_mut(ghost).despawn_recursive();
         }
 
         world.resource_mut::<EntityConverter>().remove(self.0);
-        world.despawn(self.0);
+        world.entity_mut(self.0).despawn_recursive();
     }
 }

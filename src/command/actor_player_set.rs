@@ -1,4 +1,5 @@
 use crate::command::ActorSet;
+use crate::command::HealthBarSet;
 use crate::component::Actor;
 use crate::component::ActorConfig;
 use crate::component::Inertia;
@@ -18,7 +19,7 @@ impl Command for ActorPlayerSet {
         let is_client = world.is_client();
         let mut ghost_transform = TransformLiteU8::default();
 
-        if let Some(mut transform) = world.entity_mut(self.0).get_mut::<Transform>() {
+        if let Some(mut transform) = world.get_mut::<Transform>(self.0) {
             ghost_transform = TransformLiteU8::from(&*transform);
             transform.translation.z = LAYER_ACTOR_PLAYER;
         }
@@ -50,5 +51,7 @@ impl Command for ActorPlayerSet {
         let mut entity_mut = world.entity_mut(self.0);
         entity_mut.insert(Player::new(ghost));
         entity_mut.insert(Inertia::new(config.mass));
+
+        HealthBarSet(self.0).write(world);
     }
 }

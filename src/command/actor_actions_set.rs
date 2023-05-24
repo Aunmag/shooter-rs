@@ -14,13 +14,11 @@ pub struct ActorActionsSet {
 
 impl Command for ActorActionsSet {
     fn write(self, world: &mut World) {
-        let mut entity_mut = world.entity_mut(self.entity);
-
-        if let Some(mut actor) = entity_mut.get_mut::<Actor>() {
+        if let Some(mut actor) = world.get_mut::<Actor>(self.entity) {
             actor.actions = self.actions;
         }
 
-        if let Some(mut transform) = entity_mut.get_mut::<Transform>() {
+        if let Some(mut transform) = world.get_mut::<Transform>(self.entity) {
             transform.rotation = Quat::from_rotation_z(self.direction);
         }
     }

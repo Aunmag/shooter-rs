@@ -37,6 +37,7 @@ mod system;
 mod util;
 
 use crate::data::APP_TITLE;
+use crate::material::HealthBarMaterial;
 use crate::material::ProjectileMaterial;
 use crate::model::AppState;
 use crate::model::Arguments;
@@ -97,6 +98,7 @@ fn main() {
                     ..Default::default()
                 }),
         )
+        .add_plugin(Material2dPlugin::<HealthBarMaterial>::default())
         .add_plugin(Material2dPlugin::<ProjectileMaterial>::default())
         .add_state::<AppState>()
         .insert_resource(net)

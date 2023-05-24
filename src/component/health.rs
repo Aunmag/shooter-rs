@@ -41,6 +41,10 @@ impl Health {
         }
     }
 
+    pub fn get(&self) -> f32 {
+        return self.value;
+    }
+
     pub fn is_alive(&self) -> bool {
         return self.value > 0.0;
     }

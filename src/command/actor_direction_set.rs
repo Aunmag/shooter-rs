@@ -11,7 +11,7 @@ pub struct ActorDirectionSet {
 
 impl Command for ActorDirectionSet {
     fn write(self, world: &mut World) {
-        if let Some(mut transform) = world.entity_mut(self.entity).get_mut::<Transform>() {
+        if let Some(mut transform) = world.get_mut::<Transform>(self.entity) {
             transform.rotation = Quat::from_rotation_z(self.direction);
         }
     }

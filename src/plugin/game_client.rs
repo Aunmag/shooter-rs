@@ -42,6 +42,7 @@ impl Plugin for GameClientPlugin {
         );
         app.add_state_system(state, net::connection_update);
         app.add_state_system(state, camera.after(inertia));
+        app.add_state_system(state, health_bar);
         app.add_state_system(state, footsteps);
         app.add_state_system(state, ambience_fx);
         app.add_state_system(state, terrain);
