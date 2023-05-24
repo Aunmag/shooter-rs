@@ -32,6 +32,12 @@ impl Health {
         self.set(self.value - value / self.resistance, now);
     }
 
+    pub fn heal(&mut self) {
+        if self.is_alive() {
+            self.value = 1.0;
+        }
+    }
+
     pub fn set(&mut self, value: f32, now: Duration) {
         let was_alive = self.is_alive();
         self.value = value.clamp(0.0, 1.0);

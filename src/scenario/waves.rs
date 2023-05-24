@@ -4,6 +4,7 @@ use crate::command::ActorSet;
 use crate::component::Actor;
 use crate::component::ActorConfig;
 use crate::component::ActorType;
+use crate::component::Health;
 use crate::data::VIEW_DISTANCE;
 use crate::model::TransformLiteU8;
 use crate::resource::Scenario;
@@ -87,6 +88,7 @@ impl WavesScenario {
             }
             Task::PrepareNextWave => {
                 log::info!("Prepare for the wave");
+                commands.add(HealHumans);
                 return Task::StartNextWave;
             }
             Task::StartNextWave => {
@@ -187,6 +189,18 @@ impl Command for CountZombies {
         {
             if let Some(scenario) = world.resource_mut::<Scenario>().logic::<WavesScenario>() {
                 scenario.task = Task::CompleteWave; // TODO: count duration
+            }
+        }
+    }
+}
+
+struct HealHumans;
+
+impl Command for HealHumans {
+    fn write(self, world: &mut World) {
+        for (actor, mut health) in world.query::<(&Actor, &mut Health)>().iter_mut(world) {
+            if let ActorType::Human = actor.config.actor_type {
+                health.heal();
             }
         }
     }
