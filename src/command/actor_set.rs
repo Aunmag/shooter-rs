@@ -1,5 +1,6 @@
 use crate::component::Actor;
 use crate::component::ActorConfig;
+use crate::component::ActorType;
 use crate::component::Collision;
 use crate::component::Footsteps;
 use crate::component::Health;
@@ -84,8 +85,11 @@ impl Command for ActorSet {
                 ..Default::default()
             })
             .insert(Actor::new(self.config))
-            .insert(Footsteps::default())
-            .insert(Weapon::new(&WeaponConfig::AKS_74U));
+            .insert(Footsteps::default());
+
+        if let ActorType::Human = self.config.actor_type {
+            entity_mut.insert(Weapon::new(&WeaponConfig::AKS_74U));
+        }
 
         if is_server {
             entity_mut.insert(Health::new(self.config.resistance));

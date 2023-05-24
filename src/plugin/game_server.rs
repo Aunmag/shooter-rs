@@ -46,6 +46,7 @@ impl Plugin for GameServerPlugin {
         app.add_state_system(state, inertia.after(actor));
         app.add_state_system(state, collision_find.pipe(collision_resolve).after(inertia));
         app.add_state_system(state, weapon.after(collision_resolve));
+        app.add_state_system(state, melee.after(collision_resolve));
         app.add_state_system(
             state,
             projectile.pipe(projectile_hit).after(collision_resolve),

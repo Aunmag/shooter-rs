@@ -19,7 +19,7 @@ pub fn collision_resolve(
     for (entity, mut transform, mut inertia) in query.iter_mut() {
         for (i, solution) in solutions.iter().enumerate() {
             if entity.index() == solution.entity_index {
-                inertia.push(solution.push, 0.0, true, false);
+                inertia.push(solution.push, 0.0, true, false, false);
                 transform.translation.x += solution.shift.x;
                 transform.translation.y += solution.shift.y;
                 solutions.swap_remove(i);

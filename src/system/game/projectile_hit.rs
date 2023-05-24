@@ -1,7 +1,6 @@
 use crate::command::AudioPlay;
 use crate::component::Health;
 use crate::component::Inertia;
-use crate::component::Projectile;
 use bevy::ecs::entity::Entity;
 use bevy::ecs::system::Query;
 use bevy::math::Vec3Swizzles;
@@ -24,12 +23,7 @@ pub fn projectile_hit(
         let momentum = force.length();
 
         if let Ok((transform, mut inertia, mut health)) = entities.get_mut(entity) {
-            inertia.push(
-                force * Projectile::PUSH_FACTOR,
-                momentum * force_angular * Projectile::PUSH_FACTOR_ANGULAR,
-                true,
-                false,
-            );
+            inertia.push(force, momentum * force_angular, true, false, true);
 
             health.damage(momentum, time);
 

@@ -1,6 +1,7 @@
 mod actor_actions_set;
 mod actor_bot_set;
 mod actor_direction_set;
+mod actor_melee_reset;
 mod actor_player_set;
 mod actor_set;
 mod audio_play;
@@ -14,6 +15,7 @@ mod terrain_init;
 pub use self::actor_actions_set::*;
 pub use self::actor_bot_set::*;
 pub use self::actor_direction_set::*;
+pub use self::actor_melee_reset::*;
 pub use self::actor_player_set::*;
 pub use self::actor_set::*;
 pub use self::audio_play::*;

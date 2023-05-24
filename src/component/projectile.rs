@@ -70,8 +70,6 @@ impl ProjectileConfig {
 }
 
 impl Projectile {
-    pub const PUSH_FACTOR: f32 = 30.0;
-    pub const PUSH_FACTOR_ANGULAR: f32 = 200.0;
     pub const VELOCITY_MIN: f32 = 5.0;
     pub const VELOCITY_VISUAL_FACTOR: f32 = 1.0 / 5.0;
 

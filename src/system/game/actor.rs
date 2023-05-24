@@ -51,7 +51,7 @@ pub fn actor(mut query: Query<(&Actor, &mut Transform, &mut Inertia)>, time: Res
             movement *= actor.config.sprint_factor;
         }
 
-        inertia.push(movement.xy(), 0.0, false, true);
+        inertia.push(movement.xy(), 0.0, false, true, false);
     }
 }
 
@@ -78,7 +78,7 @@ fn turn(actor: &Actor, transform: &mut Transform, inertia: &mut Inertia, time_de
         velocity /= distance_excess;
     }
 
-    inertia.push(Vec2::ZERO, velocity, false, true);
+    inertia.push(Vec2::ZERO, velocity, false, true, false);
 }
 
 fn normalize_movement(mut movement: Vec3) -> Vec3 {
