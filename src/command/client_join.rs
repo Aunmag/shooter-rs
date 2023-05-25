@@ -1,14 +1,13 @@
-use crate::command::ActorSet;
-use crate::component::Actor;
-use crate::component::ActorConfig;
-use crate::model::TransformLiteU8;
-use crate::resource::Config;
-use crate::resource::Message;
-use crate::resource::NetResource;
-use bevy::ecs::system::Command;
-use bevy::prelude::Entity;
-use bevy::prelude::Transform;
-use bevy::prelude::World;
+use crate::{
+    command::ActorSet,
+    component::{Actor, ActorConfig},
+    model::TransformLiteU8,
+    resource::{Config, Message, NetResource},
+};
+use bevy::{
+    ecs::system::Command,
+    prelude::{Entity, Transform, World},
+};
 use std::net::SocketAddr;
 
 pub struct ClientJoin(pub SocketAddr);

@@ -1,11 +1,10 @@
-use crate::command::AudioPlay;
-use crate::model::ActorActions;
-use crate::model::SpriteOffset;
+use crate::{
+    command::AudioPlay,
+    model::{ActorActions, SpriteOffset},
+};
 use bevy::ecs::component::Component;
-use serde::Deserialize;
-use serde::Serialize;
-use std::f32::consts::TAU;
-use std::time::Duration;
+use serde::{Deserialize, Serialize};
+use std::{f32::consts::TAU, time::Duration};
 
 #[derive(Component)]
 pub struct Actor {

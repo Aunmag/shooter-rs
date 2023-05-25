@@ -1,7 +1,8 @@
 use bevy::prelude::Vec2;
-use std::f32::consts::PI;
-use std::f32::consts::TAU;
-use std::ops::Neg;
+use std::{
+    f32::consts::{PI, TAU},
+    ops::Neg,
+};
 
 pub fn interpolate(min: f32, max: f32, ratio: f32) -> f32 {
     return min + (max - min) * ratio;

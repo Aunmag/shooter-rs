@@ -1,6 +1,5 @@
 use crate::resource::ServerData;
-use bevy::ecs::system::Command;
-use bevy::prelude::World;
+use bevy::{ecs::system::Command, prelude::World};
 use std::time::Duration;
 
 pub struct StartClient {

@@ -1,10 +1,9 @@
-use crate::component::Actor;
-use crate::model::ActorActions;
-use bevy::ecs::system::Command;
-use bevy::math::Quat;
-use bevy::prelude::Entity;
-use bevy::prelude::Transform;
-use bevy::prelude::World;
+use crate::{component::Actor, model::ActorActions};
+use bevy::{
+    ecs::system::Command,
+    math::Quat,
+    prelude::{Entity, Transform, World},
+};
 
 pub struct ActorActionsSet {
     pub entity: Entity,

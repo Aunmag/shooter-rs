@@ -1,5 +1,4 @@
-use crate::model::geometry::Geometry;
-use crate::model::geometry::GeometryDistance;
+use crate::model::geometry::{Geometry, GeometryDistance};
 use bevy::math::Vec2;
 
 pub type LineSegment = (Vec2, Vec2);

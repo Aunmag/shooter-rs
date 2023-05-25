@@ -1,17 +1,10 @@
-use crate::component::Player;
-use crate::data::VIEW_DISTANCE;
-use crate::util::ext::TransformExt;
-use bevy::ecs::system::Query;
-use bevy::math::Quat;
-use bevy::math::Vec2;
-use bevy::math::Vec3;
-use bevy::prelude::Camera;
-use bevy::prelude::OrthographicProjection;
-use bevy::prelude::Transform;
-use bevy::prelude::With;
-use bevy::prelude::Without;
-use bevy::window::PrimaryWindow;
-use bevy::window::Window;
+use crate::{component::Player, data::VIEW_DISTANCE, util::ext::TransformExt};
+use bevy::{
+    ecs::system::Query,
+    math::{Quat, Vec2, Vec3},
+    prelude::{Camera, OrthographicProjection, Transform, With, Without},
+    window::{PrimaryWindow, Window},
+};
 use std::f32::consts::FRAC_PI_2;
 
 const OFFSET_RATIO: f32 = 0.25;

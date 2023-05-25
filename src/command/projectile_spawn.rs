@@ -1,25 +1,19 @@
-use crate::component::Projectile;
-use crate::component::ProjectileConfig;
-use crate::data::LAYER_PROJECTILE;
-use crate::material::ProjectileMaterial;
-use crate::model::TransformLite;
-use crate::resource::Message;
-use crate::resource::NetResource;
-use crate::util;
-use crate::util::ext::Vec2Ext;
-use crate::util::ext::WorldExt;
-use bevy::asset::Assets;
-use bevy::ecs::system::Command;
-use bevy::math::Vec3;
-use bevy::prelude::shape::Cube;
-use bevy::prelude::Entity;
-use bevy::prelude::Image;
-use bevy::prelude::Mesh;
-use bevy::prelude::Time;
-use bevy::prelude::Transform;
-use bevy::prelude::Vec2;
-use bevy::prelude::World;
-use bevy::sprite::MaterialMesh2dBundle;
+use crate::{
+    component::{Projectile, ProjectileConfig},
+    data::LAYER_PROJECTILE,
+    material::ProjectileMaterial,
+    model::TransformLite,
+    resource::{Message, NetResource},
+    util,
+    util::ext::{Vec2Ext, WorldExt},
+};
+use bevy::{
+    asset::Assets,
+    ecs::system::Command,
+    math::Vec3,
+    prelude::{shape::Cube, Entity, Image, Mesh, Time, Transform, Vec2, World},
+    sprite::MaterialMesh2dBundle,
+};
 
 pub struct ProjectileSpawn {
     pub config: &'static ProjectileConfig,

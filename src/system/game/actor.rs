@@ -1,16 +1,14 @@
-use crate::component::Actor;
-use crate::component::Inertia;
-use crate::model::ActorAction;
-use crate::model::ActorActionsExt;
-use crate::util::ext::TransformExt;
-use crate::util::math;
-use bevy::ecs::system::Query;
-use bevy::math::Vec2;
-use bevy::math::Vec3Swizzles;
-use bevy::prelude::Res;
-use bevy::prelude::Time;
-use bevy::prelude::Vec3;
-use bevy::transform::components::Transform;
+use crate::{
+    component::{Actor, Inertia},
+    model::{ActorAction, ActorActionsExt},
+    util::{ext::TransformExt, math},
+};
+use bevy::{
+    ecs::system::Query,
+    math::{Vec2, Vec3Swizzles},
+    prelude::{Res, Time, Vec3},
+    transform::components::Transform,
+};
 
 const TURN_EPSILON: f32 = 0.01;
 

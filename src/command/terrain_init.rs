@@ -1,10 +1,8 @@
-use crate::component::Terrain;
-use crate::data::LAYER_TERRAIN;
-use crate::model::TransformLite;
-use bevy::ecs::system::Command;
-use bevy::prelude::AssetServer;
-use bevy::prelude::SpriteBundle;
-use bevy::prelude::World;
+use crate::{component::Terrain, data::LAYER_TERRAIN, model::TransformLite};
+use bevy::{
+    ecs::system::Command,
+    prelude::{AssetServer, SpriteBundle, World},
+};
 
 pub struct TerrainInit;
 

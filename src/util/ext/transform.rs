@@ -1,6 +1,5 @@
 use crate::util;
-use bevy::prelude::EulerRot;
-use bevy::prelude::Transform;
+use bevy::prelude::{EulerRot, Transform};
 
 pub trait TransformExt {
     fn direction(&self) -> f32;

@@ -36,27 +36,21 @@ mod scenario;
 mod system;
 mod util;
 
-use crate::data::APP_TITLE;
-use crate::material::HealthBarMaterial;
-use crate::material::ProjectileMaterial;
-use crate::model::AppState;
-use crate::model::Arguments;
-use crate::plugin::GameClientPlugin;
-use crate::plugin::GameServerPlugin;
-use crate::plugin::StressTestPlugin;
-use crate::resource::AssetStorage;
-use crate::resource::Config;
-use crate::resource::GameType;
-use crate::resource::NetResource;
-use crate::util::ext::AppExt;
-use bevy::prelude::App;
-use bevy::prelude::DefaultPlugins;
-use bevy::prelude::PluginGroup;
-use bevy::render::texture::ImagePlugin;
-use bevy::sprite::Material2dPlugin;
-use bevy::window::Window;
-use bevy::window::WindowPlugin;
-use bevy::window::WindowResolution;
+use crate::{
+    data::APP_TITLE,
+    // material::{HealthBarMaterial, ProjectileMaterial},
+    material::{HealthBarMaterial, ProjectileMaterial},
+    model::{AppState, Arguments},
+    plugin::{GameClientPlugin, GameServerPlugin, StressTestPlugin},
+    resource::{AssetStorage, Config, GameType, NetResource},
+    util::ext::AppExt,
+};
+use bevy::{
+    prelude::{App, DefaultPlugins, PluginGroup},
+    render::texture::ImagePlugin,
+    sprite::Material2dPlugin,
+    window::{Window, WindowPlugin, WindowResolution},
+};
 use clap::Parser;
 
 fn main() {

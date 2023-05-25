@@ -1,6 +1,5 @@
 use bevy::ecs::system::Resource;
-use derive_more::Deref;
-use derive_more::DerefMut;
+use derive_more::{Deref, DerefMut};
 use rand::SeedableRng;
 use rand_pcg::Pcg32;
 

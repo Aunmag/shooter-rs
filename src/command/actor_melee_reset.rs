@@ -1,9 +1,9 @@
-use crate::component::Actor;
-use crate::model::ActorAction;
-use bevy::ecs::system::Command;
-use bevy::prelude::Entity;
-use bevy::prelude::World;
-use bevy::time::Time;
+use crate::{component::Actor, model::ActorAction};
+use bevy::{
+    ecs::system::Command,
+    prelude::{Entity, World},
+    time::Time,
+};
 
 pub struct ActorMeleeReset(pub Entity);
 

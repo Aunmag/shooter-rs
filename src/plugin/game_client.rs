@@ -1,21 +1,18 @@
-use crate::model::AppState;
-use crate::resource::AudioStorage;
-use crate::resource::EntityConverter;
-use crate::resource::Rng;
-use crate::resource::ServerData;
-use crate::resource::TransformUpdateResource;
-use crate::util::ext::AppExt;
-use bevy::app::App;
-use bevy::app::Plugin;
-use bevy::prelude::IntoPipeSystem;
-use bevy::prelude::IntoSystemConfig;
+use crate::{
+    model::AppState,
+    resource::{AudioStorage, EntityConverter, Rng, ServerData, TransformUpdateResource},
+    util::ext::AppExt,
+};
+use bevy::{
+    app::{App, Plugin},
+    prelude::{IntoPipeSystem, IntoSystemConfig},
+};
 
 pub struct GameClientPlugin;
 
 impl Plugin for GameClientPlugin {
     fn build(&self, app: &mut App) {
-        use crate::system::game::*;
-        use crate::system::net;
+        use crate::system::{game::*, net};
 
         // TODO: do automatically on enter or make it lazy
         // TODO: remove on exit

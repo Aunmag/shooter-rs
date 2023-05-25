@@ -1,19 +1,11 @@
-use crate::component::HealthBar;
-use crate::data::PIXELS_PER_METER;
-use crate::material::HealthBarMaterial;
-use crate::util;
-use bevy::asset::Assets;
-use bevy::ecs::system::Command;
-use bevy::prelude::shape::Cube;
-use bevy::prelude::BuildWorldChildren;
-use bevy::prelude::Color;
-use bevy::prelude::Entity;
-use bevy::prelude::Transform;
-use bevy::prelude::Vec3;
-use bevy::prelude::World;
-use bevy::render::mesh::Mesh;
-use bevy::render::texture::Image;
-use bevy::sprite::MaterialMesh2dBundle;
+use crate::{component::HealthBar, data::PIXELS_PER_METER, material::HealthBarMaterial, util};
+use bevy::{
+    asset::Assets,
+    ecs::system::Command,
+    prelude::{shape::Cube, BuildWorldChildren, Color, Entity, Transform, Vec3, World},
+    render::{mesh::Mesh, texture::Image},
+    sprite::MaterialMesh2dBundle,
+};
 
 pub struct HealthBarSet(pub Entity);
 

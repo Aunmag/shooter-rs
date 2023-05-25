@@ -1,7 +1,5 @@
-use bevy::asset::HandleUntyped;
-use bevy::ecs::system::Resource;
-use derive_more::Deref;
-use derive_more::DerefMut;
+use bevy::{asset::HandleUntyped, ecs::system::Resource};
+use derive_more::{Deref, DerefMut};
 
 #[derive(Default, Resource, Deref, DerefMut)]
 pub struct AssetStorage(Vec<HandleUntyped>);

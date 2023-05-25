@@ -1,13 +1,9 @@
-use crate::component::Collision;
-use crate::component::CollisionSolution;
-use crate::component::Inertia;
-use bevy::ecs::system::Resource;
-use bevy::math::Vec2;
-use bevy::math::Vec3Swizzles;
-use bevy::prelude::Entity;
-use bevy::prelude::Query;
-use bevy::prelude::ResMut;
-use bevy::prelude::Transform;
+use crate::component::{Collision, CollisionSolution, Inertia};
+use bevy::{
+    ecs::system::Resource,
+    math::{Vec2, Vec3Swizzles},
+    prelude::{Entity, Query, ResMut, Transform},
+};
 
 #[derive(Default, Resource)]
 pub struct CollisionSystemData {

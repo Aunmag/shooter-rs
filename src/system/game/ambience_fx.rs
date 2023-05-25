@@ -1,10 +1,9 @@
-use crate::command::AudioPlay;
-use crate::resource::Rng;
-use bevy::ecs::system::Res;
-use bevy::ecs::system::Resource;
-use bevy::prelude::Commands;
-use bevy::prelude::ResMut;
-use bevy::time::Time;
+use crate::{command::AudioPlay, resource::Rng};
+use bevy::{
+    ecs::system::{Res, Resource},
+    prelude::{Commands, ResMut},
+    time::Time,
+};
 use rand::Rng as _;
 use std::time::Duration;
 

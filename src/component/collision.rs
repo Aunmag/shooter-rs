@@ -1,6 +1,5 @@
 use crate::util::ext::Vec2Ext;
-use bevy::ecs::component::Component;
-use bevy::math::Vec2;
+use bevy::{ecs::component::Component, math::Vec2};
 
 const EXTRA_RESOLVE_DISTANCE: f32 = 0.0001;
 

@@ -35,12 +35,8 @@ impl Vec2Ext for Vec2 {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::util::math::normalize_radians;
-    use crate::util::test::assert_radians_eq;
-    use std::f32::consts::FRAC_PI_2;
-    use std::f32::consts::FRAC_PI_4;
-    use std::f32::consts::PI;
-    use std::f32::consts::TAU;
+    use crate::util::{math::normalize_radians, test::assert_radians_eq};
+    use std::f32::consts::{FRAC_PI_2, FRAC_PI_4, PI, TAU};
 
     #[test]
     fn test_from_length() {

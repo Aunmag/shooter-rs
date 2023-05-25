@@ -1,12 +1,12 @@
-use crate::component::Player;
-use crate::resource::EntityConverter;
-use crate::resource::Message;
-use crate::resource::NetResource;
-use crate::util::ext::WorldExt;
-use bevy::ecs::system::Command;
-use bevy::prelude::DespawnRecursiveExt;
-use bevy::prelude::Entity;
-use bevy::prelude::World;
+use crate::{
+    component::Player,
+    resource::{EntityConverter, Message, NetResource},
+    util::ext::WorldExt,
+};
+use bevy::{
+    ecs::system::Command,
+    prelude::{DespawnRecursiveExt, Entity, World},
+};
 
 pub struct EntityDelete(pub Entity);
 

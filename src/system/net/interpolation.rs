@@ -1,12 +1,11 @@
-use crate::component::Interpolation;
-use crate::component::Player;
-use crate::resource::ServerData;
-use bevy::math::Quat;
-use bevy::prelude::Query;
-use bevy::prelude::Res;
-use bevy::prelude::Time;
-use bevy::prelude::Transform;
-use bevy::prelude::Without;
+use crate::{
+    component::{Interpolation, Player},
+    resource::ServerData,
+};
+use bevy::{
+    math::Quat,
+    prelude::{Query, Res, Time, Transform, Without},
+};
 
 pub fn interpolation(
     mut query: Query<(&Interpolation, &mut Transform), Without<Player>>,

@@ -1,9 +1,8 @@
 use crate::component::Terrain;
-use bevy::ecs::system::Query;
-use bevy::prelude::Camera;
-use bevy::prelude::Transform;
-use bevy::prelude::With;
-use bevy::prelude::Without;
+use bevy::{
+    ecs::system::Query,
+    prelude::{Camera, Transform, With, Without},
+};
 
 pub fn terrain(
     cameras: Query<&Transform, With<Camera>>,

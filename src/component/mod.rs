@@ -11,15 +11,7 @@ mod projectile;
 mod terrain;
 mod weapon;
 
-pub use self::actor::*;
-pub use self::bot::*;
-pub use self::collision::*;
-pub use self::footsteps::*;
-pub use self::health::*;
-pub use self::health_bar::*;
-pub use self::inertia::*;
-pub use self::interpolation::*;
-pub use self::player::*;
-pub use self::projectile::*;
-pub use self::terrain::*;
-pub use self::weapon::*;
+pub use self::{
+    actor::*, bot::*, collision::*, footsteps::*, health::*, health_bar::*, inertia::*,
+    interpolation::*, player::*, projectile::*, terrain::*, weapon::*,
+};

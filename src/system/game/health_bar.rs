@@ -1,14 +1,10 @@
-use crate::component::Health;
-use crate::HealthBarMaterial;
-use bevy::ecs::system::Query;
-use bevy::ecs::system::ResMut;
-use bevy::prelude::Assets;
-use bevy::prelude::Children;
-use bevy::prelude::Handle;
-use bevy::prelude::Res;
-use bevy::time::Time;
-use std::f32::consts::TAU;
-use std::time::Duration;
+use crate::{component::Health, HealthBarMaterial};
+use bevy::{
+    ecs::system::{Query, ResMut},
+    prelude::{Assets, Children, Handle, Res},
+    time::Time,
+};
+use std::{f32::consts::TAU, time::Duration};
 
 const INTERPOLATION: f32 = 8.0;
 const PULSE: Duration = Duration::from_millis(500);

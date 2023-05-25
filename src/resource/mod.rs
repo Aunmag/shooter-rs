@@ -10,14 +10,7 @@ mod scenario;
 mod server_data;
 mod transform_update;
 
-pub use self::asset_storage::*;
-pub use self::audio_storage::*;
-pub use self::config::*;
-pub use self::entity_converter::*;
-pub use self::game_type::*;
-pub use self::message::*;
-pub use self::net::*;
-pub use self::rng::*;
-pub use self::scenario::*;
-pub use self::server_data::*;
-pub use self::transform_update::*;
+pub use self::{
+    asset_storage::*, audio_storage::*, config::*, entity_converter::*, game_type::*, message::*,
+    net::*, rng::*, scenario::*, server_data::*, transform_update::*,
+};

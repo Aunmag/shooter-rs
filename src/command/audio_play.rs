@@ -1,14 +1,13 @@
-use crate::component::Player;
-use crate::resource::AudioStorage;
-use crate::resource::Rng;
-use bevy::ecs::query::With;
-use bevy::ecs::system::Command;
-use bevy::math::Vec2;
-use bevy::math::Vec3Swizzles;
-use bevy::prelude::Audio;
-use bevy::prelude::PlaybackSettings;
-use bevy::prelude::World;
-use bevy::transform::components::Transform;
+use crate::{
+    component::Player,
+    resource::{AudioStorage, Rng},
+};
+use bevy::{
+    ecs::{query::With, system::Command},
+    math::{Vec2, Vec3Swizzles},
+    prelude::{Audio, PlaybackSettings, World},
+    transform::components::Transform,
+};
 use rand::Rng as _;
 
 const VOLUME_MIN: f32 = 0.01;

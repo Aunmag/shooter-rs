@@ -1,17 +1,13 @@
-use crate::component::Actor;
-use crate::component::Player;
-use crate::model::ActorAction;
-use crate::model::ActorActionsExt;
-use crate::resource::Config;
-use bevy::ecs::system::Query;
-use bevy::input::mouse::MouseMotion;
-use bevy::prelude::EventReader;
-use bevy::prelude::Input;
-use bevy::prelude::KeyCode;
-use bevy::prelude::MouseButton;
-use bevy::prelude::Res;
-use bevy::prelude::Transform;
-use bevy::prelude::With;
+use crate::{
+    component::{Actor, Player},
+    model::{ActorAction, ActorActionsExt},
+    resource::Config,
+};
+use bevy::{
+    ecs::system::Query,
+    input::mouse::MouseMotion,
+    prelude::{EventReader, Input, KeyCode, MouseButton, Res, Transform, With},
+};
 use std::f32::consts::TAU;
 
 pub fn player(

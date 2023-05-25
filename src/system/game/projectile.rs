@@ -1,19 +1,13 @@
-use crate::component::Collision;
-use crate::component::Projectile;
-use crate::model::geometry::GeometryProjection;
-use crate::util::ext::Vec2Ext;
-use crate::util::math;
-use bevy::ecs::entity::Entity;
-use bevy::ecs::system::Query;
-use bevy::math::Quat;
-use bevy::math::Vec3Swizzles;
-use bevy::prelude::Commands;
-use bevy::prelude::DespawnRecursiveExt;
-use bevy::prelude::Res;
-use bevy::prelude::Time;
-use bevy::prelude::Transform;
-use bevy::prelude::Vec2;
-use bevy::prelude::Without;
+use crate::{
+    component::{Collision, Projectile},
+    model::geometry::GeometryProjection,
+    util::{ext::Vec2Ext, math},
+};
+use bevy::{
+    ecs::{entity::Entity, system::Query},
+    math::{Quat, Vec3Swizzles},
+    prelude::{Commands, DespawnRecursiveExt, Res, Time, Transform, Vec2, Without},
+};
 use std::time::Duration;
 
 const TIME_DELTA_FOR_RENDER: Duration = Duration::from_millis(25); // 40 FPS

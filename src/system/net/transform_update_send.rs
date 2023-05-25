@@ -1,18 +1,14 @@
-use crate::component::Actor;
-use crate::model::TransformLiteU8;
-use crate::resource::Message;
-use crate::resource::NetResource;
-use crate::util::Timer;
-use bevy::ecs::system::Resource;
-use bevy::prelude::Entity;
-use bevy::prelude::Query;
-use bevy::prelude::Res;
-use bevy::prelude::ResMut;
-use bevy::prelude::Time;
-use bevy::prelude::Transform;
-use bevy::prelude::With;
-use std::collections::HashMap;
-use std::time::Duration;
+use crate::{
+    component::Actor,
+    model::TransformLiteU8,
+    resource::{Message, NetResource},
+    util::Timer,
+};
+use bevy::{
+    ecs::system::Resource,
+    prelude::{Entity, Query, Res, ResMut, Time, Transform, With},
+};
+use std::{collections::HashMap, time::Duration};
 
 #[derive(Resource)]
 pub struct TransformUpdateSendData {

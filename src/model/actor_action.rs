@@ -1,7 +1,5 @@
-use enumset::EnumSet;
-use enumset::EnumSetType;
-use serde::Deserialize;
-use serde::Serialize;
+use enumset::{EnumSet, EnumSetType};
+use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize, EnumSetType)]
 pub enum ActorAction {

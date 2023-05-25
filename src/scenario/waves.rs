@@ -1,28 +1,20 @@
-use crate::command::ActorBotSet;
-use crate::command::ActorPlayerSet;
-use crate::command::ActorSet;
-use crate::component::Actor;
-use crate::component::ActorConfig;
-use crate::component::ActorType;
-use crate::component::Health;
-use crate::data::VIEW_DISTANCE;
-use crate::model::TransformLiteU8;
-use crate::resource::Scenario;
-use crate::resource::ScenarioLogic;
-use crate::util::ext::Vec2Ext;
-use crate::util::math::compress_radians;
-use bevy::ecs::system::Command;
-use bevy::math::Vec2;
-use bevy::math::Vec3Swizzles;
-use bevy::prelude::Commands;
-use bevy::prelude::World;
-use bevy::transform::components::Transform;
-use rand::Rng;
-use rand::SeedableRng;
+use crate::{
+    command::{ActorBotSet, ActorPlayerSet, ActorSet},
+    component::{Actor, ActorConfig, ActorType, Health},
+    data::VIEW_DISTANCE,
+    model::TransformLiteU8,
+    resource::{Scenario, ScenarioLogic},
+    util::{ext::Vec2Ext, math::compress_radians},
+};
+use bevy::{
+    ecs::system::Command,
+    math::{Vec2, Vec3Swizzles},
+    prelude::{Commands, World},
+    transform::components::Transform,
+};
+use rand::{Rng, SeedableRng};
 use rand_pcg::Pcg32;
-use std::any::Any;
-use std::f32::consts::PI;
-use std::time::Duration;
+use std::{any::Any, f32::consts::PI, time::Duration};
 
 const ZOMBIES_SPAWN_QUANTITY: u16 = 5;
 const ZOMBIES_SPAWN_DISTANCE: f32 = VIEW_DISTANCE / 1.5;

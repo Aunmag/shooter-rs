@@ -1,12 +1,9 @@
-use crate::command::AudioPlay;
-use crate::component::Footsteps;
-use crate::util::math::interpolate;
-use bevy::ecs::system::Query;
-use bevy::math::Vec3Swizzles;
-use bevy::prelude::Commands;
-use bevy::prelude::Res;
-use bevy::prelude::Time;
-use bevy::prelude::Transform;
+use crate::{command::AudioPlay, component::Footsteps, util::math::interpolate};
+use bevy::{
+    ecs::system::Query,
+    math::Vec3Swizzles,
+    prelude::{Commands, Res, Time, Transform},
+};
 use std::time::Duration;
 
 const STRIDE_DISTANCE_MIN: f32 = 0.1;

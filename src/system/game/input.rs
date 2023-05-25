@@ -1,10 +1,8 @@
 use crate::command::CursorGrab;
-use bevy::app::AppExit;
-use bevy::prelude::Commands;
-use bevy::prelude::EventWriter;
-use bevy::prelude::Input;
-use bevy::prelude::KeyCode;
-use bevy::prelude::Res;
+use bevy::{
+    app::AppExit,
+    prelude::{Commands, EventWriter, Input, KeyCode, Res},
+};
 
 pub fn input(
     mut commands: Commands,

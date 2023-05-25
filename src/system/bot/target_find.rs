@@ -1,18 +1,14 @@
-use crate::component::Actor;
-use crate::component::Bot;
-use crate::component::Inertia;
-use crate::util;
-use crate::util::ext::IteratorExt;
-use crate::util::Timer;
-use bevy::ecs::system::Resource;
-use bevy::math::Vec2;
-use bevy::math::Vec3Swizzles;
-use bevy::prelude::Entity;
-use bevy::prelude::Query;
-use bevy::prelude::Res;
-use bevy::prelude::ResMut;
-use bevy::prelude::Transform;
-use bevy::time::Time;
+use crate::{
+    component::{Actor, Bot, Inertia},
+    util,
+    util::{ext::IteratorExt, Timer},
+};
+use bevy::{
+    ecs::system::Resource,
+    math::{Vec2, Vec3Swizzles},
+    prelude::{Entity, Query, Res, ResMut, Transform},
+    time::Time,
+};
 use std::time::Duration;
 
 const RUN_INTERVAL: Duration = Duration::from_secs(2);

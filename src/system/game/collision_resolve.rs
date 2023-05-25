@@ -1,11 +1,5 @@
-use crate::component::Collision;
-use crate::component::CollisionSolution;
-use crate::component::Inertia;
-use bevy::prelude::Entity;
-use bevy::prelude::In;
-use bevy::prelude::Query;
-use bevy::prelude::Transform;
-use bevy::prelude::With;
+use crate::component::{Collision, CollisionSolution, Inertia};
+use bevy::prelude::{Entity, In, Query, Transform, With};
 
 pub fn collision_resolve(
     In(mut solutions): In<Vec<CollisionSolution>>,

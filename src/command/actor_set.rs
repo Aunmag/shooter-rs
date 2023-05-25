@@ -1,29 +1,19 @@
-use crate::component::Actor;
-use crate::component::ActorConfig;
-use crate::component::ActorType;
-use crate::component::Collision;
-use crate::component::Footsteps;
-use crate::component::Health;
-use crate::component::Inertia;
-use crate::component::Interpolation;
-use crate::component::Weapon;
-use crate::component::WeaponConfig;
-use crate::data::LAYER_ACTOR;
-use crate::model::TransformLiteU8;
-use crate::resource::Message;
-use crate::resource::NetResource;
-use crate::util::ext::WorldExt;
-use bevy::asset::Assets;
-use bevy::ecs::system::Command;
-use bevy::prelude::AssetServer;
-use bevy::prelude::Color;
-use bevy::prelude::Entity;
-use bevy::prelude::Image;
-use bevy::prelude::Sprite;
-use bevy::prelude::SpriteBundle;
-use bevy::prelude::Time;
-use bevy::prelude::World;
-use bevy::sprite::Anchor;
+use crate::{
+    component::{
+        Actor, ActorConfig, ActorType, Collision, Footsteps, Health, Inertia, Interpolation,
+        Weapon, WeaponConfig,
+    },
+    data::LAYER_ACTOR,
+    model::TransformLiteU8,
+    resource::{Message, NetResource},
+    util::ext::WorldExt,
+};
+use bevy::{
+    asset::Assets,
+    ecs::system::Command,
+    prelude::{AssetServer, Color, Entity, Image, Sprite, SpriteBundle, Time, World},
+    sprite::Anchor,
+};
 
 pub struct ActorSet {
     pub entity: Entity,

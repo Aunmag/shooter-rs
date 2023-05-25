@@ -1,15 +1,13 @@
-use crate::component::Interpolation;
-use crate::component::Player;
-use crate::model::geometry::GeometryProjection;
-use crate::resource::ServerData;
-use crate::resource::TransformUpdateResource;
-use bevy::ecs::entity::Entity;
-use bevy::math::Vec3Swizzles;
-use bevy::prelude::Query;
-use bevy::prelude::Res;
-use bevy::prelude::ResMut;
-use bevy::prelude::Time;
-use bevy::prelude::Transform;
+use crate::{
+    component::{Interpolation, Player},
+    model::geometry::GeometryProjection,
+    resource::{ServerData, TransformUpdateResource},
+};
+use bevy::{
+    ecs::entity::Entity,
+    math::Vec3Swizzles,
+    prelude::{Query, Res, ResMut, Time, Transform},
+};
 
 pub fn transform_update_receive(
     mut updates: ResMut<TransformUpdateResource>,

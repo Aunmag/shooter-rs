@@ -1,15 +1,13 @@
-use crate::model::AppState;
-use crate::resource::AudioStorage;
-use crate::resource::EntityConverter;
-use crate::resource::Rng;
-use crate::resource::Scenario;
-use crate::resource::TransformUpdateResource;
-use crate::scenario::WavesScenario;
-use crate::util::ext::AppExt;
-use bevy::app::App;
-use bevy::app::Plugin;
-use bevy::prelude::IntoPipeSystem;
-use bevy::prelude::IntoSystemConfig;
+use crate::{
+    model::AppState,
+    resource::{AudioStorage, EntityConverter, Rng, Scenario, TransformUpdateResource},
+    scenario::WavesScenario,
+    util::ext::AppExt,
+};
+use bevy::{
+    app::{App, Plugin},
+    prelude::{IntoPipeSystem, IntoSystemConfig},
+};
 use derive_more::Constructor;
 use std::time::Duration;
 
@@ -20,9 +18,7 @@ pub struct GameServerPlugin {
 
 impl Plugin for GameServerPlugin {
     fn build(&self, app: &mut App) {
-        use crate::system::bot;
-        use crate::system::game::*;
-        use crate::system::net;
+        use crate::system::{bot, game::*, net};
 
         // TODO: do automatically on enter or make it lazy
         // TODO: remove on exit

@@ -1,13 +1,11 @@
-use crate::model::AppState;
-use crate::resource::AssetStorage;
-use crate::resource::AudioStorage;
-use bevy::asset::LoadState;
-use bevy::prelude::AssetServer;
-use bevy::prelude::Assets;
-use bevy::prelude::AudioSource;
-use bevy::prelude::NextState;
-use bevy::prelude::Res;
-use bevy::prelude::ResMut;
+use crate::{
+    model::AppState,
+    resource::{AssetStorage, AudioStorage},
+};
+use bevy::{
+    asset::LoadState,
+    prelude::{AssetServer, Assets, AudioSource, NextState, Res, ResMut},
+};
 
 pub fn on_update(
     asset_server: Res<AssetServer>,

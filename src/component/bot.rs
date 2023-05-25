@@ -1,6 +1,4 @@
-use bevy::ecs::component::Component;
-use bevy::math::Vec2;
-use bevy::prelude::Entity;
+use bevy::{ecs::component::Component, math::Vec2, prelude::Entity};
 use std::time::Duration;
 
 #[derive(Default, Component)]

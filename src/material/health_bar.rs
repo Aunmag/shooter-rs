@@ -1,10 +1,9 @@
-use bevy::prelude::Color;
-use bevy::prelude::Handle;
-use bevy::prelude::Image;
-use bevy::reflect::TypeUuid;
-use bevy::render::render_resource::AsBindGroup;
-use bevy::render::render_resource::ShaderRef;
-use bevy::sprite::Material2d;
+use bevy::{
+    prelude::{Color, Handle, Image},
+    reflect::TypeUuid,
+    render::render_resource::{AsBindGroup, ShaderRef},
+    sprite::Material2d,
+};
 
 #[derive(AsBindGroup, TypeUuid, Debug, Clone)]
 #[uuid = "71682a00-fabd-4639-a0a5-e5a984d01fa6"]

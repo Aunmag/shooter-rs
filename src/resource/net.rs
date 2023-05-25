@@ -1,13 +1,11 @@
-use crate::resource::Message;
-use crate::resource::NetConfig;
-use bevy::ecs::system::Resource;
-use bevy::prelude::Entity;
-use std::cmp::Ordering;
-use std::collections::HashMap;
-use std::net::SocketAddr;
-use std::net::UdpSocket;
-use std::time::Duration;
-use std::time::Instant;
+use crate::resource::{Message, NetConfig};
+use bevy::{ecs::system::Resource, prelude::Entity};
+use std::{
+    cmp::Ordering,
+    collections::HashMap,
+    net::{SocketAddr, UdpSocket},
+    time::{Duration, Instant},
+};
 
 #[derive(Resource)]
 pub struct NetResource {

@@ -1,18 +1,15 @@
-use crate::command::ActorBotSet;
-use crate::command::ActorSet;
-use crate::component::ActorConfig;
-use crate::model::AppState;
-use crate::model::TransformLiteU8;
-use crate::util::ext::AppExt;
-use bevy::app::App;
-use bevy::app::Plugin;
-use bevy::diagnostic::Diagnostics;
-use bevy::diagnostic::EntityCountDiagnosticsPlugin;
-use bevy::diagnostic::FrameTimeDiagnosticsPlugin;
-use bevy::input::Input;
-use bevy::prelude::Commands;
-use bevy::prelude::KeyCode;
-use bevy::prelude::Res;
+use crate::{
+    command::{ActorBotSet, ActorSet},
+    component::ActorConfig,
+    model::{AppState, TransformLiteU8},
+    util::ext::AppExt,
+};
+use bevy::{
+    app::{App, Plugin},
+    diagnostic::{Diagnostics, EntityCountDiagnosticsPlugin, FrameTimeDiagnosticsPlugin},
+    input::Input,
+    prelude::{Commands, KeyCode, Res},
+};
 
 pub struct StressTestPlugin;
 

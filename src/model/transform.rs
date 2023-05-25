@@ -1,13 +1,9 @@
-use crate::data::PIXELS_PER_METER;
-use crate::util;
-use crate::util::ext::TransformExt;
-use bevy::math::Vec2;
-use bevy::math::Vec3Swizzles;
-use bevy::prelude::Quat;
-use bevy::prelude::Transform;
-use bevy::prelude::Vec3;
-use serde::Deserialize;
-use serde::Serialize;
+use crate::{data::PIXELS_PER_METER, util, util::ext::TransformExt};
+use bevy::{
+    math::{Vec2, Vec3Swizzles},
+    prelude::{Quat, Transform, Vec3},
+};
+use serde::{Deserialize, Serialize};
 
 // TODO: no copy
 #[derive(Default, Clone, Copy, Debug, PartialEq, Serialize, Deserialize)]

@@ -1,7 +1,8 @@
 use crate::component::Bot;
-use bevy::ecs::system::Command;
-use bevy::prelude::Entity;
-use bevy::prelude::World;
+use bevy::{
+    ecs::system::Command,
+    prelude::{Entity, World},
+};
 
 pub struct ActorBotSet(pub Entity);
 

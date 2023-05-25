@@ -1,13 +1,10 @@
-use crate::command::AudioPlay;
-use crate::component::Bot;
-use crate::resource::Rng;
-use bevy::ecs::system::Res;
-use bevy::math::Vec3Swizzles;
-use bevy::prelude::Commands;
-use bevy::prelude::Query;
-use bevy::prelude::ResMut;
-use bevy::prelude::Transform;
-use bevy::time::Time;
+use crate::{command::AudioPlay, component::Bot, resource::Rng};
+use bevy::{
+    ecs::system::Res,
+    math::Vec3Swizzles,
+    prelude::{Commands, Query, ResMut, Transform},
+    time::Time,
+};
 use rand::Rng as _;
 use std::time::Duration;
 

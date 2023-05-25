@@ -13,17 +13,8 @@ mod projectile_spawn;
 mod start_client;
 mod terrain_init;
 
-pub use self::actor_actions_set::*;
-pub use self::actor_bot_set::*;
-pub use self::actor_direction_set::*;
-pub use self::actor_melee_reset::*;
-pub use self::actor_player_set::*;
-pub use self::actor_set::*;
-pub use self::audio_play::*;
-pub use self::client_join::*;
-pub use self::cursor_lock::*;
-pub use self::entity_delete::*;
-pub use self::health_bar_set::*;
-pub use self::projectile_spawn::*;
-pub use self::start_client::*;
-pub use self::terrain_init::*;
+pub use self::{
+    actor_actions_set::*, actor_bot_set::*, actor_direction_set::*, actor_melee_reset::*,
+    actor_player_set::*, actor_set::*, audio_play::*, client_join::*, cursor_lock::*,
+    entity_delete::*, health_bar_set::*, projectile_spawn::*, start_client::*, terrain_init::*,
+};

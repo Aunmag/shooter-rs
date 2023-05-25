@@ -1,24 +1,19 @@
-use crate::command::ActorActionsSet;
-use crate::command::ActorDirectionSet;
-use crate::command::ActorPlayerSet;
-use crate::command::ActorSet;
-use crate::command::ClientJoin;
-use crate::command::EntityDelete;
-use crate::command::ProjectileSpawn;
-use crate::command::StartClient;
-use crate::component::ProjectileConfig;
-use crate::resource::EntityConverter;
-use crate::resource::Message;
-use crate::resource::NetConnection;
-use crate::resource::NetResource;
-use crate::resource::TransformUpdateResource;
-use crate::resource::MESSAGE_SIZE_MAX;
-use bevy::ecs::entity::Entities;
-use bevy::ecs::entity::Entity;
-use bevy::prelude::Commands;
-use bevy::prelude::ResMut;
-use std::io::ErrorKind;
-use std::net::SocketAddr;
+use crate::{
+    command::{
+        ActorActionsSet, ActorDirectionSet, ActorPlayerSet, ActorSet, ClientJoin, EntityDelete,
+        ProjectileSpawn, StartClient,
+    },
+    component::ProjectileConfig,
+    resource::{
+        EntityConverter, Message, NetConnection, NetResource, TransformUpdateResource,
+        MESSAGE_SIZE_MAX,
+    },
+};
+use bevy::{
+    ecs::entity::{Entities, Entity},
+    prelude::{Commands, ResMut},
+};
+use std::{io::ErrorKind, net::SocketAddr};
 
 pub fn message_receive(
     entities: &Entities,

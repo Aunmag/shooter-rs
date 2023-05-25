@@ -1,7 +1,5 @@
 use crate::resource::AssetStorage;
-use bevy::prelude::AssetServer;
-use bevy::prelude::Res;
-use bevy::prelude::ResMut;
+use bevy::prelude::{AssetServer, Res, ResMut};
 
 pub fn on_enter(asset_server: Res<AssetServer>, mut asset_storage: ResMut<AssetStorage>) {
     load_folder_or_log(&asset_server, &mut asset_storage, "actors");

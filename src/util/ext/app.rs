@@ -1,9 +1,9 @@
 use crate::model::AppState;
-use bevy::app::App;
-use bevy::ecs::schedule::OnEnter;
-use bevy::ecs::schedule::OnUpdate;
-use bevy::prelude::IntoSystemAppConfig;
-use bevy::prelude::IntoSystemConfig;
+use bevy::{
+    app::App,
+    ecs::schedule::{OnEnter, OnUpdate},
+    prelude::{IntoSystemAppConfig, IntoSystemConfig},
+};
 
 pub trait AppExt {
     fn add_state_system<M>(

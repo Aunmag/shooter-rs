@@ -1,10 +1,9 @@
 use crate::util::ext::WorldExt;
-use bevy::ecs::system::Command;
-use bevy::prelude::With;
-use bevy::prelude::World;
-use bevy::window::CursorGrabMode;
-use bevy::window::PrimaryWindow;
-use bevy::window::Window;
+use bevy::{
+    ecs::system::Command,
+    prelude::{With, World},
+    window::{CursorGrabMode, PrimaryWindow, Window},
+};
 
 pub struct CursorGrab(pub bool);
 

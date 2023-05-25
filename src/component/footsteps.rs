@@ -1,5 +1,4 @@
-use bevy::ecs::component::Component;
-use bevy::math::Vec2;
+use bevy::{ecs::component::Component, math::Vec2};
 use std::time::Duration;
 
 #[derive(Default, Component)]

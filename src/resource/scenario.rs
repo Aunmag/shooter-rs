@@ -1,7 +1,5 @@
-use bevy::ecs::system::Resource;
-use bevy::prelude::Commands;
-use std::any::Any;
-use std::time::Duration;
+use bevy::{ecs::system::Resource, prelude::Commands};
+use std::{any::Any, time::Duration};
 
 pub trait ScenarioLogic {
     fn update(&mut self, commands: &mut Commands) -> Duration;

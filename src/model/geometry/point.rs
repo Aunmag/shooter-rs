@@ -1,9 +1,7 @@
-use crate::model::geometry::line_segment::LineSegment;
-use crate::model::geometry::line_segment::LineSegmentTrait;
-use crate::model::geometry::Geometry;
-use crate::model::geometry::GeometryDistance;
-use crate::model::geometry::GeometryProjection;
-use crate::model::geometry::Line;
+use crate::model::geometry::{
+    LineSegment, LineSegmentTrait,
+    Geometry, GeometryDistance, GeometryProjection, Line,
+};
 use bevy::math::Vec2;
 
 impl Geometry for Vec2 {}

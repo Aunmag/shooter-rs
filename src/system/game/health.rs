@@ -1,13 +1,12 @@
-use crate::command::EntityDelete;
-use crate::component::Actor;
-use crate::component::Health;
-use bevy::ecs::system::Query;
-use bevy::math::Vec3Swizzles;
-use bevy::prelude::Commands;
-use bevy::prelude::Entity;
-use bevy::prelude::Res;
-use bevy::prelude::Time;
-use bevy::prelude::Transform;
+use crate::{
+    command::EntityDelete,
+    component::{Actor, Health},
+};
+use bevy::{
+    ecs::system::Query,
+    math::Vec3Swizzles,
+    prelude::{Commands, Entity, Res, Time, Transform},
+};
 
 pub fn health(
     mut query: Query<(Entity, &Actor, &mut Health, &Transform)>,

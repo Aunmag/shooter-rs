@@ -1,11 +1,10 @@
-use anyhow::Context;
-use anyhow::Result;
-use bevy::ecs::system::Resource;
-use bevy::window::PresentMode;
-use bevy::window::WindowMode;
+use anyhow::{Context, Result};
+use bevy::{
+    ecs::system::Resource,
+    window::{PresentMode, WindowMode},
+};
 use serde::Deserialize;
-use std::net::SocketAddr;
-use std::time::Duration;
+use std::{net::SocketAddr, time::Duration};
 
 // TODO: logging config
 

@@ -1,8 +1,8 @@
-use bevy::ecs::system::Command;
-use bevy::math::Quat;
-use bevy::prelude::Entity;
-use bevy::prelude::Transform;
-use bevy::prelude::World;
+use bevy::{
+    ecs::system::Command,
+    math::Quat,
+    prelude::{Entity, Transform, World},
+};
 
 pub struct ActorDirectionSet {
     pub entity: Entity,

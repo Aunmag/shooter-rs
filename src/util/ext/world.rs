@@ -1,5 +1,4 @@
-use crate::resource::Config;
-use crate::resource::GameType;
+use crate::resource::{Config, GameType};
 use bevy::prelude::World;
 
 pub trait WorldExt {

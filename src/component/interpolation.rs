@@ -1,6 +1,7 @@
-use crate::model::TransformLite;
-use crate::util::ext::DurationExt;
-use crate::util::math;
+use crate::{
+    model::TransformLite,
+    util::{ext::DurationExt, math},
+};
 use bevy::ecs::component::Component;
 use std::time::Duration;
 

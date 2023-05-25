@@ -1,23 +1,15 @@
-use crate::command::ActorMeleeReset;
-use crate::command::AudioPlay;
-use crate::component::Actor;
-use crate::component::ActorConfig;
-use crate::component::Health;
-use crate::component::Inertia;
-use crate::component::Weapon;
-use crate::model::ActorActionsExt;
-use crate::model::TransformLite;
-use crate::util::ext::Vec2Ext;
-use crate::util::math;
-use bevy::ecs::entity::Entity;
-use bevy::math::Vec2Swizzles;
-use bevy::prelude::Commands;
-use bevy::prelude::Query;
-use bevy::prelude::Res;
-use bevy::prelude::Transform;
-use bevy::prelude::Vec2;
-use bevy::prelude::Without;
-use bevy::time::Time;
+use crate::{
+    command::{ActorMeleeReset, AudioPlay},
+    component::{Actor, ActorConfig, Health, Inertia, Weapon},
+    model::{ActorActionsExt, TransformLite},
+    util::{ext::Vec2Ext, math},
+};
+use bevy::{
+    ecs::entity::Entity,
+    math::Vec2Swizzles,
+    prelude::{Commands, Query, Res, Transform, Vec2, Without},
+    time::Time,
+};
 
 pub fn melee(
     attackers: Query<(Entity, &Actor, &Transform), Without<Weapon>>,

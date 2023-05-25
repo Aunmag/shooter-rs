@@ -1,16 +1,14 @@
-use crate::command::ActorSet;
-use crate::command::HealthBarSet;
-use crate::component::Actor;
-use crate::component::ActorConfig;
-use crate::component::Inertia;
-use crate::component::Player;
-use crate::data::LAYER_ACTOR_PLAYER;
-use crate::model::TransformLiteU8;
-use crate::util::ext::WorldExt;
-use bevy::ecs::system::Command;
-use bevy::prelude::Entity;
-use bevy::prelude::Transform;
-use bevy::prelude::World;
+use crate::{
+    command::{ActorSet, HealthBarSet},
+    component::{Actor, ActorConfig, Inertia, Player},
+    data::LAYER_ACTOR_PLAYER,
+    model::TransformLiteU8,
+    util::ext::WorldExt,
+};
+use bevy::{
+    ecs::system::Command,
+    prelude::{Entity, Transform, World},
+};
 
 pub struct ActorPlayerSet(pub Entity);
 

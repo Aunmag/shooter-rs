@@ -1,5 +1,4 @@
-use bevy::ecs::component::Component;
-use bevy::ecs::entity::Entity;
+use bevy::ecs::{component::Component, entity::Entity};
 use derive_more::Constructor;
 
 #[derive(Constructor, Component)]

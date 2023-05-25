@@ -1,6 +1,4 @@
-use bevy::math::Vec2;
-use bevy::prelude::Image;
-use bevy::sprite::Anchor;
+use bevy::{math::Vec2, prelude::Image, sprite::Anchor};
 
 pub struct SpriteOffset {
     pub x: Option<f32>,

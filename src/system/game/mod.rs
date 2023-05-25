@@ -17,21 +17,8 @@ mod scenario;
 mod terrain;
 mod weapon;
 
-pub use self::actor::*;
-pub use self::ambience_fx::*;
-pub use self::camera::*;
-pub use self::collision_find::*;
-pub use self::collision_resolve::*;
-pub use self::footsteps::*;
-pub use self::health::*;
-pub use self::health_bar::*;
-pub use self::inertia::*;
-pub use self::input::*;
-pub use self::melee::*;
-pub use self::on_enter::*;
-pub use self::player::*;
-pub use self::projectile::*;
-pub use self::projectile_hit::*;
-pub use self::scenario::*;
-pub use self::terrain::*;
-pub use self::weapon::*;
+pub use self::{
+    actor::*, ambience_fx::*, camera::*, collision_find::*, collision_resolve::*, footsteps::*,
+    health::*, health_bar::*, inertia::*, input::*, melee::*, on_enter::*, player::*,
+    projectile::*, projectile_hit::*, scenario::*, terrain::*, weapon::*,
+};

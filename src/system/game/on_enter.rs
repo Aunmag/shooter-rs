@@ -1,28 +1,17 @@
-use crate::command::AudioPlay;
-use crate::command::CursorGrab;
-use crate::command::TerrainInit;
-use crate::data::LAYER_BLUFF;
-use crate::data::LAYER_TREE;
-use crate::data::WORLD_SIZE;
-use crate::data::WORLD_SIZE_HALF;
-use crate::data::WORLD_SIZE_VISUAL;
-use crate::model::TransformLite;
-use crate::util::ext::Vec2Ext;
-use bevy::asset::AssetServer;
-use bevy::asset::Handle;
-use bevy::math::Vec2;
-use bevy::prelude::Camera2dBundle;
-use bevy::prelude::Commands;
-use bevy::prelude::Image;
-use bevy::prelude::Res;
-use bevy::prelude::SpriteBundle;
-use rand::seq::SliceRandom;
-use rand::Rng;
-use rand::SeedableRng;
+use crate::{
+    command::{AudioPlay, CursorGrab, TerrainInit},
+    data::{LAYER_BLUFF, LAYER_TREE, WORLD_SIZE, WORLD_SIZE_HALF, WORLD_SIZE_VISUAL},
+    model::TransformLite,
+    util::ext::Vec2Ext,
+};
+use bevy::{
+    asset::{AssetServer, Handle},
+    math::Vec2,
+    prelude::{Camera2dBundle, Commands, Image, Res, SpriteBundle},
+};
+use rand::{seq::SliceRandom, Rng, SeedableRng};
 use rand_pcg::Pcg32;
-use std::f32::consts::FRAC_PI_2;
-use std::f32::consts::PI;
-use std::f32::consts::TAU;
+use std::f32::consts::{FRAC_PI_2, PI, TAU};
 
 const TREES_PER_METER: f32 = 0.02;
 const TREES_QUANTITY: f32 = WORLD_SIZE_VISUAL * WORLD_SIZE_VISUAL * TREES_PER_METER;

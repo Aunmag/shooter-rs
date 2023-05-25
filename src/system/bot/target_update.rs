@@ -1,23 +1,16 @@
-use crate::component::Actor;
-use crate::component::Bot;
-use crate::component::Inertia;
-use crate::model::geometry::GeometryProjection;
-use crate::model::geometry::Line;
-use crate::util;
-use crate::util::ext::Vec2Ext;
-use crate::util::Timer;
-use bevy::ecs::system::Res;
-use bevy::ecs::system::Resource;
-use bevy::math::Vec3Swizzles;
-use bevy::prelude::Entity;
-use bevy::prelude::Query;
-use bevy::prelude::ResMut;
-use bevy::prelude::Transform;
-use bevy::prelude::Vec2;
-use bevy::prelude::With;
-use bevy::time::Time;
-use rand::Rng;
-use rand::SeedableRng;
+use crate::{
+    component::{Actor, Bot, Inertia},
+    model::geometry::{GeometryProjection, Line},
+    util,
+    util::{ext::Vec2Ext, Timer},
+};
+use bevy::{
+    ecs::system::{Res, Resource},
+    math::Vec3Swizzles,
+    prelude::{Entity, Query, ResMut, Transform, Vec2, With},
+    time::Time,
+};
+use rand::{Rng, SeedableRng};
 use rand_pcg::Pcg32;
 use std::time::Duration;
 

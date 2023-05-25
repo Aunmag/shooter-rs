@@ -1,21 +1,15 @@
-use crate::command::AudioPlay;
-use crate::command::ProjectileSpawn;
-use crate::component::Actor;
-use crate::component::Weapon;
-use crate::model::ActorActionsExt;
-use crate::model::TransformLite;
-use crate::util::ext::Vec2Ext;
-use bevy::ecs::system::Query;
-use bevy::ecs::system::Resource;
-use bevy::math::Vec2;
-use bevy::prelude::Commands;
-use bevy::prelude::Entity;
-use bevy::prelude::Res;
-use bevy::prelude::ResMut;
-use bevy::prelude::Time;
-use bevy::prelude::Transform;
-use rand::Rng;
-use rand::SeedableRng;
+use crate::{
+    command::{AudioPlay, ProjectileSpawn},
+    component::{Actor, Weapon},
+    model::{ActorActionsExt, TransformLite},
+    util::ext::Vec2Ext,
+};
+use bevy::{
+    ecs::system::{Query, Resource},
+    math::Vec2,
+    prelude::{Commands, Entity, Res, ResMut, Time, Transform},
+};
+use rand::{Rng, SeedableRng};
 use rand_pcg::Pcg32;
 
 const VELOCITY_DEVIATION_FACTOR: f32 = 0.1;

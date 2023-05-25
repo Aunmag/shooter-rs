@@ -1,6 +1,7 @@
-use bevy::ecs::entity::Entities;
-use bevy::ecs::system::Resource;
-use bevy::prelude::Entity;
+use bevy::{
+    ecs::{entity::Entities, system::Resource},
+    prelude::Entity,
+};
 
 #[derive(Default, Resource)]
 pub struct EntityConverter {

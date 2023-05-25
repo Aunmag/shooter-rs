@@ -1,10 +1,9 @@
-use crate::component::ActorType;
-use crate::model::ActorActions;
-use crate::model::TransformLite;
-use crate::model::TransformLiteU8;
+use crate::{
+    component::ActorType,
+    model::{ActorActions, TransformLite, TransformLiteU8},
+};
 use bincode::Options;
-use serde::Deserialize;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use std::time::Duration;
 
 // TODO: move to model

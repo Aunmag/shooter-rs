@@ -1,13 +1,10 @@
-use bevy::asset::AssetServer;
-use bevy::prelude::Assets;
-use bevy::prelude::AudioSource;
-use bevy::prelude::Handle;
-use bevy::prelude::Resource;
-use rand::Rng;
-use rand::SeedableRng;
+use bevy::{
+    asset::AssetServer,
+    prelude::{Assets, AudioSource, Handle, Resource},
+};
+use rand::{Rng, SeedableRng};
 use rand_pcg::Pcg32;
-use regex::Captures;
-use regex::Regex;
+use regex::{Captures, Regex};
 use std::collections::HashMap;
 
 lazy_static::lazy_static! {

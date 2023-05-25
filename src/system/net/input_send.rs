@@ -1,18 +1,13 @@
-use crate::component::Actor;
-use crate::component::Player;
-use crate::model::ActorActions;
-use crate::model::ActorActionsExt;
-use crate::resource::Message;
-use crate::resource::NetResource;
-use crate::resource::ServerData;
-use crate::util::ext::TransformExt;
-use bevy::ecs::system::Resource;
-use bevy::prelude::Query;
-use bevy::prelude::Res;
-use bevy::prelude::ResMut;
-use bevy::prelude::Time;
-use bevy::prelude::Transform;
-use bevy::prelude::With;
+use crate::{
+    component::{Actor, Player},
+    model::{ActorActions, ActorActionsExt},
+    resource::{Message, NetResource, ServerData},
+    util::ext::TransformExt,
+};
+use bevy::{
+    ecs::system::Resource,
+    prelude::{Query, Res, ResMut, Time, Transform, With},
+};
 use std::time::Duration;
 
 #[derive(Default, Resource)]
