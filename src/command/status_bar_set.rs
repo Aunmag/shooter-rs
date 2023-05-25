@@ -1,15 +1,15 @@
-use crate::{component::HealthBar, data::PIXELS_PER_METER, material::HealthBarMaterial, util};
+use crate::{data::PIXELS_PER_METER, material::StatusBarMaterial, util};
 use bevy::{
     asset::Assets,
     ecs::system::Command,
-    prelude::{shape::Cube, BuildWorldChildren, Color, Entity, Transform, Vec3, World},
+    prelude::{shape::Cube, BuildWorldChildren, Entity, Transform, Vec3, World},
     render::{mesh::Mesh, texture::Image},
     sprite::MaterialMesh2dBundle,
 };
 
-pub struct HealthBarSet(pub Entity);
+pub struct StatusBarSet(pub Entity);
 
-impl Command for HealthBarSet {
+impl Command for StatusBarSet {
     fn write(self, world: &mut World) {
         let image = world
             .resource_mut::<Assets<Image>>()
@@ -20,11 +20,12 @@ impl Command for HealthBarSet {
             .add(Mesh::from(Cube::default()));
 
         let material = world
-            .resource_mut::<Assets<HealthBarMaterial>>()
-            .add(HealthBarMaterial {
-                value: 1.0,
-                color: Color::RED,
-                thickness: 0.05,
+            .resource_mut::<Assets<StatusBarMaterial>>()
+            .add(StatusBarMaterial {
+                health: 0.0,
+                health_alpha: 0.0,
+                ammo: 1.0,
+                ammo_alpha: 0.0,
                 image,
             });
 
@@ -37,7 +38,6 @@ impl Command for HealthBarSet {
                 material,
                 ..Default::default()
             })
-            .insert(HealthBar::default())
             .set_parent(self.0);
     }
 }

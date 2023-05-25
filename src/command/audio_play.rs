@@ -1,14 +1,18 @@
 use crate::{
     component::Player,
-    resource::{AudioStorage, Rng},
+    resource::{AudioStorage, AudioTracker, Rng},
 };
 use bevy::{
+    asset::Assets,
+    audio::AudioSink,
     ecs::{query::With, system::Command},
     math::{Vec2, Vec3Swizzles},
     prelude::{Audio, PlaybackSettings, World},
+    time::Time,
     transform::components::Transform,
 };
 use rand::Rng as _;
+use std::time::Duration;
 
 const VOLUME_MIN: f32 = 0.01;
 
@@ -16,7 +20,7 @@ const VOLUME_MIN: f32 = 0.01;
 pub struct AudioPlay {
     pub path: &'static str,
     pub volume: f32,
-    pub repeat: bool,
+    pub repeat: AudioRepeat,
     pub chance: f32,
     pub source: Option<Vec2>,
 }
@@ -25,7 +29,7 @@ impl AudioPlay {
     pub const DEFAULT: Self = Self {
         path: "sounds/default.ogg",
         volume: 1.0,
-        repeat: false,
+        repeat: AudioRepeat::Once,
         chance: 1.0,
         source: None,
     };
@@ -42,10 +46,10 @@ impl AudioPlay {
     }
 
     pub fn settings(&self) -> PlaybackSettings {
-        let settings = if self.repeat {
-            PlaybackSettings::LOOP
-        } else {
+        let settings = if let AudioRepeat::Once = self.repeat {
             PlaybackSettings::ONCE
+        } else {
+            PlaybackSettings::LOOP
         };
 
         return settings.with_volume(self.volume);
@@ -79,12 +83,30 @@ impl Command for AudioPlay {
             return;
         };
 
-        world
+        let sink = world
             .resource::<Audio>()
             .play_with_settings(handle, self.settings());
+
+        if let AudioRepeat::Loop(duration) = self.repeat {
+            if !duration.is_zero() {
+                let time = world.resource::<Time>().elapsed();
+
+                let handle = world.resource::<Assets<AudioSink>>().get_handle(sink);
+
+                world
+                    .resource_mut::<AudioTracker>()
+                    .track_temporary(handle, time + duration);
+            }
+        }
     }
 }
 
 fn calc_spatial_volume(listener: Vec2, source: Vec2, volume: f32) -> f32 {
     return f32::min(1.0 / source.distance(listener).sqrt(), 1.0) * volume;
+}
+
+#[derive(Clone)]
+pub enum AudioRepeat {
+    Once,
+    Loop(Duration),
 }

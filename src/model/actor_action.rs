@@ -8,41 +8,25 @@ pub enum ActorAction {
     MovementRightward,
     Sprint,
     Attack,
+    Reload,
 }
 
 pub type ActorActions = EnumSet<ActorAction>;
 
 pub trait ActorActionsExt {
-    const MOVEMENT: ActorActions = enumset::enum_set!(
-        ActorAction::MovementForward
-            | ActorAction::MovementBackward
-            | ActorAction::MovementLeftward
-            | ActorAction::MovementRightward
-    );
-
-    fn clean(self) -> Self;
-
     fn set(&mut self, value: ActorAction, state: bool);
 
     #[allow(clippy::wrong_self_convention)]
-    fn is_moving(self) -> bool;
+    fn is_sprinting(self) -> bool;
 
     #[allow(clippy::wrong_self_convention)]
     fn is_attacking(self) -> bool;
 
     #[allow(clippy::wrong_self_convention)]
-    fn is_sprinting(self) -> bool;
+    fn is_reloading(self) -> bool;
 }
 
 impl ActorActionsExt for ActorActions {
-    fn clean(self) -> Self {
-        if self.is_moving() {
-            return self;
-        } else {
-            return self - ActorAction::Sprint;
-        }
-    }
-
     fn set(&mut self, value: ActorAction, state: bool) {
         if state {
             self.insert(value);
@@ -51,16 +35,16 @@ impl ActorActionsExt for ActorActions {
         }
     }
 
-    fn is_moving(self) -> bool {
-        return !self.is_disjoint(Self::MOVEMENT);
+    fn is_sprinting(self) -> bool {
+        return self.contains(ActorAction::Sprint);
     }
 
     fn is_attacking(self) -> bool {
         return self.contains(ActorAction::Attack);
     }
 
-    fn is_sprinting(self) -> bool {
-        return self.contains(ActorAction::Sprint);
+    fn is_reloading(self) -> bool {
+        return self.contains(ActorAction::Reload);
     }
 }
 
@@ -96,17 +80,5 @@ mod tests {
         assert_eq!(actions.len(), 2);
         assert_eq!(actions.as_u8(), 0b10100);
         assert_eq!(actions.as_u8(), 20);
-    }
-
-    #[test]
-    fn test_is_moving() {
-        assert!(!ActorActions::EMPTY.is_moving());
-        assert!(ActorActions::ALL.is_moving());
-        assert!(ActorActions::only(ActorAction::MovementForward).is_moving());
-        assert!(ActorActions::only(ActorAction::MovementBackward).is_moving());
-        assert!(ActorActions::only(ActorAction::MovementLeftward).is_moving());
-        assert!(ActorActions::only(ActorAction::MovementRightward).is_moving());
-        assert!(!ActorActions::only(ActorAction::Sprint).is_moving());
-        assert!(!ActorActions::only(ActorAction::Attack).is_moving());
     }
 }

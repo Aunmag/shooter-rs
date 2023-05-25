@@ -1,5 +1,5 @@
 use crate::{
-    command::HealthBarSet,
+    command::StatusBarSet,
     component::{Actor, ActorConfig, Inertia, Player},
     data::LAYER_ACTOR_PLAYER,
 };
@@ -28,6 +28,6 @@ impl Command for ActorPlayerSet {
         entity_mut.insert(Player);
         entity_mut.insert(Inertia::new(config.mass));
 
-        HealthBarSet(self.0).write(world);
+        StatusBarSet(self.0).write(world);
     }
 }

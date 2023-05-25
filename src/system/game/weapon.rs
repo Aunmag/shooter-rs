@@ -1,12 +1,12 @@
 use crate::{
-    command::{AudioPlay, ProjectileSpawn},
-    component::{Actor, Weapon},
+    command::{AudioPlay, AudioRepeat, ProjectileSpawn},
+    component::{Actor, Weapon, WeaponFireResult},
     model::{ActorActionsExt, TransformLite},
     util::ext::Vec2Ext,
 };
 use bevy::{
     ecs::system::{Query, Resource},
-    math::Vec2,
+    math::{Vec2, Vec3Swizzles},
     prelude::{Commands, Entity, Res, ResMut, Time, Transform},
 };
 use rand::{Rng, SeedableRng};
@@ -38,26 +38,75 @@ pub fn weapon(
     let now = time.elapsed();
 
     for (entity, actor, transform, mut weapon) in query.iter_mut() {
-        if actor.actions.is_attacking() && weapon.fire(now) {
-            let mut transform = TransformLite::from(transform);
-            transform.translation += Vec2::from_length(BARREL_LENGTH, transform.direction);
+        if !actor.actions.is_attacking() {
+            weapon.release_trigger();
+        }
+
+        if actor.actions.is_reloading() && !weapon.is_reloading() && !weapon.is_ammo_full() {
+            weapon.reload(now);
 
             commands.add(AudioPlay {
-                path: "sounds/shot.ogg",
-                volume: 1.0,
-                source: Some(transform.translation),
+                path: "sounds/reloading_{n}.ogg",
+                volume: 0.4,
+                source: Some(transform.translation.xy()),
+                repeat: AudioRepeat::Loop(weapon.config.reloading_time), // TODO: stop if weapon will be changed earlier
                 ..AudioPlay::DEFAULT
             });
 
-            for _ in 0..weapon.config.projectile.fragments {
-                transform.direction = deviate_direction(&mut data.rng, transform.direction);
+            continue;
+        }
 
-                commands.add(ProjectileSpawn {
-                    config: weapon.config.projectile,
-                    transform,
-                    velocity: deviate_velocity(&mut data.rng, weapon.config.muzzle_velocity),
-                    shooter: Some(entity),
-                });
+        if weapon.is_reloading() && weapon.is_ready(now) {
+            weapon.complete_reloading(now);
+            commands.add(AudioPlay {
+                path: "sounds/reloaded_{n}.ogg",
+                volume: 0.8,
+                source: Some(transform.translation.xy()),
+                ..AudioPlay::DEFAULT
+            });
+        }
+
+        if actor.actions.is_attacking() {
+            let was_cocked = weapon.is_cocked();
+            let was_trigger_pressed = weapon.is_trigger_pressed();
+
+            match weapon.fire(now) {
+                WeaponFireResult::Empty => {
+                    if !was_trigger_pressed || (was_cocked && !weapon.is_cocked()) {
+                        commands.add(AudioPlay {
+                            path: "sounds/dry_fire.ogg",
+                            volume: 0.4,
+                            source: Some(transform.translation.xy()),
+                            ..AudioPlay::DEFAULT
+                        });
+                    }
+                }
+                WeaponFireResult::NotReady => {}
+                WeaponFireResult::Fire => {
+                    let mut transform = TransformLite::from(transform);
+                    transform.translation += Vec2::from_length(BARREL_LENGTH, transform.direction);
+
+                    commands.add(AudioPlay {
+                        path: "sounds/shot.ogg",
+                        volume: 1.0,
+                        source: Some(transform.translation),
+                        ..AudioPlay::DEFAULT
+                    });
+
+                    for _ in 0..weapon.config.projectile.fragments {
+                        transform.direction = deviate_direction(&mut data.rng, transform.direction);
+
+                        commands.add(ProjectileSpawn {
+                            config: weapon.config.projectile,
+                            transform,
+                            velocity: deviate_velocity(
+                                &mut data.rng,
+                                weapon.config.muzzle_velocity,
+                            ),
+                            shooter: Some(entity),
+                        });
+                    }
+                }
             }
         }
     }

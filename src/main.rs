@@ -37,10 +37,10 @@ mod util;
 
 use crate::{
     data::APP_TITLE,
-    material::{HealthBarMaterial, ProjectileMaterial},
+    material::{ProjectileMaterial, StatusBarMaterial},
     model::{AppState, Arguments},
     plugin::StressTestPlugin,
-    resource::{AssetStorage, AudioStorage, Config, Rng, Scenario},
+    resource::{AssetStorage, AudioStorage, AudioTracker, Config, Rng, Scenario},
     scenario::WavesScenario,
     util::ext::AppExt,
 };
@@ -83,11 +83,12 @@ fn main() {
                 ..Default::default()
             }),
     )
-    .add_plugin(Material2dPlugin::<HealthBarMaterial>::default())
+    .add_plugin(Material2dPlugin::<StatusBarMaterial>::default())
     .add_plugin(Material2dPlugin::<ProjectileMaterial>::default())
     .add_state::<AppState>()
     .insert_resource(AssetStorage::default())
     .insert_resource(AudioStorage::default())
+    .insert_resource(AudioTracker::default())
     .insert_resource(config)
     .insert_resource(Rng::default())
     .insert_resource(Scenario::new(WavesScenario::new()))
@@ -96,6 +97,7 @@ fn main() {
     .insert_resource(system::game::AmbienceFxData::default())
     .insert_resource(system::game::CollisionSystemData::default())
     .insert_resource(system::game::WeaponData::default())
+    .add_system(system::sys::audio_tracker)
     .add_state_system_enter(AppState::Loading, system::loading::on_enter)
     .add_state_system(AppState::Loading, system::loading::on_update)
     .add_state_system_enter(AppState::Game, system::game::on_enter)
@@ -111,7 +113,7 @@ fn main() {
         s.add(melee.after(collision_resolve));
         s.add(projectile.pipe(projectile_hit).after(collision_resolve));
         s.add(camera.after(collision_resolve));
-        s.add(health_bar);
+        s.add(status_bar);
         s.add(footsteps);
         s.add(ambience_fx);
         s.add(terrain);

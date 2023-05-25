@@ -4,11 +4,11 @@ mod actor_player_set;
 mod actor_set;
 mod audio_play;
 mod cursor_lock;
-mod health_bar_set;
 mod projectile_spawn;
+mod status_bar_set;
 mod terrain_init;
 
 pub use self::{
     actor_bot_set::*, actor_melee_reset::*, actor_player_set::*, actor_set::*, audio_play::*,
-    cursor_lock::*, health_bar_set::*, projectile_spawn::*, terrain_init::*,
+    cursor_lock::*, projectile_spawn::*, status_bar_set::*, terrain_init::*,
 };

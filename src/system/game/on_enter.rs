@@ -1,5 +1,5 @@
 use crate::{
-    command::{AudioPlay, CursorGrab, TerrainInit},
+    command::{AudioPlay, AudioRepeat, CursorGrab, TerrainInit},
     data::{LAYER_BLUFF, LAYER_TREE, WORLD_SIZE, WORLD_SIZE_HALF, WORLD_SIZE_VISUAL},
     model::TransformLite,
     util::ext::Vec2Ext,
@@ -11,7 +11,10 @@ use bevy::{
 };
 use rand::{seq::SliceRandom, Rng, SeedableRng};
 use rand_pcg::Pcg32;
-use std::f32::consts::{FRAC_PI_2, PI, TAU};
+use std::{
+    f32::consts::{FRAC_PI_2, PI, TAU},
+    time::Duration,
+};
 
 const TREES_PER_METER: f32 = 0.02;
 const TREES_QUANTITY: f32 = WORLD_SIZE_VISUAL * WORLD_SIZE_VISUAL * TREES_PER_METER;
@@ -29,14 +32,14 @@ pub fn on_enter(mut commands: Commands, assets: Res<AssetServer>) {
     commands.add(AudioPlay {
         path: "sounds/ambience_music.ogg",
         volume: 0.3,
-        repeat: true,
+        repeat: AudioRepeat::Loop(Duration::ZERO),
         ..AudioPlay::DEFAULT
     });
 
     commands.add(AudioPlay {
         path: "sounds/ambience_nature.ogg",
         volume: 0.3,
-        repeat: true,
+        repeat: AudioRepeat::Loop(Duration::ZERO),
         ..AudioPlay::DEFAULT
     });
 }

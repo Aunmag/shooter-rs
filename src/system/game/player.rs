@@ -50,6 +50,10 @@ pub fn player(
             .actions
             .set(ActorAction::Attack, mouse.pressed(MouseButton::Left));
 
+        actor
+            .actions
+            .set(ActorAction::Reload, keyboard.pressed(KeyCode::R));
+
         transform.rotate_local_z(rotation)
     }
 }

@@ -1,4 +1,4 @@
-mod health_bar;
 mod projectile;
+mod status_bar;
 
-pub use self::{health_bar::*, projectile::*};
+pub use self::{projectile::*, status_bar::*};
