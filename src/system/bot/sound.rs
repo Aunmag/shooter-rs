@@ -30,7 +30,7 @@ pub fn sound(
         if !bot.next_sound.is_zero() {
             commands.add(AudioPlay {
                 path: "sounds/zombie_{n}.ogg",
-                volume: 0.5,
+                volume: 0.7,
                 source: Some(transform.translation.xy()),
                 choices: 9,
                 ..Default::default()

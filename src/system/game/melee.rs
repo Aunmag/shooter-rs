@@ -80,7 +80,7 @@ pub fn melee(
                     path: "sounds/melee_{n}.ogg",
                     volume: 0.6,
                     source: Some(attacker_transform.translation.xy()),
-                    choices: 2,
+                    choices: 3,
                     ..Default::default()
                 });
 

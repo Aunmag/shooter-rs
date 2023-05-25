@@ -38,7 +38,14 @@ pub fn on_enter(mut commands: Commands, assets: Res<AssetServer>) {
     spawn_trees(&mut commands, &assets);
 
     commands.add(AudioPlay {
-        path: "sounds/ambience.ogg",
+        path: "sounds/ambience_music.ogg",
+        volume: 0.3,
+        repeat: true,
+        ..Default::default()
+    });
+
+    commands.add(AudioPlay {
+        path: "sounds/ambience_nature.ogg",
         volume: 0.3,
         repeat: true,
         ..Default::default()

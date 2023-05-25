@@ -6,6 +6,7 @@ const DECAY_TIME: Duration = Duration::from_millis(500);
 #[derive(Component)]
 pub struct Health {
     value: f32,
+    value_previous: f32,
     resistance: f32,
     death_time: Duration,
 }
@@ -23,9 +24,14 @@ impl Health {
 
         return Self {
             value: 1.0,
+            value_previous: 1.0,
             resistance,
             death_time: Duration::from_secs(0),
         };
+    }
+
+    pub fn save_change(&mut self) {
+        self.value_previous = self.value;
     }
 
     pub fn damage(&mut self, value: f32, now: Duration) {
@@ -49,6 +55,10 @@ impl Health {
 
     pub fn get(&self) -> f32 {
         return self.value;
+    }
+
+    pub fn change(&self) -> f32 {
+        return self.value - self.value_previous;
     }
 
     pub fn is_alive(&self) -> bool {

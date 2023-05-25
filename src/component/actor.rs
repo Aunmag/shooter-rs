@@ -1,4 +1,5 @@
 use crate::model::ActorActions;
+use crate::model::SoundConfig;
 use crate::model::SpriteOffset;
 use bevy::ecs::component::Component;
 use serde::Deserialize;
@@ -34,6 +35,9 @@ pub struct ActorConfig {
     pub melee_distance_angular: f32,
     pub melee_interval: Duration,
     pub actor_type: ActorType,
+    pub pain_threshold: f32,
+    pub sound_pain: Option<SoundConfig>,
+    pub sound_death: Option<SoundConfig>,
 }
 
 impl Actor {
@@ -64,6 +68,9 @@ impl ActorConfig {
         melee_distance_angular: TAU / 3.0,
         melee_interval: Duration::from_millis(400),
         actor_type: ActorType::Human,
+        pain_threshold: 0.02,
+        sound_pain: Some(SoundConfig::new("sounds/human_pain_{n}.ogg", 6, 0.8, 1.0)),
+        sound_death: None,
     };
 
     pub const ZOMBIE: &'static Self = &Self {
@@ -80,6 +87,9 @@ impl ActorConfig {
         melee_distance_angular: Self::HUMAN.melee_distance_angular,
         melee_interval: Self::HUMAN.melee_interval,
         actor_type: ActorType::Zombie,
+        pain_threshold: 0.08,
+        sound_pain: Some(SoundConfig::new("sounds/zombie_pain_{n}.ogg", 2, 1.0, 0.3)),
+        sound_death: Some(SoundConfig::new("sounds/zombie_death_{n}.ogg", 3, 1.0, 0.4)),
     };
 }
 
