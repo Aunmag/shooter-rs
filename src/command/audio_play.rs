@@ -71,9 +71,15 @@ impl Command for AudioPlay {
             world.resource::<AssetServer>().get_handle(self.path)
         };
 
+        let settings = if self.repeat {
+            PlaybackSettings::LOOP
+        } else {
+            PlaybackSettings::ONCE
+        };
+
         world
             .resource::<Audio>()
-            .play_with_settings(handle, PlaybackSettings::ONCE.with_volume(self.volume));
+            .play_with_settings(handle, settings.with_volume(self.volume));
     }
 }
 
