@@ -80,8 +80,7 @@ pub fn melee(
                     path: "sounds/melee_{n}.ogg",
                     volume: 0.6,
                     source: Some(attacker_transform.translation.xy()),
-                    choices: 3,
-                    ..Default::default()
+                    ..AudioPlay::DEFAULT
                 });
 
                 victim_health.damage(momentum, time);

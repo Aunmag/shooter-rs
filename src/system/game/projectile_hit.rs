@@ -24,7 +24,6 @@ pub fn projectile_hit(
 
         if let Ok((transform, mut inertia, mut health)) = entities.get_mut(entity) {
             inertia.push(force, momentum * force_angular, true, false, true);
-
             health.damage(momentum, time);
 
             // TODO: don't play multiple times if it was a fraction
@@ -32,8 +31,7 @@ pub fn projectile_hit(
                 path: "sounds/hit_body_{n}.ogg",
                 volume: 1.5,
                 source: Some(transform.translation.xy()),
-                choices: 5,
-                ..Default::default()
+                ..AudioPlay::DEFAULT
             });
         }
     }

@@ -1,4 +1,5 @@
 use crate::model::AppState;
+use crate::resource::AudioStorage;
 use crate::resource::EntityConverter;
 use crate::resource::Rng;
 use crate::resource::ServerData;
@@ -19,6 +20,7 @@ impl Plugin for GameClientPlugin {
         // TODO: do automatically on enter or make it lazy
         // TODO: remove on exit
         app.insert_resource(AmbienceFxData::default());
+        app.insert_resource(AudioStorage::default());
         app.insert_resource(EntityConverter::default());
         app.insert_resource(Rng::default());
         app.insert_resource(ServerData::default());

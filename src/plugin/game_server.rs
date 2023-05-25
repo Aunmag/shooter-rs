@@ -1,4 +1,5 @@
 use crate::model::AppState;
+use crate::resource::AudioStorage;
 use crate::resource::EntityConverter;
 use crate::resource::Rng;
 use crate::resource::Scenario;
@@ -9,16 +10,12 @@ use bevy::app::App;
 use bevy::app::Plugin;
 use bevy::prelude::IntoPipeSystem;
 use bevy::prelude::IntoSystemConfig;
+use derive_more::Constructor;
 use std::time::Duration;
 
+#[derive(Constructor)]
 pub struct GameServerPlugin {
     sync_interval: Duration,
-}
-
-impl GameServerPlugin {
-    pub fn new(sync_interval: Duration) -> Self {
-        return Self { sync_interval };
-    }
 }
 
 impl Plugin for GameServerPlugin {
@@ -30,6 +27,7 @@ impl Plugin for GameServerPlugin {
         // TODO: do automatically on enter or make it lazy
         // TODO: remove on exit
         app.insert_resource(AmbienceFxData::default());
+        app.insert_resource(AudioStorage::default());
         app.insert_resource(EntityConverter::default());
         app.insert_resource(Rng::default());
         app.insert_resource(Scenario::new(WavesScenario::new()));

@@ -32,8 +32,7 @@ pub fn sound(
                 path: "sounds/zombie_{n}.ogg",
                 volume: 0.7,
                 source: Some(transform.translation.xy()),
-                choices: 9,
-                ..Default::default()
+                ..AudioPlay::DEFAULT
             });
         }
 

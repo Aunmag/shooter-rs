@@ -52,7 +52,7 @@ pub fn weapon(
                 path: "sounds/shot.ogg",
                 volume: 1.0,
                 source: Some(transform.translation),
-                ..Default::default()
+                ..AudioPlay::DEFAULT
             });
 
             for _ in 0..weapon.config.projectile.fragments {

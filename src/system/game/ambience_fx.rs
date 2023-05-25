@@ -32,8 +32,7 @@ pub fn ambience_fx(
         commands.add(AudioPlay {
             path: "sounds/ambience_fx_{n}.ogg",
             volume: 0.3,
-            choices: 16,
-            ..Default::default()
+            ..AudioPlay::DEFAULT
         });
     }
 

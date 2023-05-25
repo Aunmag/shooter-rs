@@ -3189,9 +3189,11 @@ dependencies = [
  "derive_more",
  "enumset",
  "humantime-serde",
+ "lazy_static",
  "log",
  "rand",
  "rand_pcg",
+ "regex",
  "serde",
 ]
 

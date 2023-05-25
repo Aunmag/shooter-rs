@@ -41,14 +41,14 @@ pub fn on_enter(mut commands: Commands, assets: Res<AssetServer>) {
         path: "sounds/ambience_music.ogg",
         volume: 0.3,
         repeat: true,
-        ..Default::default()
+        ..AudioPlay::DEFAULT
     });
 
     commands.add(AudioPlay {
         path: "sounds/ambience_nature.ogg",
         volume: 0.3,
         repeat: true,
-        ..Default::default()
+        ..AudioPlay::DEFAULT
     });
 }
 

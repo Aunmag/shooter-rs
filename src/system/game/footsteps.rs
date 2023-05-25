@@ -41,8 +41,7 @@ pub fn footsteps(
             path: "sounds/footstep_{n}.ogg",
             volume: calc_stride_volume(intensity),
             source: Some(translation),
-            choices: 8,
-            ..Default::default()
+            ..AudioPlay::DEFAULT
         });
 
         footsteps.time = time;

@@ -1,5 +1,5 @@
+use crate::command::AudioPlay;
 use crate::model::ActorActions;
-use crate::model::SoundConfig;
 use crate::model::SpriteOffset;
 use bevy::ecs::component::Component;
 use serde::Deserialize;
@@ -36,8 +36,8 @@ pub struct ActorConfig {
     pub melee_interval: Duration,
     pub actor_type: ActorType,
     pub pain_threshold: f32,
-    pub sound_pain: Option<SoundConfig>,
-    pub sound_death: Option<SoundConfig>,
+    pub sound_pain: Option<AudioPlay>,
+    pub sound_death: Option<AudioPlay>,
 }
 
 impl Actor {
@@ -69,7 +69,12 @@ impl ActorConfig {
         melee_interval: Duration::from_millis(400),
         actor_type: ActorType::Human,
         pain_threshold: 0.02,
-        sound_pain: Some(SoundConfig::new("sounds/human_pain_{n}.ogg", 6, 0.8, 1.0)),
+        sound_pain: Some(AudioPlay {
+            path: "sounds/human_pain_{n}.ogg",
+            volume: 0.8,
+            chance: 1.0,
+            ..AudioPlay::DEFAULT
+        }),
         sound_death: None,
     };
 
@@ -88,8 +93,18 @@ impl ActorConfig {
         melee_interval: Self::HUMAN.melee_interval,
         actor_type: ActorType::Zombie,
         pain_threshold: 0.08,
-        sound_pain: Some(SoundConfig::new("sounds/zombie_pain_{n}.ogg", 2, 1.0, 0.3)),
-        sound_death: Some(SoundConfig::new("sounds/zombie_death_{n}.ogg", 3, 1.0, 0.4)),
+        sound_pain: Some(AudioPlay {
+            path: "sounds/zombie_pain_{n}.ogg",
+            volume: 1.0,
+            chance: 0.3,
+            ..AudioPlay::DEFAULT
+        }),
+        sound_death: Some(AudioPlay {
+            path: "sounds/zombie_death_{n}.ogg",
+            volume: 1.0,
+            chance: 0.4,
+            ..AudioPlay::DEFAULT
+        }),
     };
 }
 
