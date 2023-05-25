@@ -27,7 +27,7 @@ impl AppExt for App {
         state: AppState,
         system: impl IntoSystemAppConfig<M> + IntoSystemConfig<M>,
     ) -> &mut Self {
-        self.add_system(system.in_set(OnUpdate(state)))
+        return self.add_system(system.in_set(OnUpdate(state)));
     }
 
     fn add_state_systems(&mut self, state: AppState, f: fn(&mut StateSystems)) -> &mut Self {
@@ -40,7 +40,7 @@ impl AppExt for App {
         state: AppState,
         system: impl IntoSystemAppConfig<M> + IntoSystemConfig<M>,
     ) -> &mut Self {
-        self.add_system(system.in_schedule(OnEnter(state)))
+        return self.add_system(system.in_schedule(OnEnter(state)));
     }
 }
 
