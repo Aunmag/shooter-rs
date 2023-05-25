@@ -1,11 +1,8 @@
-use crate::{
-    command::EntityDelete,
-    component::{Actor, Health},
-};
+use crate::component::{Actor, Health};
 use bevy::{
     ecs::system::Query,
     math::Vec3Swizzles,
-    prelude::{Commands, Entity, Res, Time, Transform},
+    prelude::{Commands, DespawnRecursiveExt, Entity, Res, Time, Transform},
 };
 
 pub fn health(
@@ -31,7 +28,7 @@ pub fn health(
         }
 
         if health.is_decayed(now) {
-            commands.add(EntityDelete(entity));
+            commands.entity(entity).despawn_recursive();
         }
 
         health.save_change();

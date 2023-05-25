@@ -1,7 +1,4 @@
-use bevy::ecs::{component::Component, entity::Entity};
-use derive_more::Constructor;
+use bevy::ecs::component::Component;
 
-#[derive(Constructor, Component)]
-pub struct Player {
-    pub ghost: Option<Entity>,
-}
+#[derive(Component)]
+pub struct Player;

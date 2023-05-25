@@ -1,6 +1,5 @@
 use crate::model::geometry::{
-    LineSegment, LineSegmentTrait,
-    Geometry, GeometryDistance, GeometryProjection, Line,
+    Geometry, GeometryDistance, GeometryProjection, Line, LineSegment, LineSegmentTrait,
 };
 use bevy::math::Vec2;
 

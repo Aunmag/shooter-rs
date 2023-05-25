@@ -21,7 +21,6 @@
     clippy::cargo_common_metadata,
     clippy::multiple_crate_versions,
     clippy::needless_return,
-    clippy::too_many_arguments,
     clippy::type_complexity
 )]
 
@@ -38,15 +37,15 @@ mod util;
 
 use crate::{
     data::APP_TITLE,
-    // material::{HealthBarMaterial, ProjectileMaterial},
     material::{HealthBarMaterial, ProjectileMaterial},
     model::{AppState, Arguments},
-    plugin::{GameClientPlugin, GameServerPlugin, StressTestPlugin},
-    resource::{AssetStorage, Config, GameType, NetResource},
+    plugin::StressTestPlugin,
+    resource::{AssetStorage, AudioStorage, Config, Rng, Scenario},
+    scenario::WavesScenario,
     util::ext::AppExt,
 };
 use bevy::{
-    prelude::{App, DefaultPlugins, PluginGroup},
+    prelude::{App, DefaultPlugins, IntoPipeSystem, IntoSystemConfig, PluginGroup},
     render::texture::ImagePlugin,
     sprite::Material2dPlugin,
     window::{Window, WindowPlugin, WindowResolution},
@@ -60,66 +59,67 @@ fn main() {
     let config = Config::load_from(&arguments.config).expect("Failed to load config");
     log::debug!("Config loaded: {:?}", config);
 
-    let game_type = GameType::try_from(&arguments).expect("Wrong IPv4");
-    log::debug!("Starting as {:?}", game_type);
+    let mut app = App::new();
 
-    let net = match game_type {
-        GameType::Server => {
-            NetResource::new_as_server(&config.net).expect("Failed to start server")
-        }
-        GameType::Client => {
-            NetResource::new_as_client(&config.net).expect("Failed to start client")
-        }
-    };
+    if config.misc.with_stress_test {
+        log::info!("Starting with StressTestPlugin plugin");
+        app.add_plugin(StressTestPlugin);
+    }
 
-    let mut application = App::new();
-
-    application
-        .add_plugins(
-            DefaultPlugins
-                .set(ImagePlugin::default_nearest())
-                .set(WindowPlugin {
-                    primary_window: Some(Window {
-                        title: APP_TITLE.to_string(),
-                        mode: config.display.mode(),
-                        resolution: WindowResolution::new(
-                            config.display.window_size_x,
-                            config.display.window_size_y,
-                        ),
-                        present_mode: config.display.present_mode(),
-                        ..Default::default()
-                    }),
+    app.add_plugins(
+        DefaultPlugins
+            .set(ImagePlugin::default_nearest())
+            .set(WindowPlugin {
+                primary_window: Some(Window {
+                    title: APP_TITLE.to_string(),
+                    mode: config.display.mode(),
+                    resolution: WindowResolution::new(
+                        config.display.window_size_x,
+                        config.display.window_size_y,
+                    ),
+                    present_mode: config.display.present_mode(),
                     ..Default::default()
                 }),
-        )
-        .add_plugin(Material2dPlugin::<HealthBarMaterial>::default())
-        .add_plugin(Material2dPlugin::<ProjectileMaterial>::default())
-        .add_state::<AppState>()
-        .insert_resource(net)
-        .insert_resource(system::game::CollisionSystemData::default())
-        .insert_resource(system::game::WeaponData::default())
-        .insert_resource(game_type)
-        .insert_resource(AssetStorage::default())
-        .insert_resource(config.clone())
-        .add_state_system_enter(AppState::Loading, system::loading::on_enter)
-        .add_state_system(AppState::Loading, system::loading::on_update)
-        .add_state_system_enter(AppState::Game, system::game::on_enter);
-
-    match game_type {
-        GameType::Server => {
-            log::info!("Starting as server");
-            application.add_plugin(GameServerPlugin::new(config.net.server.sync_interval));
-
-            if config.misc.with_stress_test {
-                log::info!("Starting with StressTestPlugin plugin");
-                application.add_plugin(StressTestPlugin);
-            }
-        }
-        GameType::Client => {
-            log::info!("Starting as client");
-            application.add_plugin(GameClientPlugin);
-        }
-    };
-
-    application.run();
+                ..Default::default()
+            }),
+    )
+    .add_plugin(Material2dPlugin::<HealthBarMaterial>::default())
+    .add_plugin(Material2dPlugin::<ProjectileMaterial>::default())
+    .add_state::<AppState>()
+    .insert_resource(AssetStorage::default())
+    .insert_resource(AudioStorage::default())
+    .insert_resource(config)
+    .insert_resource(Rng::default())
+    .insert_resource(Scenario::new(WavesScenario::new()))
+    .insert_resource(system::bot::TargetFindData::default())
+    .insert_resource(system::bot::TargetUpdateData::default())
+    .insert_resource(system::game::AmbienceFxData::default())
+    .insert_resource(system::game::CollisionSystemData::default())
+    .insert_resource(system::game::WeaponData::default())
+    .add_state_system_enter(AppState::Loading, system::loading::on_enter)
+    .add_state_system(AppState::Loading, system::loading::on_update)
+    .add_state_system_enter(AppState::Game, system::game::on_enter)
+    .add_state_systems(AppState::Game, |s| {
+        use crate::system::{bot, game::*};
+        s.add(input);
+        s.add(health);
+        s.add(player.after(input));
+        s.add(actor.after(player));
+        s.add(inertia.after(actor));
+        s.add(collision_find.pipe(collision_resolve).after(inertia));
+        s.add(weapon.after(collision_resolve));
+        s.add(melee.after(collision_resolve));
+        s.add(projectile.pipe(projectile_hit).after(collision_resolve));
+        s.add(camera.after(collision_resolve));
+        s.add(health_bar);
+        s.add(footsteps);
+        s.add(ambience_fx);
+        s.add(terrain);
+        s.add(scenario);
+        s.add(bot::target_find);
+        s.add(bot::target_update.after(bot::target_find));
+        s.add(bot::target_follow.after(bot::target_update));
+        s.add(bot::sound);
+    })
+    .run();
 }

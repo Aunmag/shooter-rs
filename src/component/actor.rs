@@ -3,7 +3,6 @@ use crate::{
     model::{ActorActions, SpriteOffset},
 };
 use bevy::ecs::component::Component;
-use serde::{Deserialize, Serialize};
 use std::{f32::consts::TAU, time::Duration};
 
 #[derive(Component)]
@@ -14,7 +13,7 @@ pub struct Actor {
     pub melee_next: Duration,
 }
 
-#[derive(Serialize, Deserialize, Debug, Copy, Clone, PartialEq, Eq)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum ActorType {
     Human,
     Zombie,

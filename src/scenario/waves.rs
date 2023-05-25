@@ -2,9 +2,9 @@ use crate::{
     command::{ActorBotSet, ActorPlayerSet, ActorSet},
     component::{Actor, ActorConfig, ActorType, Health},
     data::VIEW_DISTANCE,
-    model::TransformLiteU8,
+    model::TransformLite,
     resource::{Scenario, ScenarioLogic},
-    util::{ext::Vec2Ext, math::compress_radians},
+    util::ext::Vec2Ext,
 };
 use bevy::{
     ecs::system::Command,
@@ -64,8 +64,7 @@ impl WavesScenario {
         commands.add(ActorSet {
             entity,
             config: ActorConfig::HUMAN,
-            transform: TransformLiteU8::default(),
-            is_ghost: false,
+            transform: TransformLite::default(),
         });
 
         commands.add(ActorPlayerSet(entity));
@@ -151,18 +150,13 @@ impl Command for SpawnZombie {
 
         let entity = world.spawn_empty().id();
         let offset = Vec2::from_length(ZOMBIES_SPAWN_DISTANCE, self.direction);
-
-        let transform = TransformLiteU8::new(
-            center.x + offset.x,
-            center.y + offset.y,
-            compress_radians(self.direction),
-        );
+        let transform =
+            TransformLite::new(center.x + offset.x, center.y + offset.y, self.direction);
 
         ActorSet {
             entity,
             config: ActorConfig::ZOMBIE,
             transform,
-            is_ghost: false,
         }
         .write(world);
 

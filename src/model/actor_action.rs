@@ -1,7 +1,6 @@
 use enumset::{EnumSet, EnumSetType};
-use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Serialize, Deserialize, EnumSetType)]
+#[derive(Debug, EnumSetType)]
 pub enum ActorAction {
     MovementForward,
     MovementBackward,

@@ -24,18 +24,6 @@ pub fn normalize_radians(mut radians: f32) -> f32 {
     return radians;
 }
 
-pub fn compress_radians(value: f32) -> u8 {
-    if value > 0.0 {
-        return (value / TAU * f32::from(u8::MAX)).round() as u8;
-    } else {
-        return u8::MAX - (-value / TAU * f32::from(u8::MAX)).round() as u8;
-    }
-}
-
-pub fn decompress_radians(value: u8) -> f32 {
-    return value as f32 / f32::from(u8::MAX) * TAU;
-}
-
 pub fn find_meet_point(
     origin_position: Vec2,
     origin_velocity: Vec2,

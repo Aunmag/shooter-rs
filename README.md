@@ -2,7 +2,7 @@
 
 ### About
 
-A work-in-progress multiplayer top-down shooter. Actually, it's a Rust port of [my Java game](https://github.com/aunmag/shooter-java). For now, its goal is very simply to shoot zombies chasing after you. The game has several advantages, like high-quality bullet ballistics and geocentric camera rotation relative to the player. I want to make something similar to S.T.A.L.K.E.R., with open locations, quests, cooperative mode, and so on. It may take a lot of time and effort.
+A work-in-progress top-down shooter. Actually, it's a Rust port of [my Java game](https://github.com/aunmag/shooter-java). For now, its goal is very simply to shoot zombies chasing after you. The game has several advantages, like high-quality bullet ballistics and geocentric camera rotation relative to the player. I want to make something similar to S.T.A.L.K.E.R., with open locations, quests, cooperative mode, and so on. It may take a lot of time and effort.
 
 Feel free to leave any comments or questions in the open [discussion](https://github.com/aunmag/shooter-rust/discussions/1) on GitHub.
 

@@ -3,9 +3,8 @@ use crate::{
     data::LAYER_PROJECTILE,
     material::ProjectileMaterial,
     model::TransformLite,
-    resource::{Message, NetResource},
     util,
-    util::ext::{Vec2Ext, WorldExt},
+    util::ext::Vec2Ext,
 };
 use bevy::{
     asset::Assets,
@@ -24,18 +23,6 @@ pub struct ProjectileSpawn {
 
 impl Command for ProjectileSpawn {
     fn write(self, world: &mut World) {
-        if world.is_server() {
-            world
-                .resource_mut::<NetResource>()
-                .send_to_all(Message::ProjectileSpawn {
-                    id: 0,
-                    transform: self.transform,
-                    velocity: self.velocity,
-                    acceleration_factor: self.config.acceleration_factor,
-                    shooter_id: self.shooter.map(Entity::index),
-                });
-        }
-
         let projectile = Projectile::new(
             self.config,
             world.resource::<Time>().elapsed(),

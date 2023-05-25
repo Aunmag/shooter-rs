@@ -7,17 +7,6 @@ v_sync = false
 [controls]
 mouse_sensitivity = 0.003
 
-[net]
-message_resend_interval = "300ms"
-
-[net.server]
-port = 2001
-sync_interval = "40ms" # 25 Hz
-
-[net.client]
-join = "127.0.0.1:2001" # TODO: change this
-
 [misc]
 grab_cursor = true
-show_ghost = false
 with_stress_test = false

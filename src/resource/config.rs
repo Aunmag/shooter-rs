@@ -4,7 +4,6 @@ use bevy::{
     window::{PresentMode, WindowMode},
 };
 use serde::Deserialize;
-use std::{net::SocketAddr, time::Duration};
 
 // TODO: logging config
 
@@ -12,7 +11,6 @@ use std::{net::SocketAddr, time::Duration};
 pub struct Config {
     pub display: DisplayConfig,
     pub controls: ControlsConfig,
-    pub net: NetConfig,
     pub misc: MiscConfig,
 }
 
@@ -25,26 +23,6 @@ pub struct DisplayConfig {
 }
 
 #[derive(Clone, Deserialize, Debug)]
-pub struct NetConfig {
-    #[serde(with = "humantime_serde")]
-    pub message_resend_interval: Duration, // TODO: detect from ping
-    pub server: ServerConfig,
-    pub client: ClientConfig,
-}
-
-#[derive(Clone, Deserialize, Debug)]
-pub struct ServerConfig {
-    pub port: u16,
-    #[serde(with = "humantime_serde")]
-    pub sync_interval: Duration, // TODO: use Hz
-}
-
-#[derive(Clone, Deserialize, Debug)]
-pub struct ClientConfig {
-    pub join: SocketAddr,
-}
-
-#[derive(Clone, Deserialize, Debug)]
 pub struct ControlsConfig {
     pub mouse_sensitivity: f32,
 }
@@ -52,7 +30,6 @@ pub struct ControlsConfig {
 #[derive(Clone, Deserialize, Debug)]
 pub struct MiscConfig {
     pub grab_cursor: bool,
-    pub show_ghost: bool,
     pub with_stress_test: bool,
 }
 

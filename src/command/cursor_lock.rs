@@ -1,4 +1,4 @@
-use crate::util::ext::WorldExt;
+use crate::resource::Config;
 use bevy::{
     ecs::system::Command,
     prelude::{With, World},
@@ -19,7 +19,7 @@ impl CursorGrab {
 
 impl Command for CursorGrab {
     fn write(self, world: &mut World) {
-        if !self.0 || world.config().misc.grab_cursor {
+        if !self.0 || world.resource::<Config>().misc.grab_cursor {
             for mut window in world
                 .query_filtered::<&mut Window, With<PrimaryWindow>>()
                 .iter_mut(world)

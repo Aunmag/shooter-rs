@@ -1,7 +1,7 @@
 use crate::{
     command::{ActorBotSet, ActorSet},
     component::ActorConfig,
-    model::{AppState, TransformLiteU8},
+    model::{AppState, TransformLite},
     util::ext::AppExt,
 };
 use bevy::{
@@ -46,8 +46,7 @@ fn spawn_actors(count: usize, commands: &mut Commands) {
         commands.add(ActorSet {
             entity,
             config: ActorConfig::ZOMBIE,
-            transform: TransformLiteU8::default(),
-            is_ghost: false,
+            transform: TransformLite::default(),
         });
 
         commands.add(ActorBotSet(entity));
