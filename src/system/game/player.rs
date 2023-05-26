@@ -6,7 +6,7 @@ use crate::{
 use bevy::{
     ecs::system::Query,
     input::mouse::{MouseMotion, MouseWheel},
-    prelude::{EventReader, Input, KeyCode, MouseButton, Res, Transform, With},
+    prelude::{EventReader, Input, KeyCode, MouseButton, Res, Transform},
     time::Time,
 };
 use std::f32::consts::TAU;

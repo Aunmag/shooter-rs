@@ -43,7 +43,7 @@ impl Task {
 pub struct WavesScenario {
     task: Task,
     wave: u16,
-    zombies_to_spawn: u16,
+    zombies_spawned: u16,
     rng: Pcg32,
 }
 
@@ -52,7 +52,7 @@ impl WavesScenario {
         return Self {
             task: Task::Start,
             wave: 0,
-            zombies_to_spawn: 0,
+            zombies_spawned: 0,
             rng: Pcg32::seed_from_u64(32),
         };
     }
@@ -78,34 +78,40 @@ impl WavesScenario {
             }
             Task::StartNextWave => {
                 self.wave += 1;
+                self.zombies_spawned = 0;
 
                 if self.wave > WAVE_FINAL {
-                    self.zombies_to_spawn = u16::MAX;
                     commands.add(Notify::new(
                         "Wait".to_string(),
                         "NOW IT IS TIME TO SUFFER".to_string(),
                     ));
                 } else {
-                    self.zombies_to_spawn = ZOMBIES_SPAWN_QUANTITY * self.wave * self.wave;
                     commands.add(HealHumans);
                     commands.add(Notify::new(
                         format!("Wave {}/{}", self.wave, WAVE_FINAL),
-                        format!("Kill {} zombies", self.zombies_to_spawn),
+                        format!("Kill {} zombies", self.zombies_to_spawn()),
                     ));
                 }
 
                 return Task::SpawnZombie;
             }
             Task::SpawnZombie => {
-                if self.zombies_to_spawn > 0 {
-                    commands.add(SpawnZombie {
-                        direction: self.rng.gen_range(-PI..PI),
-                    });
-                    self.zombies_to_spawn -= 1;
-                    log::debug!("Spawning a zombie");
+                log::debug!("Spawning a zombie");
+
+                commands.add(SpawnZombie {
+                    direction: self.rng.gen_range(-PI..PI),
+                });
+
+                self.zombies_spawned += 1;
+
+                if self.wave == 2 && self.zombies_spawned == 5 {
+                    commands.add(Notify::new(
+                        "".to_string(),
+                        "Press [SHIFT] to sprint".to_string(),
+                    ));
                 }
 
-                if self.zombies_to_spawn > 0 {
+                if self.zombies_spawned < self.zombies_to_spawn() {
                     return Task::SpawnZombie;
                 } else {
                     return Task::CheckWaveCompletion;
@@ -131,6 +137,14 @@ impl WavesScenario {
 
                 return Task::StartNextWave;
             }
+        }
+    }
+
+    fn zombies_to_spawn(&self) -> u16 {
+        if self.wave > WAVE_FINAL {
+            return u16::MAX;
+        } else {
+            return ZOMBIES_SPAWN_QUANTITY * self.wave * self.wave;
         }
     }
 }
