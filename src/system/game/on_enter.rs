@@ -2,12 +2,15 @@ use crate::{
     command::{AudioPlay, AudioRepeat, CursorGrab, TerrainInit},
     data::{LAYER_BLUFF, LAYER_TREE, WORLD_SIZE, WORLD_SIZE_HALF, WORLD_SIZE_VISUAL},
     model::TransformLite,
+    resource::HeartbeatResource,
     util::ext::Vec2Ext,
 };
 use bevy::{
     asset::{AssetServer, Handle},
     math::Vec2,
-    prelude::{Camera2dBundle, Commands, Image, Res, SpriteBundle},
+    prelude::{
+        Audio, Camera2dBundle, Commands, Image, PlaybackSettings, Res, ResMut, SpriteBundle,
+    },
 };
 use rand::{seq::SliceRandom, Rng, SeedableRng};
 use rand_pcg::Pcg32;
@@ -22,7 +25,12 @@ const TREE_BUFFER_ZONE: f32 = 3.2;
 const TREE_FIND_POSITION_ATTEMPTS: usize = 32;
 const BLUFF_SPRITE_SIZE: f32 = 4.0;
 
-pub fn on_enter(mut commands: Commands, assets: Res<AssetServer>) {
+pub fn on_enter(
+    mut commands: Commands,
+    assets: Res<AssetServer>,
+    audio: Res<Audio>,
+    mut heartbeat: ResMut<HeartbeatResource>,
+) {
     commands.add(CursorGrab(true));
     commands.add(TerrainInit);
     commands.spawn(Camera2dBundle::default());
@@ -42,6 +50,12 @@ pub fn on_enter(mut commands: Commands, assets: Res<AssetServer>) {
         repeat: AudioRepeat::Loop(Duration::ZERO),
         ..AudioPlay::DEFAULT
     });
+
+    let heartbeat_sink = audio.play_with_settings(
+        assets.get_handle("sounds/heartbeat.ogg"),
+        PlaybackSettings::LOOP.with_volume(0.0),
+    );
+    heartbeat.sink.replace(assets.get_handle(heartbeat_sink));
 }
 
 // TODO: maybe render bluff corner as tile map

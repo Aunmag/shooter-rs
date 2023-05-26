@@ -12,6 +12,8 @@ pub struct Health {
 }
 
 impl Health {
+    pub const LOW_VALUE: f32 = 0.4;
+
     pub fn new(mut resistance: f32) -> Self {
         if resistance < 1.0 {
             log::warn!(
@@ -71,5 +73,9 @@ impl Health {
         } else {
             return now > self.death_time + DECAY_TIME;
         }
+    }
+
+    pub fn is_low(&self) -> bool {
+        return self.value < Self::LOW_VALUE;
     }
 }

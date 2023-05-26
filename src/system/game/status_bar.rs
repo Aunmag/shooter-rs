@@ -11,7 +11,6 @@ use std::{f32::consts::TAU, time::Duration};
 
 const INTERPOLATION: f32 = 8.0;
 const PULSE: Duration = Duration::from_millis(500);
-const HEALTH_LOW: f32 = 0.4;
 
 pub fn status_bar(
     targets: Query<(&Health, Option<&Weapon>, &Children)>,
@@ -27,7 +26,7 @@ pub fn status_bar(
             if let Some(material) = handles.get(*child).ok().and_then(|h| assets.get_mut(h)) {
                 material.health -= (material.health - health.get()) * interpolation;
 
-                if material.health < HEALTH_LOW {
+                if material.health < Health::LOW_VALUE {
                     material.health_alpha = pulse;
                 } else {
                     material.health_alpha = 1.0;
