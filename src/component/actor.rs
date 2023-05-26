@@ -1,6 +1,6 @@
 use crate::{
     command::AudioPlay,
-    model::{ActorActions, SpriteOffset},
+    model::{ActorActions, ActorActionsExt, SpriteOffset},
 };
 use bevy::ecs::component::Component;
 use std::{f32::consts::TAU, time::Duration};
@@ -9,6 +9,7 @@ use std::{f32::consts::TAU, time::Duration};
 pub struct Actor {
     pub config: &'static ActorConfig,
     pub skill: f32, // TODO: affect bots reaction too
+    pub stamina: f32,
     pub actions: ActorActions,
     pub look_at: Option<f32>,
     pub melee_next: Duration,
@@ -26,6 +27,7 @@ pub struct ActorConfig {
     pub movement_velocity: f32,
     pub rotation_velocity: f32,
     pub sprint_factor: f32,
+    pub stamina: Duration,
     pub resistance: f32,
     pub radius: f32,
     pub mass: f32,
@@ -44,10 +46,27 @@ impl Actor {
         return Self {
             config,
             skill,
+            stamina: 1.0,
             actions: ActorActions::EMPTY,
             look_at: None,
             melee_next: Duration::ZERO,
         };
+    }
+
+    pub fn update_stamina(&mut self, delta: f32) {
+        let mut change = 1.0 / self.config.stamina.as_secs_f32() * delta;
+
+        if self.actions.is_moving() {
+            if self.actions.is_sprinting() {
+                // spend stamina while sprinting
+                change = -change;
+            } else {
+                // slower stamina gain while just moving
+                change *= self.stamina / 2.0;
+            }
+        }
+
+        self.stamina = (self.stamina + change).clamp(0.0, 1.0);
     }
 }
 
@@ -60,6 +79,7 @@ impl ActorConfig {
         movement_velocity: 2.5,
         rotation_velocity: 8.0,
         sprint_factor: 2.0,
+        stamina: Duration::from_secs(20),
         resistance: Self::HUMAN_RESISTANCE,
         radius: 0.25,
         mass: 80_000.0,
@@ -84,6 +104,7 @@ impl ActorConfig {
         movement_velocity: Self::HUMAN.movement_velocity * 0.4,
         rotation_velocity: Self::HUMAN.rotation_velocity * 0.4,
         sprint_factor: 1.8,
+        stamina: Duration::from_secs(10),
         resistance: Self::HUMAN.resistance * 0.4,
         radius: 0.21,
         mass: 70_000.0,

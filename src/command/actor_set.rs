@@ -1,6 +1,7 @@
 use crate::{
     component::{
-        Actor, ActorConfig, ActorType, Collision, Footsteps, Health, Inertia, Weapon, WeaponConfig,
+        Actor, ActorConfig, ActorType, Breath, Collision, Footsteps, Health, Inertia, Weapon,
+        WeaponConfig,
     },
     data::LAYER_ACTOR,
     model::TransformLite,
@@ -58,6 +59,7 @@ impl Command for ActorSet {
 
         if let ActorType::Human = self.config.actor_type {
             entity_mut.insert(Weapon::new(&WeaponConfig::AKS_74U));
+            entity_mut.insert(Breath::default());
         }
     }
 }

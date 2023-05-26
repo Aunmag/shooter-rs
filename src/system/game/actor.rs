@@ -12,13 +12,14 @@ use bevy::{
 
 const TURN_EPSILON: f32 = 0.01;
 
-pub fn actor(mut query: Query<(&Actor, &mut Transform, &mut Inertia)>, time: Res<Time>) {
+pub fn actor(mut query: Query<(&mut Actor, &mut Transform, &mut Inertia)>, time: Res<Time>) {
     let time_delta = time.delta_seconds();
 
-    for (actor, mut transform, mut inertia) in query.iter_mut() {
-        turn(actor, &mut transform, &mut inertia, time_delta);
+    for (mut actor, mut transform, mut inertia) in query.iter_mut() {
+        actor.update_stamina(time_delta);
+        turn(&actor, &mut transform, &mut inertia, time_delta);
 
-        if actor.actions.is_empty() {
+        if !actor.actions.is_moving() {
             continue;
         }
 
@@ -46,7 +47,7 @@ pub fn actor(mut query: Query<(&Actor, &mut Transform, &mut Inertia)>, time: Res
             * actor.skill
             * time_delta;
 
-        if actor.actions.is_sprinting() {
+        if actor.stamina > 0.0 && actor.actions.is_sprinting() {
             movement *= actor.config.sprint_factor;
         }
 

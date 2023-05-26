@@ -14,7 +14,17 @@ pub enum ActorAction {
 pub type ActorActions = EnumSet<ActorAction>;
 
 pub trait ActorActionsExt {
+    const MOVEMENT: ActorActions = enumset::enum_set!(
+        ActorAction::MovementForward
+            | ActorAction::MovementBackward
+            | ActorAction::MovementLeftward
+            | ActorAction::MovementRightward
+    );
+
     fn set(&mut self, value: ActorAction, state: bool);
+
+    #[allow(clippy::wrong_self_convention)]
+    fn is_moving(self) -> bool;
 
     #[allow(clippy::wrong_self_convention)]
     fn is_sprinting(self) -> bool;
@@ -33,6 +43,10 @@ impl ActorActionsExt for ActorActions {
         } else {
             self.remove(value);
         }
+    }
+
+    fn is_moving(self) -> bool {
+        return !self.is_disjoint(Self::MOVEMENT);
     }
 
     fn is_sprinting(self) -> bool {
@@ -80,5 +94,17 @@ mod tests {
         assert_eq!(actions.len(), 2);
         assert_eq!(actions.as_u8(), 0b10100);
         assert_eq!(actions.as_u8(), 20);
+    }
+
+    #[test]
+    fn test_is_moving() {
+        assert!(!ActorActions::EMPTY.is_moving());
+        assert!(ActorActions::ALL.is_moving());
+        assert!(ActorActions::only(ActorAction::MovementForward).is_moving());
+        assert!(ActorActions::only(ActorAction::MovementBackward).is_moving());
+        assert!(ActorActions::only(ActorAction::MovementLeftward).is_moving());
+        assert!(ActorActions::only(ActorAction::MovementRightward).is_moving());
+        assert!(!ActorActions::only(ActorAction::Sprint).is_moving());
+        assert!(!ActorActions::only(ActorAction::Attack).is_moving());
     }
 }

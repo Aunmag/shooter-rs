@@ -115,6 +115,7 @@ fn main() {
         s.add(projectile.pipe(projectile_hit).after(collision_resolve));
         s.add(camera.after(collision_resolve));
         s.add(status_bar);
+        s.add(breath);
         s.add(footsteps);
         s.add(ambience_fx);
         s.add(terrain);
