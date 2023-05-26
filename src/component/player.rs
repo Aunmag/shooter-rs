@@ -48,9 +48,9 @@ impl Zoom {
 
     const SPEED_INITIAL: f32 = 0.2;
     const SPEED_MANUAL: f32 = 8.0;
-    const SPEED_RESET: f32 = 1.5;
+    const SPEED_RESET: f32 = 1.25;
 
-    const RESET_TIMEOUT: Duration = Duration::from_secs(3);
+    const RESET_TIMEOUT: Duration = Duration::from_secs(4);
 
     pub fn update(&mut self, time: Duration, delta: f32) {
         self.value += (self.value_target - self.value) * delta * self.speed;
