@@ -71,7 +71,13 @@ impl Zoom {
         self.value_target += zoom * self.value_target * Self::SENSITIVITY;
         self.value_target = Self::clamp(self.value_target);
         self.speed = Self::SPEED_MANUAL;
-        self.reset_time = time + Self::RESET_TIMEOUT;
+
+        // reset only when distant
+        if self.value_target > Self::DEFAULT {
+            self.reset_time = Duration::ZERO;
+        } else {
+            self.reset_time = time + Self::RESET_TIMEOUT;
+        }
     }
 
     fn get(&self) -> f32 {
