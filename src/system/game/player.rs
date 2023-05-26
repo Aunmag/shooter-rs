@@ -5,27 +5,38 @@ use crate::{
 };
 use bevy::{
     ecs::system::Query,
-    input::mouse::MouseMotion,
+    input::mouse::{MouseMotion, MouseWheel},
     prelude::{EventReader, Input, KeyCode, MouseButton, Res, Transform, With},
+    time::Time,
 };
 use std::f32::consts::TAU;
 
 pub fn player(
-    mut query: Query<(&mut Actor, &mut Transform), With<Player>>,
+    mut query: Query<(&mut Player, &mut Actor, &mut Transform)>,
     keyboard: Res<Input<KeyCode>>,
     mouse: Res<Input<MouseButton>>,
     mut mouse_motion: EventReader<MouseMotion>,
+    mut mouse_scroll: EventReader<MouseWheel>,
+    time: Res<Time>,
     config: Res<Config>,
 ) {
+    let delta = time.delta_seconds();
+    let time = time.elapsed();
+
     let mut mouse_delta_x = 0.0;
+    let mut zoom = 0.0;
 
     for event in mouse_motion.iter() {
         mouse_delta_x -= event.delta.x;
     }
 
+    for event in mouse_scroll.iter() {
+        zoom += event.y;
+    }
+
     let rotation = (mouse_delta_x * config.controls.mouse_sensitivity) % TAU;
 
-    for (mut actor, mut transform) in query.iter_mut() {
+    for (mut player, mut actor, mut transform) in query.iter_mut() {
         actor
             .actions
             .set(ActorAction::MovementForward, keyboard.pressed(KeyCode::W));
@@ -54,6 +65,8 @@ pub fn player(
             .actions
             .set(ActorAction::Reload, keyboard.pressed(KeyCode::R));
 
-        transform.rotate_local_z(rotation)
+        player.add_zoom(zoom, time);
+        player.update(time, delta);
+        transform.rotate_local_z(rotation);
     }
 }

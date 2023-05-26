@@ -25,7 +25,7 @@ impl Command for ActorPlayerSet {
             });
 
         let mut entity_mut = world.entity_mut(self.0);
-        entity_mut.insert(Player);
+        entity_mut.insert(Player::default());
         entity_mut.insert(Inertia::new(config.mass));
 
         StatusBarSet(self.0).write(world);
