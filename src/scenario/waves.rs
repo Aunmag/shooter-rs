@@ -1,5 +1,5 @@
 use crate::{
-    command::{ActorBotSet, ActorPlayerSet, ActorSet},
+    command::{ActorBotSet, ActorPlayerSet, ActorSet, Notify},
     component::{Actor, ActorConfig, ActorType, Health},
     data::VIEW_DISTANCE,
     model::TransformLite,
@@ -16,12 +16,12 @@ use rand::{Rng, SeedableRng};
 use rand_pcg::Pcg32;
 use std::{any::Any, f32::consts::PI, time::Duration};
 
+const WAVE_FINAL: u16 = 6;
 const ZOMBIES_SPAWN_QUANTITY: u16 = 5;
 const ZOMBIES_SPAWN_DISTANCE: f32 = VIEW_DISTANCE / 1.5;
 
 enum Task {
     Start,
-    PrepareNextWave,
     StartNextWave,
     SpawnZombie,
     CheckWaveCompletion,
@@ -31,12 +31,11 @@ enum Task {
 impl Task {
     fn get_timeout(&self) -> Duration {
         return match self {
-            Self::Start => Duration::ZERO,
-            Self::PrepareNextWave => Duration::from_secs(2),
-            Self::StartNextWave => Duration::ZERO,
+            Self::Start => Duration::from_secs(2),
+            Self::StartNextWave => Duration::from_secs(2),
             Self::SpawnZombie => Duration::from_millis(500),
             Self::CheckWaveCompletion => Duration::from_secs(2),
-            Self::CompleteWave => Duration::ZERO,
+            Self::CompleteWave => Duration::from_secs(4),
         };
     }
 }
@@ -75,17 +74,26 @@ impl WavesScenario {
             Task::Start => {
                 log::debug!("Starting waves scenario");
                 self.spawn_player(commands);
-                return Task::PrepareNextWave;
-            }
-            Task::PrepareNextWave => {
-                log::info!("Prepare for the wave");
-                commands.add(HealHumans);
                 return Task::StartNextWave;
             }
             Task::StartNextWave => {
                 self.wave += 1;
-                self.zombies_to_spawn = ZOMBIES_SPAWN_QUANTITY * self.wave * self.wave;
-                log::info!("Wave {}. Kill {} zombies", self.wave, self.zombies_to_spawn);
+
+                if self.wave > WAVE_FINAL {
+                    self.zombies_to_spawn = u16::MAX;
+                    commands.add(Notify::new(
+                        "Wait".to_string(),
+                        "NOW IT IS TIME TO SUFFER".to_string(),
+                    ));
+                } else {
+                    self.zombies_to_spawn = ZOMBIES_SPAWN_QUANTITY * self.wave * self.wave;
+                    commands.add(HealHumans);
+                    commands.add(Notify::new(
+                        format!("Wave {}/{}", self.wave, WAVE_FINAL),
+                        format!("Kill {} zombies", self.zombies_to_spawn),
+                    ));
+                }
+
                 return Task::SpawnZombie;
             }
             Task::SpawnZombie => {
@@ -109,8 +117,19 @@ impl WavesScenario {
                 return Task::CheckWaveCompletion;
             }
             Task::CompleteWave => {
-                log::info!("Wave {} completed!", self.wave);
-                return Task::PrepareNextWave;
+                if self.wave == WAVE_FINAL {
+                    commands.add(Notify::new(
+                        "Congratulations!".to_string(),
+                        format!("You've completed the all {} waves", WAVE_FINAL),
+                    ));
+                } else {
+                    commands.add(Notify::new(
+                        format!("Wave {} completed!", self.wave),
+                        "Prepare for the next".to_string(),
+                    ));
+                }
+
+                return Task::StartNextWave;
             }
         }
     }

@@ -98,6 +98,7 @@ fn main() {
     .insert_resource(system::game::CollisionSystemData::default())
     .insert_resource(system::game::WeaponData::default())
     .add_system(system::sys::audio_tracker)
+    .add_system(system::ui::notification)
     .add_state_system_enter(AppState::Loading, system::loading::on_enter)
     .add_state_system(AppState::Loading, system::loading::on_update)
     .add_state_system_enter(AppState::Game, system::game::on_enter)
