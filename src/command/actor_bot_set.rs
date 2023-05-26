@@ -8,6 +8,7 @@ pub struct ActorBotSet(pub Entity);
 
 impl Command for ActorBotSet {
     fn write(self, world: &mut World) {
-        world.entity_mut(self.0).insert(Bot::default());
+        let entity_id = u64::from(self.0.index());
+        world.entity_mut(self.0).insert(Bot::new(entity_id));
     }
 }

@@ -77,9 +77,9 @@ pub fn melee(
 
                 victim_health.damage(momentum, time);
             }
-        }
 
-        commands.add(ActorMeleeReset(attacker_entity));
+            commands.add(ActorMeleeReset(attacker_entity));
+        }
     }
 }
 

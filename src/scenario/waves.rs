@@ -1,7 +1,6 @@
 use crate::{
     command::{ActorBotSet, ActorPlayerSet, ActorSet, Notify},
     component::{Actor, ActorConfig, ActorType, Health},
-    data::VIEW_DISTANCE,
     model::TransformLite,
     resource::{Scenario, ScenarioLogic},
     util::ext::Vec2Ext,
@@ -18,7 +17,8 @@ use std::{any::Any, f32::consts::PI, time::Duration};
 
 const WAVE_FINAL: u16 = 6;
 const ZOMBIES_SPAWN_QUANTITY: u16 = 5;
-const ZOMBIES_SPAWN_DISTANCE: f32 = VIEW_DISTANCE / 1.5;
+const ZOMBIES_SPAWN_DISTANCE_MIN: f32 = 20.0;
+const ZOMBIES_SPAWN_DISTANCE_MAX: f32 = 60.0;
 
 enum Task {
     Start,
@@ -99,6 +99,7 @@ impl WavesScenario {
                 log::debug!("Spawning a zombie");
 
                 commands.add(SpawnZombie {
+                    distance: self.generate_spawn_distance(),
                     direction: self.rng.gen_range(-PI..PI),
                 });
 
@@ -147,6 +148,16 @@ impl WavesScenario {
             return ZOMBIES_SPAWN_QUANTITY * self.wave * self.wave;
         }
     }
+
+    fn progress(&self) -> f32 {
+        return f32::min(f32::from(self.wave) / f32::from(WAVE_FINAL), 1.0);
+    }
+
+    fn generate_spawn_distance(&mut self) -> f32 {
+        let min = ZOMBIES_SPAWN_DISTANCE_MIN;
+        let max = min + (ZOMBIES_SPAWN_DISTANCE_MAX - min) * self.progress();
+        return self.rng.gen_range(min..max);
+    }
 }
 
 impl ScenarioLogic for WavesScenario {
@@ -162,6 +173,7 @@ impl ScenarioLogic for WavesScenario {
 }
 
 struct SpawnZombie {
+    distance: f32,
     direction: f32,
 }
 
@@ -182,7 +194,7 @@ impl Command for SpawnZombie {
         }
 
         let entity = world.spawn_empty().id();
-        let offset = Vec2::from_length(ZOMBIES_SPAWN_DISTANCE, self.direction);
+        let offset = Vec2::from_length(self.distance, self.direction);
         let transform =
             TransformLite::new(center.x + offset.x, center.y + offset.y, self.direction);
 

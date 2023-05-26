@@ -63,7 +63,7 @@ impl ActorConfig {
         mass: 80_000.0,
         melee_damage: Self::HUMAN_RESISTANCE / 16.0, // 16 hits to kill human
         melee_distance: 0.7,
-        melee_distance_angular: TAU / 3.0,
+        melee_distance_angular: TAU / 5.0,
         melee_interval: Duration::from_millis(400),
         actor_type: ActorType::Human,
         pain_threshold: 0.02,

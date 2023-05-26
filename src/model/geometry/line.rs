@@ -8,6 +8,7 @@ pub struct Line {
 
 impl Line {
     /// NOTE: Line direction must be normalized
+    #[allow(dead_code)] // maybe I'll use it later
     pub fn new(origin: Vec2, direction: Vec2) -> Self {
         debug_assert!(direction.is_normalized(), "Direction must be normalized");
         return Self { origin, direction };

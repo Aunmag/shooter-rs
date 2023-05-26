@@ -1,21 +1,16 @@
 use crate::{
     component::{Actor, Bot, Inertia},
-    model::geometry::{GeometryProjection, Line},
-    util,
-    util::{ext::Vec2Ext, Timer},
+    util::{self, Interpolation, Timer},
 };
 use bevy::{
     ecs::system::{Res, Resource},
     math::Vec3Swizzles,
-    prelude::{Entity, Query, ResMut, Transform, Vec2, With},
+    prelude::{Query, ResMut, Transform, With},
     time::Time,
 };
-use rand::{Rng, SeedableRng};
-use rand_pcg::Pcg32;
 use std::time::Duration;
 
-const RUN_INTERVAL: Duration = Duration::from_millis(200);
-const DETOUR_DISTANCE_MIN: f32 = 2.0;
+const RUN_INTERVAL: Duration = Duration::from_millis(700);
 
 #[derive(Resource)]
 pub struct TargetUpdateData {
@@ -31,50 +26,37 @@ impl Default for TargetUpdateData {
 }
 
 pub fn target_update(
-    mut bots: Query<(Entity, &mut Bot, &Transform, &Inertia)>,
+    mut bots: Query<(&mut Bot, &Transform, &Inertia)>,
     actors: Query<(&Transform, &Inertia), With<Actor>>,
     mut data: ResMut<TargetUpdateData>,
     time: Res<Time>,
 ) {
-    if !data.timer.next_if_done(time.elapsed()) {
+    let time = time.elapsed();
+
+    if !data.timer.next_if_done(time) {
         return;
     }
 
-    for (entity, mut bot, bot_transform, bot_inertia) in bots.iter_mut() {
+    for (mut bot, bot_transform, bot_inertia) in bots.iter_mut() {
         if let Some((target_position, target_velocity)) = bot
             .target_actor
             .and_then(|e| actors.get(e).ok())
             .map(|a| (a.0.translation.xy(), a.1.velocity))
         {
-            let bot_position = bot_transform.translation.xy();
-            let mut rng = Pcg32::seed_from_u64(u64::from(entity.index()));
-            let mut target_final = util::math::find_meet_point(
-                bot_position,
+            let target = util::math::find_meet_point(
+                bot_transform.translation.xy(),
                 bot_inertia.velocity,
                 target_position,
                 target_velocity,
             );
 
-            if rng.gen::<bool>() {
-                let detour_point = generate_detour_point(bot_position, target_final, &mut rng);
-
-                if (detour_point - bot_position).is_longer_than(DETOUR_DISTANCE_MIN) {
-                    target_final = detour_point;
-                }
+            if let Some(bot_target_final) = bot.target_point.as_mut() {
+                bot_target_final.add(target, time);
+            } else {
+                bot.target_point = Some(Interpolation::new(target, time));
             }
-
-            bot.target_final = Some(target_final);
         } else {
-            bot.target_final = None;
+            bot.target_point = None;
         }
     }
-}
-
-fn generate_detour_point(origin: Vec2, target: Vec2, rng: &mut Pcg32) -> Vec2 {
-    let detour_line = Line::new(
-        target,
-        Vec2::new(rng.gen_range(-1.0..1.0), rng.gen_range(-1.0..1.0)).normalize(),
-    );
-
-    return origin.project_on(&detour_line);
 }
