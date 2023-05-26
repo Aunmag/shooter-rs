@@ -26,7 +26,7 @@ pub fn breath(
         if intensity > 0.0 && time > breath.last + calc_interval(intensity) {
             commands.add(AudioPlay {
                 path: "sounds/breath_{n}.ogg",
-                volume: 0.3 * intensity,
+                volume: 0.2 * intensity,
                 source: Some(transform.translation.xy()),
                 ..AudioPlay::DEFAULT
             });
