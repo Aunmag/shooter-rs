@@ -46,6 +46,7 @@ fn spawn_actors(count: usize, commands: &mut Commands) {
         commands.add(ActorSet {
             entity,
             config: ActorConfig::ZOMBIE,
+            skill: 1.0,
             transform: TransformLite::default(),
         });
 

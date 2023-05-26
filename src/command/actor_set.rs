@@ -15,6 +15,7 @@ use bevy::{
 pub struct ActorSet {
     pub entity: Entity,
     pub config: &'static ActorConfig,
+    pub skill: f32,
     pub transform: TransformLite,
 }
 
@@ -51,8 +52,8 @@ impl Command for ActorSet {
                 radius: self.config.radius,
             })
             .insert(Inertia::new(self.config.mass))
-            .insert(Actor::new(self.config))
-            .insert(Health::new(self.config.resistance))
+            .insert(Actor::new(self.config, self.skill))
+            .insert(Health::new(self.config.resistance * self.skill))
             .insert(Footsteps::default());
 
         if let ActorType::Human = self.config.actor_type {

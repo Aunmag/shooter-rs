@@ -8,6 +8,7 @@ use std::{f32::consts::TAU, time::Duration};
 #[derive(Component)]
 pub struct Actor {
     pub config: &'static ActorConfig,
+    pub skill: f32, // TODO: affect bots reaction too
     pub actions: ActorActions,
     pub look_at: Option<f32>,
     pub melee_next: Duration,
@@ -39,9 +40,10 @@ pub struct ActorConfig {
 }
 
 impl Actor {
-    pub const fn new(config: &'static ActorConfig) -> Self {
+    pub const fn new(config: &'static ActorConfig, skill: f32) -> Self {
         return Self {
             config,
+            skill,
             actions: ActorActions::EMPTY,
             look_at: None,
             melee_next: Duration::ZERO,

@@ -43,6 +43,7 @@ pub fn actor(mut query: Query<(&Actor, &mut Transform, &mut Inertia)>, time: Res
         movement = transform.rotation
             * normalize_movement(movement)
             * actor.config.movement_velocity
+            * actor.skill
             * time_delta;
 
         if actor.actions.is_sprinting() {
@@ -66,7 +67,9 @@ fn turn(actor: &Actor, transform: &mut Transform, inertia: &mut Inertia, time_de
         return;
     }
 
-    let mut velocity = actor.config.rotation_velocity * time_delta * distance.signum();
+    let mut velocity =
+        distance.signum() * actor.config.rotation_velocity * actor.skill * time_delta;
+
     let velocity_current = inertia.velocity_angular;
     let velocity_future = velocity + velocity_current;
     let distance_future = velocity_future / Inertia::DRAG_ANGULAR;

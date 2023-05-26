@@ -3,7 +3,7 @@ use crate::{
     component::{Actor, ActorConfig, ActorType, Health},
     model::TransformLite,
     resource::{Scenario, ScenarioLogic},
-    util::ext::Vec2Ext,
+    util::{ext::Vec2Ext, math::interpolate},
 };
 use bevy::{
     ecs::system::Command,
@@ -19,6 +19,9 @@ const WAVE_FINAL: u16 = 6;
 const ZOMBIES_SPAWN_QUANTITY: u16 = 5;
 const ZOMBIES_SPAWN_DISTANCE_MIN: f32 = 20.0;
 const ZOMBIES_SPAWN_DISTANCE_MAX: f32 = 60.0;
+
+const ZOMBIES_SKILL_MIN: f32 = 1.0;
+const ZOMBIES_SKILL_MAX: f32 = 2.0;
 
 enum Task {
     Start,
@@ -63,6 +66,7 @@ impl WavesScenario {
         commands.add(ActorSet {
             entity,
             config: ActorConfig::HUMAN,
+            skill: 1.0,
             transform: TransformLite::default(),
         });
 
@@ -99,6 +103,7 @@ impl WavesScenario {
                 log::debug!("Spawning a zombie");
 
                 commands.add(SpawnZombie {
+                    skill: self.generate_zombie_skill(),
                     distance: self.generate_spawn_distance(),
                     direction: self.rng.gen_range(-PI..PI),
                 });
@@ -150,13 +155,27 @@ impl WavesScenario {
     }
 
     fn progress(&self) -> f32 {
-        return f32::min(f32::from(self.wave) / f32::from(WAVE_FINAL), 1.0);
+        return f32::min(f32::from(self.wave - 1) / f32::from(WAVE_FINAL - 1), 1.0);
+    }
+
+    fn generate_zombie_skill(&mut self) -> f32 {
+        let min = ZOMBIES_SKILL_MIN;
+        let max = interpolate(min, ZOMBIES_SKILL_MAX, self.progress());
+        return self.generate_range(min, max);
     }
 
     fn generate_spawn_distance(&mut self) -> f32 {
         let min = ZOMBIES_SPAWN_DISTANCE_MIN;
-        let max = min + (ZOMBIES_SPAWN_DISTANCE_MAX - min) * self.progress();
-        return self.rng.gen_range(min..max);
+        let max = interpolate(min, ZOMBIES_SPAWN_DISTANCE_MAX, self.progress());
+        return self.generate_range(min, max);
+    }
+
+    fn generate_range(&mut self, min: f32, max: f32) -> f32 {
+        if min == max {
+            return max;
+        } else {
+            return self.rng.gen_range(min..max);
+        }
     }
 }
 
@@ -173,6 +192,7 @@ impl ScenarioLogic for WavesScenario {
 }
 
 struct SpawnZombie {
+    skill: f32,
     distance: f32,
     direction: f32,
 }
@@ -201,6 +221,7 @@ impl Command for SpawnZombie {
         ActorSet {
             entity,
             config: ActorConfig::ZOMBIE,
+            skill: self.skill,
             transform,
         }
         .write(world);

@@ -57,7 +57,7 @@ pub fn melee(
             if let Ok((_, _, _, mut victim_inertia, mut victim_health)) =
                 targets.get_mut(victim.entity)
             {
-                let momentum = attacker_actor.config.melee_damage;
+                let momentum = attacker_actor.config.melee_damage * attacker_actor.skill;
                 let force = Vec2::from_length(momentum, victim.angle_objective);
 
                 victim_inertia.push(
