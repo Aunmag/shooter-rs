@@ -30,7 +30,7 @@ impl WeaponConfig {
     const SEMI_AUTO_FIRE_RATE: f32 = 400.0;
 
     /// To make game easier modify real reloading time
-    const RELOADING_TIME_FACTOR: f32 = 0.75;
+    const RELOADING_TIME_FACTOR: f32 = 0.65;
 
     const RELOADING_TIME_PISTOL: Duration =
         Duration::from_millis((3000.0 * Self::RELOADING_TIME_FACTOR) as u64);

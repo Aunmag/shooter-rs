@@ -8,8 +8,8 @@ pub struct Inertia {
 }
 
 impl Inertia {
-    pub const PUSH_MULTIPLIER: f32 = 30.0;
-    pub const PUSH_MULTIPLIER_ANGULAR: f32 = 200.0;
+    pub const PUSH_MULTIPLIER: f32 = 40.0;
+    pub const PUSH_MULTIPLIER_ANGULAR: f32 = 350.0;
 
     // TODO: make these component's properties
     pub const DRAG: f32 = 7.0;

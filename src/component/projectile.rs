@@ -27,21 +27,21 @@ impl ProjectileConfig {
         fragments: 1,
         mass: 6.1,
         acceleration_factor: -6.0,
-        size: 1.0,
+        size: 0.7,
     };
 
     pub const _7_62X25: Self = Self {
         fragments: 1,
         mass: 5.5,
         acceleration_factor: -6.0,
-        size: 1.0,
+        size: 0.7,
     };
 
     pub const _12X76: Self = Self {
         fragments: 16,
         mass: 48.0,
         acceleration_factor: -4.0,
-        size: 0.6,
+        size: 0.1,
     };
 
     pub const _5_45X39: Self = Self {
@@ -55,7 +55,7 @@ impl ProjectileConfig {
         fragments: 1,
         mass: 9.6,
         acceleration_factor: -4.5,
-        size: 1.0,
+        size: 1.2,
     };
 
     pub fn fragment_mass(&self) -> f32 {
