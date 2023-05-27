@@ -1,4 +1,7 @@
-use crate::{component::ProjectileConfig, util::ext::DurationExt};
+use crate::{
+    component::ProjectileConfig,
+    util::{ext::DurationExt, math::interpolate},
+};
 use bevy::ecs::component::Component;
 use std::time::Duration;
 
@@ -24,6 +27,7 @@ pub struct WeaponConfig {
     pub projectile: &'static ProjectileConfig,
     pub ammo_capacity: u8,
     pub reloading_time: Duration,
+    pub partial_reloading: bool,
 }
 
 impl WeaponConfig {
@@ -36,7 +40,7 @@ impl WeaponConfig {
         Duration::from_millis((3000.0 * Self::RELOADING_TIME_FACTOR) as u64);
 
     const RELOADING_TIME_SG: Duration =
-        Duration::from_millis((4000.0 * Self::RELOADING_TIME_FACTOR) as u64);
+        Duration::from_millis((1800.0 * Self::RELOADING_TIME_FACTOR) as u64);
 
     const RELOADING_TIME_RIFLE_LIGHT: Duration =
         Duration::from_millis((4500.0 * Self::RELOADING_TIME_FACTOR) as u64);
@@ -77,6 +81,7 @@ impl WeaponConfig {
         projectile: &ProjectileConfig::_9X18,
         ammo_capacity: 8,
         reloading_time: Self::RELOADING_TIME_PISTOL,
+        partial_reloading: false,
     };
 
     pub const TT: Self = Self {
@@ -91,6 +96,7 @@ impl WeaponConfig {
         projectile: &ProjectileConfig::_7_62X25,
         ammo_capacity: 8,
         reloading_time: Self::RELOADING_TIME_PISTOL,
+        partial_reloading: false,
     };
 
     pub const MP_43_SAWED_OFF: Self = Self {
@@ -105,6 +111,7 @@ impl WeaponConfig {
         projectile: &ProjectileConfig::_12X76,
         ammo_capacity: 2,
         reloading_time: Self::RELOADING_TIME_RIFLE_LIGHT,
+        partial_reloading: true,
     };
 
     pub const MP_27: Self = Self {
@@ -119,6 +126,7 @@ impl WeaponConfig {
         projectile: &ProjectileConfig::_12X76,
         ammo_capacity: 2,
         reloading_time: Self::RELOADING_TIME_RIFLE,
+        partial_reloading: true,
     };
 
     pub const PP_91_KEDR: Self = Self {
@@ -133,6 +141,7 @@ impl WeaponConfig {
         projectile: &ProjectileConfig::_9X18,
         ammo_capacity: 20,
         reloading_time: Self::RELOADING_TIME_SG,
+        partial_reloading: false,
     };
 
     pub const PP_19_BIZON: Self = Self {
@@ -147,6 +156,7 @@ impl WeaponConfig {
         projectile: &ProjectileConfig::_9X18,
         ammo_capacity: 64,
         reloading_time: Self::RELOADING_TIME_SG,
+        partial_reloading: false,
     };
 
     pub const AKS_74U: Self = Self {
@@ -161,6 +171,7 @@ impl WeaponConfig {
         projectile: &ProjectileConfig::_5_45X39,
         ammo_capacity: 30,
         reloading_time: Self::RELOADING_TIME_RIFLE_LIGHT,
+        partial_reloading: false,
     };
 
     pub const AK_74M: Self = Self {
@@ -175,6 +186,7 @@ impl WeaponConfig {
         projectile: &ProjectileConfig::_5_45X39,
         ammo_capacity: 30,
         reloading_time: Self::RELOADING_TIME_RIFLE,
+        partial_reloading: false,
     };
 
     pub const RPK_74: Self = Self {
@@ -189,6 +201,7 @@ impl WeaponConfig {
         projectile: &ProjectileConfig::_5_45X39,
         ammo_capacity: 45,
         reloading_time: Self::RELOADING_TIME_RIFLE_HEAVY,
+        partial_reloading: false,
     };
 
     pub const SAIGA_12K: Self = Self {
@@ -203,6 +216,7 @@ impl WeaponConfig {
         projectile: &ProjectileConfig::_12X76,
         ammo_capacity: 8,
         reloading_time: Self::RELOADING_TIME_RIFLE,
+        partial_reloading: false,
     };
 
     pub const PKM: Self = Self {
@@ -217,6 +231,7 @@ impl WeaponConfig {
         projectile: &ProjectileConfig::_7_62X54,
         ammo_capacity: 100,
         reloading_time: Self::RELOADING_TIME_MG,
+        partial_reloading: false,
     };
 
     pub const PKP_PECHENEG: Self = Self {
@@ -231,10 +246,19 @@ impl WeaponConfig {
         projectile: &ProjectileConfig::_7_62X54,
         ammo_capacity: 100,
         reloading_time: Self::RELOADING_TIME_MG,
+        partial_reloading: false,
     };
 
     pub fn get_image_path(&self) -> String {
         return format!("weapons/{}/image.png", self.name);
+    }
+
+    pub fn get_ammo_normalized(&self, ammo: u8) -> f32 {
+        if self.ammo_capacity == 0 {
+            return 1.0;
+        } else {
+            return f32::from(ammo) / f32::from(self.ammo_capacity);
+        }
     }
 }
 
@@ -274,6 +298,14 @@ impl Weapon {
 
     pub fn reload(&mut self, time: Duration) {
         if !self.is_reloading {
+            if self.config.partial_reloading {
+                if self.ammo == self.config.ammo_capacity {
+                    self.ammo = self.ammo.saturating_sub(1);
+                }
+            } else {
+                self.ammo = 0;
+            }
+
             self.is_reloading = true;
             self.next_time = time + self.config.reloading_time;
         }
@@ -283,23 +315,37 @@ impl Weapon {
         if self.is_reloading {
             self.is_cocked = true;
             self.is_reloading = false;
-            self.ammo = self.config.ammo_capacity;
+
+            if self.config.partial_reloading {
+                if self.ammo < self.config.ammo_capacity {
+                    self.ammo += 1;
+                }
+            } else {
+                self.ammo = self.config.ammo_capacity;
+            }
+
             self.next_time = time + POST_RELOADING_TIME;
         }
     }
 
     pub fn get_ammo_normalized(&self, time: Duration) -> f32 {
         if self.is_reloading {
-            return time.get_progress(
+            let progress = time.get_progress(
                 self.next_time.saturating_sub(self.config.reloading_time),
                 self.next_time,
             );
-        } else {
-            if self.config.ammo_capacity == 0 {
-                return 1.0;
+
+            if self.config.partial_reloading {
+                return interpolate(
+                    self.config.get_ammo_normalized(self.ammo),
+                    self.config.get_ammo_normalized(self.ammo + 1),
+                    progress,
+                );
             } else {
-                return f32::from(self.ammo) / f32::from(self.config.ammo_capacity);
+                return progress;
             }
+        } else {
+            return self.config.get_ammo_normalized(self.ammo);
         }
     }
 
