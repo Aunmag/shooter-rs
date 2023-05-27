@@ -13,6 +13,8 @@ pub fn projectile_hit(
     mut entities: Query<(&Transform, &mut Inertia, &mut Health)>,
     mut commands: Commands,
 ) {
+    let mut unique_hits = Vec::with_capacity(hits.capacity());
+
     while let Some((entity, force, force_angular)) = hits.pop() {
         let momentum = force.length();
 
@@ -20,13 +22,15 @@ pub fn projectile_hit(
             inertia.push(force, momentum * force_angular, true, false, true);
             health.damage(momentum);
 
-            // TODO: don't play multiple times if it was a fraction
-            commands.add(AudioPlay {
-                path: "sounds/hit_body_{n}.ogg",
-                volume: 1.5,
-                source: Some(transform.translation.xy()),
-                ..AudioPlay::DEFAULT
-            });
+            if !unique_hits.contains(&entity.index()) {
+                unique_hits.push(entity.index());
+                commands.add(AudioPlay {
+                    path: "sounds/hit_body_{n}.ogg",
+                    volume: 1.5,
+                    source: Some(transform.translation.xy()),
+                    ..AudioPlay::DEFAULT
+                });
+            }
         }
     }
 }
