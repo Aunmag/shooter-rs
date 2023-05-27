@@ -37,10 +37,10 @@ mod system;
 mod util;
 
 use crate::{
-    data::APP_TITLE,
+    data::{APP_TITLE, CONFIG_PATH},
     event::ActorDeathEvent,
     material::{ProjectileMaterial, StatusBarMaterial},
-    model::{AppState, Arguments},
+    model::AppState,
     plugin::StressTestPlugin,
     resource::{
         AssetStorage, AudioStorage, AudioTracker, Config, HeartbeatResource, Misc, Scenario,
@@ -54,13 +54,10 @@ use bevy::{
     sprite::Material2dPlugin,
     window::{Window, WindowPlugin, WindowResolution},
 };
-use clap::Parser;
 
 fn main() {
-    let arguments = Arguments::parse();
-
-    log::debug!("Loading config from {}", arguments.config);
-    let config = Config::load_from(&arguments.config).expect("Failed to load config");
+    log::debug!("Loading config from {}", CONFIG_PATH);
+    let config = Config::load_from(CONFIG_PATH).expect("Failed to load config");
     log::debug!("Config loaded: {:?}", config);
 
     let mut app = App::new();
