@@ -1,4 +1,5 @@
 use crate::{
+    command::ActorRelease,
     component::{Actor, Health},
     event::ActorDeathEvent,
 };
@@ -9,7 +10,7 @@ use bevy::{
 };
 use std::time::Duration;
 
-const DECAY: Duration = Duration::from_millis(500);
+const DECAY: Duration = Duration::from_millis(1000);
 
 pub fn health(
     mut query: Query<(Entity, &Actor, &mut Health, &Transform)>,
@@ -35,6 +36,7 @@ pub fn health(
             }
 
             health.decay(now + DECAY);
+            commands.add(ActorRelease(entity));
             death_events.send(ActorDeathEvent::new(point));
         }
 
