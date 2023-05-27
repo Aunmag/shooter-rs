@@ -13,7 +13,7 @@ const INTERPOLATION: f32 = 8.0;
 const PULSE: Duration = Duration::from_millis(500);
 
 pub fn status_bar(
-    targets: Query<(&Health, Option<&Weapon>, &Children)>,
+    targets: Query<(&Health, Option<&Weapon>, &Children)>, // TODO: try to simplify
     handles: Query<&Handle<StatusBarMaterial>>,
     mut assets: ResMut<Assets<StatusBarMaterial>>,
     time: Res<Time>,
@@ -26,7 +26,7 @@ pub fn status_bar(
             if let Some(material) = handles.get(*child).ok().and_then(|h| assets.get_mut(h)) {
                 material.health -= (material.health - health.get()) * interpolation;
 
-                if material.health < Health::LOW_VALUE {
+                if health.is_low() {
                     material.health_alpha = pulse;
                 } else {
                     material.health_alpha = 1.0;

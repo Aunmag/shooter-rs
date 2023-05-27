@@ -1,4 +1,8 @@
-use crate::{command::AudioPlay, component::Notification};
+use crate::{
+    command::AudioPlay,
+    component::Notification,
+    data::{FONT_PATH, FONT_PATH_BOLD},
+};
 use bevy::{
     ecs::{query::With, system::Command, world::World},
     prelude::{AssetServer, Color, PositionType},
@@ -37,7 +41,7 @@ impl Command for Notify {
                     TextSection::new(
                         format!("{}\n", self.text),
                         TextStyle {
-                            font: asset_server.load("fonts/OpenSans-Bold.ttf"),
+                            font: asset_server.get_handle(FONT_PATH_BOLD),
                             font_size: window_width * FONT_SCALE,
                             color: COLOR,
                         },
@@ -45,7 +49,7 @@ impl Command for Notify {
                     TextSection::new(
                         self.text_small,
                         TextStyle {
-                            font: asset_server.load("fonts/OpenSans.ttf"),
+                            font: asset_server.get_handle(FONT_PATH),
                             font_size: window_width * FONT_SCALE / 2.0,
                             color: COLOR,
                         },

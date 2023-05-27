@@ -1,6 +1,7 @@
 use crate::{
-    command::{ActorBotSet, ActorPlayerSet, ActorSet, Notify},
+    command::{ActorBotSet, ActorPlayerSet, ActorSet, BonusSpawn, Notify},
     component::{Actor, ActorConfig, ActorType, Health},
+    event::ActorDeathEvent,
     model::TransformLite,
     resource::{Scenario, ScenarioLogic},
     util::{ext::Vec2Ext, math::interpolate},
@@ -15,13 +16,13 @@ use rand::{Rng, SeedableRng};
 use rand_pcg::Pcg32;
 use std::{any::Any, f32::consts::PI, time::Duration};
 
-const WAVE_FINAL: u16 = 6;
-const ZOMBIES_SPAWN_QUANTITY: u16 = 5;
-const ZOMBIES_SPAWN_DISTANCE_MIN: f32 = 20.0;
-const ZOMBIES_SPAWN_DISTANCE_MAX: f32 = 60.0;
-
-const ZOMBIES_SKILL_MIN: f32 = 1.0;
-const ZOMBIES_SKILL_MAX: f32 = 2.0;
+const WAVE_FINAL: u8 = 6;
+const WAVE_SIZE_INITIAL: u16 = 5;
+const ZOMBIE_SPAWN_DISTANCE_MIN: f32 = 20.0;
+const ZOMBIE_SPAWN_DISTANCE_MAX: f32 = 60.0;
+const ZOMBIE_SKILL_MIN: f32 = 1.0;
+const ZOMBIE_SKILL_MAX: f32 = 2.0;
+const BONUSES_PER_WAVE: f32 = 2.0;
 
 enum Task {
     Start,
@@ -45,7 +46,7 @@ impl Task {
 
 pub struct WavesScenario {
     task: Task,
-    wave: u16,
+    wave: u8,
     zombies_spawned: u16,
     rng: Pcg32,
 }
@@ -93,7 +94,7 @@ impl WavesScenario {
                     commands.add(HealHumans);
                     commands.add(Notify::new(
                         format!("Wave {}/{}", self.wave, WAVE_FINAL),
-                        format!("Kill {} zombies", self.zombies_to_spawn()),
+                        format!("Kill {} zombies", self.wave_size()),
                     ));
                 }
 
@@ -117,7 +118,7 @@ impl WavesScenario {
                     ));
                 }
 
-                if self.zombies_spawned < self.zombies_to_spawn() {
+                if self.zombies_spawned < self.wave_size() {
                     return Task::SpawnZombie;
                 } else {
                     return Task::CheckWaveCompletion;
@@ -146,11 +147,12 @@ impl WavesScenario {
         }
     }
 
-    fn zombies_to_spawn(&self) -> u16 {
+    fn wave_size(&self) -> u16 {
         if self.wave > WAVE_FINAL {
             return u16::MAX;
         } else {
-            return ZOMBIES_SPAWN_QUANTITY * self.wave * self.wave;
+            let wave = u16::from(self.wave);
+            return WAVE_SIZE_INITIAL * wave * wave;
         }
     }
 
@@ -159,14 +161,14 @@ impl WavesScenario {
     }
 
     fn generate_zombie_skill(&mut self) -> f32 {
-        let min = ZOMBIES_SKILL_MIN;
-        let max = interpolate(min, ZOMBIES_SKILL_MAX, self.progress());
+        let min = ZOMBIE_SKILL_MIN;
+        let max = interpolate(min, ZOMBIE_SKILL_MAX, self.progress());
         return self.generate_range(min, max);
     }
 
     fn generate_spawn_distance(&mut self) -> f32 {
-        let min = ZOMBIES_SPAWN_DISTANCE_MIN;
-        let max = interpolate(min, ZOMBIES_SPAWN_DISTANCE_MAX, self.progress());
+        let min = ZOMBIE_SPAWN_DISTANCE_MIN;
+        let max = interpolate(min, ZOMBIE_SPAWN_DISTANCE_MAX, self.progress());
         return self.generate_range(min, max);
     }
 
@@ -184,6 +186,18 @@ impl ScenarioLogic for WavesScenario {
         let timeout = self.task.get_timeout();
         self.task = WavesScenario::update(self, commands);
         return timeout;
+    }
+
+    fn on_actor_death(&mut self, event: &ActorDeathEvent, commands: &mut Commands) {
+        let wave = f32::from(self.wave);
+        let wave_size = f32::from(self.wave_size());
+
+        if self
+            .rng
+            .gen_bool((BONUSES_PER_WAVE * wave / wave_size).into())
+        {
+            commands.add(BonusSpawn::new(event.position, self.wave));
+        }
     }
 
     fn as_any_mut(&mut self) -> &mut dyn Any {

@@ -1,7 +1,7 @@
-use crate::{data::PIXELS_PER_METER, util::ext::TransformExt};
+use crate::{data::TRANSFORM_SCALE, util::ext::TransformExt};
 use bevy::{
     math::{Vec2, Vec3Swizzles},
-    prelude::{Quat, Transform, Vec3},
+    prelude::{Quat, Transform},
 };
 
 // TODO: no copy
@@ -23,7 +23,7 @@ impl TransformLite {
         return Transform {
             translation: self.translation.extend(z),
             rotation: Quat::from_rotation_z(self.direction),
-            scale: Vec3::splat(1.0 / PIXELS_PER_METER),
+            scale: TRANSFORM_SCALE,
         };
     }
 }

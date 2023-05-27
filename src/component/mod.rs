@@ -1,4 +1,5 @@
 mod actor;
+mod bonus;
 mod bot;
 mod breath;
 mod collision;
@@ -12,6 +13,6 @@ mod terrain;
 mod weapon;
 
 pub use self::{
-    actor::*, bot::*, breath::*, collision::*, footsteps::*, health::*, inertia::*,
+    actor::*, bonus::*, bot::*, breath::*, collision::*, footsteps::*, health::*, inertia::*,
     notification::*, player::*, projectile::*, terrain::*, weapon::*,
 };

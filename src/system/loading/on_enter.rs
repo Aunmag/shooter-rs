@@ -3,8 +3,10 @@ use bevy::prelude::{AssetServer, Res, ResMut};
 
 pub fn on_enter(asset_server: Res<AssetServer>, mut asset_storage: ResMut<AssetStorage>) {
     load_folder_or_log(&asset_server, &mut asset_storage, "actors");
-    load_folder_or_log(&asset_server, &mut asset_storage, "terrain");
+    load_folder_or_log(&asset_server, &mut asset_storage, "fonts");
     load_folder_or_log(&asset_server, &mut asset_storage, "sounds");
+    load_folder_or_log(&asset_server, &mut asset_storage, "terrain");
+    load_folder_or_log(&asset_server, &mut asset_storage, "weapons");
 }
 
 fn load_folder_or_log(

@@ -27,6 +27,7 @@
 mod command;
 mod component;
 mod data;
+mod event;
 mod material;
 mod model;
 mod plugin;
@@ -37,6 +38,7 @@ mod util;
 
 use crate::{
     data::APP_TITLE,
+    event::ActorDeathEvent,
     material::{ProjectileMaterial, StatusBarMaterial},
     model::{AppState, Arguments},
     plugin::StressTestPlugin,
@@ -88,6 +90,7 @@ fn main() {
     .add_plugin(Material2dPlugin::<StatusBarMaterial>::default())
     .add_plugin(Material2dPlugin::<ProjectileMaterial>::default())
     .add_state::<AppState>()
+    .add_event::<ActorDeathEvent>()
     .insert_resource(AssetStorage::default())
     .insert_resource(AudioStorage::default())
     .insert_resource(AudioTracker::default())
@@ -116,6 +119,9 @@ fn main() {
         s.add(weapon.after(collision_resolve));
         s.add(melee.after(collision_resolve));
         s.add(projectile.pipe(projectile_hit).after(collision_resolve));
+        s.add(bonus_image);
+        s.add(bonus_label);
+        s.add(bonus.after(collision_resolve));
         s.add(camera.after(collision_resolve));
         s.add(status_bar);
         s.add(breath);

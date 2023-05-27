@@ -23,13 +23,6 @@ pub struct ProjectileConfig {
 }
 
 impl ProjectileConfig {
-    pub const LASER: Self = Self {
-        fragments: 1,
-        mass: 1.0,
-        acceleration_factor: -0.0,
-        size: 0.05,
-    };
-
     pub const _9X18: Self = Self {
         fragments: 1,
         mass: 6.1,

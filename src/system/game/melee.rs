@@ -75,7 +75,7 @@ pub fn melee(
                     ..AudioPlay::DEFAULT
                 });
 
-                victim_health.damage(momentum, time);
+                victim_health.damage(momentum);
             }
 
             commands.add(ActorMeleeReset(attacker_entity));

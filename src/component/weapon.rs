@@ -18,6 +18,7 @@ pub struct Weapon {
 #[derive(Clone)]
 pub struct WeaponConfig {
     pub name: &'static str,
+    pub level: u8,
     pub muzzle_velocity: f32,
     pub fire_rate: f32,
     pub projectile: &'static ProjectileConfig,
@@ -25,7 +26,6 @@ pub struct WeaponConfig {
     pub reloading_time: Duration,
 }
 
-#[allow(dead_code)] // TODO: remove
 impl WeaponConfig {
     const SEMI_AUTO_FIRE_RATE: f32 = 400.0;
 
@@ -36,21 +36,24 @@ impl WeaponConfig {
     const RELOADING_TIME_RIFLE_HEAVY: Duration = Duration::from_millis(5500);
     const RELOADING_TIME_MG: Duration = Duration::from_millis(10000);
 
-    pub const LASER_GUN: Self = Self {
-        name: "Laser Gun",
-        muzzle_velocity: 5000.0,
-        fire_rate: 1200.0,
-        // radians_deflection: 0,
-        // recoil: 0f,
-        // is_automatic: true,
-        // grip_offset: GRIP_OFFSET_EXTENDED,
-        projectile: &ProjectileConfig::LASER,
-        ammo_capacity: 0,
-        reloading_time: Duration::ZERO,
-    };
+    pub const ALL: [Self; 12] = [
+        Self::PM,
+        Self::TT,
+        Self::MP_43_SAWED_OFF,
+        Self::MP_27,
+        Self::PP_91_KEDR,
+        Self::PP_19_BIZON,
+        Self::AKS_74U,
+        Self::AK_74M,
+        Self::RPK_74,
+        Self::SAIGA_12K,
+        Self::PKM,
+        Self::PKP_PECHENEG,
+    ];
 
     pub const PM: Self = Self {
         name: "PM",
+        level: 1,
         muzzle_velocity: 315.0,
         fire_rate: Self::SEMI_AUTO_FIRE_RATE,
         // radians_deflection: 0.05,
@@ -64,6 +67,7 @@ impl WeaponConfig {
 
     pub const TT: Self = Self {
         name: "TT",
+        level: 1,
         muzzle_velocity: 430.0,
         fire_rate: Self::SEMI_AUTO_FIRE_RATE,
         // radians_deflection: 0.05,
@@ -77,6 +81,7 @@ impl WeaponConfig {
 
     pub const MP_43_SAWED_OFF: Self = Self {
         name: "MP-43 sawed-off",
+        level: 2,
         muzzle_velocity: 260.0,
         fire_rate: Self::SEMI_AUTO_FIRE_RATE,
         // radians_deflection: 0.08,
@@ -90,6 +95,7 @@ impl WeaponConfig {
 
     pub const MP_27: Self = Self {
         name: "MP-27",
+        level: 2,
         muzzle_velocity: 410.0,
         fire_rate: Self::SEMI_AUTO_FIRE_RATE,
         // radians_deflection: 0.06,
@@ -103,6 +109,7 @@ impl WeaponConfig {
 
     pub const PP_91_KEDR: Self = Self {
         name: "PP-91 Kedr",
+        level: 3,
         muzzle_velocity: 310.0,
         fire_rate: 900.0,
         // radians_deflection: 0.04,
@@ -116,6 +123,7 @@ impl WeaponConfig {
 
     pub const PP_19_BIZON: Self = Self {
         name: "PP-19 Bizon",
+        level: 3,
         muzzle_velocity: 330.0,
         fire_rate: 680.0,
         // radians_deflection: 0.03,
@@ -129,6 +137,7 @@ impl WeaponConfig {
 
     pub const AKS_74U: Self = Self {
         name: "AKS-74U",
+        level: 4,
         muzzle_velocity: 735.0,
         fire_rate: 675.0,
         // radians_deflection: 0.03,
@@ -142,6 +151,7 @@ impl WeaponConfig {
 
     pub const AK_74M: Self = Self {
         name: "AK-74M",
+        level: 4,
         muzzle_velocity: 910.0,
         fire_rate: 600.0,
         // radians_deflection: 0.028,
@@ -155,6 +165,7 @@ impl WeaponConfig {
 
     pub const RPK_74: Self = Self {
         name: "RPK-74",
+        level: 5,
         muzzle_velocity: 960.0,
         fire_rate: 600.0,
         // radians_deflection: 0.025,
@@ -168,6 +179,7 @@ impl WeaponConfig {
 
     pub const SAIGA_12K: Self = Self {
         name: "Saiga-12K",
+        level: 5,
         muzzle_velocity: 410.0,
         fire_rate: Self::SEMI_AUTO_FIRE_RATE,
         // radians_deflection: 0.07,
@@ -181,6 +193,7 @@ impl WeaponConfig {
 
     pub const PKM: Self = Self {
         name: "PKM",
+        level: 6,
         muzzle_velocity: 825.0,
         fire_rate: 650.0,
         // radians_deflection: 0.021,
@@ -194,6 +207,7 @@ impl WeaponConfig {
 
     pub const PKP_PECHENEG: Self = Self {
         name: "PKP Pecheneg",
+        level: 6,
         muzzle_velocity: 825.0,
         fire_rate: 650.0,
         // radians_deflection: 0.02,
@@ -204,6 +218,10 @@ impl WeaponConfig {
         ammo_capacity: 100,
         reloading_time: Self::RELOADING_TIME_MG,
     };
+
+    pub fn get_image_path(&self) -> String {
+        return format!("weapons/{}/image.png", self.name);
+    }
 }
 
 impl Weapon {

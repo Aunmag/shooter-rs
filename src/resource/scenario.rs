@@ -1,8 +1,24 @@
-use bevy::{ecs::system::Resource, prelude::Commands};
+use crate::event::ActorDeathEvent;
+use bevy::{
+    ecs::{event::EventReader, system::Resource},
+    prelude::Commands,
+};
 use std::{any::Any, time::Duration};
 
 pub trait ScenarioLogic {
     fn update(&mut self, commands: &mut Commands) -> Duration;
+
+    fn on_actor_deaths(
+        &mut self,
+        mut events: EventReader<ActorDeathEvent>,
+        commands: &mut Commands,
+    ) {
+        for event in events.iter() {
+            self.on_actor_death(event, commands);
+        }
+    }
+
+    fn on_actor_death(&mut self, event: &ActorDeathEvent, commands: &mut Commands);
 
     fn as_any_mut(&mut self) -> &mut dyn Any;
 }
@@ -21,7 +37,16 @@ impl Scenario {
         };
     }
 
-    pub fn update(&mut self, commands: &mut Commands, time: Duration) {
+    pub fn update(
+        &mut self,
+        commands: &mut Commands,
+        death_events: EventReader<ActorDeathEvent>,
+        time: Duration,
+    ) {
+        if !death_events.is_empty() {
+            self.logic.on_actor_deaths(death_events, commands);
+        }
+
         while self.timer < time {
             self.timer = time + self.logic.update(commands);
         }

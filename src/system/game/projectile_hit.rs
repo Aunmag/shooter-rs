@@ -5,23 +5,20 @@ use crate::{
 use bevy::{
     ecs::{entity::Entity, system::Query},
     math::Vec3Swizzles,
-    prelude::{Commands, In, Res, Time, Transform, Vec2},
+    prelude::{Commands, In, Transform, Vec2},
 };
 
 pub fn projectile_hit(
     In(mut hits): In<Vec<(Entity, Vec2, f32)>>,
     mut entities: Query<(&Transform, &mut Inertia, &mut Health)>,
     mut commands: Commands,
-    time: Res<Time>,
 ) {
-    let time = time.elapsed();
-
     while let Some((entity, force, force_angular)) = hits.pop() {
         let momentum = force.length();
 
         if let Ok((transform, mut inertia, mut health)) = entities.get_mut(entity) {
             inertia.push(force, momentum * force_angular, true, false, true);
-            health.damage(momentum, time);
+            health.damage(momentum);
 
             // TODO: don't play multiple times if it was a fraction
             commands.add(AudioPlay {
