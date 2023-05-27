@@ -3,14 +3,14 @@ use crate::{
     data::LAYER_PROJECTILE,
     material::ProjectileMaterial,
     model::TransformLite,
-    util,
+    resource::Misc,
     util::ext::Vec2Ext,
 };
 use bevy::{
     asset::Assets,
     ecs::system::Command,
     math::Vec3,
-    prelude::{shape::Cube, Entity, Image, Mesh, Time, Transform, Vec2, World},
+    prelude::{shape::Cube, Entity, Mesh, Time, Transform, Vec2, World},
     sprite::MaterialMesh2dBundle,
 };
 
@@ -23,6 +23,13 @@ pub struct ProjectileSpawn {
 
 impl Command for ProjectileSpawn {
     fn write(self, world: &mut World) {
+        let image = if let Some(image) = world.resource_mut::<Misc>().dummy_image.clone() {
+            image
+        } else {
+            log::warn!("Failed spawn a projectile. The dummy image isn't initialized");
+            return;
+        };
+
         let projectile = Projectile::new(
             self.config,
             world.resource::<Time>().elapsed(),
@@ -30,10 +37,6 @@ impl Command for ProjectileSpawn {
             Vec2::from_length(self.velocity, self.transform.direction),
             self.shooter,
         );
-
-        let image = world
-            .resource_mut::<Assets<Image>>()
-            .add(util::create_empty_image(1, 1));
 
         let mesh = world
             .resource_mut::<Assets<Mesh>>()

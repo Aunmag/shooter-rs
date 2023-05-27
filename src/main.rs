@@ -42,7 +42,9 @@ use crate::{
     material::{ProjectileMaterial, StatusBarMaterial},
     model::{AppState, Arguments},
     plugin::StressTestPlugin,
-    resource::{AssetStorage, AudioStorage, AudioTracker, Config, HeartbeatResource, Scenario},
+    resource::{
+        AssetStorage, AudioStorage, AudioTracker, Config, HeartbeatResource, Misc, Scenario,
+    },
     scenario::WavesScenario,
     util::ext::AppExt,
 };
@@ -93,6 +95,7 @@ fn main() {
     .insert_resource(AudioStorage::default())
     .insert_resource(AudioTracker::default())
     .insert_resource(HeartbeatResource::default())
+    .insert_resource(Misc::default())
     .insert_resource(config)
     .insert_resource(Scenario::new(WavesScenario::new()))
     .insert_resource(system::bot::TargetFindData::default())
