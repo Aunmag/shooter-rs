@@ -29,12 +29,26 @@ pub struct WeaponConfig {
 impl WeaponConfig {
     const SEMI_AUTO_FIRE_RATE: f32 = 400.0;
 
-    const RELOADING_TIME_PISTOL: Duration = Duration::from_millis(3000);
-    const RELOADING_TIME_SG: Duration = Duration::from_millis(4000);
-    const RELOADING_TIME_RIFLE_LIGHT: Duration = Duration::from_millis(4500);
-    const RELOADING_TIME_RIFLE: Duration = Duration::from_millis(5000);
-    const RELOADING_TIME_RIFLE_HEAVY: Duration = Duration::from_millis(5500);
-    const RELOADING_TIME_MG: Duration = Duration::from_millis(10000);
+    /// To make game easier modify real reloading time
+    const RELOADING_TIME_FACTOR: f32 = 0.75;
+
+    const RELOADING_TIME_PISTOL: Duration =
+        Duration::from_millis((3000.0 * Self::RELOADING_TIME_FACTOR) as u64);
+
+    const RELOADING_TIME_SG: Duration =
+        Duration::from_millis((4000.0 * Self::RELOADING_TIME_FACTOR) as u64);
+
+    const RELOADING_TIME_RIFLE_LIGHT: Duration =
+        Duration::from_millis((4500.0 * Self::RELOADING_TIME_FACTOR) as u64);
+
+    const RELOADING_TIME_RIFLE: Duration =
+        Duration::from_millis((5000.0 * Self::RELOADING_TIME_FACTOR) as u64);
+
+    const RELOADING_TIME_RIFLE_HEAVY: Duration =
+        Duration::from_millis((5500.0 * Self::RELOADING_TIME_FACTOR) as u64);
+
+    const RELOADING_TIME_MG: Duration =
+        Duration::from_millis((10000.0 * Self::RELOADING_TIME_FACTOR) as u64);
 
     pub const ALL: [Self; 12] = [
         Self::PM,
