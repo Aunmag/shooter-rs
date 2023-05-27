@@ -79,7 +79,7 @@ impl ActorConfig {
         movement_velocity: 2.5,
         rotation_velocity: 8.0,
         sprint_factor: 2.0,
-        stamina: Duration::from_secs(20),
+        stamina: Duration::from_secs(15),
         resistance: Self::HUMAN_RESISTANCE,
         radius: 0.25,
         mass: 80_000.0,
