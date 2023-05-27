@@ -1,10 +1,10 @@
-use crate::{command::AudioPlay, resource::Rng};
+use crate::command::AudioPlay;
 use bevy::{
     ecs::system::{Res, Resource},
     prelude::{Commands, ResMut},
     time::Time,
 };
-use rand::Rng as _;
+use rand::{thread_rng, Rng as _};
 use std::time::Duration;
 
 const INTERVAL_MIN: f32 = 15.0;
@@ -15,12 +15,7 @@ pub struct AmbienceFxData {
     next: Duration,
 }
 
-pub fn ambience_fx(
-    mut data: ResMut<AmbienceFxData>,
-    mut rng: ResMut<Rng>,
-    mut commands: Commands,
-    time: Res<Time>,
-) {
+pub fn ambience_fx(mut data: ResMut<AmbienceFxData>, mut commands: Commands, time: Res<Time>) {
     let time = time.elapsed();
 
     if time < data.next {
@@ -35,6 +30,6 @@ pub fn ambience_fx(
         });
     }
 
-    let interval = Duration::from_secs_f32(rng.gen_range(INTERVAL_MIN..INTERVAL_MAX));
+    let interval = Duration::from_secs_f32(thread_rng().gen_range(INTERVAL_MIN..INTERVAL_MAX));
     data.next = time + interval;
 }

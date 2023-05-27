@@ -1,6 +1,6 @@
 use crate::{
     component::Player,
-    resource::{AudioStorage, AudioTracker, Rng},
+    resource::{AudioStorage, AudioTracker},
 };
 use bevy::{
     asset::Assets,
@@ -11,7 +11,7 @@ use bevy::{
     time::Time,
     transform::components::Transform,
 };
-use rand::Rng as _;
+use rand::{thread_rng, Rng as _};
 use std::time::Duration;
 
 const VOLUME_MIN: f32 = 0.01;
@@ -62,7 +62,7 @@ impl Command for AudioPlay {
             return;
         }
 
-        if self.chance < 1.0 && !world.resource_mut::<Rng>().gen_bool(self.chance.into()) {
+        if self.chance < 1.0 && !thread_rng().gen_bool(self.chance.into()) {
             return;
         }
 
