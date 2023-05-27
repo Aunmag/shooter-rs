@@ -42,7 +42,7 @@ pub fn weapon(
             weapon.release_trigger();
         }
 
-        if actor.actions.is_reloading() && !weapon.is_reloading() && !weapon.is_ammo_full() {
+        if actor.actions.is_reloading() && !weapon.is_reloading() {
             weapon.reload(now);
 
             commands.add(AudioPlay {

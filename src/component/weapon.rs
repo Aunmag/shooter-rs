@@ -318,10 +318,6 @@ impl Weapon {
     pub fn is_ready(&self, time: Duration) -> bool {
         return self.next_time < time;
     }
-
-    pub fn is_ammo_full(&self) -> bool {
-        return self.ammo == self.config.ammo_capacity;
-    }
 }
 
 pub enum WeaponFireResult {
