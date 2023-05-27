@@ -58,7 +58,7 @@ impl Command for ActorSet {
             .insert(Footsteps::default());
 
         if let ActorType::Human = self.config.actor_type {
-            entity_mut.insert(Weapon::new(&WeaponConfig::AKS_74U));
+            entity_mut.insert(Weapon::new(&WeaponConfig::PM));
             entity_mut.insert(Breath::default());
         }
     }
