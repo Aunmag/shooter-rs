@@ -48,6 +48,7 @@ pub struct WavesScenario {
     task: Task,
     wave: u8,
     zombies_spawned: u16,
+    kills: u16,
     rng: Pcg32,
 }
 
@@ -57,6 +58,7 @@ impl WavesScenario {
             task: Task::Start,
             wave: 0,
             zombies_spawned: 0,
+            kills: 0,
             rng: Pcg32::seed_from_u64(32),
         };
     }
@@ -84,6 +86,7 @@ impl WavesScenario {
             Task::StartNextWave => {
                 self.wave += 1;
                 self.zombies_spawned = 0;
+                self.kills = 0;
 
                 if self.wave > WAVE_FINAL {
                     commands.add(Notify::new(
@@ -110,13 +113,6 @@ impl WavesScenario {
                 });
 
                 self.zombies_spawned += 1;
-
-                if self.wave == 2 && self.zombies_spawned == 5 {
-                    commands.add(Notify::new(
-                        "".to_string(),
-                        "Press [SHIFT] to sprint".to_string(),
-                    ));
-                }
 
                 if self.zombies_spawned < self.wave_size() {
                     return Task::SpawnZombie;
@@ -189,6 +185,32 @@ impl ScenarioLogic for WavesScenario {
     }
 
     fn on_actor_death(&mut self, event: &ActorDeathEvent, commands: &mut Commands) {
+        self.kills += 1;
+
+        if self.kills == 1 {
+            match self.wave {
+                1 => {
+                    commands.add(Notify::new(
+                        String::new(),
+                        "Press [R] to reload".to_string(),
+                    ));
+                }
+                2 => {
+                    commands.add(Notify::new(
+                        String::new(),
+                        "Press [SHIFT] to sprint".to_string(),
+                    ));
+                }
+                3 => {
+                    commands.add(Notify::new(
+                        String::new(),
+                        "Use mouse wheel to change zoom".to_string(),
+                    ));
+                }
+                _ => {}
+            }
+        }
+
         let wave = f32::from(self.wave);
         let wave_size = f32::from(self.wave_size());
 
