@@ -12,7 +12,7 @@ pub struct Player {
 
 impl Player {
     pub const EXTRA_ROTATION_MULTIPLAYER: f32 = 0.1;
-    pub const EXTRA_ROTATION_MAX: f32 = 0.15;
+    pub const EXTRA_ROTATION_MAX: f32 = 0.11;
 
     pub fn update(&mut self, time: Duration, delta: f32) {
         self.zoom.update(time, delta);

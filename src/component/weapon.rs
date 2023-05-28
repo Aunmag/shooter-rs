@@ -10,7 +10,7 @@ use rand_pcg::Pcg32;
 use std::time::Duration;
 
 /// To make sure reloading sounds have stopped
-const POST_RELOADING_TIME: Duration = Duration::from_millis(400);
+const POST_RELOADING_TIME: Duration = Duration::from_millis(200);
 
 #[derive(Component)]
 pub struct Weapon {
@@ -49,10 +49,16 @@ impl WeaponConfig {
     const RELOADING_TIME_PISTOL: Duration =
         Duration::from_millis((3000.0 * Self::RELOADING_TIME_FACTOR) as u64);
 
-    const RELOADING_TIME_SG: Duration =
-        Duration::from_millis((1800.0 * Self::RELOADING_TIME_FACTOR) as u64);
+    const RELOADING_TIME_SHOTGUN_LIGHT: Duration =
+        Duration::from_millis((1300.0 * Self::RELOADING_TIME_FACTOR) as u64); // TODO: tweak
 
-    const RELOADING_TIME_RIFLE_LIGHT: Duration =
+    const RELOADING_TIME_SHOTGUN: Duration =
+        Duration::from_millis((1800.0 * Self::RELOADING_TIME_FACTOR) as u64); // TODO: tweak
+
+    const RELOADING_TIME_SMG: Duration =
+        Duration::from_millis((4000.0 * Self::RELOADING_TIME_FACTOR) as u64);
+
+    const RELOADING_TIME_CARBINE: Duration =
         Duration::from_millis((4500.0 * Self::RELOADING_TIME_FACTOR) as u64);
 
     const RELOADING_TIME_RIFLE: Duration =
@@ -61,7 +67,7 @@ impl WeaponConfig {
     const RELOADING_TIME_RIFLE_HEAVY: Duration =
         Duration::from_millis((5500.0 * Self::RELOADING_TIME_FACTOR) as u64);
 
-    const RELOADING_TIME_MG: Duration =
+    const RELOADING_TIME_MACHINE_GUN: Duration =
         Duration::from_millis((10000.0 * Self::RELOADING_TIME_FACTOR) as u64);
 
     pub const ALL: [Self; 12] = [
@@ -121,7 +127,7 @@ impl WeaponConfig {
         is_automatic: false,
         projectile: &ProjectileConfig::_12X76,
         ammo_capacity: 2,
-        reloading_time: Self::RELOADING_TIME_RIFLE_LIGHT,
+        reloading_time: Self::RELOADING_TIME_SHOTGUN_LIGHT,
         partial_reloading: true,
         image_offset: 3.5,
         actor_image_suffix: 2,
@@ -137,7 +143,7 @@ impl WeaponConfig {
         is_automatic: false,
         projectile: &ProjectileConfig::_12X76,
         ammo_capacity: 2,
-        reloading_time: Self::RELOADING_TIME_RIFLE,
+        reloading_time: Self::RELOADING_TIME_SHOTGUN,
         partial_reloading: true,
         image_offset: 10.0,
         actor_image_suffix: 2,
@@ -153,7 +159,7 @@ impl WeaponConfig {
         is_automatic: true,
         projectile: &ProjectileConfig::_9X18,
         ammo_capacity: 20,
-        reloading_time: Self::RELOADING_TIME_SG,
+        reloading_time: Self::RELOADING_TIME_SMG,
         partial_reloading: false,
         image_offset: 3.5,
         actor_image_suffix: 2,
@@ -169,7 +175,7 @@ impl WeaponConfig {
         is_automatic: true,
         projectile: &ProjectileConfig::_9X18,
         ammo_capacity: 64,
-        reloading_time: Self::RELOADING_TIME_SG,
+        reloading_time: Self::RELOADING_TIME_SMG,
         partial_reloading: false,
         image_offset: 7.0,
         actor_image_suffix: 2,
@@ -185,7 +191,7 @@ impl WeaponConfig {
         is_automatic: true,
         projectile: &ProjectileConfig::_5_45X39,
         ammo_capacity: 30,
-        reloading_time: Self::RELOADING_TIME_RIFLE_LIGHT,
+        reloading_time: Self::RELOADING_TIME_CARBINE,
         partial_reloading: false,
         image_offset: 8.0,
         actor_image_suffix: 2,
@@ -249,7 +255,7 @@ impl WeaponConfig {
         is_automatic: true,
         projectile: &ProjectileConfig::_7_62X54,
         ammo_capacity: 100,
-        reloading_time: Self::RELOADING_TIME_MG,
+        reloading_time: Self::RELOADING_TIME_MACHINE_GUN,
         partial_reloading: false,
         image_offset: 10.0,
         actor_image_suffix: 2,
@@ -265,7 +271,7 @@ impl WeaponConfig {
         is_automatic: true,
         projectile: &ProjectileConfig::_7_62X54,
         ammo_capacity: 100,
-        reloading_time: Self::RELOADING_TIME_MG,
+        reloading_time: Self::RELOADING_TIME_MACHINE_GUN,
         partial_reloading: false,
         image_offset: 10.0,
         actor_image_suffix: 2,

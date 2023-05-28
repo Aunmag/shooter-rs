@@ -27,7 +27,7 @@ pub fn footsteps(
         }
 
         let distance = distance_squared.sqrt();
-        let velocity = distance / (time - footsteps.time).as_secs_f32();
+        let velocity = distance / (time.saturating_sub(footsteps.time)).as_secs_f32();
         let intensity = calc_stride_intensity(velocity);
 
         if time < footsteps.time + calc_stride_interval(intensity) {

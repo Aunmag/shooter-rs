@@ -13,7 +13,7 @@ impl Command for ActorMeleeReset {
 
         if let Some(mut actor) = world.get_mut::<Actor>(self.0) {
             actor.actions.remove(ActorAction::Attack);
-            actor.melee_next = time + actor.config.melee_interval;
+            actor.melee_next = time + actor.config.melee_interval.div_f32(actor.skill);
         }
     }
 }

@@ -10,7 +10,7 @@ use bevy::{
 };
 use std::time::Duration;
 
-const RUN_INTERVAL: Duration = Duration::from_millis(700);
+const RUN_INTERVAL: Duration = Duration::from_millis(500);
 
 #[derive(Resource)]
 pub struct TargetUpdateData {

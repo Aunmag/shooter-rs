@@ -12,13 +12,13 @@ impl DurationExt for Duration {
     }
 
     fn progress(self, min: Duration, max: Duration) -> f32 {
-        let elapsed = self.saturating_sub(min).as_secs_f64();
-        let range = max.saturating_sub(min).as_secs_f64();
+        let elapsed = self.saturating_sub(min);
+        let range = max.saturating_sub(min);
 
-        if elapsed >= range {
+        if elapsed >= range || range.is_zero() {
             return 1.0;
         } else {
-            return (elapsed / range) as f32;
+            return (elapsed.as_secs_f64() / range.as_secs_f64()) as f32;
         }
     }
 }
