@@ -367,7 +367,7 @@ impl Weapon {
 
     pub fn get_ammo_normalized(&self, time: Duration) -> f32 {
         if self.is_reloading {
-            let progress = time.get_progress(
+            let progress = time.progress(
                 self.next_time.saturating_sub(self.config.reloading_time),
                 self.next_time,
             );

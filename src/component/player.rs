@@ -41,7 +41,7 @@ impl Player {
 struct Zoom {
     value: f32,
     value_target: f32,
-    speed: f32,
+    speed: Duration,
     reset_time: Duration,
 }
 
@@ -64,14 +64,14 @@ impl Zoom {
     const DEFAULT: f32 = 1.7;
     const INITIAL: f32 = 5.0;
 
-    const SPEED_INITIAL: f32 = 0.2;
-    const SPEED_MANUAL: f32 = 8.0;
-    const SPEED_RESET: f32 = 1.25;
+    const SPEED_INITIAL: Duration = Duration::from_millis(5000);
+    const SPEED_MANUAL: Duration = Duration::from_millis(125);
+    const SPEED_RESET: Duration = Duration::from_millis(800);
 
     const RESET_TIMEOUT: Duration = Duration::from_secs(4);
 
     pub fn update(&mut self, time: Duration, delta: f32) {
-        self.value += (self.value_target - self.value) * delta * self.speed;
+        self.value += (self.value_target - self.value) * delta * self.speed.rate();
         self.value = Self::clamp(self.value);
 
         if !self.reset_time.is_zero() && time > self.reset_time {

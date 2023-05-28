@@ -29,7 +29,7 @@ impl Interpolation {
     }
 
     pub fn progress(&self, time: Duration) -> f32 {
-        return time.get_progress(self.target.1, self.target.1 + self.interval());
+        return time.progress(self.target.1, self.target.1 + self.interval());
     }
 
     pub fn interval(&self) -> Duration {
