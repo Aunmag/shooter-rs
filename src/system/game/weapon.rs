@@ -14,7 +14,7 @@ use rand_pcg::Pcg32;
 
 const VELOCITY_DEVIATION_FACTOR: f32 = 0.1;
 const DIRECTION_DEVIATION: f32 = 0.02;
-const BARREL_LENGTH: f32 = 1.15; // TODO: don't hardcode
+const BARREL_LENGTH: f32 = 0.6; // TODO: don't hardcode
 
 #[derive(Resource)]
 pub struct WeaponData {

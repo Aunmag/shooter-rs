@@ -1,9 +1,8 @@
-use super::AudioPlay;
-use crate::component::{Bonus, Weapon};
+use super::WeaponGive;
+use crate::component::Bonus;
 use bevy::{
     ecs::system::Command,
-    math::Vec3Swizzles,
-    prelude::{DespawnRecursiveExt, Entity, Transform, World},
+    prelude::{DespawnRecursiveExt, Entity, World},
 };
 use derive_more::Constructor;
 
@@ -21,17 +20,7 @@ impl Command for BonusActivate {
             return;
         };
 
-        if let Some(transform) = world.get::<Transform>(self.recipient) {
-            AudioPlay {
-                path: "sounds/pickup_weapon.ogg",
-                volume: 0.9,
-                source: Some(transform.translation.xy()),
-                ..AudioPlay::DEFAULT
-            }
-            .write(world);
-        }
-
-        world.entity_mut(self.recipient).insert(Weapon::new(weapon));
+        WeaponGive::new(self.recipient, weapon).write(world);
         world.entity_mut(self.bonus).despawn_recursive();
     }
 }

@@ -1,16 +1,14 @@
 use crate::{
+    command::WeaponGive,
     component::{
-        Actor, ActorConfig, ActorType, Breath, Collision, Footsteps, Health, Inertia, Weapon,
-        WeaponConfig,
+        Actor, ActorConfig, ActorType, Breath, Collision, Footsteps, Health, Inertia, WeaponConfig,
     },
     data::LAYER_ACTOR,
     model::TransformLite,
 };
 use bevy::{
-    asset::Assets,
     ecs::system::Command,
-    prelude::{AssetServer, Entity, Image, Sprite, SpriteBundle, World},
-    sprite::Anchor,
+    prelude::{AssetServer, Entity, SpriteBundle, World},
 };
 
 pub struct ActorSet {
@@ -22,29 +20,12 @@ pub struct ActorSet {
 
 impl Command for ActorSet {
     fn write(self, world: &mut World) {
-        let texture = world
-            .resource::<AssetServer>()
-            .get_handle(self.config.sprite);
-
-        let anchor = if let Some(image) = world.resource::<Assets<Image>>().get(&texture) {
-            self.config.sprite_offset.to_anchor(image)
-        } else {
-            log::warn!(
-                "Unable to set anchor for sprite {} since it hasn't loaded yet",
-                self.config.sprite,
-            );
-
-            Anchor::default()
-        };
-
+        let texture_path = self.config.get_image_path(0);
+        let texture = world.resource::<AssetServer>().get_handle(texture_path);
         let mut entity_mut = world.entity_mut(self.entity);
 
         entity_mut
             .insert(SpriteBundle {
-                sprite: Sprite {
-                    anchor,
-                    ..Default::default()
-                },
                 transform: self.transform.as_transform(LAYER_ACTOR),
                 texture,
                 ..Default::default()
@@ -58,8 +39,8 @@ impl Command for ActorSet {
             .insert(Footsteps::default());
 
         if let ActorType::Human = self.config.actor_type {
-            entity_mut.insert(Weapon::new(&WeaponConfig::PM));
             entity_mut.insert(Breath::default());
+            WeaponGive::new(self.entity, &WeaponConfig::PM).write(world);
         }
     }
 }

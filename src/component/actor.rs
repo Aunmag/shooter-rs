@@ -1,6 +1,6 @@
 use crate::{
     command::AudioPlay,
-    model::{ActorActions, ActorActionsExt, SpriteOffset},
+    model::{ActorActions, ActorActionsExt},
 };
 use bevy::ecs::component::Component;
 use std::{f32::consts::TAU, time::Duration};
@@ -22,8 +22,6 @@ pub enum ActorType {
 }
 
 pub struct ActorConfig {
-    pub sprite: &'static str,
-    pub sprite_offset: SpriteOffset,
     pub movement_velocity: f32,
     pub rotation_velocity: f32,
     pub sprint_factor: f32,
@@ -42,6 +40,9 @@ pub struct ActorConfig {
 }
 
 impl Actor {
+    pub const ARMS_LENGTH_1: f32 = 0.546875;
+    pub const ARMS_LENGTH_2: f32 = 0.34375;
+
     pub const fn new(config: &'static ActorConfig, skill: f32) -> Self {
         return Self {
             config,
@@ -74,8 +75,6 @@ impl ActorConfig {
     const HUMAN_RESISTANCE: f32 = 8000.0;
 
     pub const HUMAN: &'static Self = &Self {
-        sprite: "actors/human/image.png",
-        sprite_offset: SpriteOffset::new(Some(9.0), None),
         movement_velocity: 2.5,
         rotation_velocity: 8.0,
         sprint_factor: 2.0,
@@ -99,8 +98,6 @@ impl ActorConfig {
     };
 
     pub const ZOMBIE: &'static Self = &Self {
-        sprite: "actors/zombie/image.png",
-        sprite_offset: SpriteOffset::new(Some(6.5), None),
         movement_velocity: Self::HUMAN.movement_velocity * 0.4,
         rotation_velocity: Self::HUMAN.rotation_velocity * 0.4,
         sprint_factor: 1.8,
@@ -127,6 +124,23 @@ impl ActorConfig {
             ..AudioPlay::DEFAULT
         }),
     };
+
+    pub fn get_image_path(&self, mut suffix: u8) -> String {
+        let folder;
+
+        match self.actor_type {
+            ActorType::Human => {
+                folder = "human";
+                suffix = suffix.clamp(1, 2); // since player has only 1 and 2
+            }
+            ActorType::Zombie => {
+                folder = "zombie";
+                suffix = 0; // since zombie only has 0
+            }
+        };
+
+        return format!("actors/{}/image_{}.png", folder, suffix);
+    }
 }
 
 impl From<ActorType> for &'static ActorConfig {
@@ -137,3 +151,6 @@ impl From<ActorType> for &'static ActorConfig {
         };
     }
 }
+
+#[derive(Component)]
+pub struct ActorWeaponSprite;

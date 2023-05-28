@@ -18,7 +18,6 @@ pub struct Weapon {
     next_time: Duration,
 }
 
-#[derive(Clone)]
 pub struct WeaponConfig {
     pub name: &'static str,
     pub level: u8,
@@ -28,6 +27,8 @@ pub struct WeaponConfig {
     pub ammo_capacity: u8,
     pub reloading_time: Duration,
     pub partial_reloading: bool,
+    pub image_offset: f32,
+    pub actor_image_suffix: u8, // TODO: detect automatically by length
 }
 
 impl WeaponConfig {
@@ -77,11 +78,12 @@ impl WeaponConfig {
         // radians_deflection: 0.05,
         // recoil: 6_500,
         // is_automatic: false,
-        // grip_offset: GRIP_OFFSET_SHORT,
         projectile: &ProjectileConfig::_9X18,
         ammo_capacity: 8,
         reloading_time: Self::RELOADING_TIME_PISTOL,
         partial_reloading: false,
+        image_offset: 2.0,
+        actor_image_suffix: 1,
     };
 
     pub const TT: Self = Self {
@@ -92,11 +94,12 @@ impl WeaponConfig {
         // radians_deflection: 0.05,
         // recoil: 7_500,
         // is_automatic: false,
-        // grip_offset: GRIP_OFFSET_SHORT,
         projectile: &ProjectileConfig::_7_62X25,
         ammo_capacity: 8,
         reloading_time: Self::RELOADING_TIME_PISTOL,
         partial_reloading: false,
+        image_offset: 2.0,
+        actor_image_suffix: 1,
     };
 
     pub const MP_43_SAWED_OFF: Self = Self {
@@ -107,11 +110,12 @@ impl WeaponConfig {
         // radians_deflection: 0.08,
         // recoil: 45_000,
         // is_automatic: false,
-        // grip_offset: GRIP_OFFSET_STEP * 4,
         projectile: &ProjectileConfig::_12X76,
         ammo_capacity: 2,
         reloading_time: Self::RELOADING_TIME_RIFLE_LIGHT,
         partial_reloading: true,
+        image_offset: 3.5,
+        actor_image_suffix: 2,
     };
 
     pub const MP_27: Self = Self {
@@ -122,11 +126,12 @@ impl WeaponConfig {
         // radians_deflection: 0.06,
         // recoil: 38_000,
         // is_automatic: false,
-        // grip_offset: GRIP_OFFSET_EXTENDED,
         projectile: &ProjectileConfig::_12X76,
         ammo_capacity: 2,
         reloading_time: Self::RELOADING_TIME_RIFLE,
         partial_reloading: true,
+        image_offset: 10.0,
+        actor_image_suffix: 2,
     };
 
     pub const PP_91_KEDR: Self = Self {
@@ -137,11 +142,12 @@ impl WeaponConfig {
         // radians_deflection: 0.04,
         // recoil: 7_000,
         // is_automatic: true,
-        // grip_offset: GRIP_OFFSET_COMMON,
         projectile: &ProjectileConfig::_9X18,
         ammo_capacity: 20,
         reloading_time: Self::RELOADING_TIME_SG,
         partial_reloading: false,
+        image_offset: 3.5,
+        actor_image_suffix: 2,
     };
 
     pub const PP_19_BIZON: Self = Self {
@@ -152,11 +158,12 @@ impl WeaponConfig {
         // radians_deflection: 0.03,
         // recoil: 7_500,
         // is_automatic: true,
-        // grip_offset: GRIP_OFFSET_COMMON,
         projectile: &ProjectileConfig::_9X18,
         ammo_capacity: 64,
         reloading_time: Self::RELOADING_TIME_SG,
         partial_reloading: false,
+        image_offset: 7.0,
+        actor_image_suffix: 2,
     };
 
     pub const AKS_74U: Self = Self {
@@ -167,11 +174,12 @@ impl WeaponConfig {
         // radians_deflection: 0.03,
         // recoil: 12_000,
         // is_automatic: true,
-        // grip_offset: GRIP_OFFSET_COMMON,
         projectile: &ProjectileConfig::_5_45X39,
         ammo_capacity: 30,
         reloading_time: Self::RELOADING_TIME_RIFLE_LIGHT,
         partial_reloading: false,
+        image_offset: 8.0,
+        actor_image_suffix: 2,
     };
 
     pub const AK_74M: Self = Self {
@@ -182,11 +190,12 @@ impl WeaponConfig {
         // radians_deflection: 0.028,
         // recoil: 14_000,
         // is_automatic: true,
-        // grip_offset: GRIP_OFFSET_COMMON,
         projectile: &ProjectileConfig::_5_45X39,
         ammo_capacity: 30,
         reloading_time: Self::RELOADING_TIME_RIFLE,
         partial_reloading: false,
+        image_offset: 9.0,
+        actor_image_suffix: 2,
     };
 
     pub const RPK_74: Self = Self {
@@ -197,11 +206,12 @@ impl WeaponConfig {
         // radians_deflection: 0.025,
         // recoil: 19_000,
         // is_automatic: true,
-        // grip_offset: GRIP_OFFSET_COMMON,
         projectile: &ProjectileConfig::_5_45X39,
         ammo_capacity: 45,
         reloading_time: Self::RELOADING_TIME_RIFLE_HEAVY,
         partial_reloading: false,
+        image_offset: 9.0,
+        actor_image_suffix: 2,
     };
 
     pub const SAIGA_12K: Self = Self {
@@ -212,11 +222,12 @@ impl WeaponConfig {
         // radians_deflection: 0.07,
         // recoil: 32_000,
         // is_automatic: false,
-        // grip_offset: GRIP_OFFSET_COMMON,
         projectile: &ProjectileConfig::_12X76,
         ammo_capacity: 8,
         reloading_time: Self::RELOADING_TIME_RIFLE,
         partial_reloading: false,
+        image_offset: 9.0,
+        actor_image_suffix: 2,
     };
 
     pub const PKM: Self = Self {
@@ -227,11 +238,12 @@ impl WeaponConfig {
         // radians_deflection: 0.021,
         // recoil: 22_000,
         // is_automatic: true,
-        // grip_offset: GRIP_OFFSET_EXTENDED,
         projectile: &ProjectileConfig::_7_62X54,
         ammo_capacity: 100,
         reloading_time: Self::RELOADING_TIME_MG,
         partial_reloading: false,
+        image_offset: 10.0,
+        actor_image_suffix: 2,
     };
 
     pub const PKP_PECHENEG: Self = Self {
@@ -242,11 +254,12 @@ impl WeaponConfig {
         // radians_deflection: 0.02,
         // recoil: 22_000,
         // is_automatic: true,
-        // grip_offset: GRIP_OFFSET_EXTENDED,
         projectile: &ProjectileConfig::_7_62X54,
         ammo_capacity: 100,
         reloading_time: Self::RELOADING_TIME_MG,
         partial_reloading: false,
+        image_offset: 10.0,
+        actor_image_suffix: 2,
     };
 
     pub fn get_image_path(&self) -> String {
