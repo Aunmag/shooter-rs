@@ -9,7 +9,6 @@ use bevy::{
     prelude::{EventReader, Input, KeyCode, MouseButton, Res, Transform},
     time::Time,
 };
-use std::f32::consts::TAU;
 
 pub fn player(
     mut query: Query<(&mut Player, &mut Actor, &mut Transform)>,
@@ -34,9 +33,12 @@ pub fn player(
         zoom += event.y;
     }
 
-    let rotation = (mouse_delta_x * config.controls.mouse_sensitivity) % TAU;
+    let rotation = mouse_delta_x * config.controls.mouse_sensitivity;
+    let extra_rotation = rotation * Player::EXTRA_ROTATION_MULTIPLAYER;
 
     for (mut player, mut actor, mut transform) in query.iter_mut() {
+        let player_rotation = rotation + player.add_extra_rotation(extra_rotation);
+
         actor
             .actions
             .set(ActorAction::MovementForward, keyboard.pressed(KeyCode::W));
@@ -67,6 +69,6 @@ pub fn player(
 
         player.add_zoom(zoom, time);
         player.update(time, delta);
-        transform.rotate_local_z(rotation);
+        transform.rotate_local_z(player_rotation);
     }
 }

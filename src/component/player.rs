@@ -7,13 +7,25 @@ pub struct Player {
     zoom: Zoom,
     shake: Shake,
     shake_abs: Shake,
+    extra_rotation: f32,
 }
 
 impl Player {
+    pub const EXTRA_ROTATION_MULTIPLAYER: f32 = 0.1;
+    pub const EXTRA_ROTATION_MAX: f32 = 0.15;
+
     pub fn update(&mut self, time: Duration, delta: f32) {
         self.zoom.update(time, delta);
         self.shake.update(delta);
         self.shake_abs.update(delta);
+    }
+
+    pub fn add_extra_rotation(&mut self, value: f32) -> f32 {
+        let previous = self.extra_rotation;
+        let limit = Self::EXTRA_ROTATION_MAX;
+        self.extra_rotation = (self.extra_rotation + value).clamp(-limit, limit);
+        let added = self.extra_rotation - previous;
+        return added;
     }
 
     pub fn add_zoom(&mut self, zoom: f32, time: Duration) {
@@ -35,6 +47,10 @@ impl Player {
 
     pub fn get_shake_abs(&self) -> f32 {
         return self.shake_abs.get();
+    }
+
+    pub fn get_extra_rotation(&self) -> f32 {
+        return self.extra_rotation;
     }
 }
 

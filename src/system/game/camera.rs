@@ -27,10 +27,11 @@ pub fn camera(
         let shake_y = player.get_shake_abs() * SHAKE_FACTOR_Y;
         let shake_z = player.get_shake_abs() * SHAKE_FACTOR_Z * player.get_zoom();
         let zoom = player.get_zoom() - shake_z;
+        let direction = player_transform.direction() + shake - player.get_extra_rotation();
 
         if let Some((mut transform, mut projection)) = cameras.iter_mut().next() {
             projection.scale = VIEW_DISTANCE / zoom / window_size.length();
-            let rotation = Quat::from_rotation_z(player_transform.direction() + shake - FRAC_PI_2);
+            let rotation = Quat::from_rotation_z(direction - FRAC_PI_2);
             let offset_y = window_size.y * projection.scale * OFFSET_RATIO - shake_y;
             let offset = rotation * Vec3::new(0.0, offset_y, 0.0);
             transform.translation.x = player_transform.translation.x + offset.x;
