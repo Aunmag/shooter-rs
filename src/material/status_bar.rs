@@ -16,6 +16,8 @@ pub struct StatusBarMaterial {
     pub ammo: f32,
     #[uniform(0)]
     pub ammo_alpha: f32,
+    #[uniform(0)]
+    pub stamina: f32,
     #[texture(1)]
     #[sampler(2)]
     pub image: Handle<Image>,

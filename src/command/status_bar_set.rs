@@ -29,6 +29,7 @@ impl Command for StatusBarSet {
                 health_alpha: 0.0,
                 ammo: 1.0,
                 ammo_alpha: 0.0,
+                stamina: 0.0,
                 image,
             });
 
