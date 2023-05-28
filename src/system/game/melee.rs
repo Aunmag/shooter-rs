@@ -1,6 +1,6 @@
 use crate::{
     command::{ActorMeleeReset, AudioPlay},
-    component::{Actor, ActorConfig, Health, Inertia, Weapon},
+    component::{Actor, ActorConfig, Health, Inertia, Player, Weapon},
     model::{ActorActionsExt, TransformLite},
     util::{ext::Vec2Ext, math},
 };
@@ -13,7 +13,14 @@ use bevy::{
 
 pub fn melee(
     attackers: Query<(Entity, &Actor, &Transform), Without<Weapon>>,
-    mut targets: Query<(Entity, &Actor, &Transform, &mut Inertia, &mut Health)>,
+    mut targets: Query<(
+        Entity,
+        &Actor,
+        &Transform,
+        &mut Inertia,
+        &mut Health,
+        Option<&mut Player>,
+    )>,
     mut commands: Commands,
     time: Res<Time>,
 ) {
@@ -32,7 +39,7 @@ pub fn melee(
 
         let mut victim: Option<TargetData> = None;
 
-        for (target_entity, target_actor, target_transform, _, _) in targets.iter() {
+        for (target_entity, target_actor, target_transform, _, _, _) in targets.iter() {
             if attacker_actor.config.actor_type == target_actor.config.actor_type {
                 continue;
             }
@@ -54,19 +61,18 @@ pub fn melee(
         }
 
         if let Some(victim) = victim {
-            if let Ok((_, _, _, mut victim_inertia, mut victim_health)) =
+            if let Ok((_, _, _, mut victim_inertia, mut victim_health, mut player)) =
                 targets.get_mut(victim.entity)
             {
                 let momentum = attacker_actor.config.melee_damage * attacker_actor.skill;
                 let force = Vec2::from_length(momentum, victim.angle_objective);
+                let force_angular = momentum * -victim.angle_subjective;
 
-                victim_inertia.push(
-                    force,
-                    momentum * -victim.angle_subjective,
-                    true,
-                    false,
-                    true,
-                );
+                victim_inertia.push(force, force_angular, true, false, true);
+
+                if let Some(player) = player.as_mut() {
+                    player.shake(force_angular * Inertia::PUSH_MULTIPLIER_ANGULAR);
+                }
 
                 commands.add(AudioPlay {
                     path: "sounds/melee_{n}.ogg",
