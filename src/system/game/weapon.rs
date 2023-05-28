@@ -9,11 +9,9 @@ use bevy::{
     math::{Vec2, Vec3Swizzles},
     prelude::{Commands, Entity, Res, ResMut, Time, Transform},
 };
-use rand::{Rng, SeedableRng};
+use rand::SeedableRng;
 use rand_pcg::Pcg32;
 
-const VELOCITY_DEVIATION_FACTOR: f32 = 0.1;
-const DIRECTION_DEVIATION: f32 = 0.02;
 const BARREL_LENGTH: f32 = 0.6; // TODO: don't hardcode
 
 #[derive(Resource)]
@@ -94,15 +92,17 @@ pub fn weapon(
                     });
 
                     for _ in 0..weapon.config.projectile.fragments {
-                        transform.direction = deviate_direction(&mut data.rng, transform.direction);
+                        let deviation = weapon.config.generate_deviation(&mut data.rng);
+                        let velocity = weapon.config.generate_velocity(&mut data.rng);
 
                         commands.add(ProjectileSpawn {
                             config: weapon.config.projectile,
-                            transform,
-                            velocity: deviate_velocity(
-                                &mut data.rng,
-                                weapon.config.muzzle_velocity,
+                            transform: TransformLite::new(
+                                transform.translation.x,
+                                transform.translation.y,
+                                transform.direction + deviation,
                             ),
+                            velocity,
                             shooter: Some(entity),
                         });
                     }
@@ -110,15 +110,4 @@ pub fn weapon(
             }
         }
     }
-}
-
-fn deviate_velocity(rng: &mut Pcg32, velocity: f32) -> f32 {
-    let min = 1.0 - VELOCITY_DEVIATION_FACTOR;
-    let max = 1.0 + VELOCITY_DEVIATION_FACTOR;
-    return velocity * rng.gen_range(min..max);
-}
-
-fn deviate_direction(rng: &mut Pcg32, direction: f32) -> f32 {
-    let deviation = DIRECTION_DEVIATION;
-    return direction + rng.gen_range(-deviation..deviation);
 }

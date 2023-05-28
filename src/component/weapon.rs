@@ -1,8 +1,12 @@
 use crate::{
     component::ProjectileConfig,
-    util::{ext::DurationExt, math::interpolate},
+    util::{
+        ext::{DurationExt, Pcg32Ext},
+        math::interpolate,
+    },
 };
 use bevy::ecs::component::Component;
+use rand_pcg::Pcg32;
 use std::time::Duration;
 
 /// To make sure reloading sounds have stopped
@@ -22,6 +26,7 @@ pub struct WeaponConfig {
     pub name: &'static str,
     pub level: u8,
     pub muzzle_velocity: f32,
+    pub deviation: f32,
     pub fire_rate: f32,
     pub is_automatic: bool,
     pub projectile: &'static ProjectileConfig,
@@ -33,6 +38,8 @@ pub struct WeaponConfig {
 }
 
 impl WeaponConfig {
+    const VELOCITY_DEVIATION: f32 = 0.06;
+
     const SEMI_AUTO_FIRE_RATE: f32 = 400.0;
 
     /// To make game easier modify real reloading time
@@ -75,8 +82,8 @@ impl WeaponConfig {
         name: "PM",
         level: 1,
         muzzle_velocity: 315.0,
+        deviation: 0.03,
         fire_rate: Self::SEMI_AUTO_FIRE_RATE,
-        // radians_deflection: 0.05,
         // recoil: 6_500,
         is_automatic: false,
         projectile: &ProjectileConfig::_9X18,
@@ -91,8 +98,8 @@ impl WeaponConfig {
         name: "TT",
         level: 1,
         muzzle_velocity: 430.0,
+        deviation: 0.025,
         fire_rate: Self::SEMI_AUTO_FIRE_RATE,
-        // radians_deflection: 0.05,
         // recoil: 7_500,
         is_automatic: false,
         projectile: &ProjectileConfig::_7_62X25,
@@ -107,8 +114,8 @@ impl WeaponConfig {
         name: "MP-43 sawed-off",
         level: 2,
         muzzle_velocity: 260.0,
+        deviation: 0.04,
         fire_rate: Self::SEMI_AUTO_FIRE_RATE,
-        // radians_deflection: 0.08,
         // recoil: 45_000,
         is_automatic: false,
         projectile: &ProjectileConfig::_12X76,
@@ -123,8 +130,8 @@ impl WeaponConfig {
         name: "MP-27",
         level: 2,
         muzzle_velocity: 410.0,
+        deviation: 0.03,
         fire_rate: Self::SEMI_AUTO_FIRE_RATE,
-        // radians_deflection: 0.06,
         // recoil: 38_000,
         is_automatic: false,
         projectile: &ProjectileConfig::_12X76,
@@ -139,8 +146,8 @@ impl WeaponConfig {
         name: "PP-91 Kedr",
         level: 3,
         muzzle_velocity: 310.0,
+        deviation: 0.02,
         fire_rate: 900.0,
-        // radians_deflection: 0.04,
         // recoil: 7_000,
         is_automatic: true,
         projectile: &ProjectileConfig::_9X18,
@@ -155,8 +162,8 @@ impl WeaponConfig {
         name: "PP-19 Bizon",
         level: 3,
         muzzle_velocity: 330.0,
+        deviation: 0.015,
         fire_rate: 680.0,
-        // radians_deflection: 0.03,
         // recoil: 7_500,
         is_automatic: true,
         projectile: &ProjectileConfig::_9X18,
@@ -171,8 +178,8 @@ impl WeaponConfig {
         name: "AKS-74U",
         level: 4,
         muzzle_velocity: 735.0,
+        deviation: 0.015,
         fire_rate: 675.0,
-        // radians_deflection: 0.03,
         // recoil: 12_000,
         is_automatic: true,
         projectile: &ProjectileConfig::_5_45X39,
@@ -187,8 +194,8 @@ impl WeaponConfig {
         name: "AK-74M",
         level: 4,
         muzzle_velocity: 910.0,
+        deviation: 0.014,
         fire_rate: 600.0,
-        // radians_deflection: 0.028,
         // recoil: 14_000,
         is_automatic: true,
         projectile: &ProjectileConfig::_5_45X39,
@@ -203,8 +210,8 @@ impl WeaponConfig {
         name: "RPK-74",
         level: 5,
         muzzle_velocity: 960.0,
+        deviation: 0.012,
         fire_rate: 600.0,
-        // radians_deflection: 0.025,
         // recoil: 19_000,
         is_automatic: true,
         projectile: &ProjectileConfig::_5_45X39,
@@ -219,8 +226,8 @@ impl WeaponConfig {
         name: "Saiga-12K",
         level: 5,
         muzzle_velocity: 410.0,
+        deviation: 0.035,
         fire_rate: Self::SEMI_AUTO_FIRE_RATE,
-        // radians_deflection: 0.07,
         // recoil: 32_000,
         is_automatic: false,
         projectile: &ProjectileConfig::_12X76,
@@ -235,8 +242,8 @@ impl WeaponConfig {
         name: "PKM",
         level: 6,
         muzzle_velocity: 825.0,
+        deviation: 0.011,
         fire_rate: 650.0,
-        // radians_deflection: 0.021,
         // recoil: 22_000,
         is_automatic: true,
         projectile: &ProjectileConfig::_7_62X54,
@@ -251,8 +258,8 @@ impl WeaponConfig {
         name: "PKP Pecheneg",
         level: 6,
         muzzle_velocity: 825.0,
+        deviation: 0.01,
         fire_rate: 650.0,
-        // radians_deflection: 0.02,
         // recoil: 22_000,
         is_automatic: true,
         projectile: &ProjectileConfig::_7_62X54,
@@ -262,6 +269,15 @@ impl WeaponConfig {
         image_offset: 10.0,
         actor_image_suffix: 2,
     };
+
+    pub fn generate_velocity(&self, rng: &mut Pcg32) -> f32 {
+        let deviation = rng.gen_normal(self.muzzle_velocity * Self::VELOCITY_DEVIATION);
+        return self.muzzle_velocity + deviation;
+    }
+
+    pub fn generate_deviation(&self, rng: &mut Pcg32) -> f32 {
+        return rng.gen_normal(self.deviation);
+    }
 
     pub fn get_image_path(&self) -> String {
         return format!("weapons/{}/image.png", self.name);
@@ -298,7 +314,9 @@ impl Weapon {
         if self.is_ready(time) {
             self.next_time = time + Duration::from_secs_f32(60.0 / self.config.fire_rate);
 
-            if self.ammo > 0 {
+            if self.config.ammo_capacity == 0 {
+                return WeaponFireResult::Fire;
+            } else if self.ammo > 0 {
                 self.ammo -= 1;
                 return WeaponFireResult::Fire;
             } else {
