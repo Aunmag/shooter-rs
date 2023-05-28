@@ -1,6 +1,7 @@
 use crate::{
     command::AudioPlay,
     model::{ActorActions, ActorActionsExt},
+    util::ext::DurationExt,
 };
 use bevy::ecs::component::Component;
 use std::{f32::consts::TAU, time::Duration};
@@ -55,7 +56,7 @@ impl Actor {
     }
 
     pub fn update_stamina(&mut self, delta: f32) {
-        let mut change = 1.0 / self.config.stamina.as_secs_f32() * delta;
+        let mut change = self.config.stamina.rate() * delta;
 
         if self.actions.is_moving() {
             if self.actions.is_sprinting() {

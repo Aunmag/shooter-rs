@@ -1,6 +1,6 @@
 use crate::{
     command::{AudioPlay, AudioRepeat, ProjectileSpawn},
-    component::{Actor, Weapon, WeaponFireResult},
+    component::{Actor, Inertia, Player, Weapon, WeaponFireResult},
     model::{ActorActionsExt, TransformLite},
     util::ext::Vec2Ext,
 };
@@ -9,7 +9,7 @@ use bevy::{
     math::{Vec2, Vec3Swizzles},
     prelude::{Commands, Entity, Res, ResMut, Time, Transform},
 };
-use rand::SeedableRng;
+use rand::{Rng, SeedableRng};
 use rand_pcg::Pcg32;
 
 const BARREL_LENGTH: f32 = 0.6; // TODO: don't hardcode
@@ -28,14 +28,21 @@ impl Default for WeaponData {
 }
 
 pub fn weapon(
-    mut query: Query<(Entity, &Actor, &Transform, &mut Weapon)>,
+    mut query: Query<(
+        Entity,
+        &Actor,
+        &Transform,
+        &mut Weapon,
+        &mut Inertia,
+        Option<&mut Player>,
+    )>,
     mut commands: Commands,
     mut data: ResMut<WeaponData>,
     time: Res<Time>,
 ) {
     let now = time.elapsed();
 
-    for (entity, actor, transform, mut weapon) in query.iter_mut() {
+    for (entity, actor, transform, mut weapon, mut inertia, mut player) in query.iter_mut() {
         if !actor.actions.is_attacking() {
             weapon.release_trigger();
         }
@@ -105,6 +112,18 @@ pub fn weapon(
                             velocity,
                             shooter: Some(entity),
                         });
+                    }
+
+                    let mut recoil = weapon.config.recoil;
+
+                    if data.rng.gen::<bool>() {
+                        recoil = -recoil;
+                    }
+
+                    inertia.push(Vec2::ZERO, recoil, true, false, false);
+
+                    if let Some(player) = player.as_mut() {
+                        player.shake(recoil);
                     }
                 }
             }

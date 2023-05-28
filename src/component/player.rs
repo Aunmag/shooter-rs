@@ -1,22 +1,40 @@
+use crate::util::ext::DurationExt;
 use bevy::ecs::component::Component;
 use std::time::Duration;
 
 #[derive(Default, Component)]
 pub struct Player {
     zoom: Zoom,
+    shake: Shake,
+    shake_abs: Shake,
 }
 
 impl Player {
     pub fn update(&mut self, time: Duration, delta: f32) {
         self.zoom.update(time, delta);
+        self.shake.update(delta);
+        self.shake_abs.update(delta);
     }
 
     pub fn add_zoom(&mut self, zoom: f32, time: Duration) {
         self.zoom.add(zoom, time);
     }
 
+    pub fn shake(&mut self, shake: f32) {
+        self.shake.add(shake);
+        self.shake_abs.add(shake.abs());
+    }
+
     pub fn get_zoom(&self) -> f32 {
         return self.zoom.get();
+    }
+
+    pub fn get_shake(&self) -> f32 {
+        return self.shake.get();
+    }
+
+    pub fn get_shake_abs(&self) -> f32 {
+        return self.shake_abs.get();
     }
 }
 
@@ -86,5 +104,30 @@ impl Zoom {
 
     fn clamp(value: f32) -> f32 {
         return value.clamp(Self::MIN, Self::MAX);
+    }
+}
+
+#[derive(Default)]
+struct Shake {
+    value: f32,
+    value_target: f32,
+}
+
+impl Shake {
+    const SENSITIVITY: f32 = 0.000001;
+    const SPEED_INCREASE: Duration = Duration::from_millis(35);
+    const SPEED_DECREASE: Duration = Duration::from_millis(600);
+
+    pub fn update(&mut self, delta: f32) {
+        self.value_target -= self.value_target * delta * Self::SPEED_DECREASE.rate();
+        self.value += (self.value_target - self.value) * delta * Self::SPEED_INCREASE.rate();
+    }
+
+    pub fn add(&mut self, shake: f32) {
+        self.value_target += shake * Self::SENSITIVITY;
+    }
+
+    fn get(&self) -> f32 {
+        return self.value;
     }
 }

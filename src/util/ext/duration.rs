@@ -1,10 +1,16 @@
 use std::time::Duration;
 
 pub trait DurationExt {
+    fn rate(&self) -> f32;
+
     fn get_progress(self, min: Duration, max: Duration) -> f32;
 }
 
 impl DurationExt for Duration {
+    fn rate(&self) -> f32 {
+        return 1.0 / self.as_secs_f32();
+    }
+
     fn get_progress(self, min: Duration, max: Duration) -> f32 {
         let elapsed = self.saturating_sub(min).as_secs_f64();
         let range = max.saturating_sub(min).as_secs_f64();
