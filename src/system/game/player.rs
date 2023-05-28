@@ -1,5 +1,6 @@
 use crate::{
     component::{Actor, Player},
+    data::WORLD_SIZE_HALF,
     model::{ActorAction, ActorActionsExt},
     resource::Config,
 };
@@ -70,5 +71,9 @@ pub fn player(
         player.add_zoom(zoom, time);
         player.update(time, delta);
         transform.rotate_local_z(player_rotation);
+
+        let limit = WORLD_SIZE_HALF;
+        transform.translation.x = transform.translation.x.clamp(-limit, limit);
+        transform.translation.y = transform.translation.y.clamp(-limit, limit);
     }
 }
