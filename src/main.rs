@@ -41,7 +41,7 @@ use crate::{
     event::ActorDeathEvent,
     material::{ProjectileMaterial, StatusBarMaterial},
     model::AppState,
-    plugin::StressTestPlugin,
+    plugin::DebugPlugin,
     resource::{
         AssetStorage, AudioStorage, AudioTracker, Config, HeartbeatResource, Misc, Scenario,
     },
@@ -62,9 +62,10 @@ fn main() {
 
     let mut app = App::new();
 
-    if config.misc.with_stress_test {
-        log::info!("Starting with StressTestPlugin plugin");
-        app.add_plugin(StressTestPlugin);
+    if config.misc.debug {
+        log::info!("Starting with debug mode");
+        std::env::set_var("RUST_BACKTRACE", "1");
+        app.add_plugin(DebugPlugin);
     }
 
     app.add_plugins(

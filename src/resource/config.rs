@@ -30,7 +30,7 @@ pub struct ControlsConfig {
 #[derive(Clone, Deserialize, Debug)]
 pub struct MiscConfig {
     pub grab_cursor: bool,
-    pub with_stress_test: bool,
+    pub debug: bool,
 }
 
 impl Config {

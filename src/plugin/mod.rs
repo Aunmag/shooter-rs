@@ -1,3 +1,3 @@
-mod stress_test;
+mod debug;
 
-pub use self::stress_test::*;
+pub use self::debug::*;

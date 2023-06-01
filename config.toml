@@ -9,4 +9,4 @@ mouse_sensitivity = 0.003
 
 [misc]
 grab_cursor = true
-with_stress_test = false
+debug = false
