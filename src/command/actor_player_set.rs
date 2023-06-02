@@ -21,7 +21,7 @@ impl Command for ActorPlayerSet {
             .map(|a| a.config)
             .unwrap_or_else(|| {
                 log::warn!("Couldn't find actor component");
-                return ActorConfig::HUMAN;
+                return &ActorConfig::HUMAN;
             });
 
         let mut entity_mut = world.entity_mut(self.0);

@@ -75,7 +75,7 @@ impl Actor {
 impl ActorConfig {
     const HUMAN_RESISTANCE: f32 = 8000.0;
 
-    pub const HUMAN: &'static Self = &Self {
+    pub const HUMAN: Self = Self {
         movement_velocity: 2.5,
         rotation_velocity: 8.0,
         sprint_factor: 2.0,
@@ -93,12 +93,13 @@ impl ActorConfig {
             path: "sounds/human_pain_{n}.ogg",
             volume: 0.8,
             chance: 1.0,
+            priority: AudioPlay::PRIORITY_HIGHER,
             ..AudioPlay::DEFAULT
         }),
         sound_death: None,
     };
 
-    pub const ZOMBIE: &'static Self = &Self {
+    pub const ZOMBIE: Self = Self {
         movement_velocity: Self::HUMAN.movement_velocity * 0.4,
         rotation_velocity: Self::HUMAN.rotation_velocity * 0.4,
         sprint_factor: 1.8,
@@ -116,12 +117,14 @@ impl ActorConfig {
             path: "sounds/zombie_pain_{n}.ogg",
             volume: 1.0,
             chance: 0.3,
+            priority: AudioPlay::PRIORITY_LOWER,
             ..AudioPlay::DEFAULT
         }),
         sound_death: Some(AudioPlay {
             path: "sounds/zombie_death_{n}.ogg",
             volume: 1.0,
             chance: 0.4,
+            priority: AudioPlay::PRIORITY_MEDIUM,
             ..AudioPlay::DEFAULT
         }),
     };
@@ -147,8 +150,8 @@ impl ActorConfig {
 impl From<ActorType> for &'static ActorConfig {
     fn from(actor_type: ActorType) -> Self {
         return match actor_type {
-            ActorType::Human => ActorConfig::HUMAN,
-            ActorType::Zombie => ActorConfig::ZOMBIE,
+            ActorType::Human => &ActorConfig::HUMAN,
+            ActorType::Zombie => &ActorConfig::ZOMBIE,
         };
     }
 }

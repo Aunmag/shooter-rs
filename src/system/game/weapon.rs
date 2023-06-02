@@ -55,6 +55,7 @@ pub fn weapon(
                 volume: 0.4,
                 source: Some(transform.translation.xy()),
                 repeat: AudioRepeat::Loop(weapon.config.reloading_time), // TODO: stop if weapon will be changed earlier
+                priority: AudioPlay::PRIORITY_MEDIUM,
                 ..AudioPlay::DEFAULT
             });
 
@@ -67,6 +68,7 @@ pub fn weapon(
                 path: "sounds/reloaded_{n}.ogg",
                 volume: 0.8,
                 source: Some(transform.translation.xy()),
+                priority: AudioPlay::PRIORITY_LOWER,
                 ..AudioPlay::DEFAULT
             });
         }
@@ -82,6 +84,7 @@ pub fn weapon(
                             path: "sounds/dry_fire.ogg",
                             volume: 0.4,
                             source: Some(transform.translation.xy()),
+                            priority: AudioPlay::PRIORITY_LOWER,
                             ..AudioPlay::DEFAULT
                         });
                     }
@@ -95,6 +98,7 @@ pub fn weapon(
                         path: "sounds/shot.ogg",
                         volume: 1.0,
                         source: Some(transform.translation),
+                        priority: AudioPlay::PRIORITY_HIGHEST,
                         ..AudioPlay::DEFAULT
                     });
 

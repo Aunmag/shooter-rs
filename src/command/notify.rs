@@ -68,6 +68,7 @@ impl Command for Notify {
         AudioPlay {
             path: "sounds/notification.ogg",
             volume: 0.8,
+            priority: AudioPlay::PRIORITY_HIGHER,
             ..AudioPlay::DEFAULT
         }
         .write(world);

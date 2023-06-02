@@ -26,6 +26,7 @@ pub fn ambience_fx(mut data: ResMut<AmbienceFxData>, mut commands: Commands, tim
         commands.add(AudioPlay {
             path: "sounds/ambience_fx_{n}.ogg",
             volume: 0.3,
+            priority: AudioPlay::PRIORITY_MEDIUM,
             ..AudioPlay::DEFAULT
         });
     }

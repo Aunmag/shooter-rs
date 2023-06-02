@@ -38,6 +38,7 @@ pub fn footsteps(
             path: "sounds/footstep_{n}.ogg",
             volume: calc_stride_volume(intensity),
             source: Some(translation),
+            priority: AudioPlay::PRIORITY_LOWEST,
             ..AudioPlay::DEFAULT
         });
 

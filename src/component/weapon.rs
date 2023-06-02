@@ -50,10 +50,10 @@ impl WeaponConfig {
         Duration::from_millis((3000.0 * Self::RELOADING_TIME_FACTOR) as u64);
 
     const RELOADING_TIME_SHOTGUN_LIGHT: Duration =
-        Duration::from_millis((1300.0 * Self::RELOADING_TIME_FACTOR) as u64); // TODO: tweak
+        Duration::from_millis((1300.0 * Self::RELOADING_TIME_FACTOR) as u64);
 
     const RELOADING_TIME_SHOTGUN: Duration =
-        Duration::from_millis((1800.0 * Self::RELOADING_TIME_FACTOR) as u64); // TODO: tweak
+        Duration::from_millis((1800.0 * Self::RELOADING_TIME_FACTOR) as u64);
 
     const RELOADING_TIME_SMG: Duration =
         Duration::from_millis((4000.0 * Self::RELOADING_TIME_FACTOR) as u64);

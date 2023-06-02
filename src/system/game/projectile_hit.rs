@@ -33,6 +33,7 @@ pub fn projectile_hit(
                     path: "sounds/hit_body_{n}.ogg",
                     volume: 1.5,
                     source: Some(transform.translation.xy()),
+                    priority: AudioPlay::PRIORITY_LOWER,
                     ..AudioPlay::DEFAULT
                 });
             }

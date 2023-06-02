@@ -102,6 +102,7 @@ impl WeaponGive {
                 path: "sounds/pickup_weapon.ogg",
                 volume: 0.9,
                 source: Some(transform.translation.xy()),
+                priority: AudioPlay::PRIORITY_HIGHER,
                 ..AudioPlay::DEFAULT
             }
             .write(world);

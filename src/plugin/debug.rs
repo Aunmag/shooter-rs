@@ -3,6 +3,7 @@ use crate::{
     component::{ActorConfig, Player},
     data::FONT_PATH,
     model::{AppState, TransformLite},
+    resource::AudioTracker,
     util::ext::{AppExt, Vec2Ext},
 };
 use bevy::{
@@ -51,13 +52,19 @@ fn startup(mut commands: Commands, asset_server: Res<AssetServer>) {
             TextSection::new("\nFPS: ", style.clone()),
             TextSection::from_style(style.clone()),
             TextSection::new("\nEntities: ", style.clone()),
+            TextSection::from_style(style.clone()),
+            TextSection::new("\nAudio sources: ", style.clone()),
             TextSection::from_style(style),
         ]),
         FpsText,
     ));
 }
 
-fn update_diagnostics(diagnostics: Res<Diagnostics>, mut query: Query<&mut Text, With<FpsText>>) {
+fn update_diagnostics(
+    diagnostics: Res<Diagnostics>,
+    audio_tracker: Res<AudioTracker>,
+    mut query: Query<&mut Text, With<FpsText>>,
+) {
     let cpu = diagnostics
         .get(SystemInformationDiagnosticsPlugin::CPU_USAGE)
         .and_then(|v| v.average())
@@ -78,11 +85,14 @@ fn update_diagnostics(diagnostics: Res<Diagnostics>, mut query: Query<&mut Text,
         .and_then(|v| v.value())
         .unwrap_or(-1.0);
 
+    let audio_sources = audio_tracker.sources();
+
     for mut text in &mut query {
         text.sections[1].value = format!("{:.2}", cpu);
         text.sections[3].value = format!("{:.2}", mem);
         text.sections[5].value = format!("{:.2}", fps);
         text.sections[7].value = format!("{:.2}", entities);
+        text.sections[9].value = format!("{}", audio_sources);
     }
 }
 
@@ -125,7 +135,7 @@ fn spawn_actors(count: usize, commands: &mut Commands) {
 
         commands.add(ActorSet {
             entity,
-            config: ActorConfig::ZOMBIE,
+            config: &ActorConfig::ZOMBIE,
             skill: 1.0,
             transform: TransformLite::default(),
         });

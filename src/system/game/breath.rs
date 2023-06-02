@@ -28,6 +28,7 @@ pub fn breath(
                 path: "sounds/breath_{n}.ogg",
                 volume: 0.2 * intensity,
                 source: Some(transform.translation.xy()),
+                priority: AudioPlay::PRIORITY_LOWEST,
                 ..AudioPlay::DEFAULT
             });
 

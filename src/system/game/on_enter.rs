@@ -41,6 +41,7 @@ pub fn on_enter(
         path: "sounds/ambience_music.ogg",
         volume: 0.3,
         repeat: AudioRepeat::Loop(Duration::ZERO),
+        priority: AudioPlay::PRIORITY_HIGHEST,
         ..AudioPlay::DEFAULT
     });
 
@@ -48,6 +49,7 @@ pub fn on_enter(
         path: "sounds/ambience_nature.ogg",
         volume: 0.3,
         repeat: AudioRepeat::Loop(Duration::ZERO),
+        priority: AudioPlay::PRIORITY_HIGHEST,
         ..AudioPlay::DEFAULT
     });
 

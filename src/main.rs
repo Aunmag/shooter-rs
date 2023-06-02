@@ -91,7 +91,7 @@ fn main() {
     .add_event::<ActorDeathEvent>()
     .insert_resource(AssetStorage::default())
     .insert_resource(AudioStorage::default())
-    .insert_resource(AudioTracker::default())
+    .insert_resource(AudioTracker::new(config.audio.sources))
     .insert_resource(HeartbeatResource::default())
     .insert_resource(Misc::default())
     .insert_resource(config)

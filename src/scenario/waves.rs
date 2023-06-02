@@ -71,7 +71,7 @@ impl WavesScenario {
 
         commands.add(ActorSet {
             entity,
-            config: ActorConfig::HUMAN,
+            config: &ActorConfig::HUMAN,
             skill: 1.0,
             transform: TransformLite::default(),
         });
@@ -245,7 +245,7 @@ impl Command for SpawnZombie {
 
         ActorSet {
             entity,
-            config: ActorConfig::ZOMBIE,
+            config: &ActorConfig::ZOMBIE,
             skill: self.skill,
             transform,
         }

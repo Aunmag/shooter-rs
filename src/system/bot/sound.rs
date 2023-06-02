@@ -24,6 +24,7 @@ pub fn sound(mut bots: Query<(&mut Bot, &Transform)>, mut commands: Commands, ti
                 path: "sounds/zombie_{n}.ogg",
                 volume: 0.7,
                 source: Some(transform.translation.xy()),
+                priority: AudioPlay::PRIORITY_LOWER,
                 ..AudioPlay::DEFAULT
             });
         }

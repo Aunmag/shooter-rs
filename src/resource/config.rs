@@ -10,6 +10,7 @@ use serde::Deserialize;
 #[derive(Clone, Deserialize, Debug, Resource)]
 pub struct Config {
     pub display: DisplayConfig,
+    pub audio: AudioConfig,
     pub controls: ControlsConfig,
     pub misc: MiscConfig,
 }
@@ -20,6 +21,11 @@ pub struct DisplayConfig {
     pub window_size_x: f32,
     pub window_size_y: f32,
     pub v_sync: bool,
+}
+
+#[derive(Clone, Deserialize, Debug)]
+pub struct AudioConfig {
+    pub sources: usize,
 }
 
 #[derive(Clone, Deserialize, Debug)]
