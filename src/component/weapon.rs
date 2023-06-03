@@ -44,7 +44,7 @@ impl WeaponConfig {
     const SEMI_AUTO_FIRE_RATE: f32 = 400.0;
 
     /// To make game easier modify real reloading time
-    const RELOADING_TIME_FACTOR: f32 = 0.65;
+    const RELOADING_TIME_FACTOR: f32 = 0.6;
 
     const RELOADING_TIME_PISTOL: Duration =
         Duration::from_millis((3000.0 * Self::RELOADING_TIME_FACTOR) as u64);
@@ -121,7 +121,7 @@ impl WeaponConfig {
         name: "MP-43 sawed-off",
         level: 2,
         muzzle_velocity: 260.0,
-        deviation: 0.04,
+        deviation: 0.06,
         recoil: 67_500.0,
         fire_rate: Self::SEMI_AUTO_FIRE_RATE,
         is_automatic: false,

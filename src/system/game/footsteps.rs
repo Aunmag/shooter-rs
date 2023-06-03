@@ -24,7 +24,7 @@ pub fn footsteps(
         let translation = transform.translation.xy();
         let distance_squared = footsteps.position.distance_squared(translation);
 
-        if distance_squared < STRIDE_DISTANCE_MIN * STRIDE_DISTANCE_MIN {
+        if distance_squared.is_nan() || distance_squared < STRIDE_DISTANCE_MIN * STRIDE_DISTANCE_MIN {
             continue;
         }
 

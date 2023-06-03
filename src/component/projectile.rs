@@ -18,7 +18,6 @@ pub struct Projectile {
 pub struct ProjectileConfig {
     pub fragments: u8,
     pub mass: f32,
-    pub acceleration_factor: f32,
     pub size: f32,
 }
 
@@ -26,37 +25,36 @@ impl ProjectileConfig {
     pub const _9X18: Self = Self {
         fragments: 1,
         mass: 6.1,
-        acceleration_factor: -6.0,
         size: 0.7,
     };
 
     pub const _7_62X25: Self = Self {
         fragments: 1,
         mass: 5.5,
-        acceleration_factor: -6.0,
         size: 0.7,
     };
 
     pub const _12X76: Self = Self {
-        fragments: 16,
+        fragments: 12,
         mass: 48.0,
-        acceleration_factor: -4.0,
         size: 0.1,
     };
 
     pub const _5_45X39: Self = Self {
         fragments: 1,
         mass: 3.4,
-        acceleration_factor: -9.0, // TODO: maybe reset to -6.0?
         size: 1.0,
     };
 
     pub const _7_62X54: Self = Self {
         fragments: 1,
         mass: 9.6,
-        acceleration_factor: -4.5,
         size: 1.2,
     };
+
+    pub fn acceleration(&self) -> f32 {
+        return -1.0 / self.fragment_mass() * 6.0 - 4.2;
+    }
 
     pub fn fragment_mass(&self) -> f32 {
         return self.mass / f32::from(self.fragments);
@@ -86,7 +84,7 @@ impl Projectile {
 
     pub fn calc_data(&self, time: Duration) -> (Vec2, Vec2) {
         let t = time.saturating_sub(self.initial_time).as_secs_f32();
-        let a = self.config.acceleration_factor;
+        let a = self.config.acceleration();
         let p = self.initial_position;
         let v0 = self.initial_velocity;
         let v1 = v0 * (t * a).exp();
