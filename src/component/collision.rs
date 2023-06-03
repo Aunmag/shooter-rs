@@ -1,5 +1,5 @@
 use crate::util::ext::Vec2Ext;
-use bevy::{ecs::component::Component, math::Vec2};
+use bevy::{ecs::component::Component, math::Vec2, prelude::Entity};
 
 const EXTRA_RESOLVE_DISTANCE: f32 = 0.0001;
 
@@ -25,7 +25,7 @@ impl Collision {
 }
 
 pub struct CollisionSolution {
-    pub entity_index: u32,
+    pub entity: Entity,
     pub shift: Vec2,
     pub push: Vec2,
 }

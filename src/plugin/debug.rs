@@ -14,20 +14,62 @@ use bevy::{
     },
     input::Input,
     prelude::{
-        AssetServer, Color, Commands, Component, KeyCode, Query, Res, TextBundle, Vec2, With,
+        AssetServer, Color, Commands, Component, KeyCode, Query, Res, Resource, TextBundle, Vec2,
+        With,
     },
     text::{Text, TextSection, TextStyle},
     transform::components::Transform,
+};
+use std::{
+    cmp::Reverse,
+    collections::HashMap,
+    time::{Duration, Instant},
 };
 
 #[derive(Component)]
 struct FpsText;
 
+#[derive(Default, Resource)]
+pub struct Benchmark {
+    measurements: HashMap<&'static str, (Duration, u32)>,
+}
+
+impl Benchmark {
+    #[allow(dead_code)]
+    pub fn register(&mut self, name: &'static str, start: Instant) {
+        let elapsed = start.elapsed();
+        self.measurements
+            .entry(name)
+            .and_modify(|m| {
+                m.0 += elapsed;
+                m.1 += 1;
+            })
+            .or_insert_with(|| (elapsed, 1));
+    }
+
+    fn log_summary(&self) {
+        let mut summary = self
+            .measurements
+            .iter()
+            .map(|(k, v)| (k, (v.0 / v.1)))
+            .collect::<Vec<_>>();
+
+        summary.sort_by_key(|v| Reverse(v.1));
+
+        log::info!("Summary:");
+
+        for (name, duration) in &summary {
+            log::info!("{:.6} ms {}", duration.as_secs_f64() * 1000.0, name);
+        }
+    }
+}
+
 pub struct DebugPlugin;
 
 impl Plugin for DebugPlugin {
     fn build(&self, app: &mut App) {
-        app.add_plugin(FrameTimeDiagnosticsPlugin::default())
+        app.insert_resource(Benchmark::default())
+            .add_plugin(FrameTimeDiagnosticsPlugin::default())
             .add_plugin(EntityCountDiagnosticsPlugin::default())
             .add_plugin(SystemInformationDiagnosticsPlugin::default())
             .add_startup_system(startup)
@@ -39,7 +81,7 @@ impl Plugin for DebugPlugin {
 fn startup(mut commands: Commands, asset_server: Res<AssetServer>) {
     let style = TextStyle {
         font: asset_server.get_handle(FONT_PATH),
-        font_size: 60.0,
+        font_size: 30.0,
         color: Color::WHITE,
     };
 
@@ -99,6 +141,7 @@ fn update_diagnostics(
 fn update_input(
     players: Query<&Transform, With<Player>>,
     keyboard: Res<Input<KeyCode>>,
+    benchmark: Res<Benchmark>,
     mut commands: Commands,
 ) {
     if keyboard.just_pressed(KeyCode::Key0) {
@@ -121,6 +164,10 @@ fn update_input(
 
     if keyboard.just_pressed(KeyCode::Key3) {
         spawn_actors(1000, &mut commands);
+    }
+
+    if keyboard.just_pressed(KeyCode::Equals) {
+        benchmark.log_summary();
     }
 }
 

@@ -43,7 +43,8 @@ use crate::{
     model::AppState,
     plugin::DebugPlugin,
     resource::{
-        AssetStorage, AudioStorage, AudioTracker, Config, HeartbeatResource, Misc, Scenario,
+        AssetStorage, AudioStorage, AudioTracker, Config, HeartbeatResource, HitResource, Misc,
+        Scenario,
     },
     scenario::WavesScenario,
     util::ext::AppExt,
@@ -93,6 +94,7 @@ fn main() {
     .insert_resource(AudioStorage::default())
     .insert_resource(AudioTracker::new(config.audio.sources))
     .insert_resource(HeartbeatResource::default())
+    .insert_resource(HitResource::default())
     .insert_resource(Misc::default())
     .insert_resource(config)
     .insert_resource(Scenario::new(WavesScenario::new()))
@@ -110,13 +112,14 @@ fn main() {
         use crate::system::{bot, game::*};
         s.add(input);
         s.add(health);
-        s.add(player.after(input));
+        s.add(player);
         s.add(actor.after(player));
         s.add(inertia.after(actor));
         s.add(collision_find.pipe(collision_resolve).after(inertia));
         s.add(weapon.after(collision_resolve));
         s.add(melee.after(collision_resolve));
-        s.add(projectile.pipe(projectile_hit).after(collision_resolve));
+        s.add(projectile.after(collision_resolve));
+        s.add(hit.after(melee).after(projectile));
         s.add(bonus_image);
         s.add(bonus_label);
         s.add(bonus.after(collision_resolve));
@@ -129,8 +132,8 @@ fn main() {
         s.add(terrain);
         s.add(scenario);
         s.add(bot::target_find);
-        s.add(bot::target_update.after(bot::target_find));
-        s.add(bot::target_follow.after(bot::target_update));
+        s.add(bot::target_update);
+        s.add(bot::target_follow);
         s.add(bot::sound);
     })
     .run();

@@ -1,34 +1,27 @@
 use crate::{
     command::{ActorMeleeReset, AudioPlay},
-    component::{Actor, ActorConfig, Health, Inertia, Player, Weapon},
+    component::{Actor, ActorConfig, Weapon},
     model::{ActorActionsExt, TransformLite},
+    resource::HitResource,
     util::{ext::Vec2Ext, math},
 };
 use bevy::{
     ecs::entity::Entity,
     math::Vec2Swizzles,
-    prelude::{Commands, Query, Res, Transform, Vec2, Without},
+    prelude::{Commands, Query, Res, ResMut, Transform, Vec2, Without},
     time::Time,
 };
 
 pub fn melee(
     attackers: Query<(Entity, &Actor, &Transform), Without<Weapon>>,
-    mut targets: Query<(
-        Entity,
-        &Actor,
-        &Transform,
-        &mut Inertia,
-        &mut Health,
-        Option<&mut Player>,
-    )>,
+    targets: Query<(Entity, &Actor, &Transform)>,
+    mut hits: ResMut<HitResource>,
     mut commands: Commands,
     time: Res<Time>,
 ) {
     let time = time.elapsed();
 
     for (attacker_entity, attacker_actor, attacker_transform) in attackers.iter() {
-        let attacker_transform = TransformLite::from(attacker_transform);
-
         if !attacker_actor.actions.is_attacking() {
             continue;
         }
@@ -37,9 +30,10 @@ pub fn melee(
             continue;
         }
 
+        let attacker_transform = TransformLite::from(attacker_transform);
         let mut victim: Option<TargetData> = None;
 
-        for (target_entity, target_actor, target_transform, _, _, _) in targets.iter() {
+        for (target_entity, target_actor, target_transform) in targets.iter() {
             if attacker_actor.config.actor_type == target_actor.config.actor_type {
                 continue;
             }
@@ -61,29 +55,17 @@ pub fn melee(
         }
 
         if let Some(victim) = victim {
-            if let Ok((_, _, _, mut victim_inertia, mut victim_health, mut player)) =
-                targets.get_mut(victim.entity)
-            {
-                let momentum = attacker_actor.config.melee_damage * attacker_actor.skill;
-                let force = Vec2::from_length(momentum, victim.angle_objective);
-                let force_angular = momentum * -victim.angle_subjective;
+            let momentum = attacker_actor.config.melee_damage * attacker_actor.skill;
+            let force = Vec2::from_length(momentum, victim.angle_objective);
+            hits.add(victim.entity, force, -victim.angle_subjective);
 
-                victim_inertia.push(force, force_angular, true, false, true);
-
-                if let Some(player) = player.as_mut() {
-                    player.shake(force_angular * Inertia::PUSH_MULTIPLIER_ANGULAR);
-                }
-
-                commands.add(AudioPlay {
-                    path: "sounds/melee_{n}.ogg",
-                    volume: 0.6,
-                    source: Some(attacker_transform.translation.xy()),
-                    priority: AudioPlay::PRIORITY_LOWER,
-                    ..AudioPlay::DEFAULT
-                });
-
-                victim_health.damage(momentum);
-            }
+            commands.add(AudioPlay {
+                path: "sounds/melee_{n}.ogg",
+                volume: 0.6,
+                source: Some(attacker_transform.translation.xy()),
+                priority: AudioPlay::PRIORITY_LOWER,
+                ..AudioPlay::DEFAULT
+            });
 
             commands.add(ActorMeleeReset(attacker_entity));
         }
@@ -105,9 +87,9 @@ fn calc_target_data(
     target_entity: Entity,
 ) -> Option<TargetData> {
     let relative = target_transform.translation - attacker_transform.translation;
-    let distance = (relative.length() - target.radius) / attacker.melee_distance;
+    let distance_to_hit = attacker.melee_distance + target.radius;
 
-    if distance > 1.0 {
+    if relative.is_longer_than(distance_to_hit) {
         return None;
     }
 
@@ -118,6 +100,8 @@ fn calc_target_data(
     if distance_angular > 1.0 {
         return None;
     }
+
+    let distance = relative.length() / distance_to_hit;
 
     return Some(TargetData {
         entity: target_entity,

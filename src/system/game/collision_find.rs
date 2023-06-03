@@ -25,8 +25,8 @@ pub fn collision_find(
                 // TODO: maybe collision solutions would contain relative_angle
                 let relative_angle = (t2.translation - t1.translation).xy().normalize();
                 let push = Inertia::bounce(i1, i2, relative_angle);
-                append_solution(&mut solutions, e1.index(), shift, push);
-                append_solution(&mut solutions, e2.index(), -shift, -push);
+                append_solution(&mut solutions, e1, shift, push);
+                append_solution(&mut solutions, e2, -shift, -push);
             }
         }
     }
@@ -38,12 +38,12 @@ pub fn collision_find(
 
 fn append_solution(
     solutions: &mut Vec<CollisionSolution>,
-    entity_index: u32,
+    entity: Entity,
     shift: Vec2,
     push: Vec2,
 ) {
     for solution in solutions.iter_mut() {
-        if solution.entity_index == entity_index {
+        if solution.entity == entity {
             solution.shift += shift;
             solution.push += push;
             return; // return if solution has found and modified
@@ -52,7 +52,7 @@ fn append_solution(
 
     // push a new one otherwise
     solutions.push(CollisionSolution {
-        entity_index,
+        entity,
         shift,
         push,
     });
