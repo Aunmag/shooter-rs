@@ -9,8 +9,8 @@ use bevy::{
 use std::time::Duration;
 
 const STRIDE_DISTANCE_MIN: f32 = 0.1;
-const STRIDE_RATE_MIN: (f32, f32, f32) = (0.1, 70.0, 0.02);
-const STRIDE_RATE_MAX: (f32, f32, f32) = (5.0, 135.0, 0.15);
+const STRIDE_RATE_MIN: (f32, f32, f32) = (0.1, 70.0, 0.06);
+const STRIDE_RATE_MAX: (f32, f32, f32) = (5.0, 135.0, 0.18);
 
 // TODO: play sound on turn
 pub fn footsteps(
@@ -29,7 +29,7 @@ pub fn footsteps(
         }
 
         let distance = distance_squared.sqrt();
-        let velocity = distance / (time.saturating_sub(footsteps.time)).as_secs_f32();
+        let velocity = distance / time.saturating_sub(footsteps.time).as_secs_f32();
         let intensity = calc_stride_intensity(velocity);
 
         if time < footsteps.time + calc_stride_interval(intensity) {
