@@ -2,9 +2,10 @@ use crate::{
     command::ActorRelease,
     component::{Actor, Health},
     event::ActorDeathEvent,
+    resource::AudioTracker,
 };
 use bevy::{
-    ecs::system::Query,
+    ecs::system::{Query, ResMut},
     math::Vec3Swizzles,
     prelude::{Commands, DespawnRecursiveExt, Entity, EventWriter, Res, Time, Transform},
 };
@@ -16,6 +17,7 @@ pub fn health(
     mut query: Query<(Entity, &Actor, &mut Health, &Transform)>,
     time: Res<Time>,
     mut death_events: EventWriter<ActorDeathEvent>,
+    mut audio: ResMut<AudioTracker>,
     mut commands: Commands,
 ) {
     let now = time.elapsed();
@@ -26,13 +28,13 @@ pub fn health(
 
         if health.is_alive() && health.get_damage() > actor.pain_threshold {
             if let Some(sound) = &actor.sound_pain {
-                commands.add(sound.as_spatial(point));
+                audio.queue(sound.as_spatial(point));
             }
         }
 
         if health.is_just_died() {
             if let Some(sound) = &actor.sound_death {
-                commands.add(sound.as_spatial(point));
+                audio.queue(sound.as_spatial(point));
             }
 
             health.decay(now + DECAY);

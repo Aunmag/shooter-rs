@@ -1,7 +1,8 @@
-use super::AudioPlay;
 use crate::{
     component::{Actor, ActorWeaponSprite, Weapon, WeaponConfig},
     data::PIXELS_PER_METER,
+    model::AudioPlay,
+    resource::AudioTracker,
 };
 use bevy::{
     asset::{AssetServer, Assets, Handle},
@@ -97,15 +98,17 @@ impl WeaponGive {
     }
 
     fn play_pickup_sound(&self, world: &mut World) {
-        if let Some(transform) = world.get::<Transform>(self.entity) {
-            AudioPlay {
+        if let Some(source) = world
+            .get::<Transform>(self.entity)
+            .map(|t| t.translation.xy())
+        {
+            world.resource_mut::<AudioTracker>().queue(AudioPlay {
                 path: "sounds/pickup_weapon.ogg",
                 volume: 0.9,
-                source: Some(transform.translation.xy()),
+                source: Some(source),
                 priority: AudioPlay::PRIORITY_HIGHER,
                 ..AudioPlay::DEFAULT
-            }
-            .write(world);
+            });
         }
     }
 }

@@ -1,12 +1,13 @@
 use crate::{
-    command::AudioPlay,
     component::{Actor, Breath},
+    model::AudioPlay,
+    resource::AudioTracker,
     util::math::interpolate,
 };
 use bevy::{
-    ecs::system::Query,
+    ecs::system::{Query, ResMut},
     math::Vec3Swizzles,
-    prelude::{Commands, Res, Time, Transform},
+    prelude::{Res, Time, Transform},
 };
 use std::time::Duration;
 
@@ -15,7 +16,7 @@ const BREATH_INTERVAL_MAX: Duration = Duration::from_millis(2200);
 
 pub fn breath(
     mut query: Query<(&mut Breath, &Actor, &Transform)>,
-    mut commands: Commands,
+    mut audio: ResMut<AudioTracker>,
     time: Res<Time>,
 ) {
     let time = time.elapsed();
@@ -24,7 +25,7 @@ pub fn breath(
         let intensity = 1.0 - actor.stamina;
 
         if intensity > 0.0 && time > breath.last + calc_interval(intensity) {
-            commands.add(AudioPlay {
+            audio.queue(AudioPlay {
                 path: "sounds/breath_{n}.ogg",
                 volume: 0.2 * intensity,
                 source: Some(transform.translation.xy()),

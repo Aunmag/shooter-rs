@@ -1,6 +1,5 @@
 use crate::{
-    command::AudioPlay,
-    model::{ActorActions, ActorActionsExt},
+    model::{ActorActions, ActorActionsExt, AudioPlay},
     util::ext::DurationExt,
 };
 use bevy::ecs::component::Component;

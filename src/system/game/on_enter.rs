@@ -1,8 +1,8 @@
 use crate::{
-    command::{AudioPlay, AudioRepeat, CursorGrab, TerrainInit},
+    command::{CursorGrab, TerrainInit},
     data::{LAYER_BLUFF, LAYER_TREE, WORLD_SIZE, WORLD_SIZE_HALF, WORLD_SIZE_VISUAL},
-    model::TransformLite,
-    resource::HeartbeatResource,
+    model::{AudioPlay, TransformLite},
+    resource::{AudioTracker, HeartbeatResource},
     util::ext::Vec2Ext,
 };
 use bevy::{
@@ -30,6 +30,7 @@ pub fn on_enter(
     assets: Res<AssetServer>,
     audio: Res<Audio>,
     mut heartbeat: ResMut<HeartbeatResource>,
+    mut audio_tracker: ResMut<AudioTracker>,
 ) {
     commands.add(CursorGrab(true));
     commands.add(TerrainInit);
@@ -37,18 +38,18 @@ pub fn on_enter(
     spawn_bluffs(&mut commands, &assets);
     spawn_trees(&mut commands, &assets);
 
-    commands.add(AudioPlay {
+    audio_tracker.queue(AudioPlay {
         path: "sounds/ambience_music.ogg",
         volume: 0.3,
-        repeat: AudioRepeat::Loop(Duration::ZERO),
+        duration: Duration::MAX,
         priority: AudioPlay::PRIORITY_HIGHEST,
         ..AudioPlay::DEFAULT
     });
 
-    commands.add(AudioPlay {
+    audio_tracker.queue(AudioPlay {
         path: "sounds/ambience_nature.ogg",
         volume: 0.3,
-        repeat: AudioRepeat::Loop(Duration::ZERO),
+        duration: Duration::MAX,
         priority: AudioPlay::PRIORITY_HIGHEST,
         ..AudioPlay::DEFAULT
     });

@@ -1,7 +1,8 @@
 use crate::{
-    command::{AudioPlay, AudioRepeat, ProjectileSpawn},
+    command::ProjectileSpawn,
     component::{Actor, Inertia, Player, Weapon, WeaponFireResult},
-    model::{ActorActionsExt, TransformLite},
+    model::{ActorActionsExt, AudioPlay, TransformLite},
+    resource::AudioTracker,
     util::ext::Vec2Ext,
 };
 use bevy::{
@@ -37,6 +38,7 @@ pub fn weapon(
         Option<&mut Player>,
     )>,
     mut commands: Commands,
+    mut audio: ResMut<AudioTracker>,
     mut data: ResMut<WeaponData>,
     time: Res<Time>,
 ) {
@@ -50,11 +52,11 @@ pub fn weapon(
         if actor.actions.is_reloading() && !weapon.is_reloading() {
             weapon.reload(now);
 
-            commands.add(AudioPlay {
+            audio.queue(AudioPlay {
                 path: "sounds/reloading_{n}.ogg",
                 volume: 0.4,
                 source: Some(transform.translation.xy()),
-                repeat: AudioRepeat::Loop(weapon.config.reloading_time), // TODO: stop if weapon will be changed earlier
+                duration: weapon.config.reloading_time, // TODO: stop if weapon will be changed earlier
                 priority: AudioPlay::PRIORITY_MEDIUM,
                 ..AudioPlay::DEFAULT
             });
@@ -64,7 +66,7 @@ pub fn weapon(
 
         if weapon.is_reloading() && weapon.is_ready(now) {
             weapon.complete_reloading(now);
-            commands.add(AudioPlay {
+            audio.queue(AudioPlay {
                 path: "sounds/reloaded_{n}.ogg",
                 volume: 0.8,
                 source: Some(transform.translation.xy()),
@@ -80,7 +82,7 @@ pub fn weapon(
             match weapon.fire(now) {
                 WeaponFireResult::Empty => {
                     if !was_trigger_pressed || (was_cocked && !weapon.is_cocked()) {
-                        commands.add(AudioPlay {
+                        audio.queue(AudioPlay {
                             path: "sounds/dry_fire.ogg",
                             volume: 0.4,
                             source: Some(transform.translation.xy()),
@@ -94,7 +96,7 @@ pub fn weapon(
                     let mut transform = TransformLite::from(transform);
                     transform.translation += Vec2::from_length(BARREL_LENGTH, transform.direction);
 
-                    commands.add(AudioPlay {
+                    audio.queue(AudioPlay {
                         path: "sounds/shot.ogg",
                         volume: 1.0,
                         source: Some(transform.translation),

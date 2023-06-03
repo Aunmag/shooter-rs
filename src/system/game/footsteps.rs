@@ -1,8 +1,10 @@
-use crate::{command::AudioPlay, component::Footsteps, util::math::interpolate};
+use crate::{
+    component::Footsteps, model::AudioPlay, resource::AudioTracker, util::math::interpolate,
+};
 use bevy::{
-    ecs::system::Query,
+    ecs::system::{Query, ResMut},
     math::Vec3Swizzles,
-    prelude::{Commands, Res, Time, Transform},
+    prelude::{Res, Time, Transform},
 };
 use std::time::Duration;
 
@@ -13,7 +15,7 @@ const STRIDE_RATE_MAX: (f32, f32, f32) = (5.0, 135.0, 0.15);
 // TODO: play sound on turn
 pub fn footsteps(
     mut query: Query<(&mut Footsteps, &Transform)>,
-    mut commands: Commands,
+    mut audio: ResMut<AudioTracker>,
     time: Res<Time>,
 ) {
     let time = time.elapsed();
@@ -34,7 +36,7 @@ pub fn footsteps(
             continue;
         }
 
-        commands.add(AudioPlay {
+        audio.queue(AudioPlay {
             path: "sounds/footstep_{n}.ogg",
             volume: calc_stride_volume(intensity),
             source: Some(translation),

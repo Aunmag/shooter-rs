@@ -1,8 +1,8 @@
 use crate::{
-    command::{ActorMeleeReset, AudioPlay},
+    command::ActorMeleeReset,
     component::{Actor, ActorConfig, Weapon},
-    model::{ActorActionsExt, TransformLite},
-    resource::HitResource,
+    model::{ActorActionsExt, AudioPlay, TransformLite},
+    resource::{AudioTracker, HitResource},
     util::{ext::Vec2Ext, math},
 };
 use bevy::{
@@ -16,6 +16,7 @@ pub fn melee(
     attackers: Query<(Entity, &Actor, &Transform), Without<Weapon>>,
     targets: Query<(Entity, &Actor, &Transform)>,
     mut hits: ResMut<HitResource>,
+    mut audio: ResMut<AudioTracker>,
     mut commands: Commands,
     time: Res<Time>,
 ) {
@@ -59,7 +60,7 @@ pub fn melee(
             let force = Vec2::from_length(momentum, victim.angle_objective);
             hits.add(victim.entity, force, -victim.angle_subjective);
 
-            commands.add(AudioPlay {
+            audio.queue(AudioPlay {
                 path: "sounds/melee_{n}.ogg",
                 volume: 0.6,
                 source: Some(attacker_transform.translation.xy()),

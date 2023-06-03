@@ -1,7 +1,7 @@
-use crate::command::AudioPlay;
+use crate::{model::AudioPlay, resource::AudioTracker};
 use bevy::{
     ecs::system::{Res, Resource},
-    prelude::{Commands, ResMut},
+    prelude::ResMut,
     time::Time,
 };
 use rand::{thread_rng, Rng as _};
@@ -15,7 +15,11 @@ pub struct AmbienceFxData {
     next: Duration,
 }
 
-pub fn ambience_fx(mut data: ResMut<AmbienceFxData>, mut commands: Commands, time: Res<Time>) {
+pub fn ambience_fx(
+    mut data: ResMut<AmbienceFxData>,
+    mut audio: ResMut<AudioTracker>,
+    time: Res<Time>,
+) {
     let time = time.elapsed();
 
     if time < data.next {
@@ -23,7 +27,7 @@ pub fn ambience_fx(mut data: ResMut<AmbienceFxData>, mut commands: Commands, tim
     }
 
     if !data.next.is_zero() {
-        commands.add(AudioPlay {
+        audio.queue(AudioPlay {
             path: "sounds/ambience_fx_{n}.ogg",
             volume: 0.3,
             priority: AudioPlay::PRIORITY_MEDIUM,

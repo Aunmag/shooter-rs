@@ -1,8 +1,7 @@
 use crate::{
-    command::AudioPlay,
     component::{Collision, Projectile},
-    model::geometry::GeometryProjection,
-    resource::HitResource,
+    model::{geometry::GeometryProjection, AudioPlay},
+    resource::{AudioTracker, HitResource},
     util::{ext::Vec2Ext, math},
 };
 use bevy::{
@@ -19,9 +18,9 @@ pub fn projectile(
     obstacles: Query<(Entity, &Collision, &Transform), Without<Projectile>>,
     mut hits: ResMut<HitResource>,
     mut commands: Commands,
+    mut audio: ResMut<AudioTracker>,
     time: Res<Time>,
 ) {
-    let mut unique_hits = Vec::new();
     let t0 = time.elapsed();
     let t1 = t0.saturating_sub(time.delta());
     let t2 = t0.saturating_sub(Duration::max(time.delta(), TIME_DELTA_FOR_RENDER));
@@ -45,16 +44,13 @@ pub fn projectile(
             let angle =
                 math::angle_difference(tail.angle_to(head), tail.angle_to(obstacle_position));
 
-            if !unique_hits.contains(&obstacle.index()) {
-                unique_hits.push(obstacle.index());
-                commands.add(AudioPlay {
-                    path: "sounds/hit_body_{n}.ogg",
-                    volume: 1.5, // TODO: make it depend from momentum
-                    source: Some(obstacle_position),
-                    priority: AudioPlay::PRIORITY_LOWER,
-                    ..AudioPlay::DEFAULT
-                });
-            }
+            audio.queue(AudioPlay {
+                path: "sounds/hit_body_{n}.ogg",
+                volume: 1.5, // TODO: make it depend from momentum
+                source: Some(obstacle_position),
+                priority: AudioPlay::PRIORITY_LOWER,
+                ..AudioPlay::DEFAULT
+            });
 
             hits.add(
                 obstacle,

@@ -1,7 +1,8 @@
 use crate::{
-    command::AudioPlay,
     component::Notification,
     data::{FONT_PATH, FONT_PATH_BOLD},
+    model::AudioPlay,
+    resource::AudioTracker,
 };
 use bevy::{
     ecs::{query::With, system::Command, world::World},
@@ -65,12 +66,11 @@ impl Command for Notify {
             )
             .insert(Notification::new(time));
 
-        AudioPlay {
+        world.resource_mut::<AudioTracker>().queue(AudioPlay {
             path: "sounds/notification.ogg",
             volume: 0.8,
             priority: AudioPlay::PRIORITY_HIGHER,
             ..AudioPlay::DEFAULT
-        }
-        .write(world);
+        });
     }
 }
