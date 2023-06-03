@@ -35,6 +35,7 @@ pub struct ControlsConfig {
 
 #[derive(Clone, Deserialize, Debug)]
 pub struct MiscConfig {
+    pub laser_sight: bool,
     pub grab_cursor: bool,
     pub debug: bool,
 }

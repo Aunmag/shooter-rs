@@ -11,5 +11,6 @@ sources = 128
 mouse_sensitivity = 0.003
 
 [misc]
+laser_sight = false
 grab_cursor = true
 debug = false

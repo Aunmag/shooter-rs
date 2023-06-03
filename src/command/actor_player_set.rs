@@ -1,7 +1,9 @@
+use super::LaserSightSet;
 use crate::{
     command::StatusBarSet,
     component::{Actor, ActorConfig, Inertia, Player},
     data::LAYER_ACTOR_PLAYER,
+    resource::Config,
 };
 use bevy::{
     ecs::system::Command,
@@ -29,5 +31,9 @@ impl Command for ActorPlayerSet {
         entity_mut.insert(Inertia::new(config.mass));
 
         StatusBarSet(self.0).write(world);
+
+        if world.resource::<Config>().misc.laser_sight {
+            LaserSightSet(self.0).write(world);
+        }
     }
 }

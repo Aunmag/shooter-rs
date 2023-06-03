@@ -39,7 +39,7 @@ mod util;
 use crate::{
     data::{APP_TITLE, CONFIG_PATH},
     event::ActorDeathEvent,
-    material::{ProjectileMaterial, StatusBarMaterial},
+    material::{LaserMaterial, ProjectileMaterial, StatusBarMaterial},
     model::AppState,
     plugin::DebugPlugin,
     resource::{
@@ -86,6 +86,7 @@ fn main() {
                 ..Default::default()
             }),
     )
+    .add_plugin(Material2dPlugin::<LaserMaterial>::default())
     .add_plugin(Material2dPlugin::<StatusBarMaterial>::default())
     .add_plugin(Material2dPlugin::<ProjectileMaterial>::default())
     .add_state::<AppState>()
