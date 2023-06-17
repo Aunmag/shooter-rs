@@ -10,7 +10,6 @@ pub struct CollisionSystemData {
     previous_solutions: usize,
 }
 
-#[allow(clippy::many_single_char_names)]
 pub fn collision_find(
     query: Query<(Entity, &Collision, &Transform, &Inertia)>,
     mut data: ResMut<CollisionSystemData>,

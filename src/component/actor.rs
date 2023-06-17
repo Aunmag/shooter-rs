@@ -8,7 +8,7 @@ use std::{f32::consts::TAU, time::Duration};
 #[derive(Component)]
 pub struct Actor {
     pub config: &'static ActorConfig,
-    pub skill: f32, // TODO: affect bots reaction too
+    pub skill: f32,
     pub stamina: f32,
     pub actions: ActorActions,
     pub look_at: Option<f32>,
@@ -54,6 +54,11 @@ impl Actor {
         };
     }
 
+    pub fn reset_actions(&mut self) {
+        self.actions = ActorActions::EMPTY;
+        self.look_at = None;
+    }
+
     pub fn update_stamina(&mut self, delta: f32) {
         let mut change = self.config.stamina.rate() * delta;
 
@@ -76,7 +81,7 @@ impl ActorConfig {
 
     pub const HUMAN: Self = Self {
         movement_velocity: 2.5,
-        rotation_velocity: 8.0,
+        rotation_velocity: 3.5,
         sprint_factor: 2.0,
         stamina: Duration::from_secs(16),
         resistance: Self::HUMAN_RESISTANCE,

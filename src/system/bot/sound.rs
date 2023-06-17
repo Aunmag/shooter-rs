@@ -6,10 +6,9 @@ use bevy::{
     time::Time,
 };
 use rand::{thread_rng, Rng as _};
-use std::time::Duration;
+use std::{ops::Range, time::Duration};
 
-const INTERVAL_MIN: f32 = 2.0;
-const INTERVAL_MAX: f32 = 30.0;
+const INTERVAL: Range<Duration> = Duration::from_secs(2)..Duration::from_secs(30);
 
 pub fn sound(
     mut bots: Query<(&mut Bot, &Transform)>,
@@ -33,7 +32,6 @@ pub fn sound(
             });
         }
 
-        let interval = Duration::from_secs_f32(thread_rng().gen_range(INTERVAL_MIN..INTERVAL_MAX));
-        bot.next_sound = time + interval;
+        bot.next_sound = time + thread_rng().gen_range(INTERVAL);
     }
 }

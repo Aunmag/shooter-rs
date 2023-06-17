@@ -4,7 +4,10 @@ use crate::{
     data::FONT_PATH,
     model::{AppState, TransformLite},
     resource::AudioTracker,
-    util::ext::{AppExt, Vec2Ext},
+    util::{
+        ext::{AppExt, Vec2Ext},
+        DEBUG_LINES,
+    },
 };
 use bevy::{
     app::{App, Plugin},
@@ -12,6 +15,7 @@ use bevy::{
         Diagnostics, EntityCountDiagnosticsPlugin, FrameTimeDiagnosticsPlugin,
         SystemInformationDiagnosticsPlugin,
     },
+    ecs::system::ResMut,
     input::Input,
     prelude::{
         AssetServer, Color, Commands, Component, KeyCode, Query, Res, Resource, TextBundle, Vec2,
@@ -20,6 +24,7 @@ use bevy::{
     text::{Text, TextSection, TextStyle},
     transform::components::Transform,
 };
+use bevy_prototype_debug_lines::{DebugLines, DebugLinesPlugin};
 use std::{
     cmp::Reverse,
     collections::HashMap,
@@ -72,8 +77,10 @@ impl Plugin for DebugPlugin {
             .add_plugin(FrameTimeDiagnosticsPlugin::default())
             .add_plugin(EntityCountDiagnosticsPlugin::default())
             .add_plugin(SystemInformationDiagnosticsPlugin::default())
+            .add_plugin(DebugLinesPlugin::default())
             .add_startup_system(startup)
             .add_system(update_diagnostics)
+            .add_system(render_debug_lines_static)
             .add_state_system(AppState::Game, update_input);
     }
 }
@@ -136,6 +143,10 @@ fn update_diagnostics(
         text.sections[7].value = format!("{:.2}", entities);
         text.sections[9].value = format!("{}", audio_sources);
     }
+}
+
+fn render_debug_lines_static(mut debug_lines: ResMut<DebugLines>) {
+    DEBUG_LINES.render(&mut debug_lines);
 }
 
 fn update_input(

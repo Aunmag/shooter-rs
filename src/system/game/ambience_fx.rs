@@ -5,10 +5,9 @@ use bevy::{
     time::Time,
 };
 use rand::{thread_rng, Rng as _};
-use std::time::Duration;
+use std::{ops::Range, time::Duration};
 
-const INTERVAL_MIN: f32 = 15.0;
-const INTERVAL_MAX: f32 = 25.0;
+const INTERVAL: Range<Duration> = Duration::from_secs(15)..Duration::from_secs(25);
 
 #[derive(Default, Resource)]
 pub struct AmbienceFxData {
@@ -35,6 +34,5 @@ pub fn ambience_fx(
         });
     }
 
-    let interval = Duration::from_secs_f32(thread_rng().gen_range(INTERVAL_MIN..INTERVAL_MAX));
-    data.next = time + interval;
+    data.next = time + thread_rng().gen_range(INTERVAL);
 }

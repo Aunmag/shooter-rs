@@ -71,6 +71,10 @@ fn turn(actor: &Actor, transform: &mut Transform, inertia: &mut Inertia, time_de
     let mut velocity =
         distance.signum() * actor.config.rotation_velocity * actor.skill * time_delta;
 
+    if actor.actions.is_attacking() {
+        velocity *= 2.0;
+    }
+
     let velocity_current = inertia.velocity_angular;
     let velocity_future = velocity + velocity_current;
     let distance_future = velocity_future / Inertia::DRAG_ANGULAR;
