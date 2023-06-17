@@ -55,7 +55,7 @@ pub fn bonus_image(mut query: Query<&mut Transform, With<BonusImage>>, time: Res
 }
 
 pub fn bonus_label(
-    mut query: Query<&mut Transform, (With<BonusLabel>,)>,
+    mut query: Query<&mut Transform, With<BonusLabel>>,
     cameras: Query<&Transform, (With<OrthographicProjection>, Without<BonusLabel>)>,
     time: Res<Time>,
 ) {

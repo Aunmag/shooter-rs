@@ -39,7 +39,7 @@ mod util;
 use crate::{
     data::{APP_TITLE, CONFIG_PATH},
     event::ActorDeathEvent,
-    material::{LaserMaterial, ProjectileMaterial, StatusBarMaterial},
+    material::{BloodMaterial, LaserMaterial, ProjectileMaterial, StatusBarMaterial},
     model::AppState,
     plugin::DebugPlugin,
     resource::{
@@ -88,6 +88,7 @@ fn main() {
     }
 
     application
+        .add_plugin(Material2dPlugin::<BloodMaterial>::default())
         .add_plugin(Material2dPlugin::<LaserMaterial>::default())
         .add_plugin(Material2dPlugin::<StatusBarMaterial>::default())
         .add_plugin(Material2dPlugin::<ProjectileMaterial>::default())
@@ -126,6 +127,7 @@ fn main() {
             s.add(bonus.after(collision_resolve));
             s.add(camera.after(collision_resolve));
             s.add(status_bar);
+            s.add(blood);
             s.add(breath);
             s.add(footsteps);
             s.add(heartbeat);

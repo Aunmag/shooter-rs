@@ -1,5 +1,6 @@
 mod actor;
 mod ambience_fx;
+mod blood;
 mod bonus;
 mod breath;
 mod camera;
@@ -21,7 +22,7 @@ mod terrain;
 mod weapon;
 
 pub use self::{
-    actor::*, ambience_fx::*, bonus::*, breath::*, camera::*, collision_find::*,
+    actor::*, ambience_fx::*, blood::*, bonus::*, breath::*, camera::*, collision_find::*,
     collision_resolve::*, footsteps::*, health::*, heartbeat::*, hit::*, inertia::*, input::*,
     melee::*, on_enter::*, player::*, projectile::*, scenario::*, status_bar::*, terrain::*,
     weapon::*,

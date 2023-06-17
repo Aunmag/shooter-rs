@@ -11,7 +11,7 @@ fn fragment(
     #import bevy_sprite::mesh2d_vertex_output
 ) -> @location(0) vec4<f32> {
     let v = abs(0.5 - uv.y);
-  	var c = 0.005 / v;
-  	var a = 0.02 / v;
+    var c = 0.005 / v;
+    var a = 0.02 / v;
     return vec4<f32>(1.0, c, c, a * uv.x * 0.5);
 }

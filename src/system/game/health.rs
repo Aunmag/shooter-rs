@@ -1,5 +1,5 @@
 use crate::{
-    command::ActorRelease,
+    command::{ActorRelease, BloodSpawn},
     component::{Actor, Health},
     event::ActorDeathEvent,
     resource::AudioTracker,
@@ -7,26 +7,26 @@ use crate::{
 use bevy::{
     ecs::system::{Query, ResMut},
     math::Vec3Swizzles,
-    prelude::{Commands, DespawnRecursiveExt, Entity, EventWriter, Res, Time, Transform},
+    prelude::{Commands, DespawnRecursiveExt, Entity, EventWriter, Transform},
 };
-use std::time::Duration;
 
-const DECAY: Duration = Duration::from_millis(1000);
+const BLOOD_MIN: f32 = 0.1;
+const BLOOD_FACTOR_ON_DAMAGE: f32 = 24.0;
+const BLOOD_FACTOR_ON_DEATH: f32 = 16.0;
 
 pub fn health(
     mut query: Query<(Entity, &Actor, &mut Health, &Transform)>,
-    time: Res<Time>,
     mut death_events: EventWriter<ActorDeathEvent>,
     mut audio: ResMut<AudioTracker>,
     mut commands: Commands,
 ) {
-    let now = time.elapsed();
-
     for (entity, actor, mut health, transform) in query.iter_mut() {
         let actor = actor.config;
         let point = transform.translation.xy();
+        let damage = health.get_damage();
+        let mut blood = actor.radius * damage * BLOOD_FACTOR_ON_DAMAGE;
 
-        if health.is_alive() && health.get_damage() > actor.pain_threshold {
+        if health.is_alive() && damage > actor.pain_threshold {
             if let Some(sound) = &actor.sound_pain {
                 audio.queue(sound.as_spatial(point));
             }
@@ -37,13 +37,14 @@ pub fn health(
                 audio.queue(sound.as_spatial(point));
             }
 
-            health.decay(now + DECAY);
             commands.add(ActorRelease(entity));
             death_events.send(ActorDeathEvent::new(point));
+            blood += actor.radius * BLOOD_FACTOR_ON_DEATH;
+            commands.entity(entity).despawn_recursive();
         }
 
-        if health.is_decayed(now) {
-            commands.entity(entity).despawn_recursive();
+        if blood > BLOOD_MIN {
+            commands.add(BloodSpawn::new(point, blood));
         }
 
         health.commit();

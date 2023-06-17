@@ -1,12 +1,10 @@
 use bevy::ecs::component::Component;
-use std::time::Duration;
 
 #[derive(Component)]
 pub struct Health {
     value: f32,
     value_previous: f32,
     resistance: f32,
-    decay_time: Duration,
 }
 
 impl Health {
@@ -26,16 +24,11 @@ impl Health {
             value: 1.0,
             value_previous: 1.0,
             resistance,
-            decay_time: Duration::ZERO,
         };
     }
 
     pub fn damage(&mut self, damage: f32) {
         self.value = (self.value - damage / self.resistance).clamp(0.0, 1.0);
-    }
-
-    pub fn decay(&mut self, decay_time: Duration) {
-        self.decay_time = decay_time;
     }
 
     pub fn heal(&mut self) {
@@ -63,10 +56,6 @@ impl Health {
 
     pub fn is_just_died(&self) -> bool {
         return !self.is_alive() && self.get_damage() > 0.0;
-    }
-
-    pub fn is_decayed(&self, now: Duration) -> bool {
-        return !self.decay_time.is_zero() && now > self.decay_time;
     }
 
     pub fn is_low(&self) -> bool {
