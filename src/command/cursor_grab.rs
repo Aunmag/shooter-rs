@@ -1,4 +1,3 @@
-use crate::resource::Config;
 use bevy::{
     ecs::system::Command,
     prelude::{With, World},
@@ -19,14 +18,12 @@ impl CursorGrab {
 
 impl Command for CursorGrab {
     fn write(self, world: &mut World) {
-        if !self.0 || world.resource::<Config>().misc.grab_cursor {
-            for mut window in world
-                .query_filtered::<&mut Window, With<PrimaryWindow>>()
-                .iter_mut(world)
-            {
-                window.cursor.grab_mode = self.get_mode();
-                window.cursor.visible = !self.0;
-            }
+        for mut window in world
+            .query_filtered::<&mut Window, With<PrimaryWindow>>()
+            .iter_mut(world)
+        {
+            window.cursor.grab_mode = self.get_mode();
+            window.cursor.visible = !self.0;
         }
     }
 }
