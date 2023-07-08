@@ -38,7 +38,7 @@ pub fn health(
             }
 
             commands.add(ActorRelease(entity));
-            death_events.send(ActorDeathEvent::new(point));
+            death_events.send(ActorDeathEvent::new(actor.actor_type, point));
             blood += actor.radius * BLOOD_FACTOR_ON_DEATH;
             commands.entity(entity).despawn_recursive();
         }

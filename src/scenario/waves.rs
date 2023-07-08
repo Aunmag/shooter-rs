@@ -174,40 +174,47 @@ impl ScenarioLogic for WavesScenario {
     }
 
     fn on_actor_death(&mut self, event: &ActorDeathEvent, commands: &mut Commands) {
-        self.kills += 1;
+        if let ActorType::Zombie = event.actor_type {
+            self.kills += 1;
 
-        if self.kills == 1 {
-            match self.wave {
-                1 => {
-                    commands.add(Notify::new(
-                        String::new(),
-                        "Press [R] to reload".to_string(),
-                    ));
+            if self.kills == 1 {
+                match self.wave {
+                    1 => {
+                        commands.add(Notify::new(
+                            String::new(),
+                            "Press [R] to reload".to_string(),
+                        ));
+                    }
+                    2 => {
+                        commands.add(Notify::new(
+                            String::new(),
+                            "Press [SHIFT] to sprint".to_string(),
+                        ));
+                    }
+                    3 => {
+                        commands.add(Notify::new(
+                            String::new(),
+                            "Use mouse wheel to change zoom".to_string(),
+                        ));
+                    }
+                    _ => {}
                 }
-                2 => {
-                    commands.add(Notify::new(
-                        String::new(),
-                        "Press [SHIFT] to sprint".to_string(),
-                    ));
-                }
-                3 => {
-                    commands.add(Notify::new(
-                        String::new(),
-                        "Use mouse wheel to change zoom".to_string(),
-                    ));
-                }
-                _ => {}
             }
-        }
 
-        let wave = f32::from(self.wave);
-        let wave_size = f32::from(self.wave_size());
+            let wave = f32::from(self.wave);
+            let wave_size = f32::from(self.wave_size());
 
-        if self
-            .rng
-            .gen_bool((BONUSES_PER_WAVE * wave / wave_size).into())
-        {
-            commands.add(BonusSpawn::new(event.position, self.wave));
+            if self
+                .rng
+                .gen_bool((BONUSES_PER_WAVE * wave / wave_size).into())
+            {
+                commands.add(BonusSpawn::new(event.position, self.wave));
+            }
+        } else {
+            commands.add(Notify::new(
+                "Game over".to_string(),
+                "You died. Press [ESC] to exit".to_string(),
+            ));
         }
     }
 
