@@ -77,7 +77,7 @@ impl Zoom {
 
     const MIN: f32 = 1.0;
     const MAX: f32 = 8.0;
-    const DEFAULT: f32 = 1.7;
+    const DEFAULT: f32 = 2.45;
     const INITIAL: f32 = 5.0;
 
     const SPEED_INITIAL: Duration = Duration::from_millis(5000);

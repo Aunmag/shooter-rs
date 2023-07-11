@@ -77,7 +77,7 @@ impl Actor {
 }
 
 impl ActorConfig {
-    const HUMAN_RESISTANCE: f32 = 8000.0;
+    const HUMAN_RESISTANCE: f32 = 9_000.0;
 
     pub const HUMAN: Self = Self {
         movement_velocity: 2.5,
@@ -90,7 +90,7 @@ impl ActorConfig {
         melee_damage: Self::HUMAN_RESISTANCE / 16.0, // 16 hits to kill human
         melee_distance: 0.7,
         melee_distance_angular: TAU / 5.0,
-        melee_interval: Duration::from_millis(400),
+        melee_interval: Duration::from_millis(600),
         actor_type: ActorType::Human,
         pain_threshold: 0.02,
         sound_pain: Some(AudioPlay {
@@ -108,10 +108,10 @@ impl ActorConfig {
         rotation_velocity: Self::HUMAN.rotation_velocity * 0.4,
         sprint_factor: 1.8,
         stamina: Duration::from_secs(10),
-        resistance: Self::HUMAN.resistance * 0.4,
+        resistance: Self::HUMAN.resistance * 0.6,
         radius: 0.21,
         mass: 70_000.0,
-        melee_damage: Self::HUMAN.resistance / 8.0, // 8 hits to kill human
+        melee_damage: Self::HUMAN.resistance / 10.0, // 10 hits to kill human
         melee_distance: Self::HUMAN.melee_distance,
         melee_distance_angular: Self::HUMAN.melee_distance_angular,
         melee_interval: Self::HUMAN.melee_interval,

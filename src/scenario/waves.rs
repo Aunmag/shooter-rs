@@ -24,7 +24,7 @@ const WAVE_SIZE_INITIAL: u16 = 5;
 const ZOMBIE_SPAWN_DISTANCE_MIN: f32 = 20.0;
 const ZOMBIE_SPAWN_DISTANCE_MAX: f32 = 60.0;
 const ZOMBIE_SKILL_MIN: f32 = 1.0;
-const ZOMBIE_SKILL_MAX: f32 = 2.3;
+const ZOMBIE_SKILL_MAX: f32 = 1.8;
 const BONUSES_PER_WAVE: f32 = 3.0;
 
 enum Task {

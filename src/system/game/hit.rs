@@ -10,13 +10,14 @@ pub fn hit(
 ) {
     for hit in hits.hits.drain(..) {
         if let Ok((mut inertia, mut health, mut player)) = targets.get_mut(hit.entity) {
-            let momentum = hit.force.length();
-            let force_angular = hit.angle * momentum;
-            inertia.push(hit.force, force_angular, true, false, true);
-            health.damage(momentum);
+            let momentum_linear = hit.momentum.length();
+            let momentum_angular = momentum_linear * hit.angle;
+
+            inertia.push(hit.momentum, momentum_angular, true, false, true);
+            health.damage(momentum_linear);
 
             if let Some(player) = player.as_mut() {
-                player.shake(force_angular * Inertia::PUSH_MULTIPLIER_ANGULAR);
+                player.shake(momentum_angular * Inertia::PUSH_MULTIPLIER_ANGULAR);
             }
         }
     }

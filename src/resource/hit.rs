@@ -10,14 +10,14 @@ pub struct HitResource {
 }
 
 impl HitResource {
-    pub fn add(&mut self, entity: Entity, force: Vec2, angle: f32) {
-        self.hits.push(HitTarget::new(entity, force, angle));
+    pub fn add(&mut self, entity: Entity, momentum: Vec2, angle: f32) {
+        self.hits.push(HitTarget::new(entity, momentum, angle));
     }
 }
 
 #[derive(Constructor)]
 pub struct HitTarget {
     pub entity: Entity,
-    pub force: Vec2,
+    pub momentum: Vec2,
     pub angle: f32,
 }

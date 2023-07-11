@@ -50,22 +50,22 @@ impl WeaponConfig {
         Duration::from_millis((3000.0 * Self::RELOADING_TIME_FACTOR) as u64);
 
     const RELOADING_TIME_SHOTGUN_LIGHT: Duration =
-        Duration::from_millis((1300.0 * Self::RELOADING_TIME_FACTOR) as u64);
+        Duration::from_millis((1200.0 * Self::RELOADING_TIME_FACTOR) as u64);
 
     const RELOADING_TIME_SHOTGUN: Duration =
         Duration::from_millis((1800.0 * Self::RELOADING_TIME_FACTOR) as u64);
 
     const RELOADING_TIME_SMG: Duration =
-        Duration::from_millis((4000.0 * Self::RELOADING_TIME_FACTOR) as u64);
+        Duration::from_millis((3800.0 * Self::RELOADING_TIME_FACTOR) as u64);
 
     const RELOADING_TIME_CARBINE: Duration =
-        Duration::from_millis((4500.0 * Self::RELOADING_TIME_FACTOR) as u64);
+        Duration::from_millis((4200.0 * Self::RELOADING_TIME_FACTOR) as u64);
 
     const RELOADING_TIME_RIFLE: Duration =
         Duration::from_millis((5000.0 * Self::RELOADING_TIME_FACTOR) as u64);
 
     const RELOADING_TIME_RIFLE_HEAVY: Duration =
-        Duration::from_millis((5500.0 * Self::RELOADING_TIME_FACTOR) as u64);
+        Duration::from_millis((5800.0 * Self::RELOADING_TIME_FACTOR) as u64);
 
     const RELOADING_TIME_MACHINE_GUN: Duration =
         Duration::from_millis((10000.0 * Self::RELOADING_TIME_FACTOR) as u64);
