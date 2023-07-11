@@ -8,7 +8,9 @@ pub fn inertia(mut query: Query<(&mut Transform, &mut Inertia)>, time: Res<Time>
         transform.translation.x += inertia.velocity.x * delta;
         transform.translation.y += inertia.velocity.y * delta;
         transform.rotate_local_z(inertia.velocity_angular * delta);
-        inertia.velocity *= 1.0 - delta * Inertia::DRAG;
-        inertia.velocity_angular *= 1.0 - delta * Inertia::DRAG_ANGULAR;
+
+        let drag = 1.0 - inertia.drag() * delta;
+        inertia.velocity *= drag;
+        inertia.velocity_angular *= drag;
     }
 }

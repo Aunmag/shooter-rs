@@ -13,7 +13,7 @@ pub fn hit(
             let momentum_linear = hit.momentum.length();
             let momentum_angular = momentum_linear * hit.angle;
 
-            inertia.push(hit.momentum, momentum_angular, true, false, true);
+            inertia.push(hit.momentum, momentum_angular, false, true);
             health.damage(momentum_linear);
 
             if let Some(player) = player.as_mut() {

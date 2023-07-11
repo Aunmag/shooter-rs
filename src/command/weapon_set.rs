@@ -1,5 +1,5 @@
 use crate::{
-    component::{Actor, ActorWeaponSprite, Weapon, WeaponConfig},
+    component::{Actor, ActorWeaponSprite, Inertia, Weapon, WeaponConfig, WeaponGrip},
     data::PIXELS_PER_METER,
     model::AudioPlay,
     resource::AudioTracker,
@@ -14,13 +14,15 @@ use bevy::{
 };
 use derive_more::Constructor;
 
+const WEAPON_MASS_MULTIPLAYER: f32 = 5.0;
+
 #[derive(Constructor)]
-pub struct WeaponGive {
+pub struct WeaponSet {
     entity: Entity,
-    weapon: &'static WeaponConfig,
+    weapon: Option<&'static WeaponConfig>,
 }
 
-impl WeaponGive {
+impl WeaponSet {
     fn remove_old_weapon_sprite(&self, world: &mut World) {
         let mut to_remove = Vec::new();
 
@@ -39,12 +41,20 @@ impl WeaponGive {
         }
     }
 
-    fn spawn_weapon_sprite(&self, world: &mut World) {
+    fn remove_old_weapon_component(&self, world: &mut World) {
+        if let Some(weapon) = world.get::<Weapon>(self.entity) {
+            let weapon_mass = weapon.config.get_mass_with_full_ammo();
+            self.update_actor_mass(world, -weapon_mass);
+            world.entity_mut(self.entity).remove::<Weapon>();
+        }
+    }
+
+    fn spawn_weapon_sprite(&self, world: &mut World, weapon: &WeaponConfig) {
         let image = world
             .resource::<AssetServer>()
-            .get_handle(self.weapon.get_image_path());
+            .get_handle(weapon.get_image_path());
 
-        let anchor = self.find_image_anchor(world, &image);
+        let anchor = self.find_image_anchor(world, weapon, &image);
 
         world
             .spawn(SpriteBundle {
@@ -60,40 +70,49 @@ impl WeaponGive {
             .set_parent(self.entity);
     }
 
-    fn find_image_anchor(&self, world: &World, image: &Handle<Image>) -> Anchor {
-        let arms_length = if self.weapon.actor_image_suffix == 1 {
+    fn find_image_anchor(
+        &self,
+        world: &World,
+        weapon: &WeaponConfig,
+        image: &Handle<Image>,
+    ) -> Anchor {
+        let arms_length = if let WeaponGrip::OneHand = weapon.grip {
             Actor::ARMS_LENGTH_1
         } else {
             Actor::ARMS_LENGTH_2
         };
 
         if let Some(image) = world.resource::<Assets<Image>>().get(image) {
-            let offset = self.weapon.image_offset - arms_length * PIXELS_PER_METER;
+            let offset = weapon.image_offset - arms_length * PIXELS_PER_METER;
             return Anchor::Custom(Vec2::new(offset / image.size().x - 0.5, 0.0));
         } else {
             log::warn!(
                 "Unable to set anchor for image {} since it hasn't loaded yet",
-                self.weapon.get_image_path(),
+                weapon.get_image_path(),
             );
 
             return Anchor::default();
         }
     }
 
-    fn update_actor_weapon(&self, world: &mut World) {
-        world
-            .entity_mut(self.entity)
-            .insert(Weapon::new(self.weapon));
+    fn update_actor_weapon(&self, world: &mut World, weapon: &'static WeaponConfig) {
+        world.entity_mut(self.entity).insert(Weapon::new(weapon));
     }
 
-    fn update_actor_image(&self, world: &mut World) {
+    fn update_actor_image(&self, world: &mut World, weapon: &WeaponConfig) {
         if let Some(actor) = world.get::<Actor>(self.entity) {
-            let image_suffix = self.weapon.actor_image_suffix;
+            let image_suffix = weapon.grip.actor_image_suffix();
             let image_path = actor.config.get_image_path(image_suffix);
             let image = world
                 .resource::<AssetServer>()
                 .get_handle::<Image, _>(image_path);
             world.entity_mut(self.entity).insert(image);
+        }
+    }
+
+    fn update_actor_mass(&self, world: &mut World, change: f32) {
+        if let Some(inertia) = world.get_mut::<Inertia>(self.entity).as_mut() {
+            inertia.mass += change * WEAPON_MASS_MULTIPLAYER;
         }
     }
 
@@ -113,12 +132,17 @@ impl WeaponGive {
     }
 }
 
-impl Command for WeaponGive {
+impl Command for WeaponSet {
     fn write(self, world: &mut World) {
+        self.remove_old_weapon_component(world);
         self.remove_old_weapon_sprite(world);
-        self.spawn_weapon_sprite(world);
-        self.update_actor_weapon(world);
-        self.update_actor_image(world);
-        self.play_pickup_sound(world);
+
+        if let Some(weapon) = self.weapon {
+            self.spawn_weapon_sprite(world, weapon);
+            self.update_actor_weapon(world, weapon);
+            self.update_actor_image(world, weapon);
+            self.update_actor_mass(world, weapon.get_mass_with_full_ammo());
+            self.play_pickup_sound(world);
+        }
     }
 }

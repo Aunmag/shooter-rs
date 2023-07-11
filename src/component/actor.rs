@@ -77,7 +77,7 @@ impl Actor {
 }
 
 impl ActorConfig {
-    const HUMAN_RESISTANCE: f32 = 9_000.0;
+    const HUMAN_RESISTANCE: f32 = 9.0;
 
     pub const HUMAN: Self = Self {
         movement_velocity: 2.5,
@@ -86,7 +86,7 @@ impl ActorConfig {
         stamina: Duration::from_secs(16),
         resistance: Self::HUMAN_RESISTANCE,
         radius: 0.25,
-        mass: 80_000.0,
+        mass: 85.0,
         melee_damage: Self::HUMAN_RESISTANCE / 16.0, // 16 hits to kill human
         melee_distance: 0.7,
         melee_distance_angular: TAU / 5.0,
@@ -110,7 +110,7 @@ impl ActorConfig {
         stamina: Duration::from_secs(10),
         resistance: Self::HUMAN.resistance * 0.6,
         radius: 0.21,
-        mass: 70_000.0,
+        mass: 70.0,
         melee_damage: Self::HUMAN.resistance / 10.0, // 10 hits to kill human
         melee_distance: Self::HUMAN.melee_distance,
         melee_distance_angular: Self::HUMAN.melee_distance_angular,

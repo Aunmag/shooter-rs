@@ -24,18 +24,18 @@ pub struct Weapon {
 
 pub struct WeaponConfig {
     pub name: &'static str,
+    pub mass: f32,
     pub level: u8,
     pub muzzle_velocity: f32,
     pub deviation: f32,
-    pub recoil: f32,
     pub fire_rate: f32,
     pub is_automatic: bool,
     pub projectile: &'static ProjectileConfig,
     pub ammo_capacity: u8,
     pub reloading_time: Duration,
     pub partial_reloading: bool,
+    pub grip: WeaponGrip,
     pub image_offset: f32,
-    pub actor_image_suffix: u8, // TODO: detect automatically by length
 }
 
 impl WeaponConfig {
@@ -70,6 +70,10 @@ impl WeaponConfig {
     const RELOADING_TIME_MACHINE_GUN: Duration =
         Duration::from_millis((10000.0 * Self::RELOADING_TIME_FACTOR) as u64);
 
+    const RECOIL_MASS_POW: f32 = 0.25;
+    const RECOIL_POW: f32 = 0.5;
+    const RECOIL_MUL: f32 = 13.0;
+
     pub const ALL: [Self; 12] = [
         Self::PM,
         Self::TT,
@@ -87,194 +91,194 @@ impl WeaponConfig {
 
     pub const PM: Self = Self {
         name: "PM",
+        mass: 0.73,
         level: 1,
         muzzle_velocity: 315.0,
         deviation: 0.03,
-        recoil: 9_750.0,
         fire_rate: Self::SEMI_AUTO_FIRE_RATE,
         is_automatic: false,
         projectile: &ProjectileConfig::_9X18,
         ammo_capacity: 8,
         reloading_time: Self::RELOADING_TIME_PISTOL,
         partial_reloading: false,
+        grip: WeaponGrip::OneHand,
         image_offset: 2.0,
-        actor_image_suffix: 1,
     };
 
     pub const TT: Self = Self {
         name: "TT",
+        mass: 0.85,
         level: 1,
         muzzle_velocity: 430.0,
         deviation: 0.025,
-        recoil: 11_250.0,
         fire_rate: Self::SEMI_AUTO_FIRE_RATE,
         is_automatic: false,
         projectile: &ProjectileConfig::_7_62X25,
         ammo_capacity: 8,
         reloading_time: Self::RELOADING_TIME_PISTOL,
         partial_reloading: false,
+        grip: WeaponGrip::OneHand,
         image_offset: 2.0,
-        actor_image_suffix: 1,
     };
 
     pub const MP_43_SAWED_OFF: Self = Self {
         name: "MP-43 sawed-off",
+        mass: 2.2,
         level: 2,
         muzzle_velocity: 260.0,
         deviation: 0.06,
-        recoil: 67_500.0,
         fire_rate: Self::SEMI_AUTO_FIRE_RATE,
         is_automatic: false,
         projectile: &ProjectileConfig::_12X76,
         ammo_capacity: 2,
         reloading_time: Self::RELOADING_TIME_SHOTGUN_LIGHT,
         partial_reloading: true,
+        grip: WeaponGrip::TwoHands,
         image_offset: 3.5,
-        actor_image_suffix: 2,
     };
 
     pub const MP_27: Self = Self {
         name: "MP-27",
+        mass: 3.2,
         level: 2,
         muzzle_velocity: 410.0,
         deviation: 0.03,
-        recoil: 57_000.0,
         fire_rate: Self::SEMI_AUTO_FIRE_RATE,
         is_automatic: false,
         projectile: &ProjectileConfig::_12X76,
         ammo_capacity: 2,
         reloading_time: Self::RELOADING_TIME_SHOTGUN,
         partial_reloading: true,
+        grip: WeaponGrip::TwoHandsWithButt,
         image_offset: 10.0,
-        actor_image_suffix: 2,
     };
 
     pub const PP_91_KEDR: Self = Self {
         name: "PP-91 Kedr",
+        mass: 1.6,
         level: 3,
         muzzle_velocity: 310.0,
         deviation: 0.02,
-        recoil: 10_500.0,
         fire_rate: 900.0,
         is_automatic: true,
         projectile: &ProjectileConfig::_9X18,
         ammo_capacity: 20,
         reloading_time: Self::RELOADING_TIME_SMG,
         partial_reloading: false,
+        grip: WeaponGrip::TwoHands,
         image_offset: 3.5,
-        actor_image_suffix: 2,
     };
 
     pub const PP_19_BIZON: Self = Self {
         name: "PP-19 Bizon",
+        mass: 2.7,
         level: 3,
         muzzle_velocity: 330.0,
         deviation: 0.015,
-        recoil: 11_250.0,
         fire_rate: 680.0,
         is_automatic: true,
         projectile: &ProjectileConfig::_9X18,
         ammo_capacity: 64,
         reloading_time: Self::RELOADING_TIME_SMG,
         partial_reloading: false,
+        grip: WeaponGrip::TwoHandsWithButt,
         image_offset: 7.0,
-        actor_image_suffix: 2,
     };
 
     pub const AKS_74U: Self = Self {
         name: "AKS-74U",
+        mass: 2.9,
         level: 4,
         muzzle_velocity: 735.0,
         deviation: 0.015,
-        recoil: 18_000.0,
         fire_rate: 675.0,
         is_automatic: true,
         projectile: &ProjectileConfig::_5_45X39,
         ammo_capacity: 30,
         reloading_time: Self::RELOADING_TIME_CARBINE,
         partial_reloading: false,
+        grip: WeaponGrip::TwoHandsWithButt,
         image_offset: 8.0,
-        actor_image_suffix: 2,
     };
 
     pub const AK_74M: Self = Self {
         name: "AK-74M",
+        mass: 3.83,
         level: 4,
         muzzle_velocity: 910.0,
         deviation: 0.014,
-        recoil: 21_000.0,
         fire_rate: 600.0,
         is_automatic: true,
         projectile: &ProjectileConfig::_5_45X39,
         ammo_capacity: 30,
         reloading_time: Self::RELOADING_TIME_RIFLE,
         partial_reloading: false,
+        grip: WeaponGrip::TwoHandsWithButt,
         image_offset: 9.0,
-        actor_image_suffix: 2,
     };
 
     pub const RPK_74: Self = Self {
         name: "RPK-74",
+        mass: 5.24,
         level: 5,
         muzzle_velocity: 960.0,
         deviation: 0.012,
-        recoil: 28_500.0,
         fire_rate: 600.0,
         is_automatic: true,
         projectile: &ProjectileConfig::_5_45X39,
         ammo_capacity: 45,
         reloading_time: Self::RELOADING_TIME_RIFLE_HEAVY,
         partial_reloading: false,
+        grip: WeaponGrip::TwoHandsWithButt,
         image_offset: 9.0,
-        actor_image_suffix: 2,
     };
 
     pub const SAIGA_12K: Self = Self {
         name: "Saiga-12K",
+        mass: 3.3,
         level: 5,
         muzzle_velocity: 410.0,
         deviation: 0.035,
-        recoil: 48_000.0,
         fire_rate: Self::SEMI_AUTO_FIRE_RATE,
         is_automatic: false,
         projectile: &ProjectileConfig::_12X76,
         ammo_capacity: 8,
         reloading_time: Self::RELOADING_TIME_RIFLE,
         partial_reloading: false,
+        grip: WeaponGrip::TwoHandsWithButt,
         image_offset: 9.0,
-        actor_image_suffix: 2,
     };
 
     pub const PKM: Self = Self {
         name: "PKM",
+        mass: 7.5,
         level: 6,
         muzzle_velocity: 825.0,
         deviation: 0.011,
-        recoil: 33_000.0,
         fire_rate: 650.0,
         is_automatic: true,
         projectile: &ProjectileConfig::_7_62X54,
         ammo_capacity: 100,
         reloading_time: Self::RELOADING_TIME_MACHINE_GUN,
         partial_reloading: false,
+        grip: WeaponGrip::TwoHandsWithButt,
         image_offset: 10.0,
-        actor_image_suffix: 2,
     };
 
     pub const PKP_PECHENEG: Self = Self {
         name: "PKP Pecheneg",
+        mass: 8.2,
         level: 6,
         muzzle_velocity: 825.0,
         deviation: 0.01,
-        recoil: 33_000.0,
         fire_rate: 650.0,
         is_automatic: true,
         projectile: &ProjectileConfig::_7_62X54,
         ammo_capacity: 100,
         reloading_time: Self::RELOADING_TIME_MACHINE_GUN,
         partial_reloading: false,
+        grip: WeaponGrip::TwoHandsWithButt,
         image_offset: 10.0,
-        actor_image_suffix: 2,
     };
 
     pub fn generate_velocity(&self, rng: &mut Pcg32) -> f32 {
@@ -284,6 +288,10 @@ impl WeaponConfig {
 
     pub fn generate_deviation(&self, rng: &mut Pcg32) -> f32 {
         return rng.gen_normal(self.deviation);
+    }
+
+    pub fn get_mass_with_full_ammo(&self) -> f32 {
+        return self.mass + self.projectile.mass * f32::from(self.ammo_capacity);
     }
 
     pub fn get_image_path(&self) -> String {
@@ -371,6 +379,19 @@ impl Weapon {
         }
     }
 
+    pub fn get_mass(&self) -> f32 {
+        return self.config.mass + self.config.projectile.mass * f32::from(self.ammo);
+    }
+
+    pub fn get_recoil(&self) -> f32 {
+        let momentum = self.config.muzzle_velocity * self.config.projectile.mass;
+        let mass = self.get_mass().powf(WeaponConfig::RECOIL_MASS_POW);
+
+        return (momentum / mass).powf(WeaponConfig::RECOIL_POW)
+            * WeaponConfig::RECOIL_MUL
+            * self.config.grip.recoil_factor();
+    }
+
     pub fn get_ammo_normalized(&self, time: Duration) -> f32 {
         if self.is_reloading {
             let progress = time.progress(
@@ -413,4 +434,28 @@ pub enum WeaponFireResult {
     NotReady,
     Empty,
     Fire,
+}
+
+pub enum WeaponGrip {
+    OneHand,
+    TwoHands,
+    TwoHandsWithButt,
+}
+
+impl WeaponGrip {
+    pub fn recoil_factor(&self) -> f32 {
+        match self {
+            Self::OneHand => 0.5,
+            Self::TwoHands => 0.75,
+            Self::TwoHandsWithButt => 1.0,
+        }
+    }
+
+    pub fn actor_image_suffix(&self) -> u8 {
+        match self {
+            Self::OneHand => 1,
+            Self::TwoHands => 2,
+            Self::TwoHandsWithButt => 2,
+        }
+    }
 }

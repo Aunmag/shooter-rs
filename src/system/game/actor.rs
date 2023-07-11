@@ -44,6 +44,7 @@ pub fn actor(mut query: Query<(&mut Actor, &mut Transform, &mut Inertia)>, time:
         movement = transform.rotation
             * normalize_movement(movement)
             * actor.config.movement_velocity
+            * actor.config.mass // since velocity configured for default mass, use int instead of real
             * actor.skill
             * time_delta;
 
@@ -51,7 +52,7 @@ pub fn actor(mut query: Query<(&mut Actor, &mut Transform, &mut Inertia)>, time:
             movement *= actor.config.sprint_factor;
         }
 
-        inertia.push(movement.xy(), 0.0, false, true, false);
+        inertia.push(movement.xy(), 0.0, true, false);
     }
 }
 
@@ -68,8 +69,11 @@ fn turn(actor: &Actor, transform: &mut Transform, inertia: &mut Inertia, time_de
         return;
     }
 
-    let mut velocity =
-        distance.signum() * actor.config.rotation_velocity * actor.skill * time_delta;
+    let mut velocity = distance.signum()
+        * actor.config.rotation_velocity
+        * actor.config.mass // since velocity configured for default mass, use int instead of real
+        * actor.skill
+        * time_delta;
 
     if actor.actions.is_attacking() {
         velocity *= 2.0;
@@ -77,14 +81,14 @@ fn turn(actor: &Actor, transform: &mut Transform, inertia: &mut Inertia, time_de
 
     let velocity_current = inertia.velocity_angular;
     let velocity_future = velocity + velocity_current;
-    let distance_future = velocity_future / Inertia::DRAG_ANGULAR;
+    let distance_future = velocity_future / inertia.drag();
     let distance_excess = distance_future / distance;
 
     if distance_excess > 1.0 {
         velocity /= distance_excess;
     }
 
-    inertia.push(Vec2::ZERO, velocity, false, true, false);
+    inertia.push(Vec2::ZERO, velocity, true, false);
 }
 
 fn normalize_movement(mut movement: Vec3) -> Vec3 {

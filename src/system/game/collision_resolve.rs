@@ -7,7 +7,7 @@ pub fn collision_resolve(
 ) {
     for solution in solutions.drain(..) {
         if let Ok((mut transform, mut inertia)) = query.get_mut(solution.entity) {
-            inertia.push(solution.push, 0.0, true, false, false);
+            inertia.push(solution.push, 0.0, false, false);
             transform.translation.x += solution.shift.x;
             transform.translation.y += solution.shift.y;
         }

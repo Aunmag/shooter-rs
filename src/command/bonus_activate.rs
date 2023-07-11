@@ -1,4 +1,4 @@
-use super::WeaponGive;
+use super::WeaponSet;
 use crate::component::Bonus;
 use bevy::{
     ecs::system::Command,
@@ -20,7 +20,7 @@ impl Command for BonusActivate {
             return;
         };
 
-        WeaponGive::new(self.recipient, weapon).write(world);
+        WeaponSet::new(self.recipient, Some(weapon)).write(world);
         world.entity_mut(self.bonus).despawn_recursive();
     }
 }

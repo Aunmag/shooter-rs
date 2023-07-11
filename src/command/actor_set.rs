@@ -1,5 +1,5 @@
 use crate::{
-    command::WeaponGive,
+    command::WeaponSet,
     component::{
         Actor, ActorConfig, ActorType, Breath, Collision, Footsteps, Health, Inertia, WeaponConfig,
     },
@@ -40,7 +40,7 @@ impl Command for ActorSet {
 
         if let ActorType::Human = self.config.actor_type {
             entity_mut.insert(Breath::default());
-            WeaponGive::new(self.entity, &WeaponConfig::PM).write(world);
+            WeaponSet::new(self.entity, Some(&WeaponConfig::PM)).write(world);
         }
     }
 }

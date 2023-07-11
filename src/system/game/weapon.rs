@@ -120,13 +120,13 @@ pub fn weapon(
                         });
                     }
 
-                    let mut recoil = weapon.config.recoil;
+                    let mut recoil = weapon.get_recoil();
 
                     if data.rng.gen::<bool>() {
                         recoil = -recoil;
                     }
 
-                    inertia.push(Vec2::ZERO, recoil, true, false, false);
+                    inertia.push(Vec2::ZERO, recoil, false, false);
 
                     if let Some(player) = player.as_mut() {
                         player.shake(recoil);

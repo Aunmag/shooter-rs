@@ -10,13 +10,14 @@ pub struct Inertia {
 impl Inertia {
     pub const PUSH_MULTIPLIER: f32 = 40.0;
     pub const PUSH_MULTIPLIER_ANGULAR: f32 = 350.0;
+    pub const DRAG_FACTOR: f32 = 500.0;
 
-    // TODO: make these component's properties
-    pub const DRAG: f32 = 7.0;
-    pub const DRAG_ANGULAR: f32 = 8.0;
+    // TODO: make component's property
     pub const RIGIDITY: f32 = 0.05;
 
     pub fn new(mass: f32) -> Self {
+        assert!(mass > 0.0, "Mass must be greater than zero");
+
         return Self {
             mass,
             velocity: Vec2::new(0.0, 0.0),
@@ -43,19 +44,17 @@ impl Inertia {
         &mut self,
         mut force: Vec2,
         mut force_angular: f32,
-        with_mass: bool,
         with_drag: bool,
         with_push_multiplier: bool,
     ) {
-        if with_mass {
-            let inverse_mass = self.get_inverse_mass();
-            force *= inverse_mass;
-            force_angular *= inverse_mass;
-        }
+        let mass_inverse = self.mass_inverse();
+        force *= mass_inverse;
+        force_angular *= mass_inverse;
 
         if with_drag {
-            force *= Self::DRAG;
-            force_angular *= Self::DRAG_ANGULAR;
+            let drag = self.drag();
+            force *= drag;
+            force_angular *= drag;
         }
 
         if with_push_multiplier {
@@ -67,11 +66,11 @@ impl Inertia {
         self.velocity_angular += force_angular;
     }
 
-    pub fn get_inverse_mass(&self) -> f32 {
-        if self.mass == 0.0 {
-            return 0.0;
-        } else {
-            return 1.0 / self.mass;
-        }
+    pub fn mass_inverse(&self) -> f32 {
+        return 1.0 / self.mass;
+    }
+
+    pub fn drag(&self) -> f32 {
+        return self.mass_inverse() * Self::DRAG_FACTOR;
     }
 }

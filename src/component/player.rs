@@ -130,7 +130,7 @@ struct Shake {
 }
 
 impl Shake {
-    const SENSITIVITY: f32 = 0.000001;
+    const SENSITIVITY: f32 = 0.001;
     const SPEED_INCREASE: Duration = Duration::from_millis(35);
     const SPEED_DECREASE: Duration = Duration::from_millis(600);
 
