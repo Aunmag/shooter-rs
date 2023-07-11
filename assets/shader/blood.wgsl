@@ -1,6 +1,6 @@
 #import bevy_pbr::utils
 
-const ALPHA = 0.75;
+const ALPHA = 0.8;
 const SCALE = 8.0;
 const NOISE_ROUGHNESS_1 = 0.5;
 const NOISE_ROUGHNESS_2 = 2.5;
