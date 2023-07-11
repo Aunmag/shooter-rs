@@ -26,6 +26,7 @@ const ZOMBIE_SPAWN_DISTANCE_MAX: f32 = 60.0;
 const ZOMBIE_SKILL_MIN: f32 = 1.0;
 const ZOMBIE_SKILL_MAX: f32 = 1.8;
 const BONUSES_PER_WAVE: f32 = 3.0;
+const GAME_OVER_TEXT_DURATION: Duration = Duration::from_secs(8);
 
 enum Task {
     Start,
@@ -92,16 +93,18 @@ impl WavesScenario {
                 self.kills = 0;
 
                 if self.wave > WAVE_FINAL {
-                    commands.add(Notify::new(
-                        "Wait".to_string(),
-                        "NOW IT IS TIME TO SUFFER".to_string(),
-                    ));
+                    commands.add(Notify {
+                        text: "Wait".to_string(),
+                        text_small: "NOW IT IS TIME TO SUFFER".to_string(),
+                        ..Default::default()
+                    });
                 } else {
                     commands.add(HealHumans);
-                    commands.add(Notify::new(
-                        format!("Wave {}/{}", self.wave, WAVE_FINAL),
-                        format!("Kill {} zombies", self.wave_size()),
-                    ));
+                    commands.add(Notify {
+                        text: format!("Wave {}/{}", self.wave, WAVE_FINAL),
+                        text_small: format!("Kill {} zombies", self.wave_size()),
+                        ..Default::default()
+                    });
                 }
 
                 return Task::SpawnZombie;
@@ -130,15 +133,17 @@ impl WavesScenario {
             }
             Task::CompleteWave => {
                 if self.wave == WAVE_FINAL {
-                    commands.add(Notify::new(
-                        "Congratulations!".to_string(),
-                        format!("You've completed the all {} waves", WAVE_FINAL),
-                    ));
+                    commands.add(Notify {
+                        text: "Congratulations!".to_string(),
+                        text_small: format!("You've completed the all {} waves", WAVE_FINAL),
+                        ..Default::default()
+                    });
                 } else {
-                    commands.add(Notify::new(
-                        format!("Wave {} completed!", self.wave),
-                        "Prepare for the next".to_string(),
-                    ));
+                    commands.add(Notify {
+                        text: format!("Wave {} completed!", self.wave),
+                        text_small: "Prepare for the next".to_string(),
+                        ..Default::default()
+                    });
                 }
 
                 return Task::StartNextWave;
@@ -180,22 +185,22 @@ impl ScenarioLogic for WavesScenario {
             if self.kills == 1 {
                 match self.wave {
                     1 => {
-                        commands.add(Notify::new(
-                            String::new(),
-                            "Press [R] to reload".to_string(),
-                        ));
+                        commands.add(Notify {
+                            text_small: "Press [R] to reload".to_string(),
+                            ..Default::default()
+                        });
                     }
                     2 => {
-                        commands.add(Notify::new(
-                            String::new(),
-                            "Press [SHIFT] to sprint".to_string(),
-                        ));
+                        commands.add(Notify {
+                            text_small: "Press [SHIFT] to sprint".to_string(),
+                            ..Default::default()
+                        });
                     }
                     3 => {
-                        commands.add(Notify::new(
-                            String::new(),
-                            "Use mouse wheel to change zoom".to_string(),
-                        ));
+                        commands.add(Notify {
+                            text_small: "Use mouse wheel to change zoom".to_string(),
+                            ..Default::default()
+                        });
                     }
                     _ => {}
                 }
@@ -211,10 +216,11 @@ impl ScenarioLogic for WavesScenario {
                 commands.add(BonusSpawn::new(event.position, self.wave));
             }
         } else {
-            commands.add(Notify::new(
-                "Game over".to_string(),
-                "You died. Press [ESC] to exit".to_string(),
-            ));
+            commands.add(Notify {
+                text: "Game over".to_string(),
+                text_small: "You died. Press [ESC] to exit".to_string(),
+                duration: GAME_OVER_TEXT_DURATION,
+            });
         }
     }
 

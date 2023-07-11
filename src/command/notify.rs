@@ -12,16 +12,17 @@ use bevy::{
     ui::{node_bundles::TextBundle, Style, UiRect, Val},
     window::{PrimaryWindow, Window},
 };
-use derive_more::Constructor;
+use std::time::Duration;
 
 const POSITION: f32 = 0.3;
 const FONT_SCALE: f32 = 0.04;
 const COLOR: Color = Color::WHITE;
 
-#[derive(Constructor)]
+#[derive(Default)]
 pub struct Notify {
-    text: String,
-    text_small: String,
+    pub text: String,
+    pub text_small: String,
+    pub duration: Duration,
 }
 
 impl Command for Notify {
@@ -35,6 +36,12 @@ impl Command for Notify {
             .map_or(600.0, |w| w.width());
 
         let asset_server = world.resource::<AssetServer>();
+
+        let notification = if self.duration.is_zero() {
+            Notification::new(time)
+        } else {
+            Notification::new_with_duration(time, self.duration)
+        };
 
         world
             .spawn(
@@ -64,7 +71,7 @@ impl Command for Notify {
                     ..Default::default()
                 }),
             )
-            .insert(Notification::new(time));
+            .insert(notification);
 
         world.resource_mut::<AudioTracker>().queue(AudioPlay {
             path: "sounds/notification.ogg",

@@ -1,25 +1,34 @@
 use crate::util::Envelope;
 use bevy::ecs::component::Component;
-use derive_more::Constructor;
 use std::time::Duration;
 
-#[derive(Constructor, Component)]
+#[derive(Component)]
 pub struct Notification {
-    pub created: Duration,
+    created: Duration,
+    envelope: Envelope,
 }
 
 impl Notification {
-    const ENVELOPE: Envelope = Envelope::new(
-        Duration::from_millis(150),
-        Duration::from_millis(2500),
-        Duration::from_millis(500),
-    );
+    const FADE_IN: Duration = Duration::from_millis(150);
+    const FADE_OUT: Duration = Duration::from_millis(150);
+    const DURATION: Duration = Duration::from_millis(2500);
+
+    pub fn new(created: Duration) -> Self {
+        return Self::new_with_duration(created, Self::DURATION);
+    }
+
+    pub fn new_with_duration(created: Duration, duration: Duration) -> Self {
+        return Self {
+            created,
+            envelope: Envelope::new(Self::FADE_IN, duration, Self::FADE_OUT),
+        };
+    }
 
     pub fn alpha(&self, time: Duration) -> f32 {
-        return Self::ENVELOPE.get(time.saturating_sub(self.created));
+        return self.envelope.get(time.saturating_sub(self.created));
     }
 
     pub fn is_expired(&self, time: Duration) -> bool {
-        return time > self.created + Self::ENVELOPE.duration();
+        return time > self.created + self.envelope.duration();
     }
 }
