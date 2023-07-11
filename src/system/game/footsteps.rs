@@ -10,7 +10,7 @@ use std::time::Duration;
 
 const STRIDE_DISTANCE_MIN: f32 = 0.1;
 const STRIDE_RATE_MIN: (f32, f32, f32) = (0.1, 70.0, 0.04);
-const STRIDE_RATE_MAX: (f32, f32, f32) = (5.0, 135.0, 0.18);
+const STRIDE_RATE_MAX: (f32, f32, f32) = (5.0, 135.0, 0.19);
 
 // TODO: play sound on turn
 pub fn footsteps(

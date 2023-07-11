@@ -46,7 +46,7 @@ pub fn projectile(
 
             audio.queue(AudioPlay {
                 path: "sounds/hit_body_{n}.ogg",
-                volume: 1.5, // TODO: make it depend from momentum
+                volume: 1.2, // TODO: make it depend from momentum
                 source: Some(obstacle_position),
                 priority: AudioPlay::PRIORITY_LOWER,
                 ..AudioPlay::DEFAULT
