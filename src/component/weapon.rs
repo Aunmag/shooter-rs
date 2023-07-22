@@ -78,8 +78,8 @@ impl WeaponConfig {
         Self::PM,
         Self::TT,
         Self::MP_43_SAWED_OFF,
-        Self::MP_27,
         Self::PP_91_KEDR,
+        Self::MP_27,
         Self::PP_19_BIZON,
         Self::AKS_74U,
         Self::AK_74M,
@@ -137,26 +137,10 @@ impl WeaponConfig {
         image_offset: 3.5,
     };
 
-    pub const MP_27: Self = Self {
-        name: "MP-27",
-        mass: 3.2,
-        level: 2,
-        muzzle_velocity: 410.0,
-        deviation: 0.03,
-        fire_rate: Self::SEMI_AUTO_FIRE_RATE,
-        is_automatic: false,
-        projectile: &ProjectileConfig::_12X76,
-        ammo_capacity: 2,
-        reloading_time: Self::RELOADING_TIME_SHOTGUN,
-        partial_reloading: true,
-        grip: WeaponGrip::TwoHandsWithButt,
-        image_offset: 10.0,
-    };
-
     pub const PP_91_KEDR: Self = Self {
         name: "PP-91 Kedr",
         mass: 1.6,
-        level: 3,
+        level: 2,
         muzzle_velocity: 310.0,
         deviation: 0.02,
         fire_rate: 900.0,
@@ -167,6 +151,22 @@ impl WeaponConfig {
         partial_reloading: false,
         grip: WeaponGrip::TwoHands,
         image_offset: 3.5,
+    };
+
+    pub const MP_27: Self = Self {
+        name: "MP-27",
+        mass: 3.2,
+        level: 3,
+        muzzle_velocity: 410.0,
+        deviation: 0.03,
+        fire_rate: Self::SEMI_AUTO_FIRE_RATE,
+        is_automatic: false,
+        projectile: &ProjectileConfig::_12X76,
+        ammo_capacity: 2,
+        reloading_time: Self::RELOADING_TIME_SHOTGUN,
+        partial_reloading: true,
+        grip: WeaponGrip::TwoHandsWithButt,
+        image_offset: 10.0,
     };
 
     pub const PP_19_BIZON: Self = Self {

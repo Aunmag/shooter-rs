@@ -74,9 +74,9 @@ pub struct DebugPlugin;
 impl Plugin for DebugPlugin {
     fn build(&self, app: &mut App) {
         app.insert_resource(Benchmark::default())
-            .add_plugin(FrameTimeDiagnosticsPlugin::default())
-            .add_plugin(EntityCountDiagnosticsPlugin::default())
-            .add_plugin(SystemInformationDiagnosticsPlugin::default())
+            .add_plugin(FrameTimeDiagnosticsPlugin)
+            .add_plugin(EntityCountDiagnosticsPlugin)
+            .add_plugin(SystemInformationDiagnosticsPlugin)
             .add_plugin(DebugLinesPlugin::default())
             .add_startup_system(startup)
             .add_system(update_diagnostics)
