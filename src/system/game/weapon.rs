@@ -63,13 +63,17 @@ pub fn weapon(
         }
 
         if weapon.is_reloading() && weapon.is_ready(now) {
+            let was_armed = weapon.is_armed();
             weapon.complete_reloading(now);
-            audio.queue(AudioPlay {
-                path: "sounds/reloaded".into(),
-                volume: 0.8,
-                source: Some(transform.translation.xy()),
-                ..AudioPlay::DEFAULT
-            });
+
+            if !was_armed {
+                audio.queue(AudioPlay {
+                    path: "sounds/reloaded".into(),
+                    volume: 0.8,
+                    source: Some(transform.translation.xy()),
+                    ..AudioPlay::DEFAULT
+                });
+            }
         }
 
         if actor.actions.is_attacking() {

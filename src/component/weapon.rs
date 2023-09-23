@@ -9,12 +9,12 @@ use bevy::ecs::component::Component;
 use rand_pcg::Pcg32;
 use std::time::Duration;
 
-/// To make sure reloading sounds have stopped
-const POST_RELOADING_TIME: Duration = Duration::from_millis(200);
+const ARMING_DURATION: Duration = Duration::from_millis(300);
 
 #[derive(Component)]
 pub struct Weapon {
     pub config: &'static WeaponConfig,
+    is_armed: bool,
     is_cocked: bool,
     is_trigger_pressed: bool,
     is_reloading: bool,
@@ -311,6 +311,7 @@ impl Weapon {
     pub const fn new(config: &'static WeaponConfig) -> Self {
         return Self {
             config,
+            is_armed: true,
             is_cocked: true,
             is_trigger_pressed: false,
             is_reloading: false,
@@ -335,6 +336,10 @@ impl Weapon {
                 self.ammo -= 1;
                 return WeaponFireResult::Fire;
             } else {
+                if !self.config.partial_reloading {
+                    self.is_armed = false;
+                }
+
                 self.is_cocked = false;
                 return WeaponFireResult::Empty;
             }
@@ -375,7 +380,10 @@ impl Weapon {
                 self.ammo = self.config.ammo_capacity;
             }
 
-            self.next_time = time + POST_RELOADING_TIME;
+            if !self.is_armed {
+                self.is_armed = true;
+                self.next_time = time + ARMING_DURATION;
+            }
         }
     }
 
@@ -419,6 +427,10 @@ impl Weapon {
 
     pub fn is_trigger_pressed(&self) -> bool {
         return self.is_trigger_pressed;
+    }
+
+    pub fn is_armed(&self) -> bool {
+        return self.is_armed;
     }
 
     pub fn is_reloading(&self) -> bool {
