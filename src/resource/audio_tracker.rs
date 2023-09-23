@@ -127,7 +127,7 @@ impl AudioTracker {
 
         for queued in queue.drain(..) {
             let audio_source = if let Some(handle) = storage.choose(queued.path.as_ref()) {
-                handle
+                handle.clone()
             } else {
                 return;
             };

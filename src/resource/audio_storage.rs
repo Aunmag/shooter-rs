@@ -2,7 +2,7 @@ use bevy::{
     asset::AssetServer,
     prelude::{Assets, AudioSource, Handle, Resource},
 };
-use rand::{Rng, SeedableRng};
+use rand::{seq::SliceRandom, SeedableRng};
 use rand_pcg::Pcg32;
 use regex::Regex;
 use std::collections::{HashMap, HashSet};
@@ -52,7 +52,7 @@ impl AudioStorage {
         log::debug!("Indexed groups: {}", self.groups.len());
     }
 
-    pub fn choose(&mut self, path: &str) -> Option<Handle<AudioSource>> {
+    pub fn choose(&mut self, path: &str) -> Option<&Handle<AudioSource>> {
         let handle = self
             .groups
             .get_mut(path)
@@ -72,36 +72,17 @@ impl AudioStorage {
 #[derive(Default)]
 struct AudioGroup {
     audios: Vec<Handle<AudioSource>>,
-    last_chosen_index: usize,
+    cursor: usize,
 }
 
 impl AudioGroup {
-    fn choose(&mut self, generator: &mut Pcg32) -> Option<Handle<AudioSource>> {
-        match self.audios.len() {
-            0 => {
-                return None;
-            }
-            1 => {
-                return self.get(0);
-            }
-            2 => {
-                return self.get(self.last_chosen_index + 1);
-            }
-            len => {
-                let mut index = generator.gen_range(0..len);
+    fn choose(&mut self, generator: &mut Pcg32) -> Option<&Handle<AudioSource>> {
+        self.cursor = (self.cursor + 1) % self.audios.len();
 
-                if index == self.last_chosen_index {
-                    index += 1;
-                }
-
-                return self.get(index);
-            }
+        if self.cursor == 0 && self.audios.len() > 2 {
+            self.audios.shuffle(generator);
         }
-    }
 
-    fn get(&mut self, mut index: usize) -> Option<Handle<AudioSource>> {
-        index %= self.audios.len();
-        self.last_chosen_index = index;
-        return self.audios.get(index).cloned();
+        return self.audios.get(self.cursor);
     }
 }
