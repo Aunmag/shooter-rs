@@ -5,8 +5,6 @@ use bevy::{
 };
 use serde::Deserialize;
 
-// TODO: logging config
-
 #[derive(Clone, Deserialize, Debug, Resource)]
 pub struct Config {
     pub display: DisplayConfig,

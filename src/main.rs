@@ -50,6 +50,7 @@ use crate::{
     util::ext::AppExt,
 };
 use bevy::{
+    log::LogPlugin,
     prelude::{App, DefaultPlugins, IntoPipeSystem, IntoSystemConfig, PluginGroup},
     render::texture::ImagePlugin,
     sprite::Material2dPlugin,
@@ -65,6 +66,7 @@ fn main() {
 
     application.add_plugins(
         DefaultPlugins
+            .set(init_log_plugin(config.misc.debug))
             .set(ImagePlugin::default_nearest())
             .set(WindowPlugin {
                 primary_window: Some(Window {
@@ -139,4 +141,19 @@ fn main() {
             s.add(bot::sound);
         })
         .run();
+}
+
+fn init_log_plugin(debug: bool) -> LogPlugin {
+    let mut log_plugin = LogPlugin::default();
+
+    if debug {
+        if !log_plugin.filter.is_empty() {
+            log_plugin.filter.push(',');
+        }
+
+        log_plugin.filter.push_str(env!("CARGO_PKG_NAME"));
+        log_plugin.filter.push_str("=debug");
+    }
+
+    return log_plugin;
 }
