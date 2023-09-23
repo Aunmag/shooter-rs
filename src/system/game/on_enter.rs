@@ -39,23 +39,21 @@ pub fn on_enter(
     spawn_trees(&mut commands, &assets);
 
     audio_tracker.queue(AudioPlay {
-        path: "sounds/ambience_music.ogg",
+        path: "sounds/ambience_music".into(),
         volume: 0.3,
         duration: Duration::MAX,
-        priority: AudioPlay::PRIORITY_HIGHEST,
         ..AudioPlay::DEFAULT
     });
 
     audio_tracker.queue(AudioPlay {
-        path: "sounds/ambience_nature.ogg",
+        path: "sounds/ambience_nature".into(),
         volume: 0.3,
         duration: Duration::MAX,
-        priority: AudioPlay::PRIORITY_HIGHEST,
         ..AudioPlay::DEFAULT
     });
 
     let heartbeat_sink = audio.play_with_settings(
-        assets.get_handle("sounds/heartbeat.ogg"),
+        assets.get_handle("sounds/heartbeat"),
         PlaybackSettings::LOOP.with_volume(0.0),
     );
     heartbeat.sink.replace(assets.get_handle(heartbeat_sink));

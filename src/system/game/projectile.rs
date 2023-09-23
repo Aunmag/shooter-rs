@@ -45,10 +45,9 @@ pub fn projectile(
                 math::angle_difference(tail.angle_to(head), tail.angle_to(obstacle_position));
 
             audio.queue(AudioPlay {
-                path: "sounds/hit_body_{n}.ogg",
+                path: "sounds/hit_body".into(),
                 volume: 1.2, // TODO: make it depend from momentum
                 source: Some(obstacle_position),
-                priority: AudioPlay::PRIORITY_LOWER,
                 ..AudioPlay::DEFAULT
             });
 

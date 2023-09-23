@@ -35,7 +35,7 @@ pub fn melee(
         let mut victim: Option<TargetData> = None;
 
         for (target_entity, target_actor, target_transform) in targets.iter() {
-            if attacker_actor.config.actor_type == target_actor.config.actor_type {
+            if attacker_actor.config.kind == target_actor.config.kind {
                 continue;
             }
 
@@ -61,10 +61,9 @@ pub fn melee(
             hits.add(victim.entity, force, -victim.angle_subjective);
 
             audio.queue(AudioPlay {
-                path: "sounds/melee_{n}.ogg",
+                path: "sounds/melee".into(),
                 volume: 0.6,
                 source: Some(attacker_transform.translation.xy()),
-                priority: AudioPlay::PRIORITY_LOWER,
                 ..AudioPlay::DEFAULT
             });
 

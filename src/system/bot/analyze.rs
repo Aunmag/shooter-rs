@@ -47,7 +47,7 @@ pub fn analyze(
 
                 let p2 = t2.translation.xy();
 
-                if a1.config.actor_type == a2.config.actor_type {
+                if a1.config.kind == a2.config.kind {
                     let distance = (p1 - p2).length_squared();
                     let distance_max = bot.spread * 2.0;
 

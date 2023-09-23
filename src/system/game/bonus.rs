@@ -1,6 +1,6 @@
 use crate::{
     command::BonusActivate,
-    component::{Actor, ActorType, Bonus, BonusImage, BonusLabel, Collision, Player},
+    component::{Actor, ActorKind, Bonus, BonusImage, BonusLabel, Collision, Player},
     util::{ext::Vec2Ext, math::interpolate},
 };
 use bevy::{
@@ -31,7 +31,7 @@ pub fn bonus(
         let bonus_position = bonus_transform.translation.xy();
 
         for (player_entity, actor, player_transform, player_body) in players.iter() {
-            if actor.config.actor_type != ActorType::Human {
+            if actor.config.kind != ActorKind::Human {
                 continue;
             }
 

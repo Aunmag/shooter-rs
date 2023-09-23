@@ -122,10 +122,9 @@ impl WeaponSet {
             .map(|t| t.translation.xy())
         {
             world.resource_mut::<AudioTracker>().queue(AudioPlay {
-                path: "sounds/pickup_weapon.ogg",
+                path: "sounds/pickup_weapon".into(),
                 volume: 0.9,
                 source: Some(source),
-                priority: AudioPlay::PRIORITY_HIGHER,
                 ..AudioPlay::DEFAULT
             });
         }

@@ -30,7 +30,6 @@ fn rotate(v: vec2<f32>, center: vec2<f32>, r: f32) -> vec2<f32> {
 }
 
 fn ddxy(v: f32, c: f32) -> f32 {
-    // TODO: avoid conditions
     // TODO: make it more smooth
     if v < c {
         return 0.0;
@@ -65,7 +64,6 @@ fn ring(center: vec2<f32>, value: f32, radius: f32, thickness: f32) -> f32 {
 fn bar(value: f32, center: vec2<f32>, color: vec4<f32>, radius: f32, thickness: f32) -> vec4<f32> {
     var fill = ring(center, value * RANGE, radius, thickness);
 
-    // TODO: avoid conditions
     if fill > 0.1 {
         return mix_alpha(color, fill);
     } else {

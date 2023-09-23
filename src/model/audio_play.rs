@@ -1,41 +1,24 @@
-use crate::util::ext::Vec2Ext;
+use crate::util::{ext::Vec2Ext, SmartString};
 use bevy::{math::Vec2, prelude::PlaybackSettings};
 use std::time::Duration;
 
 #[derive(Clone)]
 pub struct AudioPlay {
-    pub path: &'static str,
+    pub path: SmartString<'static>,
     pub volume: f32,
-    pub chance: f32,
     pub source: Option<Vec2>,
     pub duration: Duration,
-    pub priority: u8,
 }
 
 impl AudioPlay {
-    pub const PRIORITY_LOWEST: u8 = 0;
-    pub const PRIORITY_LOWER: u8 = 1;
-    pub const PRIORITY_MEDIUM: u8 = 2;
-    pub const PRIORITY_HIGHER: u8 = 3;
-    pub const PRIORITY_HIGHEST: u8 = 4;
-
     const CLOSE_DISTANCE: f32 = 0.5;
 
     pub const DEFAULT: Self = Self {
-        path: "sounds/default.ogg",
+        path: SmartString::Ref("sound/default"),
         volume: 1.0,
-        chance: 1.0,
         source: None,
         duration: Duration::ZERO,
-        priority: Self::PRIORITY_MEDIUM,
     };
-
-    pub fn as_spatial(&self, source: Vec2) -> Self {
-        return Self {
-            source: Some(source),
-            ..self.clone()
-        };
-    }
 
     pub fn settings(&self) -> PlaybackSettings {
         let settings = if self.duration.is_zero() {
@@ -57,7 +40,7 @@ impl AudioPlay {
     }
 
     pub fn is_similar_to(&self, other: &Self) -> bool {
-        return std::ptr::eq(self.path, other.path)
+        return self.path == other.path
             && self.is_close_to(other)
             && self.has_same_repeat_mode(other);
     }

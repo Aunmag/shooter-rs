@@ -24,10 +24,9 @@ pub fn sound(
 
         if !bot.next_sound.is_zero() {
             audio.queue(AudioPlay {
-                path: "sounds/zombie_{n}.ogg",
+                path: "actors/zombie/misc".into(),
                 volume: 0.7,
                 source: Some(transform.translation.xy()),
-                priority: AudioPlay::PRIORITY_LOWER,
                 ..AudioPlay::DEFAULT
             });
         }

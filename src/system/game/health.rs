@@ -2,6 +2,7 @@ use crate::{
     command::{ActorRelease, BloodSpawn},
     component::{Actor, Health},
     event::ActorDeathEvent,
+    model::AudioPlay,
     resource::AudioTracker,
 };
 use bevy::{
@@ -27,18 +28,24 @@ pub fn health(
         let mut blood = actor.radius * damage * BLOOD_FACTOR_ON_DAMAGE;
 
         if health.is_alive() && damage > actor.pain_threshold {
-            if let Some(sound) = &actor.sound_pain {
-                audio.queue(sound.as_spatial(point));
-            }
+            audio.queue(AudioPlay {
+                path: format!("{}/pain", actor.kind.get_assets_path()).into(),
+                volume: 0.9,
+                source: Some(point),
+                ..AudioPlay::DEFAULT
+            });
         }
 
         if health.is_just_died() {
-            if let Some(sound) = &actor.sound_death {
-                audio.queue(sound.as_spatial(point));
-            }
+            audio.queue(AudioPlay {
+                path: format!("{}/death", actor.kind.get_assets_path()).into(),
+                volume: 1.0,
+                source: Some(point),
+                ..AudioPlay::DEFAULT
+            });
 
             commands.add(ActorRelease(entity));
-            death_events.send(ActorDeathEvent::new(actor.actor_type, point));
+            death_events.send(ActorDeathEvent::new(actor.kind, point));
             blood += actor.radius * BLOOD_FACTOR_ON_DEATH;
             commands.entity(entity).despawn_recursive();
         }

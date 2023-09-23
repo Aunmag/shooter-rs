@@ -1,7 +1,7 @@
 use crate::{
     command::WeaponSet,
     component::{
-        Actor, ActorConfig, ActorType, Breath, Collision, Footsteps, Health, Inertia, WeaponConfig,
+        Actor, ActorConfig, ActorKind, Breath, Collision, Footsteps, Health, Inertia, WeaponConfig,
     },
     data::LAYER_ACTOR,
     model::TransformLite,
@@ -38,7 +38,7 @@ impl Command for ActorSet {
             .insert(Health::new(self.config.resistance * self.skill))
             .insert(Footsteps::default());
 
-        if let ActorType::Human = self.config.actor_type {
+        if let ActorKind::Human = self.config.kind {
             entity_mut.insert(Breath::default());
             WeaponSet::new(self.entity, Some(&WeaponConfig::PM)).write(world);
         }

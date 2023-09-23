@@ -53,12 +53,10 @@ pub fn weapon(
             weapon.reload(now);
 
             audio.queue(AudioPlay {
-                path: "sounds/reloading_{n}.ogg",
+                path: "sounds/reloading".into(),
                 volume: 0.4,
                 source: Some(transform.translation.xy()),
                 duration: weapon.config.reloading_time, // TODO: stop if weapon will be changed earlier
-                priority: AudioPlay::PRIORITY_MEDIUM,
-                ..AudioPlay::DEFAULT
             });
 
             continue;
@@ -67,10 +65,9 @@ pub fn weapon(
         if weapon.is_reloading() && weapon.is_ready(now) {
             weapon.complete_reloading(now);
             audio.queue(AudioPlay {
-                path: "sounds/reloaded_{n}.ogg",
+                path: "sounds/reloaded".into(),
                 volume: 0.8,
                 source: Some(transform.translation.xy()),
-                priority: AudioPlay::PRIORITY_LOWER,
                 ..AudioPlay::DEFAULT
             });
         }
@@ -83,10 +80,9 @@ pub fn weapon(
                 WeaponFireResult::Empty => {
                     if !was_trigger_pressed || (was_cocked && !weapon.is_cocked()) {
                         audio.queue(AudioPlay {
-                            path: "sounds/dry_fire.ogg",
+                            path: "sounds/dry_fire".into(),
                             volume: 0.4,
                             source: Some(transform.translation.xy()),
-                            priority: AudioPlay::PRIORITY_LOWER,
                             ..AudioPlay::DEFAULT
                         });
                     }
@@ -97,10 +93,9 @@ pub fn weapon(
                     transform.translation += Vec2::from_length(BARREL_LENGTH, transform.direction);
 
                     audio.queue(AudioPlay {
-                        path: "sounds/shot.ogg",
+                        path: "sounds/shot".into(),
                         volume: 1.0,
                         source: Some(transform.translation),
-                        priority: AudioPlay::PRIORITY_HIGHEST,
                         ..AudioPlay::DEFAULT
                     });
 

@@ -3,6 +3,7 @@ use crate::{
     data::{FONT_PATH, FONT_PATH_BOLD},
     model::AudioPlay,
     resource::AudioTracker,
+    util::SmartString,
 };
 use bevy::{
     ecs::{query::With, system::Command, world::World},
@@ -20,8 +21,8 @@ const COLOR: Color = Color::WHITE;
 
 #[derive(Default)]
 pub struct Notify {
-    pub text: String,
-    pub text_small: String,
+    pub text: SmartString<'static>,
+    pub text_small: SmartString<'static>,
     pub duration: Duration,
 }
 
@@ -47,7 +48,7 @@ impl Command for Notify {
             .spawn(
                 TextBundle::from_sections([
                     TextSection::new(
-                        format!("{}\n", self.text),
+                        format!("{}\n", self.text.as_ref()),
                         TextStyle {
                             font: asset_server.get_handle(FONT_PATH_BOLD),
                             font_size: window_width * FONT_SCALE,
@@ -55,7 +56,7 @@ impl Command for Notify {
                         },
                     ),
                     TextSection::new(
-                        self.text_small,
+                        self.text_small.as_ref(),
                         TextStyle {
                             font: asset_server.get_handle(FONT_PATH),
                             font_size: window_width * FONT_SCALE / 2.0,
@@ -74,9 +75,8 @@ impl Command for Notify {
             .insert(notification);
 
         world.resource_mut::<AudioTracker>().queue(AudioPlay {
-            path: "sounds/notification.ogg",
+            path: "sounds/notification".into(),
             volume: 0.8,
-            priority: AudioPlay::PRIORITY_HIGHER,
             ..AudioPlay::DEFAULT
         });
     }

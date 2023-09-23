@@ -1,9 +1,6 @@
 use super::AudioStorage;
 use crate::model::AudioPlay;
 use bevy::prelude::{Assets, Audio, AudioSink, AudioSinkPlayback, Handle, Resource, Vec2};
-use derive_more::Constructor;
-use rand::{Rng, SeedableRng};
-use rand_pcg::Pcg32;
 use std::time::{Duration, Instant};
 
 const VOLUME_MIN: f32 = 0.01;
@@ -19,7 +16,6 @@ pub struct AudioTracker {
     playing: Vec<Source>,
     canceled: Vec<Source>,
     listener: Vec2,
-    rng: Pcg32,
 }
 
 impl AudioTracker {
@@ -30,51 +26,41 @@ impl AudioTracker {
             playing: Vec::new(),
             canceled: Vec::new(),
             listener: Vec2::ZERO,
-            rng: Pcg32::seed_from_u64(133),
         };
     }
 
     pub fn queue(&mut self, mut audio: AudioPlay) {
         if let Some(source) = audio.source {
-            // TODO: find a way to recalculate volume before playing, since
-            // listener position will change
             audio.volume = self.calc_spatial_volume(source, audio.volume);
         }
 
-        if audio.volume < VOLUME_MIN || audio.chance <= 0.0 {
+        if audio.volume < VOLUME_MIN {
             return;
         }
 
-        if audio.chance < 1.0 && !self.rng.gen_bool(audio.chance.into()) {
-            return;
-        }
-
-        let mut lowest: Option<(usize, bool, Priority)> = None; // (index, is_playing, priority)
+        let mut lowest: Option<(usize, bool, f32)> = None; // (index, is_playing, volume)
 
         for (i, queued) in self.queue.iter_mut().enumerate() {
             if audio.is_similar_to(queued) {
                 queued.volume = f32::max(queued.volume, audio.volume);
                 queued.duration = Duration::max(queued.duration, audio.duration);
-                queued.priority = u8::max(queued.priority, audio.priority);
                 return;
             }
 
-            let priority = Priority::new(queued.priority, queued.volume);
-
-            if lowest.map_or(true, |(_, _, l)| priority.is_lower_than(l)) {
-                lowest = Some((i, false, priority));
+            if lowest.map_or(true, |(_, _, l)| queued.volume < l) {
+                lowest = Some((i, false, queued.volume));
             }
         }
 
         if !self.has_space() {
             for (i, source) in self.playing.iter().enumerate() {
-                if lowest.map_or(true, |(_, _, l)| source.priority.is_lower_than(l)) {
-                    lowest = Some((i, true, source.priority));
+                if lowest.map_or(true, |(_, _, l)| source.volume < l) {
+                    lowest = Some((i, true, source.volume));
                 }
             }
 
             if let Some((i, is_playing, lowest)) = lowest {
-                if lowest.is_lower_than(Priority::new(audio.priority, audio.volume)) {
+                if lowest < audio.volume {
                     if is_playing {
                         self.canceled.push(self.playing.swap_remove(i));
                     } else {
@@ -140,10 +126,9 @@ impl AudioTracker {
         std::mem::swap(&mut self.queue, &mut queue);
 
         for queued in queue.drain(..) {
-            let audio_source = if let Some(handle) = storage.choose(queued.path) {
+            let audio_source = if let Some(handle) = storage.choose(queued.path.as_ref()) {
                 handle
             } else {
-                log::warn!("Audio {} not found", queued.path);
                 return;
             };
 
@@ -155,7 +140,7 @@ impl AudioTracker {
             self.playing.push(Source {
                 handle: audio_sink_played,
                 expiration: Instant::now() + audio_duration + AUDIO_DURATION_EXTRA,
-                priority: Priority::new(queued.priority, queued.volume),
+                volume: queued.volume,
                 force_stop: audio_duration_limit.is_some(),
             });
         }
@@ -177,19 +162,6 @@ impl AudioTracker {
 struct Source {
     handle: Handle<AudioSink>,
     expiration: Instant,
-    priority: Priority,
-    force_stop: bool,
-}
-
-#[derive(Clone, Copy, Constructor)]
-struct Priority {
-    priority: u8,
     volume: f32,
-}
-
-impl Priority {
-    fn is_lower_than(self, other: Self) -> bool {
-        return self.priority < other.priority
-            || (self.priority == other.priority && self.volume < other.volume);
-    }
+    force_stop: bool,
 }

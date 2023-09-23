@@ -38,10 +38,9 @@ pub fn footsteps(
         }
 
         audio.queue(AudioPlay {
-            path: "sounds/footstep_{n}.ogg",
+            path: "sounds/footstep".into(),
             volume: calc_stride_volume(intensity),
             source: Some(translation),
-            priority: AudioPlay::PRIORITY_LOWEST,
             ..AudioPlay::DEFAULT
         });
 

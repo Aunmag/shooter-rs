@@ -26,10 +26,9 @@ pub fn breath(
 
         if intensity > 0.0 && time > breath.last + calc_interval(intensity) {
             audio.queue(AudioPlay {
-                path: "sounds/breath_{n}.ogg",
+                path: "sounds/breath".into(),
                 volume: 0.26 * intensity,
                 source: Some(transform.translation.xy()),
-                priority: AudioPlay::PRIORITY_LOWEST,
                 ..AudioPlay::DEFAULT
             });
 

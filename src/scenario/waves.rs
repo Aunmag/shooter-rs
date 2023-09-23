@@ -1,6 +1,6 @@
 use crate::{
     command::{ActorBotSet, ActorPlayerSet, ActorSet, BonusSpawn, Notify},
-    component::{Actor, ActorConfig, ActorType, Health},
+    component::{Actor, ActorConfig, ActorKind, Health},
     event::ActorDeathEvent,
     model::TransformLite,
     resource::{Scenario, ScenarioLogic},
@@ -94,15 +94,15 @@ impl WavesScenario {
 
                 if self.wave > WAVE_FINAL {
                     commands.add(Notify {
-                        text: "Wait".to_string(),
-                        text_small: "NOW IT IS TIME TO SUFFER".to_string(),
+                        text: "Wait".into(),
+                        text_small: "NOW IT IS TIME TO SUFFER".into(),
                         ..Default::default()
                     });
                 } else {
                     commands.add(HealHumans);
                     commands.add(Notify {
-                        text: format!("Wave {}/{}", self.wave, WAVE_FINAL),
-                        text_small: format!("Kill {} zombies", self.wave_size()),
+                        text: format!("Wave {}/{}", self.wave, WAVE_FINAL).into(),
+                        text_small: format!("Kill {} zombies", self.wave_size()).into(),
                         ..Default::default()
                     });
                 }
@@ -134,14 +134,14 @@ impl WavesScenario {
             Task::CompleteWave => {
                 if self.wave == WAVE_FINAL {
                     commands.add(Notify {
-                        text: "Congratulations!".to_string(),
-                        text_small: format!("You've completed the all {} waves", WAVE_FINAL),
+                        text: "Congratulations!".into(),
+                        text_small: format!("You've completed the all {} waves", WAVE_FINAL).into(),
                         ..Default::default()
                     });
                 } else {
                     commands.add(Notify {
-                        text: format!("Wave {} completed!", self.wave),
-                        text_small: "Prepare for the next".to_string(),
+                        text: format!("Wave {} completed!", self.wave).into(),
+                        text_small: "Prepare for the next".into(),
                         ..Default::default()
                     });
                 }
@@ -179,26 +179,26 @@ impl ScenarioLogic for WavesScenario {
     }
 
     fn on_actor_death(&mut self, event: &ActorDeathEvent, commands: &mut Commands) {
-        if let ActorType::Zombie = event.actor_type {
+        if let ActorKind::Zombie = event.kind {
             self.kills += 1;
 
             if self.kills == 1 {
                 match self.wave {
                     1 => {
                         commands.add(Notify {
-                            text_small: "Press [R] to reload".to_string(),
+                            text_small: "Press [R] to reload".into(),
                             ..Default::default()
                         });
                     }
                     2 => {
                         commands.add(Notify {
-                            text_small: "Press [SHIFT] to sprint".to_string(),
+                            text_small: "Press [SHIFT] to sprint".into(),
                             ..Default::default()
                         });
                     }
                     3 => {
                         commands.add(Notify {
-                            text_small: "Use mouse wheel to change zoom".to_string(),
+                            text_small: "Use mouse wheel to change zoom".into(),
                             ..Default::default()
                         });
                     }
@@ -217,8 +217,8 @@ impl ScenarioLogic for WavesScenario {
             }
         } else {
             commands.add(Notify {
-                text: "Game over".to_string(),
-                text_small: "You died. Press [ESC] to exit".to_string(),
+                text: "Game over".into(),
+                text_small: "You died. Press [ESC] to exit".into(),
                 duration: GAME_OVER_TEXT_DURATION,
             });
         }
@@ -241,7 +241,7 @@ impl Command for SpawnZombie {
         let mut humans = 0.0;
 
         for (transform, actor) in world.query::<(&Transform, &Actor)>().iter(world) {
-            if let ActorType::Human = actor.config.actor_type {
+            if let ActorKind::Human = actor.config.kind {
                 center += transform.translation.xy();
                 humans += 1.0;
             }
@@ -275,7 +275,7 @@ impl Command for CountZombies {
         if !world
             .query::<&Actor>()
             .iter(world)
-            .any(|a| a.config.actor_type == ActorType::Zombie)
+            .any(|a| a.config.kind == ActorKind::Zombie)
         {
             if let Some(scenario) = world.resource_mut::<Scenario>().logic::<WavesScenario>() {
                 scenario.task = Task::CompleteWave; // TODO: count duration
@@ -289,7 +289,7 @@ struct HealHumans;
 impl Command for HealHumans {
     fn write(self, world: &mut World) {
         for (actor, mut health) in world.query::<(&Actor, &mut Health)>().iter_mut(world) {
-            if let ActorType::Human = actor.config.actor_type {
+            if let ActorKind::Human = actor.config.kind {
                 health.heal();
             }
         }

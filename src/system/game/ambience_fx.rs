@@ -27,9 +27,8 @@ pub fn ambience_fx(
 
     if !data.next.is_zero() {
         audio.queue(AudioPlay {
-            path: "sounds/ambience_fx_{n}.ogg",
+            path: "sounds/ambience_fx".into(),
             volume: 0.3,
-            priority: AudioPlay::PRIORITY_MEDIUM,
             ..AudioPlay::DEFAULT
         });
     }
