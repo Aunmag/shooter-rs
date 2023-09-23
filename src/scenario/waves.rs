@@ -211,7 +211,7 @@ impl ScenarioLogic for WavesScenario {
 
             if self
                 .rng
-                .gen_bool((BONUSES_PER_WAVE * wave / wave_size).into())
+                .gen_bool(f32::min(BONUSES_PER_WAVE * wave / wave_size, 1.0).into())
             {
                 commands.add(BonusSpawn::new(event.position, self.wave));
             }

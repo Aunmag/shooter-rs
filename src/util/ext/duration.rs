@@ -1,14 +1,14 @@
 use std::time::Duration;
 
 pub trait DurationExt {
-    fn rate(&self) -> f32;
+    fn delta(&self, delta: f32) -> f32;
 
     fn progress(self, min: Duration, max: Duration) -> f32;
 }
 
 impl DurationExt for Duration {
-    fn rate(&self) -> f32 {
-        return 1.0 / self.as_secs_f32();
+    fn delta(&self, delta: f32) -> f32 {
+        return f32::min(delta / self.as_secs_f32(), 1.0);
     }
 
     fn progress(self, min: Duration, max: Duration) -> f32 {

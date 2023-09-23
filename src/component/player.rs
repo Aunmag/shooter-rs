@@ -87,7 +87,7 @@ impl Zoom {
     const RESET_TIMEOUT: Duration = Duration::from_secs(4);
 
     pub fn update(&mut self, time: Duration, delta: f32) {
-        self.value += (self.value_target - self.value) * delta * self.speed.rate();
+        self.value += (self.value_target - self.value) * self.speed.delta(delta);
         self.value = Self::clamp(self.value);
 
         if !self.reset_time.is_zero() && time > self.reset_time {
@@ -135,8 +135,8 @@ impl Shake {
     const SPEED_DECREASE: Duration = Duration::from_millis(600);
 
     pub fn update(&mut self, delta: f32) {
-        self.value_target -= self.value_target * delta * Self::SPEED_DECREASE.rate();
-        self.value += (self.value_target - self.value) * delta * Self::SPEED_INCREASE.rate();
+        self.value_target -= self.value_target * Self::SPEED_DECREASE.delta(delta);
+        self.value += (self.value_target - self.value) * Self::SPEED_INCREASE.delta(delta);
     }
 
     pub fn add(&mut self, shake: f32) {

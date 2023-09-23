@@ -67,7 +67,7 @@ impl Actor {
     }
 
     pub fn update_stamina(&mut self, delta: f32) {
-        let mut change = self.config.stamina.rate() * delta;
+        let mut change = self.config.stamina.delta(delta);
 
         if self.actions.is_moving() {
             if self.actions.is_sprinting() {

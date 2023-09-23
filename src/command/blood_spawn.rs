@@ -20,8 +20,7 @@ pub struct BloodSpawn {
 
 impl Command for BloodSpawn {
     fn write(mut self, world: &mut World) {
-        self.position.x = (self.position.x * PIXELS_PER_METER).floor() / PIXELS_PER_METER;
-        self.position.y = (self.position.y * PIXELS_PER_METER).floor() / PIXELS_PER_METER;
+        self.position = (self.position * PIXELS_PER_METER).floor() / PIXELS_PER_METER;
         let size_px = (self.size * PIXELS_PER_METER / 2.0).floor() * 2.0; // size must be even
         self.size = size_px / PIXELS_PER_METER;
 
