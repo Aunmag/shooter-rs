@@ -8,7 +8,7 @@ use bevy::{
 pub struct ActorMeleeReset(pub Entity);
 
 impl Command for ActorMeleeReset {
-    fn write(self, world: &mut World) {
+    fn apply(self, world: &mut World) {
         let time = world.resource::<Time>().elapsed();
 
         if let Some(mut actor) = world.get_mut::<Actor>(self.0) {

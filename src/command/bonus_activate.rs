@@ -13,14 +13,14 @@ pub struct BonusActivate {
 }
 
 impl Command for BonusActivate {
-    fn write(self, world: &mut World) {
+    fn apply(self, world: &mut World) {
         let weapon = if let Some(weapon) = world.get::<Bonus>(self.bonus).map(|b| b.weapon) {
             weapon
         } else {
             return;
         };
 
-        WeaponSet::new(self.recipient, Some(weapon)).write(world);
+        WeaponSet::new(self.recipient, Some(weapon)).apply(world);
         world.entity_mut(self.bonus).despawn_recursive();
     }
 }

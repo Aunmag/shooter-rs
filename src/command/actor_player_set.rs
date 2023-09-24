@@ -8,17 +8,17 @@ use bevy::{
 pub struct ActorPlayerSet(pub Entity);
 
 impl Command for ActorPlayerSet {
-    fn write(self, world: &mut World) {
+    fn apply(self, world: &mut World) {
         if let Some(mut transform) = world.get_mut::<Transform>(self.0) {
             transform.translation.z = LAYER_ACTOR_PLAYER;
         }
 
         world.entity_mut(self.0).insert(Player::default());
 
-        StatusBarSet(self.0).write(world);
+        StatusBarSet(self.0).apply(world);
 
         if world.resource::<Config>().misc.laser_sight {
-            LaserSightSet(self.0).write(world);
+            LaserSightSet(self.0).apply(world);
         }
     }
 }

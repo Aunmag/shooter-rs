@@ -19,7 +19,7 @@ pub struct ActorSet {
 }
 
 impl Command for ActorSet {
-    fn write(self, world: &mut World) {
+    fn apply(self, world: &mut World) {
         let texture_path = self.config.get_image_path(0);
         let texture = world.resource::<AssetServer>().get_handle(texture_path);
         let mut entity_mut = world.entity_mut(self.entity);
@@ -40,7 +40,7 @@ impl Command for ActorSet {
 
         if let ActorKind::Human = self.config.kind {
             entity_mut.insert(Breath::default());
-            WeaponSet::new(self.entity, Some(&WeaponConfig::PM)).write(world);
+            WeaponSet::new(self.entity, Some(&WeaponConfig::PM)).apply(world);
         }
     }
 }

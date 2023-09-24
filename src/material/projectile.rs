@@ -1,11 +1,11 @@
 use bevy::{
     prelude::{Handle, Image},
-    reflect::TypeUuid,
+    reflect::{TypePath, TypeUuid},
     render::render_resource::{AsBindGroup, ShaderRef},
     sprite::Material2d,
 };
 
-#[derive(AsBindGroup, TypeUuid, Debug, Clone)]
+#[derive(AsBindGroup, TypeUuid, TypePath, Debug, Clone)]
 #[uuid = "a741d840-3782-4b3b-8e86-7746c272ea63"]
 pub struct ProjectileMaterial {
     #[texture(0)]

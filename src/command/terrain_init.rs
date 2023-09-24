@@ -7,7 +7,7 @@ use bevy::{
 pub struct TerrainInit;
 
 impl Command for TerrainInit {
-    fn write(self, world: &mut World) {
+    fn apply(self, world: &mut World) {
         let texture = world
             .resource::<AssetServer>()
             .get_handle("terrain/grass.png");

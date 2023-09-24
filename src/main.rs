@@ -42,16 +42,13 @@ use crate::{
     material::{BloodMaterial, LaserMaterial, ProjectileMaterial, StatusBarMaterial},
     model::AppState,
     plugin::DebugPlugin,
-    resource::{
-        AssetStorage, AudioStorage, AudioTracker, Config, HeartbeatResource, HitResource, Misc,
-        Scenario,
-    },
+    resource::{AssetStorage, AudioStorage, AudioTracker, Config, HitResource, Misc, Scenario},
     scenario::WavesScenario,
     util::ext::AppExt,
 };
 use bevy::{
     log::LogPlugin,
-    prelude::{App, DefaultPlugins, IntoPipeSystem, IntoSystemConfig, PluginGroup},
+    prelude::{App, DefaultPlugins, IntoSystem, IntoSystemConfigs, PluginGroup, Update},
     render::texture::ImagePlugin,
     sprite::Material2dPlugin,
     window::{Window, WindowPlugin, WindowResolution},
@@ -86,20 +83,19 @@ fn main() {
     if config.misc.debug {
         log::info!("Starting with debug mode");
         std::env::set_var("RUST_BACKTRACE", "1");
-        application.add_plugin(DebugPlugin);
+        application.add_plugins(DebugPlugin);
     }
 
     application
-        .add_plugin(Material2dPlugin::<BloodMaterial>::default())
-        .add_plugin(Material2dPlugin::<LaserMaterial>::default())
-        .add_plugin(Material2dPlugin::<StatusBarMaterial>::default())
-        .add_plugin(Material2dPlugin::<ProjectileMaterial>::default())
+        .add_plugins(Material2dPlugin::<BloodMaterial>::default())
+        .add_plugins(Material2dPlugin::<LaserMaterial>::default())
+        .add_plugins(Material2dPlugin::<StatusBarMaterial>::default())
+        .add_plugins(Material2dPlugin::<ProjectileMaterial>::default())
         .add_state::<AppState>()
         .add_event::<ActorDeathEvent>()
         .insert_resource(AssetStorage::default())
         .insert_resource(AudioStorage::default())
         .insert_resource(AudioTracker::new(config.audio.sources))
-        .insert_resource(HeartbeatResource::default())
         .insert_resource(HitResource::default())
         .insert_resource(Misc::default())
         .insert_resource(config)
@@ -107,8 +103,8 @@ fn main() {
         .insert_resource(system::game::AmbienceFxData::default())
         .insert_resource(system::game::CollisionSystemData::default())
         .insert_resource(system::game::WeaponData::default())
-        .add_system(system::sys::audio_tracker)
-        .add_system(system::ui::notification)
+        .add_systems(Update, system::sys::audio)
+        .add_systems(Update, system::ui::notification)
         .add_state_system_enter(AppState::Loading, system::loading::on_enter)
         .add_state_system(AppState::Loading, system::loading::on_update)
         .add_state_system_enter(AppState::Game, system::game::on_enter)

@@ -10,7 +10,7 @@ use bevy::{
 pub struct ActorRelease(pub Entity);
 
 impl Command for ActorRelease {
-    fn write(self, world: &mut World) {
+    fn apply(self, world: &mut World) {
         // TODO: find a way to stop all sounds
         if let Some(actor) = world.get_mut::<Actor>(self.0).as_mut() {
             actor.actions = ActorActions::EMPTY;

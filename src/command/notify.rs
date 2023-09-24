@@ -27,7 +27,7 @@ pub struct Notify {
 }
 
 impl Command for Notify {
-    fn write(self, world: &mut World) {
+    fn apply(self, world: &mut World) {
         let time = world.resource::<Time>().elapsed();
 
         let window_width = world
@@ -67,7 +67,7 @@ impl Command for Notify {
                 .with_text_alignment(TextAlignment::Center)
                 .with_style(Style {
                     position_type: PositionType::Absolute,
-                    position: UiRect::top(Val::Percent(POSITION * 100.0)),
+                    top: Val::Percent(POSITION * 100.0),
                     margin: UiRect::horizontal(Val::Auto),
                     ..Default::default()
                 }),

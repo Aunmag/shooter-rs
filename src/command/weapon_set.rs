@@ -132,7 +132,7 @@ impl WeaponSet {
 }
 
 impl Command for WeaponSet {
-    fn write(self, world: &mut World) {
+    fn apply(self, world: &mut World) {
         self.remove_old_weapon_component(world);
         self.remove_old_weapon_sprite(world);
 

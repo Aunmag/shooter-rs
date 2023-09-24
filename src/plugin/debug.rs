@@ -12,14 +12,14 @@ use crate::{
 use bevy::{
     app::{App, Plugin},
     diagnostic::{
-        Diagnostics, EntityCountDiagnosticsPlugin, FrameTimeDiagnosticsPlugin,
+        DiagnosticsStore, EntityCountDiagnosticsPlugin, FrameTimeDiagnosticsPlugin,
         SystemInformationDiagnosticsPlugin,
     },
     ecs::system::ResMut,
     input::Input,
     prelude::{
-        AssetServer, Color, Commands, Component, KeyCode, Query, Res, Resource, TextBundle, Vec2,
-        With,
+        AssetServer, Color, Commands, Component, KeyCode, Query, Res, Resource, Startup,
+        TextBundle, Update, Vec2, With,
     },
     text::{Text, TextSection, TextStyle},
     transform::components::Transform,
@@ -74,13 +74,13 @@ pub struct DebugPlugin;
 impl Plugin for DebugPlugin {
     fn build(&self, app: &mut App) {
         app.insert_resource(Benchmark::default())
-            .add_plugin(FrameTimeDiagnosticsPlugin)
-            .add_plugin(EntityCountDiagnosticsPlugin)
-            .add_plugin(SystemInformationDiagnosticsPlugin)
-            .add_plugin(DebugLinesPlugin::default())
-            .add_startup_system(startup)
-            .add_system(update_diagnostics)
-            .add_system(render_debug_lines_static)
+            .add_plugins(FrameTimeDiagnosticsPlugin)
+            .add_plugins(EntityCountDiagnosticsPlugin)
+            .add_plugins(SystemInformationDiagnosticsPlugin)
+            .add_plugins(DebugLinesPlugin::default())
+            .add_systems(Startup, startup)
+            .add_systems(Update, update_diagnostics)
+            .add_systems(Update, render_debug_lines_static)
             .add_state_system(AppState::Game, update_input);
     }
 }
@@ -110,7 +110,7 @@ fn startup(mut commands: Commands, asset_server: Res<AssetServer>) {
 }
 
 fn update_diagnostics(
-    diagnostics: Res<Diagnostics>,
+    diagnostics: Res<DiagnosticsStore>,
     audio_tracker: Res<AudioTracker>,
     mut query: Query<&mut Text, With<FpsText>>,
 ) {
@@ -134,14 +134,12 @@ fn update_diagnostics(
         .and_then(|v| v.value())
         .unwrap_or(-1.0);
 
-    let audio_sources = audio_tracker.sources();
-
     for mut text in &mut query {
         text.sections[1].value = format!("{:.2}", cpu);
         text.sections[3].value = format!("{:.2}", mem);
         text.sections[5].value = format!("{:.2}", fps);
         text.sections[7].value = format!("{:.2}", entities);
-        text.sections[9].value = format!("{}", audio_sources);
+        text.sections[9].value = format!("{}", audio_tracker.playing);
     }
 }
 

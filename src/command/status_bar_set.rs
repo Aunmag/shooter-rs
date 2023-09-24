@@ -2,25 +2,29 @@ use crate::{data::PIXELS_PER_METER, material::StatusBarMaterial, resource::Misc}
 use bevy::{
     asset::Assets,
     ecs::system::Command,
-    prelude::{shape::Cube, BuildWorldChildren, Entity, Transform, Vec3, World},
-    render::mesh::Mesh,
+    prelude::{BuildWorldChildren, Entity, Transform, Vec3, World},
     sprite::MaterialMesh2dBundle,
 };
 
 pub struct StatusBarSet(pub Entity);
 
 impl Command for StatusBarSet {
-    fn write(self, world: &mut World) {
-        let image = if let Some(image) = world.resource_mut::<Misc>().dummy_image.clone() {
+    fn apply(self, world: &mut World) {
+        let misc = world.resource::<Misc>();
+
+        let image = if let Some(image) = misc.dummy_image.clone() {
             image
         } else {
             log::warn!("Failed to set status bar. The dummy image isn't initialized");
             return;
         };
 
-        let mesh = world
-            .resource_mut::<Assets<Mesh>>()
-            .add(Mesh::from(Cube::default()));
+        let mesh = if let Some(mesh) = misc.dummy_mesh.clone() {
+            mesh
+        } else {
+            log::warn!("Failed to set status bar. The dummy mesh isn't initialized");
+            return;
+        };
 
         let material = world
             .resource_mut::<Assets<StatusBarMaterial>>()

@@ -10,8 +10,8 @@ lto = "fat"
 
 [dependencies]
 anyhow = "1.0"
-bevy = "0.10"
-bevy_prototype_debug_lines = "0.10"
+bevy = "0.11"
+bevy_prototype_debug_lines = "0.11"
 config = "0.13"
 derive_more = "0.99"
 enumset = { version = "1.1", features = ["serde"] }

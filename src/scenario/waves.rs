@@ -83,7 +83,7 @@ impl WavesScenario {
     fn update(&mut self, commands: &mut Commands) -> Task {
         match self.task {
             Task::Start => {
-                log::debug!("Starting waves scenario");
+                log::info!("Starting waves scenario");
                 self.spawn_player(commands);
                 return Task::StartNextWave;
             }
@@ -236,7 +236,7 @@ struct SpawnZombie {
 }
 
 impl Command for SpawnZombie {
-    fn write(self, world: &mut World) {
+    fn apply(self, world: &mut World) {
         let mut center = Vec2::ZERO;
         let mut humans = 0.0;
 
@@ -262,16 +262,16 @@ impl Command for SpawnZombie {
             skill: self.skill,
             transform,
         }
-        .write(world);
+        .apply(world);
 
-        ActorBotSet(entity).write(world);
+        ActorBotSet(entity).apply(world);
     }
 }
 
 struct CountZombies;
 
 impl Command for CountZombies {
-    fn write(self, world: &mut World) {
+    fn apply(self, world: &mut World) {
         if !world
             .query::<&Actor>()
             .iter(world)
@@ -287,7 +287,7 @@ impl Command for CountZombies {
 struct HealHumans;
 
 impl Command for HealHumans {
-    fn write(self, world: &mut World) {
+    fn apply(self, world: &mut World) {
         for (actor, mut health) in world.query::<(&Actor, &mut Health)>().iter_mut(world) {
             if let ActorKind::Human = actor.config.kind {
                 health.heal();

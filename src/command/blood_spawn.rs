@@ -5,7 +5,7 @@ use crate::{
 };
 use bevy::{
     ecs::system::Command,
-    prelude::{shape::Cube, Assets, Mesh, Transform, Vec2, Vec3, World},
+    prelude::{Assets, Transform, Vec2, Vec3, World},
     sprite::MaterialMesh2dBundle,
     time::Time,
 };
@@ -19,23 +19,28 @@ pub struct BloodSpawn {
 }
 
 impl Command for BloodSpawn {
-    fn write(mut self, world: &mut World) {
+    fn apply(mut self, world: &mut World) {
         self.position = (self.position * PIXELS_PER_METER).floor() / PIXELS_PER_METER;
         let size_px = (self.size * PIXELS_PER_METER / 2.0).floor() * 2.0; // size must be even
         self.size = size_px / PIXELS_PER_METER;
 
         let time = world.resource::<Time>().elapsed();
 
-        let image = if let Some(image) = world.resource_mut::<Misc>().dummy_image.clone() {
+        let misc = world.resource::<Misc>();
+
+        let image = if let Some(image) = misc.dummy_image.clone() {
             image
         } else {
-            log::warn!("Failed spawn blood. The dummy image isn't initialized");
+            log::warn!("Failed to spawn blood. The dummy image isn't initialized");
             return;
         };
 
-        let mesh = world
-            .resource_mut::<Assets<Mesh>>()
-            .add(Mesh::from(Cube::default()));
+        let mesh = if let Some(mesh) = misc.dummy_mesh.clone() {
+            mesh
+        } else {
+            log::warn!("Failed to spawn blood. The dummy mesh isn't initialized");
+            return;
+        };
 
         let material = world
             .resource_mut::<Assets<BloodMaterial>>()

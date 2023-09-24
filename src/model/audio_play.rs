@@ -1,5 +1,9 @@
 use crate::util::{ext::Vec2Ext, SmartString};
-use bevy::{math::Vec2, prelude::PlaybackSettings};
+use bevy::{
+    audio::{Volume, VolumeLevel},
+    math::Vec2,
+    prelude::PlaybackSettings,
+};
 use std::time::Duration;
 
 #[derive(Clone)]
@@ -27,31 +31,22 @@ impl AudioPlay {
             PlaybackSettings::LOOP
         };
 
-        return settings.with_volume(self.volume);
-    }
-
-    /// Returns none if audio should be played just once or forever
-    pub fn duration_limit(&self) -> Option<Duration> {
-        if self.duration.is_zero() || self.duration == Duration::MAX {
-            return None;
-        } else {
-            return Some(self.duration);
-        }
+        return settings.with_volume(Volume::Relative(VolumeLevel::new(self.volume)));
     }
 
     pub fn is_similar_to(&self, other: &Self) -> bool {
         return self.path == other.path
-            && self.is_close_to(other)
+            && self.has_same_source(other)
             && self.has_same_repeat_mode(other);
     }
 
-    pub fn is_close_to(&self, other: &Self) -> bool {
+    pub fn has_same_source(&self, other: &Self) -> bool {
         match (self.source, other.source) {
             (Some(s1), Some(s2)) => {
                 return (s1 - s2).is_shorter_than(Self::CLOSE_DISTANCE);
             }
             (None, None) => {
-                return false;
+                return true;
             }
             _ => {
                 return false;

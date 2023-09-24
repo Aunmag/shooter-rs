@@ -1,13 +1,11 @@
 use crate::{
-    component::{Actor, Health, Player},
-    resource::HeartbeatResource,
+    component::{Actor, Health, Heartbeat, Player},
     util::math::interpolate,
 };
 use bevy::{
-    asset::Assets,
     audio::AudioSink,
     ecs::system::Query,
-    prelude::{AudioSinkPlayback, Res, ResMut, With},
+    prelude::{AudioSinkPlayback, Res, With},
     time::Time,
 };
 use std::time::Duration;
@@ -18,19 +16,18 @@ const SPEED_MAX: f32 = 1.9;
 const RUN_INTERVAL: Duration = Duration::from_millis(1500);
 
 pub fn heartbeat(
-    query: Query<(&Health, &Actor), With<Player>>,
-    mut heartbeat: ResMut<HeartbeatResource>,
-    sinks: Res<Assets<AudioSink>>,
+    mut heartbeats: Query<(&mut Heartbeat, &AudioSink)>,
+    players: Query<(&Health, &Actor), With<Player>>,
     time: Res<Time>,
 ) {
     let time = time.elapsed();
 
-    if time < heartbeat.next {
-        return;
-    }
+    for (mut heartbeat, audio) in heartbeats.iter_mut() {
+        if time < heartbeat.next {
+            continue;
+        }
 
-    if let Some((health, actor)) = query.iter().next() {
-        if let Some(audio) = heartbeat.sink.as_ref().and_then(|h| sinks.get(h)) {
+        if let Some((health, actor)) = players.iter().next() {
             if health.is_low() {
                 let speed = interpolate(SPEED_MIN, SPEED_MAX, 1.0 - actor.stamina.powf(4.0));
                 audio.set_volume(VOLUME * (1.0 - health.get()));
@@ -43,7 +40,7 @@ pub fn heartbeat(
                 audio.pause();
             }
         }
-    }
 
-    heartbeat.next = time + RUN_INTERVAL;
+        heartbeat.next = time + RUN_INTERVAL;
+    }
 }

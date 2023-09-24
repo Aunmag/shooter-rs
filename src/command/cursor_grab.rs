@@ -17,7 +17,7 @@ impl CursorGrab {
 }
 
 impl Command for CursorGrab {
-    fn write(self, world: &mut World) {
+    fn apply(self, world: &mut World) {
         for mut window in world
             .query_filtered::<&mut Window, With<PrimaryWindow>>()
             .iter_mut(world)

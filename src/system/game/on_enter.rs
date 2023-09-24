@@ -2,15 +2,13 @@ use crate::{
     command::{CursorGrab, TerrainInit},
     data::{LAYER_BLUFF, LAYER_TREE, WORLD_SIZE, WORLD_SIZE_HALF, WORLD_SIZE_VISUAL},
     model::{AudioPlay, TransformLite},
-    resource::{AudioTracker, HeartbeatResource},
+    resource::AudioTracker,
     util::ext::Vec2Ext,
 };
 use bevy::{
     asset::{AssetServer, Handle},
     math::Vec2,
-    prelude::{
-        Audio, Camera2dBundle, Commands, Image, PlaybackSettings, Res, ResMut, SpriteBundle,
-    },
+    prelude::{Camera2dBundle, Commands, Image, Res, ResMut, SpriteBundle},
 };
 use rand::{seq::SliceRandom, Rng, SeedableRng};
 use rand_pcg::Pcg32;
@@ -28,8 +26,6 @@ const BLUFF_SPRITE_SIZE: f32 = 4.0;
 pub fn on_enter(
     mut commands: Commands,
     assets: Res<AssetServer>,
-    audio: Res<Audio>,
-    mut heartbeat: ResMut<HeartbeatResource>,
     mut audio_tracker: ResMut<AudioTracker>,
 ) {
     commands.add(CursorGrab(true));
@@ -52,11 +48,11 @@ pub fn on_enter(
         ..AudioPlay::DEFAULT
     });
 
-    let heartbeat_sink = audio.play_with_settings(
-        assets.get_handle("sounds/heartbeat"),
-        PlaybackSettings::LOOP.with_volume(0.0),
-    );
-    heartbeat.sink.replace(assets.get_handle(heartbeat_sink));
+    audio_tracker.queue(AudioPlay {
+        path: "sounds/heartbeat".into(),
+        duration: Duration::MAX,
+        ..AudioPlay::DEFAULT
+    });
 }
 
 // TODO: maybe render bluff corner as tile map

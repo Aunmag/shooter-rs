@@ -58,7 +58,7 @@ pub fn player(
 
         actor
             .actions
-            .set(ActorAction::Sprint, keyboard.pressed(KeyCode::LShift));
+            .set(ActorAction::Sprint, keyboard.pressed(KeyCode::ShiftLeft));
 
         actor
             .actions

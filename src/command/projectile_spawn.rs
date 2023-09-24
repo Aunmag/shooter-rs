@@ -10,7 +10,7 @@ use bevy::{
     asset::Assets,
     ecs::system::Command,
     math::Vec3,
-    prelude::{shape::Cube, Entity, Mesh, Time, Transform, Vec2, World},
+    prelude::{Entity, Time, Transform, Vec2, World},
     sprite::MaterialMesh2dBundle,
 };
 
@@ -22,11 +22,20 @@ pub struct ProjectileSpawn {
 }
 
 impl Command for ProjectileSpawn {
-    fn write(self, world: &mut World) {
-        let image = if let Some(image) = world.resource_mut::<Misc>().dummy_image.clone() {
+    fn apply(self, world: &mut World) {
+        let misc = world.resource::<Misc>();
+
+        let image = if let Some(image) = misc.dummy_image.clone() {
             image
         } else {
-            log::warn!("Failed spawn a projectile. The dummy image isn't initialized");
+            log::warn!("Failed to spawn a projectile. The dummy image isn't initialized");
+            return;
+        };
+
+        let mesh = if let Some(mesh) = misc.dummy_mesh.clone() {
+            mesh
+        } else {
+            log::warn!("Failed to spawn a projectile. The dummy mesh isn't initialized");
             return;
         };
 
@@ -37,10 +46,6 @@ impl Command for ProjectileSpawn {
             Vec2::from_length(self.velocity, self.transform.direction),
             self.shooter,
         );
-
-        let mesh = world
-            .resource_mut::<Assets<Mesh>>()
-            .add(Mesh::from(Cube::default()));
 
         let material = world
             .resource_mut::<Assets<ProjectileMaterial>>()

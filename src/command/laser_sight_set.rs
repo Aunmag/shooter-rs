@@ -2,8 +2,7 @@ use crate::{data::PIXELS_PER_METER, resource::Misc, LaserMaterial};
 use bevy::{
     asset::Assets,
     ecs::system::Command,
-    prelude::{shape::Cube, BuildWorldChildren, Entity, Quat, Transform, Vec3, World},
-    render::mesh::Mesh,
+    prelude::{BuildWorldChildren, Entity, Quat, Transform, Vec3, World},
     sprite::MaterialMesh2dBundle,
 };
 use std::f32::consts::PI;
@@ -14,17 +13,22 @@ const THICKNESS: f32 = 0.5 * PIXELS_PER_METER;
 pub struct LaserSightSet(pub Entity);
 
 impl Command for LaserSightSet {
-    fn write(self, world: &mut World) {
-        let image = if let Some(image) = world.resource_mut::<Misc>().dummy_image.clone() {
+    fn apply(self, world: &mut World) {
+        let misc = world.resource::<Misc>();
+
+        let image = if let Some(image) = misc.dummy_image.clone() {
             image
         } else {
             log::warn!("Failed to set laser sight. The dummy image isn't initialized");
             return;
         };
 
-        let mesh = world
-            .resource_mut::<Assets<Mesh>>()
-            .add(Mesh::from(Cube::default()));
+        let mesh = if let Some(mesh) = misc.dummy_mesh.clone() {
+            mesh
+        } else {
+            log::warn!("Failed to set laser sight. The dummy mesh isn't initialized");
+            return;
+        };
 
         let material = world
             .resource_mut::<Assets<LaserMaterial>>()

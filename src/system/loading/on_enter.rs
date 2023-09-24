@@ -1,6 +1,6 @@
 use crate::resource::{AssetStorage, Misc};
 use bevy::{
-    prelude::{AssetServer, Assets, Image, Res, ResMut},
+    prelude::{shape::Quad, AssetServer, Assets, Image, Mesh, Res, ResMut},
     render::render_resource::Extent3d,
 };
 
@@ -8,6 +8,7 @@ pub fn on_enter(
     asset_server: Res<AssetServer>,
     mut asset_storage: ResMut<AssetStorage>,
     mut images: ResMut<Assets<Image>>,
+    mut meshes: ResMut<Assets<Mesh>>,
     mut misc: ResMut<Misc>,
 ) {
     load_folder_or_log(&asset_server, &mut asset_storage, "actors");
@@ -16,6 +17,7 @@ pub fn on_enter(
     load_folder_or_log(&asset_server, &mut asset_storage, "terrain");
     load_folder_or_log(&asset_server, &mut asset_storage, "weapons");
     init_dummy_image(&mut images, &mut misc);
+    init_dummy_mesh(&mut meshes, &mut misc);
 }
 
 fn load_folder_or_log(
@@ -43,4 +45,8 @@ fn init_dummy_image(images: &mut Assets<Image>, misc: &mut Misc) {
 
     let handle = images.add(image);
     misc.dummy_image = Some(handle);
+}
+
+fn init_dummy_mesh(meshes: &mut Assets<Mesh>, misc: &mut Misc) {
+    misc.dummy_mesh = Some(meshes.add(Mesh::from(Quad::default())));
 }
