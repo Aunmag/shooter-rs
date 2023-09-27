@@ -42,14 +42,13 @@ pub struct Benchmark {
 impl Benchmark {
     #[allow(dead_code)]
     pub fn register(&mut self, name: &'static str, start: Instant) {
-        let elapsed = start.elapsed();
-        self.measurements
+        let measurement = self
+            .measurements
             .entry(name)
-            .and_modify(|m| {
-                m.0 += elapsed;
-                m.1 += 1;
-            })
-            .or_insert_with(|| (elapsed, 1));
+            .or_insert_with(|| (Duration::ZERO, 0));
+
+        measurement.0 += start.elapsed();
+        measurement.1 += 1;
     }
 
     fn log_summary(&self) {
