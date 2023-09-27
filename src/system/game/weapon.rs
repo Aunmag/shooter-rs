@@ -1,6 +1,6 @@
 use crate::{
     command::ProjectileSpawn,
-    component::{Actor, Inertia, Player, Weapon, WeaponFireResult},
+    component::{Actor, Inertia, Player, Voice, VoiceSound, Weapon, WeaponFireResult},
     model::{ActorActionsExt, AudioPlay, TransformLite},
     resource::AudioTracker,
     util::ext::Vec2Ext,
@@ -35,6 +35,7 @@ pub fn weapon(
         &Transform,
         &mut Weapon,
         &mut Inertia,
+        &mut Voice,
         Option<&mut Player>,
     )>,
     mut commands: Commands,
@@ -44,12 +45,15 @@ pub fn weapon(
 ) {
     let now = time.elapsed();
 
-    for (entity, actor, transform, mut weapon, mut inertia, mut player) in query.iter_mut() {
+    for (entity, actor, transform, mut weapon, mut inertia, mut voice, mut player) in
+        query.iter_mut()
+    {
         if !actor.actions.is_attacking() {
             weapon.release_trigger();
         }
 
         if actor.actions.is_reloading() && !weapon.is_reloading() {
+            let is_empty = !weapon.has_ammo();
             weapon.reload(now);
 
             audio.queue(AudioPlay {
@@ -58,6 +62,8 @@ pub fn weapon(
                 source: Some(transform.translation.xy()),
                 duration: weapon.config.reloading_time, // TODO: stop if weapon will be changed earlier
             });
+
+            voice.queue(VoiceSound::Reload(is_empty), now);
 
             continue;
         }

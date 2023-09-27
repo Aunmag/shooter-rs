@@ -12,10 +12,11 @@ mod notification;
 mod player;
 mod projectile;
 mod terrain;
+mod voice;
 mod weapon;
 
 pub use self::{
     actor::*, audio_expiration::*, bonus::*, bot::*, breath::*, collision::*, footsteps::*,
     health::*, heartbeat::*, inertia::*, notification::*, player::*, projectile::*, terrain::*,
-    weapon::*,
+    voice::*, weapon::*,
 };

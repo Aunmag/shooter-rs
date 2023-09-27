@@ -52,6 +52,7 @@ pub fn projectile(
             });
 
             hits.add(
+                projectile.shooter,
                 obstacle,
                 contact_velocity * projectile.config.fragment_mass(),
                 angle,

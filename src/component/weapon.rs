@@ -330,10 +330,8 @@ impl Weapon {
         if self.is_ready(time) {
             self.next_time = time + Duration::from_secs_f32(60.0 / self.config.fire_rate);
 
-            if self.config.ammo_capacity == 0 {
-                return WeaponFireResult::Fire;
-            } else if self.ammo > 0 {
-                self.ammo -= 1;
+            if self.has_ammo() {
+                self.ammo = self.ammo.saturating_sub(1);
                 return WeaponFireResult::Fire;
             } else {
                 if !self.config.partial_reloading {
@@ -419,6 +417,10 @@ impl Weapon {
         } else {
             return self.config.get_ammo_normalized(self.ammo);
         }
+    }
+
+    pub fn has_ammo(&self) -> bool {
+        return self.config.ammo_capacity == 0 || self.ammo != 0;
     }
 
     pub fn is_cocked(&self) -> bool {

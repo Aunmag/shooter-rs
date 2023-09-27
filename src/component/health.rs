@@ -1,10 +1,11 @@
-use bevy::ecs::component::Component;
+use bevy::ecs::{component::Component, entity::Entity};
 
 #[derive(Component)]
 pub struct Health {
     value: f32,
     value_previous: f32,
     resistance: f32,
+    attacker: Option<Entity>,
 }
 
 impl Health {
@@ -24,11 +25,13 @@ impl Health {
             value: 1.0,
             value_previous: 1.0,
             resistance,
+            attacker: None,
         };
     }
 
-    pub fn damage(&mut self, damage: f32) {
+    pub fn damage(&mut self, damage: f32, attacker: Option<Entity>) {
         self.value = (self.value - damage / self.resistance).clamp(0.0, 1.0);
+        self.attacker = attacker;
     }
 
     pub fn heal(&mut self) {
@@ -48,6 +51,10 @@ impl Health {
 
     pub fn get_damage(&self) -> f32 {
         return self.value_previous - self.value;
+    }
+
+    pub fn get_attacker(&self) -> Option<Entity> {
+        return self.attacker;
     }
 
     pub fn is_alive(&self) -> bool {

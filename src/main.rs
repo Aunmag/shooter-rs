@@ -112,6 +112,7 @@ fn main() {
             use crate::system::{bot, game::*};
             s.add(input);
             s.add(health);
+            s.add(on_actor_death.after(health));
             s.add(player);
             s.add(actor.after(player));
             s.add(inertia.after(actor));
@@ -132,6 +133,7 @@ fn main() {
             s.add(ambience_fx);
             s.add(terrain);
             s.add(scenario);
+            s.add(voice);
             s.add(bot::analyze);
             s.add(bot::operate);
             s.add(bot::sound);

@@ -13,17 +13,19 @@ mod hit;
 mod inertia;
 mod input;
 mod melee;
+mod on_actor_death;
 mod on_enter;
 mod player;
 mod projectile;
 mod scenario;
 mod status_bar;
 mod terrain;
+mod voice;
 mod weapon;
 
 pub use self::{
     actor::*, ambience_fx::*, blood::*, bonus::*, breath::*, camera::*, collision_find::*,
     collision_resolve::*, footsteps::*, health::*, heartbeat::*, hit::*, inertia::*, input::*,
-    melee::*, on_enter::*, player::*, projectile::*, scenario::*, status_bar::*, terrain::*,
-    weapon::*,
+    melee::*, on_actor_death::*, on_enter::*, player::*, projectile::*, scenario::*, status_bar::*,
+    terrain::*, voice::*, weapon::*,
 };

@@ -1,5 +1,7 @@
 use crate::{
-    component::{Actor, ActorWeaponSprite, Inertia, Weapon, WeaponConfig, WeaponGrip},
+    component::{
+        Actor, ActorWeaponSprite, Inertia, Voice, VoiceSound, Weapon, WeaponConfig, WeaponGrip,
+    },
     data::PIXELS_PER_METER,
     model::AudioPlay,
     resource::AudioTracker,
@@ -11,8 +13,10 @@ use bevy::{
     prelude::{BuildWorldChildren, Children, DespawnRecursiveExt, Entity, Transform, Vec2, World},
     render::texture::Image,
     sprite::{Anchor, Sprite, SpriteBundle},
+    time::Time,
 };
 use derive_more::Constructor;
+use std::cmp::Ordering;
 
 const WEAPON_MASS_MULTIPLAYER: f32 = 5.0;
 
@@ -20,6 +24,7 @@ const WEAPON_MASS_MULTIPLAYER: f32 = 5.0;
 pub struct WeaponSet {
     entity: Entity,
     weapon: Option<&'static WeaponConfig>,
+    play_sound: bool,
 }
 
 impl WeaponSet {
@@ -129,10 +134,44 @@ impl WeaponSet {
             });
         }
     }
+
+    fn play_actor_voice(&self, world: &mut World) {
+        let now = world.resource::<Time>().elapsed();
+
+        let voice_sound = if self.weapon.map_or(false, |w| w.partial_reloading) {
+            VoiceSound::ArmShotgun
+        } else {
+            let level_previous = world
+                .get::<Weapon>(self.entity)
+                .map(|w| w.config.level)
+                .unwrap_or(0);
+
+            let level_current = self.weapon.map(|w| w.level).unwrap_or(0);
+
+            // TODO: what is current is shotgun too?
+
+            match (u8::cmp(&level_current, &level_previous), level_current) {
+                (Ordering::Less, 1) => VoiceSound::ArmWorse,
+                (Ordering::Less, _) => VoiceSound::ArmSimilar,
+                (Ordering::Equal, _) => VoiceSound::ArmSimilar, // TODO: don't play if same
+                (Ordering::Greater, 6) => VoiceSound::ArmBest, // TODO: use const
+                (Ordering::Greater, _) => VoiceSound::ArmBetter,
+            }
+        };
+
+        if let Some(voice) = world.get_mut::<Voice>(self.entity).as_mut() {
+            voice.queue(voice_sound, now)
+        }
+    }
 }
 
 impl Command for WeaponSet {
     fn apply(self, world: &mut World) {
+        if self.play_sound {
+            self.play_actor_voice(world); // play it before weapon changes
+            self.play_pickup_sound(world);
+        }
+
         self.remove_old_weapon_component(world);
         self.remove_old_weapon_sprite(world);
 

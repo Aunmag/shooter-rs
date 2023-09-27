@@ -1,6 +1,6 @@
 use crate::{
     command::{ActorBotSet, ActorPlayerSet, ActorSet, BonusSpawn, Notify},
-    component::{Actor, ActorConfig, ActorKind, Health},
+    component::{Actor, ActorConfig, ActorKind, Health, Player, Voice, VoiceSound},
     event::ActorDeathEvent,
     model::TransformLite,
     resource::{Scenario, ScenarioLogic},
@@ -12,7 +12,8 @@ use crate::{
 use bevy::{
     ecs::system::Command,
     math::{Vec2, Vec3Swizzles},
-    prelude::{Commands, World},
+    prelude::{Commands, With, World},
+    time::Time,
     transform::components::Transform,
 };
 use rand::{Rng, SeedableRng};
@@ -107,6 +108,8 @@ impl WavesScenario {
                     });
                 }
 
+                commands.add(PlayPlayerVoice(VoiceSound::Start(self.wave >= 5)));
+
                 return Task::SpawnZombie;
             }
             Task::SpawnZombie => {
@@ -145,6 +148,8 @@ impl WavesScenario {
                         ..Default::default()
                     });
                 }
+
+                commands.add(PlayPlayerVoice(VoiceSound::Success));
 
                 return Task::StartNextWave;
             }
@@ -292,6 +297,21 @@ impl Command for HealHumans {
             if let ActorKind::Human = actor.config.kind {
                 health.heal();
             }
+        }
+    }
+}
+
+struct PlayPlayerVoice(VoiceSound);
+
+impl Command for PlayPlayerVoice {
+    fn apply(self, world: &mut World) {
+        let now = world.resource::<Time>().elapsed();
+
+        for mut voice in world
+            .query_filtered::<&mut Voice, With<Player>>()
+            .iter_mut(world)
+        {
+            voice.queue(self.0, now);
         }
     }
 }

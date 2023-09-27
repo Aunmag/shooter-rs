@@ -58,7 +58,12 @@ pub fn melee(
         if let Some(victim) = victim {
             let momentum = attacker_actor.config.melee_damage * attacker_actor.skill;
             let force = Vec2::from_length(momentum, victim.angle_objective);
-            hits.add(victim.entity, force, -victim.angle_subjective);
+            hits.add(
+                Some(attacker_entity),
+                victim.entity,
+                force,
+                -victim.angle_subjective,
+            );
 
             audio.queue(AudioPlay {
                 path: "sounds/melee".into(),

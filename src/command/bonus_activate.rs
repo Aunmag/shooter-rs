@@ -20,7 +20,7 @@ impl Command for BonusActivate {
             return;
         };
 
-        WeaponSet::new(self.recipient, Some(weapon)).apply(world);
+        WeaponSet::new(self.recipient, Some(weapon), true).apply(world);
         world.entity_mut(self.bonus).despawn_recursive();
     }
 }
