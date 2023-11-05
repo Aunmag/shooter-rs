@@ -132,5 +132,6 @@ impl ActorConfig {
     }
 }
 
+// TODO: remove
 #[derive(Component)]
 pub struct ActorWeaponSprite;
