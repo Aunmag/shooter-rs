@@ -198,5 +198,5 @@ fn spawn_actors(count: usize, commands: &mut Commands) {
         commands.add(ActorBotSet(entity));
     }
 
-    log::info!("Spawned +{} entities", count)
+    log::info!("Spawned +{} entities", count);
 }

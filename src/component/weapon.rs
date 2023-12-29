@@ -456,18 +456,18 @@ pub enum WeaponGrip {
 
 impl WeaponGrip {
     pub fn recoil_factor(&self) -> f32 {
-        match self {
+        return match self {
             Self::OneHand => 0.5,
             Self::TwoHands => 0.75,
             Self::TwoHandsWithButt => 1.0,
-        }
+        };
     }
 
     pub fn actor_image_suffix(&self) -> u8 {
-        match self {
+        return match self {
             Self::OneHand => 1,
             Self::TwoHands => 2,
             Self::TwoHandsWithButt => 2,
-        }
+        };
     }
 }

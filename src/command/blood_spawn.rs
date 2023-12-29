@@ -28,16 +28,12 @@ impl Command for BloodSpawn {
 
         let misc = world.resource::<Misc>();
 
-        let image = if let Some(image) = misc.dummy_image.clone() {
-            image
-        } else {
+        let Some(image) = misc.dummy_image.clone() else {
             log::warn!("Failed to spawn blood. The dummy image isn't initialized");
             return;
         };
 
-        let mesh = if let Some(mesh) = misc.dummy_mesh.clone() {
-            mesh
-        } else {
+        let Some(mesh) = misc.dummy_mesh.clone() else {
             log::warn!("Failed to spawn blood. The dummy mesh isn't initialized");
             return;
         };

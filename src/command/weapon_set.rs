@@ -54,7 +54,7 @@ impl WeaponSet {
             .resource::<AssetServer>()
             .get_handle(weapon.get_image_path());
 
-        let anchor = self.find_image_anchor(world, weapon, &image);
+        let anchor = Self::find_image_anchor(world, weapon, &image);
 
         world
             .spawn(SpriteBundle {
@@ -70,12 +70,7 @@ impl WeaponSet {
             .set_parent(self.entity);
     }
 
-    fn find_image_anchor(
-        &self,
-        world: &World,
-        weapon: &WeaponConfig,
-        image: &Handle<Image>,
-    ) -> Anchor {
+    fn find_image_anchor(world: &World, weapon: &WeaponConfig, image: &Handle<Image>) -> Anchor {
         let arms_length = if let WeaponGrip::OneHand = weapon.grip {
             Actor::ARMS_LENGTH_1
         } else {

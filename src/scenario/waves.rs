@@ -67,7 +67,7 @@ impl WavesScenario {
         };
     }
 
-    fn spawn_player(&mut self, commands: &mut Commands) {
+    fn spawn_player(commands: &mut Commands) {
         let entity = commands.spawn_empty().id();
 
         commands.add(ActorSet {
@@ -84,7 +84,7 @@ impl WavesScenario {
         match self.task {
             Task::Start => {
                 log::info!("Starting waves scenario");
-                self.spawn_player(commands);
+                Self::spawn_player(commands);
                 return Task::StartNextWave;
             }
             Task::StartNextWave => {

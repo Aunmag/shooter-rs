@@ -1,29 +1,3 @@
-#![warn(
-    // basic
-    clippy::all,
-    clippy::cargo,
-    // extra restrictions
-    clippy::get_unwrap,
-    clippy::let_underscore_must_use,
-    clippy::lossy_float_literal,
-    clippy::multiple_inherent_impl,
-    clippy::panic_in_result_fn,
-    clippy::print_stdout,
-    clippy::print_stderr,
-    clippy::rest_pat_in_fully_bound_structs,
-    clippy::string_to_string,
-    clippy::unneeded_field_pattern,
-    clippy::unwrap_in_result,
-    clippy::unwrap_used,
-    clippy::verbose_file_reads,
-)]
-#![allow(
-    clippy::cargo_common_metadata,
-    clippy::multiple_crate_versions,
-    clippy::needless_return,
-    clippy::type_complexity
-)]
-
 mod command;
 mod component;
 mod data;

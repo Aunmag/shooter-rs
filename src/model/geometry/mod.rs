@@ -2,7 +2,7 @@ mod line;
 mod line_segment;
 mod point;
 
-pub use self::{line::*, line_segment::*, point::*};
+pub use self::{line::*, line_segment::*};
 
 pub trait Geometry {}
 

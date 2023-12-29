@@ -57,9 +57,7 @@ pub fn actor(mut query: Query<(&mut Actor, &mut Transform, &mut Inertia)>, time:
 }
 
 fn turn(actor: &Actor, transform: &mut Transform, inertia: &mut Inertia, time_delta: f32) {
-    let look_at = if let Some(look_at) = actor.look_at {
-        look_at
-    } else {
+    let Some(look_at) = actor.look_at else {
         return;
     };
 

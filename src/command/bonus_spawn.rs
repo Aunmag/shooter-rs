@@ -22,9 +22,7 @@ pub struct BonusSpawn {
 
 impl Command for BonusSpawn {
     fn apply(self, world: &mut World) {
-        let weapon = if let Some(weapon) = generate_weapon(self.level) {
-            weapon
-        } else {
+        let Some(weapon) = generate_weapon(self.level) else {
             return;
         };
 

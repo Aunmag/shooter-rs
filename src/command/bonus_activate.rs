@@ -14,9 +14,7 @@ pub struct BonusActivate {
 
 impl Command for BonusActivate {
     fn apply(self, world: &mut World) {
-        let weapon = if let Some(weapon) = world.get::<Bonus>(self.bonus).map(|b| b.weapon) {
-            weapon
-        } else {
+        let Some(weapon) = world.get::<Bonus>(self.bonus).map(|b| b.weapon) else {
             return;
         };
 

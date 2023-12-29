@@ -22,7 +22,7 @@ pub enum ActorKind {
 }
 
 impl ActorKind {
-    pub const fn get_assets_path(&self) -> &'static str {
+    pub const fn get_assets_path(self) -> &'static str {
         return match self {
             Self::Human => "actors/human",
             Self::Zombie => "actors/zombie",

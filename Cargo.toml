@@ -1,12 +1,7 @@
 [package]
 name = "shooter"
-version = "0.1.0"
 edition = "2021"
 authors = ["Aunmag <aunmag@gmail.com>"]
-
-[profile.release]
-codegen-units = 1
-lto = "fat"
 
 [dependencies]
 anyhow = "1.0"
@@ -25,3 +20,34 @@ serde = { version = "1.0", features = ["derive"] }
 
 [dev-dependencies]
 approx = "0.5"
+
+[lints.clippy]
+# basic
+all = { level = "warn", priority = -1 }
+cargo = { level = "warn", priority = -1 }
+# basic exceptions
+cargo_common_metadata = "allow"
+multiple_crate_versions = "allow"
+needless_return = "allow"
+too_many_arguments = "allow"
+type_complexity = "allow"
+unwrap_or_default = "allow"
+# extra restrictions
+explicit_into_iter_loop = "warn"
+get_unwrap = "warn"
+impl_trait_in_params = "warn"
+imprecise_flops = "warn"
+lossy_float_literal = "warn"
+manual_let_else = "warn"
+multiple_inherent_impl = "warn"
+panic_in_result_fn = "warn"
+print_stderr = "warn"
+print_stdout = "warn"
+rest_pat_in_fully_bound_structs = "warn"
+semicolon_if_nothing_returned = "warn"
+string_to_string = "warn"
+unneeded_field_pattern = "warn"
+unused_self = "warn"
+unwrap_in_result = "warn"
+unwrap_used = "warn"
+verbose_file_reads = "warn"

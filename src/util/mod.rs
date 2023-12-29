@@ -1,7 +1,6 @@
 mod debug_lines_static;
 mod envelope;
 pub mod ext;
-pub mod macros;
 pub mod math;
 mod smart_string;
 #[cfg(test)]

@@ -50,7 +50,7 @@ pub struct StateSystems<'a> {
 }
 
 impl<'a> StateSystems<'a> {
-    pub fn add<M>(&mut self, system: impl IntoSystemConfigs<M>) {
+    pub fn add<M, S: IntoSystemConfigs<M>>(&mut self, system: S) {
         self.app.add_state_system(self.state, system);
     }
 }

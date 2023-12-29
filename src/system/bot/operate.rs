@@ -3,7 +3,6 @@ use crate::{
     model::ActorAction,
     util::{
         ext::{TransformExt, Vec2Ext},
-        macros::ok_or_continue,
         math::{angle_difference, find_meet_point},
     },
 };
@@ -95,8 +94,10 @@ mod sub_system {
         let mut teammates_position_sum_weight = 0.0;
 
         for teammate in &bot.teammates {
-            let teammate_position =
-                ok_or_continue!(actors.get(*teammate).map(|a| a.0.translation.xy()));
+            let Ok(teammate_position) = actors.get(*teammate).map(|a| a.0.translation.xy()) else {
+                continue;
+            };
+
             let teammate_distance = (position - teammate_position).length_squared();
 
             if teammate_distance < bot.spread * bot.spread {
