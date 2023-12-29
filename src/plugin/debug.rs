@@ -6,7 +6,7 @@ use crate::{
     resource::AudioTracker,
     util::{
         ext::{AppExt, Vec2Ext},
-        DEBUG_LINES,
+        GIZMOS,
     },
 };
 use bevy::{
@@ -15,7 +15,7 @@ use bevy::{
         DiagnosticsStore, EntityCountDiagnosticsPlugin, FrameTimeDiagnosticsPlugin,
         SystemInformationDiagnosticsPlugin,
     },
-    ecs::system::ResMut,
+    gizmos::gizmos::Gizmos,
     input::Input,
     prelude::{
         AssetServer, Color, Commands, Component, KeyCode, Query, Res, Resource, Startup,
@@ -24,7 +24,6 @@ use bevy::{
     text::{Text, TextSection, TextStyle},
     transform::components::Transform,
 };
-use bevy_prototype_debug_lines::{DebugLines, DebugLinesPlugin};
 use std::{
     cmp::Reverse,
     collections::HashMap,
@@ -76,10 +75,9 @@ impl Plugin for DebugPlugin {
             .add_plugins(FrameTimeDiagnosticsPlugin)
             .add_plugins(EntityCountDiagnosticsPlugin)
             .add_plugins(SystemInformationDiagnosticsPlugin)
-            .add_plugins(DebugLinesPlugin::default())
             .add_systems(Startup, startup)
             .add_systems(Update, update_diagnostics)
-            .add_systems(Update, render_debug_lines_static)
+            .add_systems(Update, render_gizmos_static)
             .add_state_system(AppState::Game, update_input);
     }
 }
@@ -142,8 +140,8 @@ fn update_diagnostics(
     }
 }
 
-fn render_debug_lines_static(mut debug_lines: ResMut<DebugLines>) {
-    DEBUG_LINES.render(&mut debug_lines);
+fn render_gizmos_static(mut gizmos: Gizmos) {
+    GIZMOS.render(&mut gizmos);
 }
 
 fn update_input(

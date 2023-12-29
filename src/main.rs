@@ -21,6 +21,7 @@ use crate::{
     util::ext::AppExt,
 };
 use bevy::{
+    gizmos::GizmoConfig,
     log::LogPlugin,
     prelude::{App, DefaultPlugins, IntoSystem, IntoSystemConfigs, PluginGroup, Update},
     render::texture::ImagePlugin,
@@ -73,6 +74,10 @@ fn main() {
         .insert_resource(HitResource::default())
         .insert_resource(Misc::default())
         .insert_resource(config)
+        .insert_resource(GizmoConfig {
+            line_width: 5.0,
+            ..Default::default()
+        })
         .insert_resource(Scenario::new(WavesScenario::new()))
         .insert_resource(system::game::AmbienceFxData::default())
         .insert_resource(system::game::CollisionSystemData::default())

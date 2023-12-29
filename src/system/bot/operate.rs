@@ -31,7 +31,7 @@ pub fn operate(
 
 mod sub_system {
     use super::*;
-    use crate::util::DEBUG_LINES;
+    use crate::util::GIZMOS;
     use bevy::prelude::Color;
 
     pub fn follow_enemy(
@@ -126,7 +126,7 @@ mod sub_system {
             }
 
             if DEBUG_TEAMMATES {
-                DEBUG_LINES.ln(
+                GIZMOS.ln(
                     position,
                     teammates_position,
                     Color::rgba(0.0, 1.0, 0.0, closeness),

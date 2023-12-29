@@ -1,22 +1,23 @@
-use crate::util::ext::DebugLinesExt;
-use bevy::prelude::{Color, Vec2};
-use bevy_prototype_debug_lines::DebugLines;
+use bevy::{
+    gizmos::gizmos::Gizmos,
+    prelude::{Color, Vec2},
+};
 use std::sync::Mutex;
 
 lazy_static::lazy_static! {
-    pub static ref DEBUG_LINES: DebugLinesStatic = DebugLinesStatic::default();
+    pub static ref GIZMOS: GizmosStatic = GizmosStatic::default();
 }
 
 #[derive(Default)]
-pub struct DebugLinesStatic {
+pub struct GizmosStatic {
     lines: Mutex<Vec<(Vec2, Vec2, Color)>>,
 }
 
 #[allow(clippy::unwrap_used)]
-impl DebugLinesStatic {
-    pub fn render(&self, debug_lines: &mut DebugLines) {
+impl GizmosStatic {
+    pub fn render(&self, gizmos: &mut Gizmos) {
         for (head, tail, color) in self.lines.lock().unwrap().drain(..) {
-            debug_lines.ln(head, tail, color);
+            gizmos.line_2d(head, tail, color);
         }
     }
 
