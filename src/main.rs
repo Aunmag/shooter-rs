@@ -17,7 +17,7 @@ use crate::{
     model::AppState,
     plugin::DebugPlugin,
     resource::{AssetStorage, AudioStorage, AudioTracker, Config, HitResource, Misc, Scenario},
-    scenario::WavesScenario,
+    scenario::{BenchScenario, WavesScenario},
     util::ext::AppExt,
 };
 use bevy::{
@@ -61,6 +61,12 @@ fn main() {
         application.add_plugins(DebugPlugin);
     }
 
+    if config.misc.bench {
+        application.insert_resource(Scenario::new(BenchScenario::default()));
+    } else {
+        application.insert_resource(Scenario::new(WavesScenario::new()));
+    }
+
     application
         .add_plugins(Material2dPlugin::<BloodMaterial>::default())
         .add_plugins(Material2dPlugin::<LaserMaterial>::default())
@@ -78,7 +84,6 @@ fn main() {
             line_width: 5.0,
             ..Default::default()
         })
-        .insert_resource(Scenario::new(WavesScenario::new()))
         .insert_resource(system::game::AmbienceFxData::default())
         .insert_resource(system::game::CollisionSystemData::default())
         .insert_resource(system::game::WeaponData::default())

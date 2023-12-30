@@ -38,6 +38,10 @@ pub fn player(
     let extra_rotation = rotation * Player::EXTRA_ROTATION_MULTIPLAYER;
 
     for (mut player, mut actor, mut transform) in query.iter_mut() {
+        if !player.is_controllable {
+            continue;
+        }
+
         let player_rotation = rotation + player.add_extra_rotation(extra_rotation);
 
         actor

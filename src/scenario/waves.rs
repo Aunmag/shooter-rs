@@ -29,7 +29,6 @@ const BONUSES_PER_WAVE: f32 = 3.0;
 const GAME_OVER_TEXT_DURATION: Duration = Duration::from_secs(8);
 
 enum Task {
-    Start,
     StartNextWave,
     SpawnZombie,
     CheckWaveCompletion,
@@ -39,7 +38,6 @@ enum Task {
 impl Task {
     fn get_timeout(&self) -> Duration {
         return match self {
-            Self::Start => Duration::from_secs(2),
             Self::StartNextWave => Duration::from_secs(2),
             Self::SpawnZombie => Duration::from_millis(800),
             Self::CheckWaveCompletion => Duration::from_secs(2),
@@ -59,7 +57,7 @@ pub struct WavesScenario {
 impl WavesScenario {
     pub fn new() -> Self {
         return Self {
-            task: Task::Start,
+            task: Task::StartNextWave,
             wave: 0,
             zombies_spawned: 0,
             kills: 0,
@@ -77,16 +75,14 @@ impl WavesScenario {
             transform: TransformLite::default(),
         });
 
-        commands.add(ActorPlayerSet(entity));
+        commands.add(ActorPlayerSet {
+            entity,
+            is_controllable: true,
+        });
     }
 
     fn update(&mut self, commands: &mut Commands) -> Task {
         match self.task {
-            Task::Start => {
-                log::info!("Starting waves scenario");
-                Self::spawn_player(commands);
-                return Task::StartNextWave;
-            }
             Task::StartNextWave => {
                 self.wave += 1;
                 self.zombies_spawned = 0;
@@ -172,10 +168,10 @@ impl WavesScenario {
 }
 
 impl ScenarioLogic for WavesScenario {
-    fn update(&mut self, commands: &mut Commands) -> Duration {
-        let timeout = self.task.get_timeout();
-        self.task = WavesScenario::update(self, commands);
-        return timeout;
+    fn on_start(&mut self, commands: &mut Commands) -> Duration {
+        log::info!("Starting waves scenario");
+        Self::spawn_player(commands);
+        return Duration::from_secs(2);
     }
 
     fn on_actor_death(&mut self, event: &ActorDeathEvent, commands: &mut Commands) {
@@ -222,6 +218,12 @@ impl ScenarioLogic for WavesScenario {
                 duration: GAME_OVER_TEXT_DURATION,
             });
         }
+    }
+
+    fn on_interval_update(&mut self, commands: &mut Commands) -> Duration {
+        let timeout = self.task.get_timeout();
+        self.task = WavesScenario::update(self, commands);
+        return timeout;
     }
 
     fn as_any_mut(&mut self) -> &mut dyn Any {
@@ -278,7 +280,7 @@ impl Command for CountZombies {
             .any(|a| a.config.kind == ActorKind::Zombie)
         {
             if let Some(scenario) = world.resource_mut::<Scenario>().logic::<WavesScenario>() {
-                scenario.task = Task::CompleteWave; // TODO: count duration
+                scenario.task = Task::CompleteWave;
             }
         }
     }

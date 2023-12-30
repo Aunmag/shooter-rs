@@ -2,8 +2,9 @@ use crate::util::ext::DurationExt;
 use bevy::ecs::component::Component;
 use std::time::Duration;
 
-#[derive(Default, Component)]
+#[derive(Component)]
 pub struct Player {
+    pub is_controllable: bool,
     zoom: Zoom,
     shake: Shake,
     shake_abs: Shake,
@@ -13,6 +14,16 @@ pub struct Player {
 impl Player {
     pub const EXTRA_ROTATION_MULTIPLAYER: f32 = 0.1;
     pub const EXTRA_ROTATION_MAX: f32 = 0.11;
+
+    pub fn new(is_controllable: bool) -> Self {
+        return Self {
+            is_controllable,
+            zoom: Zoom::default(),
+            shake: Shake::default(),
+            shake_abs: Shake::default(),
+            extra_rotation: 0.0,
+        };
+    }
 
     pub fn update(&mut self, time: Duration, delta: f32) {
         self.zoom.update(time, delta);

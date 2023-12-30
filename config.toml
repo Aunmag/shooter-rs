@@ -13,3 +13,4 @@ mouse_sensitivity = 0.003
 [misc]
 laser_sight = false
 debug = false
+bench = false

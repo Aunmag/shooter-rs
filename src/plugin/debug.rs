@@ -11,70 +11,48 @@ use crate::{
 };
 use bevy::{
     app::{App, Plugin},
-    diagnostic::{
-        DiagnosticsStore, EntityCountDiagnosticsPlugin, FrameTimeDiagnosticsPlugin,
-        SystemInformationDiagnosticsPlugin,
-    },
+    diagnostic::{DiagnosticsStore, EntityCountDiagnosticsPlugin, FrameTimeDiagnosticsPlugin},
+    ecs::system::{ResMut, Resource},
     gizmos::gizmos::Gizmos,
     input::Input,
     prelude::{
-        AssetServer, Color, Commands, Component, KeyCode, Query, Res, Resource, Startup,
-        TextBundle, Update, Vec2, With,
+        AssetServer, Color, Commands, Component, KeyCode, Query, Res, Startup, TextBundle, Update,
+        Vec2, With,
     },
     text::{Text, TextSection, TextStyle},
+    time::Time,
     transform::components::Transform,
 };
-use std::{
-    cmp::Reverse,
-    collections::HashMap,
-    time::{Duration, Instant},
-};
-
-#[derive(Component)]
-struct FpsText;
+use std::time::Duration;
 
 #[derive(Default, Resource)]
-pub struct Benchmark {
-    measurements: HashMap<&'static str, (Duration, u32)>,
+struct DiagnosticTimer {
+    next: Duration,
 }
 
-impl Benchmark {
-    #[allow(dead_code)]
-    pub fn register(&mut self, name: &'static str, start: Instant) {
-        let measurement = self
-            .measurements
-            .entry(name)
-            .or_insert_with(|| (Duration::ZERO, 0));
+impl DiagnosticTimer {
+    const INTERVAL: Duration = Duration::from_millis(500);
 
-        measurement.0 += start.elapsed();
-        measurement.1 += 1;
-    }
-
-    fn log_summary(&self) {
-        let mut summary = self
-            .measurements
-            .iter()
-            .map(|(k, v)| (k, (v.0 / v.1)))
-            .collect::<Vec<_>>();
-
-        summary.sort_by_key(|v| Reverse(v.1));
-
-        log::info!("Summary:");
-
-        for (name, duration) in &summary {
-            log::info!("{:.6} ms {}", duration.as_secs_f64() * 1000.0, name);
+    fn next_if_ready(&mut self, time: Duration) -> bool {
+        if time < self.next {
+            return false;
+        } else {
+            self.next = time + Self::INTERVAL;
+            return true;
         }
     }
 }
+
+#[derive(Component)]
+struct FpsText;
 
 pub struct DebugPlugin;
 
 impl Plugin for DebugPlugin {
     fn build(&self, app: &mut App) {
-        app.insert_resource(Benchmark::default())
+        app.insert_resource(DiagnosticTimer::default())
             .add_plugins(FrameTimeDiagnosticsPlugin)
             .add_plugins(EntityCountDiagnosticsPlugin)
-            .add_plugins(SystemInformationDiagnosticsPlugin)
             .add_systems(Startup, startup)
             .add_systems(Update, update_diagnostics)
             .add_systems(Update, render_gizmos_static)
@@ -91,11 +69,7 @@ fn startup(mut commands: Commands, asset_server: Res<AssetServer>) {
 
     commands.spawn((
         TextBundle::from_sections([
-            TextSection::new("\nCPU: ", style.clone()),
-            TextSection::from_style(style.clone()),
-            TextSection::new("\nMEM: ", style.clone()),
-            TextSection::from_style(style.clone()),
-            TextSection::new("\nFPS: ", style.clone()),
+            TextSection::new("FPS: ", style.clone()),
             TextSection::from_style(style.clone()),
             TextSection::new("\nEntities: ", style.clone()),
             TextSection::from_style(style.clone()),
@@ -107,19 +81,15 @@ fn startup(mut commands: Commands, asset_server: Res<AssetServer>) {
 }
 
 fn update_diagnostics(
+    mut diagnostics_timer: ResMut<DiagnosticTimer>,
     diagnostics: Res<DiagnosticsStore>,
     audio_tracker: Res<AudioTracker>,
+    time: Res<Time>,
     mut query: Query<&mut Text, With<FpsText>>,
 ) {
-    let cpu = diagnostics
-        .get(SystemInformationDiagnosticsPlugin::CPU_USAGE)
-        .and_then(|v| v.average())
-        .unwrap_or(-1.0);
-
-    let mem = diagnostics
-        .get(SystemInformationDiagnosticsPlugin::MEM_USAGE)
-        .and_then(|v| v.average())
-        .unwrap_or(-1.0);
+    if !diagnostics_timer.next_if_ready(time.elapsed()) {
+        return;
+    }
 
     let fps = diagnostics
         .get(FrameTimeDiagnosticsPlugin::FPS)
@@ -132,11 +102,9 @@ fn update_diagnostics(
         .unwrap_or(-1.0);
 
     for mut text in &mut query {
-        text.sections[1].value = format!("{:.2}", cpu);
-        text.sections[3].value = format!("{:.2}", mem);
-        text.sections[5].value = format!("{:.2}", fps);
-        text.sections[7].value = format!("{:.2}", entities);
-        text.sections[9].value = format!("{}", audio_tracker.playing);
+        text.sections[1].value = format!("{:.0}", fps);
+        text.sections[3].value = format!("{:.0}", entities);
+        text.sections[5].value = format!("{}", audio_tracker.playing);
     }
 }
 
@@ -147,54 +115,56 @@ fn render_gizmos_static(mut gizmos: Gizmos) {
 fn update_input(
     players: Query<&Transform, With<Player>>,
     keyboard: Res<Input<KeyCode>>,
-    benchmark: Res<Benchmark>,
     mut commands: Commands,
 ) {
-    if keyboard.just_pressed(KeyCode::Key0) {
-        let player_position = players
+    let bonus_level = if keyboard.just_pressed(KeyCode::Key0) {
+        0
+    } else if keyboard.just_pressed(KeyCode::Key1) {
+        1
+    } else if keyboard.just_pressed(KeyCode::Key2) {
+        2
+    } else if keyboard.just_pressed(KeyCode::Key3) {
+        3
+    } else if keyboard.just_pressed(KeyCode::Key4) {
+        4
+    } else if keyboard.just_pressed(KeyCode::Key5) {
+        5
+    } else if keyboard.just_pressed(KeyCode::Key6) {
+        6
+    } else {
+        -1
+    };
+
+    if bonus_level != -1 {
+        let mut position = players
             .iter()
             .next()
             .map(TransformLite::from)
             .unwrap_or_default();
 
-        spawn_bonus(player_position, &mut commands);
-    }
+        position.translation += Vec2::from_length(2.0, position.direction);
 
-    if keyboard.just_pressed(KeyCode::Key1) {
-        spawn_actors(10, &mut commands);
-    }
-
-    if keyboard.just_pressed(KeyCode::Key2) {
-        spawn_actors(100, &mut commands);
-    }
-
-    if keyboard.just_pressed(KeyCode::Key3) {
-        spawn_actors(1000, &mut commands);
-    }
-
-    if keyboard.just_pressed(KeyCode::Equals) {
-        benchmark.log_summary();
+        if bonus_level == 0 {
+            spawn_actor(&mut commands, position);
+        } else {
+            spawn_bonus(&mut commands, position.translation, bonus_level as u8);
+        }
     }
 }
 
-fn spawn_bonus(mut position: TransformLite, commands: &mut Commands) {
-    position.translation += Vec2::from_length(2.0, position.direction);
-    commands.add(BonusSpawn::new(position.translation, u8::MAX));
+fn spawn_bonus(commands: &mut Commands, position: Vec2, level: u8) {
+    commands.add(BonusSpawn::new(position, level));
 }
 
-fn spawn_actors(count: usize, commands: &mut Commands) {
-    for _ in 0..count {
-        let entity = commands.spawn_empty().id();
+fn spawn_actor(commands: &mut Commands, transform: TransformLite) {
+    let entity = commands.spawn_empty().id();
 
-        commands.add(ActorSet {
-            entity,
-            config: &ActorConfig::ZOMBIE,
-            skill: 1.0,
-            transform: TransformLite::default(),
-        });
+    commands.add(ActorSet {
+        entity,
+        config: &ActorConfig::ZOMBIE,
+        skill: 1.0,
+        transform,
+    });
 
-        commands.add(ActorBotSet(entity));
-    }
-
-    log::info!("Spawned +{} entities", count);
+    commands.add(ActorBotSet(entity));
 }

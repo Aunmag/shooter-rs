@@ -6,7 +6,9 @@ use bevy::{
 use std::{any::Any, time::Duration};
 
 pub trait ScenarioLogic {
-    fn update(&mut self, commands: &mut Commands) -> Duration;
+    fn on_start(&mut self, _commands: &mut Commands) -> Duration {
+        return Duration::ZERO;
+    }
 
     fn on_actor_deaths(
         &mut self,
@@ -18,7 +20,11 @@ pub trait ScenarioLogic {
         }
     }
 
-    fn on_actor_death(&mut self, event: &ActorDeathEvent, commands: &mut Commands);
+    fn on_actor_death(&mut self, _event: &ActorDeathEvent, _commands: &mut Commands) {}
+
+    fn on_interval_update(&mut self, commands: &mut Commands) -> Duration;
+
+    fn on_constant_update(&mut self, _commands: &mut Commands) {}
 
     fn as_any_mut(&mut self) -> &mut dyn Any;
 }
@@ -27,6 +33,7 @@ pub trait ScenarioLogic {
 pub struct Scenario {
     logic: Box<dyn ScenarioLogic + 'static + Send + Sync>,
     timer: Duration,
+    is_started: bool,
 }
 
 impl Scenario {
@@ -34,6 +41,7 @@ impl Scenario {
         return Self {
             logic: Box::new(logic),
             timer: Duration::ZERO,
+            is_started: false,
         };
     }
 
@@ -43,13 +51,20 @@ impl Scenario {
         death_events: EventReader<ActorDeathEvent>,
         time: Duration,
     ) {
+        if !self.is_started {
+            self.timer = time + self.logic.on_start(commands);
+            self.is_started = true;
+        }
+
         if !death_events.is_empty() {
             self.logic.on_actor_deaths(death_events, commands);
         }
 
-        while self.timer < time {
-            self.timer = time + self.logic.update(commands);
+        if self.timer <= time {
+            self.timer = time + self.logic.on_interval_update(commands);
         }
+
+        self.logic.on_constant_update(commands);
     }
 
     pub fn logic<T: ScenarioLogic + 'static>(&mut self) -> Option<&mut T> {

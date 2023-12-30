@@ -35,6 +35,7 @@ pub struct ControlsConfig {
 pub struct MiscConfig {
     pub laser_sight: bool,
     pub debug: bool,
+    pub bench: bool,
 }
 
 impl Config {
@@ -42,7 +43,7 @@ impl Config {
     pub fn load_from(path: &str) -> Result<Self> {
         let global_context = || format!("Path: {}", path);
 
-        let config = config::Config::builder()
+        let mut config = config::Config::builder()
             .add_source(config::File::with_name(path))
             .build()
             .context("Failed to load config from file")
@@ -51,7 +52,17 @@ impl Config {
             .context("Failed to deserialize config")
             .with_context(global_context)?;
 
+        config.normalize();
+
         return Ok(config);
+    }
+
+    pub fn normalize(&mut self) {
+        if self.misc.bench {
+            self.display.fullscreen = false;
+            self.audio.sources = 0;
+            self.misc.debug = true;
+        }
     }
 }
 

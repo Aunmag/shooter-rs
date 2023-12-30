@@ -1,3 +1,4 @@
+mod bench;
 mod waves;
 
-pub use self::waves::*;
+pub use self::{bench::*, waves::*};
