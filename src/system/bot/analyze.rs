@@ -23,7 +23,7 @@ pub fn analyze(
 
     bots.par_iter_mut()
         .batching_strategy(BatchingStrategy::fixed(32))
-        .for_each_mut(|(mut bot, e1, a1, t1, i1)| {
+        .for_each(|(mut bot, e1, a1, t1, i1)| {
             if bot.next_update.is_zero() {
                 bot.next_update = time + thread_rng().gen_range(Duration::ZERO..UPDATE_INTERVAL);
                 return;

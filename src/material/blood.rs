@@ -1,13 +1,13 @@
 use bevy::{
+    asset::Asset,
     prelude::{Handle, Image},
-    reflect::{TypePath, TypeUuid},
+    reflect::TypePath,
     render::render_resource::{AsBindGroup, ShaderRef},
     sprite::Material2d,
 };
 use std::time::Duration;
 
-#[derive(AsBindGroup, TypeUuid, TypePath, Debug, Clone)]
-#[uuid = "fe5e7c73-1d08-4cee-b2f7-25ab9b376c6a"]
+#[derive(Debug, Clone, Asset, TypePath, AsBindGroup)]
 pub struct BloodMaterial {
     pub spawned: Duration,
     #[uniform(0)]

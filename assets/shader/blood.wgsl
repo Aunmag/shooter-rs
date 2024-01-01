@@ -1,4 +1,4 @@
-#import bevy_sprite::mesh2d_vertex_output MeshVertexOutput
+#import bevy_sprite::mesh2d_vertex_output::VertexOutput
 
 const ALPHA = 0.8;
 const SCALE = 8.0;
@@ -51,7 +51,7 @@ fn noise(p: vec2<f32>) -> f32 {
 }
 
 @fragment
-fn fragment(in: MeshVertexOutput) -> @location(0) vec4<f32> {
+fn fragment(in: VertexOutput) -> @location(0) vec4<f32> {
     var uv_px = in.uv.xy;
     uv_px = floor(uv_px * uniform.size) / uniform.size;
     var uv_px_m = uv_px;

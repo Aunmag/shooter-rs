@@ -3,33 +3,31 @@ use crate::{
     resource::{AssetStorage, AudioStorage},
 };
 use bevy::{
-    asset::LoadState,
-    prelude::{AssetServer, Assets, AudioSource, NextState, Res, ResMut},
+    asset::Assets,
+    prelude::{AssetServer, AudioSource, NextState, Res, ResMut},
 };
 
 pub fn on_update(
     asset_server: Res<AssetServer>,
-    asset_storage: Res<AssetStorage>,
-    assets_audio: Res<Assets<AudioSource>>,
+    audio_assets: Res<Assets<AudioSource>>,
+    mut asset_storage: ResMut<AssetStorage>,
     mut audio_storage: ResMut<AudioStorage>,
     mut next_state: ResMut<NextState<AppState>>,
 ) {
-    for asset in asset_storage.iter() {
-        match asset_server.get_load_state(asset) {
-            LoadState::NotLoaded | LoadState::Loaded | LoadState::Unloaded => {
-                // ok
-            }
-            LoadState::Loading => {
-                return; // still loading
-            }
-            LoadState::Failed => {
-                if let Some(path) = asset_server.get_handle_path(asset) {
-                    log::error!("Failed to asset from {}", path.path().display());
-                }
-            }
+    match asset_storage.is_loaded(&asset_server) {
+        None => {
+            log::info!("Loading...");
+            asset_storage.load(&asset_server);
+            return;
+        }
+        Some(false) => {
+            log::trace!("Loading...");
+            return;
+        }
+        Some(true) => {
+            log::info!("Loaded");
+            audio_storage.index(&audio_assets, &asset_server);
+            next_state.set(AppState::Game);
         }
     }
-
-    audio_storage.index(&assets_audio, &asset_server);
-    next_state.set(AppState::Game);
 }

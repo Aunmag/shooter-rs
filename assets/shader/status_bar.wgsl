@@ -1,5 +1,5 @@
-#import bevy_sprite::mesh2d_vertex_output MeshVertexOutput
-#import bevy_pbr::utils PI
+#import bevy_pbr::utils::PI
+#import bevy_sprite::mesh2d_vertex_output::VertexOutput
 
 const RANGE = 0.75;
 const COLOR_VOID = vec4<f32>(0.0, 0.0, 0.0, 0.333333);
@@ -73,7 +73,7 @@ fn bar(value: f32, center: vec2<f32>, color: vec4<f32>, radius: f32, thickness: 
 }
 
 @fragment
-fn fragment(in: MeshVertexOutput) -> @location(0) vec4<f32> {
+fn fragment(in: VertexOutput) -> @location(0) vec4<f32> {
     var center  = in.uv.xy - 0.5;
     var stamina = bar(uniform.stamina, center, mix_alpha(COLOR_STAMINA, 1.0                 ), 0.62, 0.01);
     var health  = bar(uniform.health , center, mix_alpha(COLOR_HEALTH , uniform.health_alpha), 0.91, 0.06);

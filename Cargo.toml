@@ -5,7 +5,7 @@ authors = ["Aunmag <aunmag@gmail.com>"]
 
 [dependencies]
 anyhow = "1.0"
-bevy = "0.11"
+bevy = "0.12"
 chrono = "0.4"
 config = "0.13"
 derive_more = "0.99"

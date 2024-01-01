@@ -48,7 +48,8 @@ fn spawn_bonus(world: &mut World, position: Vec2, weapon: &'static WeaponConfig)
 fn spawn_image(world: &mut World, bonus: Entity, weapon: &'static WeaponConfig) {
     let texture = world
         .resource::<AssetServer>()
-        .get_handle(weapon.get_image_path());
+        .get_handle(weapon.get_image_path())
+        .unwrap_or_default();
 
     world
         .spawn(SpriteBundle {
@@ -60,7 +61,11 @@ fn spawn_image(world: &mut World, bonus: Entity, weapon: &'static WeaponConfig) 
 }
 
 fn spawn_label(world: &mut World, bonus: Entity, weapon: &'static WeaponConfig) {
-    let font = world.resource::<AssetServer>().get_handle(FONT_PATH);
+    let font = world
+        .resource::<AssetServer>()
+        .get_handle(FONT_PATH)
+        .unwrap_or_default();
+
     let text = Text::from_section(
         weapon.name,
         TextStyle {

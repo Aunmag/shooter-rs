@@ -11,28 +11,9 @@ pub fn on_enter(
     mut meshes: ResMut<Assets<Mesh>>,
     mut misc: ResMut<Misc>,
 ) {
-    load_folder_or_log(&asset_server, &mut asset_storage, "actors");
-    load_folder_or_log(&asset_server, &mut asset_storage, "fonts");
-    load_folder_or_log(&asset_server, &mut asset_storage, "sounds");
-    load_folder_or_log(&asset_server, &mut asset_storage, "terrain");
-    load_folder_or_log(&asset_server, &mut asset_storage, "weapons");
+    asset_storage.load(&asset_server);
     init_dummy_image(&mut images, &mut misc);
     init_dummy_mesh(&mut meshes, &mut misc);
-}
-
-fn load_folder_or_log(
-    asset_server: &Res<AssetServer>,
-    asset_storage: &mut ResMut<AssetStorage>,
-    path: &str,
-) {
-    match asset_server.load_folder(path) {
-        Ok(assets) => {
-            asset_storage.extend(assets);
-        }
-        Err(error) => {
-            log::error!("Failed to load assets folder from {}: {:?}", path, error);
-        }
-    }
 }
 
 fn init_dummy_image(images: &mut Assets<Image>, misc: &mut Misc) {

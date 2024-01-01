@@ -21,7 +21,11 @@ pub struct ActorSet {
 impl Command for ActorSet {
     fn apply(self, world: &mut World) {
         let texture_path = self.config.get_image_path(0);
-        let texture = world.resource::<AssetServer>().get_handle(texture_path);
+        let texture = world
+            .resource::<AssetServer>()
+            .get_handle(texture_path)
+            .unwrap_or_default();
+
         let mut entity_mut = world.entity_mut(self.entity);
 
         entity_mut

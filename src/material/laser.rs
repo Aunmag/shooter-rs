@@ -1,12 +1,12 @@
 use bevy::{
+    asset::Asset,
     prelude::{Handle, Image},
-    reflect::{TypePath, TypeUuid},
+    reflect::TypePath,
     render::render_resource::{AsBindGroup, ShaderRef},
     sprite::Material2d,
 };
 
-#[derive(AsBindGroup, TypeUuid, TypePath, Debug, Clone)]
-#[uuid = "5a5b4fc1-2055-4ac5-ade7-ecf1e3aa2c1b"]
+#[derive(Debug, Clone, Asset, TypePath, AsBindGroup)]
 pub struct LaserMaterial {
     #[texture(0)]
     #[sampler(1)]

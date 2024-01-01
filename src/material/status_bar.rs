@@ -1,12 +1,12 @@
 use bevy::{
+    asset::Asset,
     prelude::{Handle, Image},
-    reflect::{TypePath, TypeUuid},
+    reflect::TypePath,
     render::render_resource::{AsBindGroup, ShaderRef},
     sprite::Material2d,
 };
 
-#[derive(AsBindGroup, TypeUuid, TypePath, Debug, Clone)]
-#[uuid = "71682a00-fabd-4639-a0a5-e5a984d01fa6"]
+#[derive(Debug, Clone, Asset, TypePath, AsBindGroup)]
 pub struct StatusBarMaterial {
     #[uniform(0)]
     pub health: f32,

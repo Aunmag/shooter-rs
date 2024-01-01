@@ -10,7 +10,8 @@ impl Command for TerrainInit {
     fn apply(self, world: &mut World) {
         let texture = world
             .resource::<AssetServer>()
-            .get_handle("terrain/grass.png");
+            .get_handle("terrain/grass.png")
+            .unwrap_or_default();
 
         for _ in 0..Terrain::get_count().pow(2) {
             world

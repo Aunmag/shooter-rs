@@ -65,7 +65,7 @@ fn spawn_bluffs(commands: &mut Commands, assets: &AssetServer) {
     let r4 = FRAC_PI_2 + PI;
 
     let range = (WORLD_SIZE / BLUFF_SPRITE_SIZE).abs().round() as u32;
-    let texture = assets.get_handle("terrain/bluff.png");
+    let texture = assets.get_handle("terrain/bluff.png").unwrap_or_default();
 
     for i in 1..range {
         let j = BLUFF_SPRITE_SIZE * i as f32 - WORLD_SIZE_HALF;
@@ -75,7 +75,10 @@ fn spawn_bluffs(commands: &mut Commands, assets: &AssetServer) {
         spawn_sprite(commands, n, j, z, r4, texture.clone());
     }
 
-    let texture_corner = assets.get_handle("terrain/bluff_corner.png");
+    let texture_corner = assets
+        .get_handle("terrain/bluff_corner.png")
+        .unwrap_or_default();
+
     spawn_sprite(commands, -n, -n, z, r1, texture_corner.clone());
     spawn_sprite(commands, n, n, z, r2, texture_corner.clone());
     spawn_sprite(commands, -n, n, z, r3, texture_corner.clone());
@@ -87,9 +90,9 @@ fn spawn_trees(commands: &mut Commands, assets: &AssetServer) {
     let trees_quantity = f32::max(0.0, TREES_QUANTITY) as usize;
 
     let textures = [
-        assets.get_handle("terrain/tree_0.png"),
-        assets.get_handle("terrain/tree_1.png"),
-        assets.get_handle("terrain/tree_2.png"),
+        assets.get_handle("terrain/tree_0.png").unwrap_or_default(),
+        assets.get_handle("terrain/tree_1.png").unwrap_or_default(),
+        assets.get_handle("terrain/tree_2.png").unwrap_or_default(),
     ];
 
     let range = WORLD_SIZE_VISUAL / 2.0;

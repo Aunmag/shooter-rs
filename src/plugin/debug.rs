@@ -62,7 +62,7 @@ impl Plugin for DebugPlugin {
 
 fn startup(mut commands: Commands, asset_server: Res<AssetServer>) {
     let style = TextStyle {
-        font: asset_server.get_handle(FONT_PATH),
+        font: asset_server.get_handle(FONT_PATH).unwrap_or_default(),
         font_size: 30.0,
         color: Color::WHITE,
     };

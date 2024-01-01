@@ -34,18 +34,18 @@ impl AudioStorage {
         self.groups.clear();
         self.missing.clear();
 
-        for handle_id in assets.ids() {
-            let handle = assets.get_handle(handle_id);
+        for asset_id in assets.ids() {
+            if let Some(handle) = asset_server.get_id_handle(asset_id) {
+                if let Some(path) = handle.path() {
+                    let asset_path = path.path().display().to_string().replace('\\', "/");
+                    let group_path = RE.replace_all(&asset_path, "");
 
-            if let Some(path) = asset_server.get_handle_path(handle.clone()) {
-                let asset_path = path.path().display().to_string().replace('\\', "/");
-                let group_path = RE.replace_all(&asset_path, "");
-
-                self.groups
-                    .entry(group_path.into_owned())
-                    .or_insert_with(AudioGroup::default)
-                    .audios
-                    .push(handle);
+                    self.groups
+                        .entry(group_path.into_owned())
+                        .or_insert_with(AudioGroup::default)
+                        .audios
+                        .push(handle);
+                }
             }
         }
 

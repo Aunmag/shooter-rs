@@ -26,11 +26,11 @@ pub fn player(
     let mut mouse_delta_x = 0.0;
     let mut zoom = 0.0;
 
-    for event in mouse_motion.iter() {
+    for event in mouse_motion.read() {
         mouse_delta_x -= event.delta.x;
     }
 
-    for event in mouse_scroll.iter() {
+    for event in mouse_scroll.read() {
         zoom += event.y;
     }
 

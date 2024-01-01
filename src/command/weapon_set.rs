@@ -52,7 +52,8 @@ impl WeaponSet {
     fn spawn_weapon_sprite(&self, world: &mut World, weapon: &WeaponConfig) {
         let image = world
             .resource::<AssetServer>()
-            .get_handle(weapon.get_image_path());
+            .get_handle(weapon.get_image_path())
+            .unwrap_or_default();
 
         let anchor = Self::find_image_anchor(world, weapon, &image);
 
@@ -79,7 +80,10 @@ impl WeaponSet {
 
         if let Some(image) = world.resource::<Assets<Image>>().get(image) {
             let offset = weapon.image_offset - arms_length * PIXELS_PER_METER;
-            return Anchor::Custom(Vec2::new(offset / image.size().x - 0.5, 0.0));
+            return Anchor::Custom(Vec2::new(
+                offset / image.texture_descriptor.size.width as f32 - 0.5,
+                0.0,
+            ));
         } else {
             log::warn!(
                 "Unable to set anchor for image {} since it hasn't loaded yet",
@@ -100,7 +104,9 @@ impl WeaponSet {
             let image_path = actor.config.get_image_path(image_suffix);
             let image = world
                 .resource::<AssetServer>()
-                .get_handle::<Image, _>(image_path);
+                .get_handle::<Image>(image_path)
+                .unwrap_or_default();
+
             world.entity_mut(self.entity).insert(image);
         }
     }

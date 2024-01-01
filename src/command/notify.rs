@@ -50,7 +50,7 @@ impl Command for Notify {
                     TextSection::new(
                         format!("{}\n", self.text.as_ref()),
                         TextStyle {
-                            font: asset_server.get_handle(FONT_PATH_BOLD),
+                            font: asset_server.get_handle(FONT_PATH_BOLD).unwrap_or_default(),
                             font_size: window_width * FONT_SCALE,
                             color: COLOR,
                         },
@@ -58,7 +58,7 @@ impl Command for Notify {
                     TextSection::new(
                         self.text_small.as_ref(),
                         TextStyle {
-                            font: asset_server.get_handle(FONT_PATH),
+                            font: asset_server.get_handle(FONT_PATH).unwrap_or_default(),
                             font_size: window_width * FONT_SCALE / 2.0,
                             color: COLOR,
                         },

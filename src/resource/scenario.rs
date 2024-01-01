@@ -15,7 +15,7 @@ pub trait ScenarioLogic {
         mut events: EventReader<ActorDeathEvent>,
         commands: &mut Commands,
     ) {
-        for event in events.iter() {
+        for event in events.read() {
             self.on_actor_death(event, commands);
         }
     }
