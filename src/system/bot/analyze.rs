@@ -8,7 +8,6 @@ use bevy::{
     prelude::{Entity, Query, Res, Transform},
     time::Time,
 };
-use rand::{thread_rng, Rng};
 use std::time::Duration;
 
 const TEAMMATES_MAX: usize = 8;
@@ -24,12 +23,7 @@ pub fn analyze(
     bots.par_iter_mut()
         .batching_strategy(BatchingStrategy::fixed(32))
         .for_each(|(mut bot, e1, a1, t1, i1)| {
-            if bot.next_update.is_zero() {
-                bot.next_update = time + thread_rng().gen_range(Duration::ZERO..UPDATE_INTERVAL);
-                return;
-            }
-
-            if time < bot.next_update {
+            if !bot.update_timer.next_if_ready(time, || UPDATE_INTERVAL) {
                 return;
             }
 
@@ -70,7 +64,6 @@ pub fn analyze(
             }
 
             bot.teammates = teammates.iter().map(|t| t.0).collect();
-            bot.next_update = time + UPDATE_INTERVAL;
         });
 }
 

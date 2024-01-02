@@ -5,7 +5,7 @@ use bevy::{
     prelude::{Query, ResMut, Transform},
     time::Time,
 };
-use rand::{thread_rng, Rng as _};
+use rand::Rng as _;
 use std::{ops::Range, time::Duration};
 
 const INTERVAL: Range<Duration> = Duration::from_secs(2)..Duration::from_secs(30);
@@ -18,19 +18,18 @@ pub fn sound(
     let time = time.elapsed();
 
     for (mut bot, transform) in bots.iter_mut() {
-        if time < bot.next_sound {
+        if !bot
+            .voice_timer
+            .next_if_ready(time, || rand::thread_rng().gen_range(INTERVAL))
+        {
             continue;
         }
 
-        if !bot.next_sound.is_zero() {
-            audio.queue(AudioPlay {
-                path: "actors/zombie/misc".into(),
-                volume: 0.7,
-                source: Some(transform.translation.xy()),
-                ..AudioPlay::DEFAULT
-            });
-        }
-
-        bot.next_sound = time + thread_rng().gen_range(INTERVAL);
+        audio.queue(AudioPlay {
+            path: "actors/zombie/misc".into(),
+            volume: 0.7,
+            source: Some(transform.translation.xy()),
+            ..AudioPlay::DEFAULT
+        });
     }
 }

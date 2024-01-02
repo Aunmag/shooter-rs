@@ -1,7 +1,8 @@
+use crate::util::Timer;
 use bevy::{ecs::component::Component, prelude::Entity};
 use rand::{Rng, SeedableRng};
 use rand_pcg::Pcg32;
-use std::{ops::Range, time::Duration};
+use std::ops::Range;
 
 const SPRINT_DISTANCE: Range<f32> = 5.0..12.0;
 const SPREAD: Range<f32> = 0.8..5.0;
@@ -19,8 +20,8 @@ pub struct Bot {
     pub stamina_min: f32,
     pub enemy: Option<Entity>,
     pub teammates: Vec<Entity>,
-    pub next_update: Duration,
-    pub next_sound: Duration,
+    pub update_timer: Timer,
+    pub voice_timer: Timer,
 }
 
 impl Bot {
@@ -34,8 +35,8 @@ impl Bot {
             stamina_min: rng.gen_range(STAMINA_MIN),
             enemy: None,
             teammates: Vec::new(),
-            next_update: Duration::ZERO,
-            next_sound: Duration::ZERO,
+            update_timer: Timer::default(),
+            voice_timer: Timer::default(),
         };
     }
 }
