@@ -6,7 +6,7 @@ use crate::{
     util::ext::Vec2Ext,
 };
 use bevy::{
-    ecs::system::{Query, Resource},
+    ecs::system::{Local, Query},
     math::{Vec2, Vec3Swizzles},
     prelude::{Commands, Entity, Res, ResMut, Time, Transform},
 };
@@ -15,12 +15,11 @@ use rand_pcg::Pcg32;
 
 const BARREL_LENGTH: f32 = 0.6; // TODO: don't hardcode
 
-#[derive(Resource)]
-pub struct WeaponData {
+pub struct WeaponSystemData {
     rng: Pcg32,
 }
 
-impl Default for WeaponData {
+impl Default for WeaponSystemData {
     fn default() -> Self {
         return Self {
             rng: Pcg32::seed_from_u64(0),
@@ -29,6 +28,7 @@ impl Default for WeaponData {
 }
 
 pub fn weapon(
+    mut data: Local<WeaponSystemData>,
     mut query: Query<(
         Entity,
         &Actor,
@@ -39,7 +39,6 @@ pub fn weapon(
     )>,
     mut commands: Commands,
     mut audio: ResMut<AudioTracker>,
-    mut data: ResMut<WeaponData>,
     time: Res<Time>,
 ) {
     let now = time.elapsed();

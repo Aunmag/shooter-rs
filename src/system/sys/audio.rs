@@ -49,7 +49,7 @@ pub fn audio(
             let mut entity = commands.spawn(AudioBundle { source, settings });
 
             if is_heartbeat {
-                entity.insert(Heartbeat::default());
+                entity.insert(Heartbeat);
             }
 
             if Duration::ZERO < queued.duration && queued.duration < Duration::MAX {

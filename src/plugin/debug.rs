@@ -6,18 +6,18 @@ use crate::{
     resource::AudioTracker,
     util::{
         ext::{AppExt, Vec2Ext},
-        GIZMOS,
+        Timer, GIZMOS,
     },
 };
 use bevy::{
     app::{App, Plugin},
     diagnostic::{DiagnosticsStore, EntityCountDiagnosticsPlugin, FrameTimeDiagnosticsPlugin},
-    ecs::system::{ResMut, Resource},
+    ecs::{schedule::SystemConfigs, system::Local},
     gizmos::gizmos::Gizmos,
     input::Input,
     prelude::{
-        AssetServer, Color, Commands, Component, KeyCode, Query, Res, Startup, TextBundle, Update,
-        Vec2, With,
+        AssetServer, Color, Commands, Component, IntoSystemConfigs, KeyCode, Query, Res, Startup,
+        TextBundle, Update, Vec2, With,
     },
     text::{Text, TextSection, TextStyle},
     time::Time,
@@ -25,23 +25,7 @@ use bevy::{
 };
 use std::time::Duration;
 
-#[derive(Default, Resource)]
-struct DiagnosticTimer {
-    next: Duration,
-}
-
-impl DiagnosticTimer {
-    const INTERVAL: Duration = Duration::from_millis(500);
-
-    fn next_if_ready(&mut self, time: Duration) -> bool {
-        if time < self.next {
-            return false;
-        } else {
-            self.next = time + Self::INTERVAL;
-            return true;
-        }
-    }
-}
+const INTERVAL: Duration = Duration::from_millis(500);
 
 #[derive(Component)]
 struct FpsText;
@@ -49,12 +33,12 @@ struct FpsText;
 pub struct DebugPlugin;
 
 impl Plugin for DebugPlugin {
-    fn build(&self, app: &mut App) {
-        app.insert_resource(DiagnosticTimer::default())
+    fn build(&self, application: &mut App) {
+        application
             .add_plugins(FrameTimeDiagnosticsPlugin)
             .add_plugins(EntityCountDiagnosticsPlugin)
             .add_systems(Startup, startup)
-            .add_systems(Update, update_diagnostics)
+            .add_systems(Update, update_diagnostics())
             .add_systems(Update, render_gizmos_static)
             .add_state_system(AppState::Game, update_input);
     }
@@ -80,17 +64,11 @@ fn startup(mut commands: Commands, asset_server: Res<AssetServer>) {
     ));
 }
 
-fn update_diagnostics(
-    mut diagnostics_timer: ResMut<DiagnosticTimer>,
+fn update_diagnostics_inner(
     diagnostics: Res<DiagnosticsStore>,
     audio_tracker: Res<AudioTracker>,
-    time: Res<Time>,
     mut query: Query<&mut Text, With<FpsText>>,
 ) {
-    if !diagnostics_timer.next_if_ready(time.elapsed()) {
-        return;
-    }
-
     let fps = diagnostics
         .get(FrameTimeDiagnosticsPlugin::FPS)
         .and_then(|v| v.average())
@@ -106,6 +84,12 @@ fn update_diagnostics(
         text.sections[3].value = format!("{:.0}", entities);
         text.sections[5].value = format!("{}", audio_tracker.playing);
     }
+}
+
+fn update_diagnostics() -> SystemConfigs {
+    return update_diagnostics_inner.run_if(|mut r: Local<Timer>, t: Res<Time>| {
+        return r.next_if_ready(t.elapsed(), || INTERVAL);
+    });
 }
 
 fn render_gizmos_static(mut gizmos: Gizmos) {

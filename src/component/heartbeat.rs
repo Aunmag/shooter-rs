@@ -1,7 +1,4 @@
 use bevy::ecs::component::Component;
-use std::time::Duration;
 
-#[derive(Default, Component)]
-pub struct Heartbeat {
-    pub next: Duration,
-}
+#[derive(Component)]
+pub struct Heartbeat;

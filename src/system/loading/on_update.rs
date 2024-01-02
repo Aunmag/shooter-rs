@@ -1,13 +1,19 @@
 use crate::{
     model::AppState,
     resource::{AssetStorage, AudioStorage},
+    util::Timer,
 };
 use bevy::{
     asset::Assets,
-    prelude::{AssetServer, AudioSource, NextState, Res, ResMut},
+    ecs::{schedule::SystemConfigs, system::Local},
+    prelude::{AssetServer, AudioSource, IntoSystemConfigs, NextState, Res, ResMut},
+    time::Time,
 };
+use std::time::Duration;
 
-pub fn on_update(
+const INTERVAL: Duration = Duration::from_secs(1);
+
+fn on_update_inner(
     asset_server: Res<AssetServer>,
     audio_assets: Res<Assets<AudioSource>>,
     mut asset_storage: ResMut<AssetStorage>,
@@ -30,4 +36,10 @@ pub fn on_update(
             next_state.set(AppState::Game);
         }
     }
+}
+
+pub fn on_update() -> SystemConfigs {
+    return on_update_inner.run_if(|mut r: Local<Timer>, t: Res<Time>| {
+        return r.next_if_ready(t.elapsed(), || INTERVAL);
+    });
 }

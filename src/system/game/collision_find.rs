@@ -1,18 +1,18 @@
 use crate::component::{Collision, CollisionSolution, Inertia};
 use bevy::{
-    ecs::system::Resource,
+    ecs::system::Local,
     math::{Vec2, Vec3Swizzles},
-    prelude::{Entity, Query, ResMut, Transform},
+    prelude::{Entity, Query, Transform},
 };
 
-#[derive(Default, Resource)]
-pub struct CollisionSystemData {
+#[derive(Default)]
+pub struct CollisionFindSystemData {
     previous_solutions: usize,
 }
 
 pub fn collision_find(
+    mut data: Local<CollisionFindSystemData>,
     query: Query<(Entity, &Collision, &Transform, &Inertia)>,
-    mut data: ResMut<CollisionSystemData>,
 ) -> Vec<CollisionSolution> {
     let mut solutions = Vec::with_capacity(data.previous_solutions);
 

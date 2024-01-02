@@ -2,9 +2,15 @@ use crate::{
     component::{Health, Inertia, Player},
     resource::HitResource,
 };
-use bevy::prelude::{Query, ResMut};
+use bevy::{
+    ecs::{
+        schedule::{IntoSystemConfigs, SystemConfigs},
+        system::Res,
+    },
+    prelude::{Query, ResMut},
+};
 
-pub fn hit(
+pub fn hit_inner(
     mut targets: Query<(&mut Inertia, &mut Health, Option<&mut Player>)>,
     mut hits: ResMut<HitResource>,
 ) {
@@ -21,4 +27,8 @@ pub fn hit(
             }
         }
     }
+}
+
+pub fn hit() -> SystemConfigs {
+    return hit_inner.run_if(|r: Res<HitResource>| !r.hits.is_empty());
 }

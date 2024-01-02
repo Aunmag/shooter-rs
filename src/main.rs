@@ -84,13 +84,10 @@ fn main() {
             line_width: 5.0,
             ..Default::default()
         })
-        .insert_resource(system::game::AmbienceFxData::default())
-        .insert_resource(system::game::CollisionSystemData::default())
-        .insert_resource(system::game::WeaponData::default())
         .add_systems(Update, system::sys::audio)
         .add_systems(Update, system::ui::notification)
         .add_state_system_enter(AppState::Loading, system::loading::on_enter)
-        .add_state_system(AppState::Loading, system::loading::on_update)
+        .add_state_system(AppState::Loading, system::loading::on_update())
         .add_state_system_enter(AppState::Game, system::game::on_enter)
         .add_state_systems(AppState::Game, |s| {
             use crate::system::{bot, game::*};
@@ -103,7 +100,7 @@ fn main() {
             s.add(weapon.after(collision_resolve));
             s.add(melee.after(collision_resolve));
             s.add(projectile.after(collision_resolve));
-            s.add(hit.after(melee).after(projectile));
+            s.add(hit().after(melee).after(projectile));
             s.add(bonus_image);
             s.add(bonus_label);
             s.add(bonus.after(collision_resolve));
@@ -112,8 +109,8 @@ fn main() {
             s.add(blood);
             s.add(breath);
             s.add(footsteps);
-            s.add(heartbeat);
-            s.add(ambience_fx);
+            s.add(heartbeat());
+            s.add(ambience_fx());
             s.add(terrain);
             s.add(scenario);
             s.add(bot::analyze);

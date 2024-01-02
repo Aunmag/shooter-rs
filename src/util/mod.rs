@@ -5,5 +5,6 @@ pub mod math;
 mod smart_string;
 #[cfg(test)]
 pub mod test;
+mod timer;
 
-pub use self::{envelope::*, gizmos_static::*, smart_string::*};
+pub use self::{envelope::*, gizmos_static::*, smart_string::*, timer::*};
