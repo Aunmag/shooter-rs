@@ -32,9 +32,20 @@ use bevy::{
 };
 
 fn main() {
-    log::debug!("Loading config from {}", CONFIG_PATH);
-    let config = Config::load_from(CONFIG_PATH).expect("Failed to load config");
-    log::debug!("Config loaded: {:?}", config);
+    // TODO: init logger earlier
+    log::info!("Loading config from {}", CONFIG_PATH);
+
+    let config = match Config::load_from(CONFIG_PATH) {
+        Ok(config) => {
+            log::info!("Config loaded: {:?}", config);
+            config
+        }
+        Err(error) => {
+            log::error!("{:?}", error);
+            log::warn!("Default config will be used");
+            Config::default()
+        }
+    };
 
     let mut application = App::new();
 

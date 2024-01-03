@@ -91,19 +91,15 @@ impl Default for ControlsConfig {
 }
 
 impl Config {
-    // TODO: simplify
-    // TODO: default if not found
     pub fn load_from(path: &str) -> Result<Self> {
-        let global_context = || format!("Path: {}", path);
+        let context = || format!("Failed to load config from {}", path);
 
         let mut config = config::Config::builder()
             .add_source(config::File::with_name(path))
             .build()
-            .context("Failed to load config from file")
-            .with_context(global_context)?
+            .with_context(context)?
             .try_deserialize::<Self>()
-            .context("Failed to deserialize config")
-            .with_context(global_context)?;
+            .with_context(context)?;
 
         config.normalize();
 
