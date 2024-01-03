@@ -45,6 +45,7 @@ pub struct ActorConfig {
     pub melee_distance_angular: f32,
     pub melee_interval: Duration,
     pub pain_threshold: f32,
+    pub reloading_speed: f32,
 }
 
 impl Actor {
@@ -103,6 +104,7 @@ impl ActorConfig {
         melee_distance_angular: TAU / 5.0,
         melee_interval: Duration::from_millis(600),
         pain_threshold: 0.02,
+        reloading_speed: 0.6,
     };
 
     pub const ZOMBIE: Self = Self {
@@ -119,6 +121,7 @@ impl ActorConfig {
         melee_distance_angular: Self::HUMAN.melee_distance_angular,
         melee_interval: Self::HUMAN.melee_interval,
         pain_threshold: 0.08,
+        reloading_speed: Self::HUMAN.reloading_speed * 2.0,
     };
 
     pub fn get_image_path(&self, mut suffix: u8) -> String {

@@ -49,13 +49,19 @@ pub fn weapon(
         }
 
         if actor.actions.is_reloading() && !weapon.is_reloading() {
-            weapon.reload(now);
+            let reloading_duration = weapon
+                .config
+                .reloading_time
+                .mul_f32(actor.config.reloading_speed)
+                .div_f32(actor.skill);
+
+            weapon.reload(now, reloading_duration);
 
             audio.queue(AudioPlay {
                 path: "sounds/reloading".into(),
                 volume: 0.4,
                 source: Some(transform.translation.xy()),
-                duration: weapon.config.reloading_time, // TODO: stop if weapon will be changed earlier
+                duration: reloading_duration, // TODO: stop if weapon will be changed earlier
             });
 
             continue;

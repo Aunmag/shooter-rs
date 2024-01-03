@@ -17,7 +17,7 @@ pub struct Weapon {
     is_armed: bool,
     is_cocked: bool,
     is_trigger_pressed: bool,
-    is_reloading: bool,
+    reloading: Option<Duration>,
     ammo: u8,
     next_time: Duration,
 }
@@ -40,35 +40,16 @@ pub struct WeaponConfig {
 
 impl WeaponConfig {
     const VELOCITY_DEVIATION: f32 = 0.06;
-
     const SEMI_AUTO_FIRE_RATE: f32 = 400.0;
 
-    /// To make game easier modify real reloading time
-    const RELOADING_TIME_FACTOR: f32 = 0.6;
-
-    const RELOADING_TIME_PISTOL: Duration =
-        Duration::from_millis((3000.0 * Self::RELOADING_TIME_FACTOR) as u64);
-
-    const RELOADING_TIME_SHOTGUN_LIGHT: Duration =
-        Duration::from_millis((1200.0 * Self::RELOADING_TIME_FACTOR) as u64);
-
-    const RELOADING_TIME_SHOTGUN: Duration =
-        Duration::from_millis((1800.0 * Self::RELOADING_TIME_FACTOR) as u64);
-
-    const RELOADING_TIME_SMG: Duration =
-        Duration::from_millis((3800.0 * Self::RELOADING_TIME_FACTOR) as u64);
-
-    const RELOADING_TIME_CARBINE: Duration =
-        Duration::from_millis((4200.0 * Self::RELOADING_TIME_FACTOR) as u64);
-
-    const RELOADING_TIME_RIFLE: Duration =
-        Duration::from_millis((5000.0 * Self::RELOADING_TIME_FACTOR) as u64);
-
-    const RELOADING_TIME_RIFLE_HEAVY: Duration =
-        Duration::from_millis((5800.0 * Self::RELOADING_TIME_FACTOR) as u64);
-
-    const RELOADING_TIME_MACHINE_GUN: Duration =
-        Duration::from_millis((10000.0 * Self::RELOADING_TIME_FACTOR) as u64);
+    const RELOADING_TIME_PISTOL: Duration = Duration::from_millis(3000);
+    const RELOADING_TIME_SHOTGUN_LIGHT: Duration = Duration::from_millis(1200);
+    const RELOADING_TIME_SHOTGUN: Duration = Duration::from_millis(1800);
+    const RELOADING_TIME_SMG: Duration = Duration::from_millis(3800);
+    const RELOADING_TIME_CARBINE: Duration = Duration::from_millis(4200);
+    const RELOADING_TIME_RIFLE: Duration = Duration::from_millis(5000);
+    const RELOADING_TIME_RIFLE_HEAVY: Duration = Duration::from_millis(5800);
+    const RELOADING_TIME_MACHINE_GUN: Duration = Duration::from_millis(10000);
 
     const RECOIL_MASS_POW: f32 = 0.25;
     const RECOIL_POW: f32 = 0.5;
@@ -314,7 +295,7 @@ impl Weapon {
             is_armed: true,
             is_cocked: true,
             is_trigger_pressed: false,
-            is_reloading: false,
+            reloading: None,
             ammo: config.ammo_capacity,
             next_time: Duration::from_secs(0),
         };
@@ -352,8 +333,8 @@ impl Weapon {
         self.is_trigger_pressed = false;
     }
 
-    pub fn reload(&mut self, time: Duration) {
-        if !self.is_reloading {
+    pub fn reload(&mut self, time: Duration, duration: Duration) {
+        if self.reloading.is_none() {
             if self.config.partial_reloading {
                 if self.ammo == self.config.ammo_capacity {
                     self.ammo = self.ammo.saturating_sub(1);
@@ -362,15 +343,15 @@ impl Weapon {
                 self.ammo = 0;
             }
 
-            self.is_reloading = true;
-            self.next_time = time + self.config.reloading_time;
+            self.reloading = Some(duration);
+            self.next_time = time + duration;
         }
     }
 
     pub fn complete_reloading(&mut self, time: Duration) {
-        if self.is_reloading {
+        if self.reloading.is_some() {
             self.is_cocked = true;
-            self.is_reloading = false;
+            self.reloading = None;
 
             if self.config.partial_reloading {
                 if self.ammo < self.config.ammo_capacity {
@@ -401,9 +382,9 @@ impl Weapon {
     }
 
     pub fn get_ammo_normalized(&self, time: Duration) -> f32 {
-        if self.is_reloading {
+        if let Some(reloading_duration) = self.reloading {
             let progress = time.progress(
-                self.next_time.saturating_sub(self.config.reloading_time),
+                self.next_time.saturating_sub(reloading_duration),
                 self.next_time,
             );
 
@@ -434,7 +415,7 @@ impl Weapon {
     }
 
     pub fn is_reloading(&self) -> bool {
-        return self.is_reloading;
+        return self.reloading.is_some();
     }
 
     pub fn is_ready(&self, time: Duration) -> bool {
