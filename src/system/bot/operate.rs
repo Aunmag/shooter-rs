@@ -52,17 +52,22 @@ mod sub_system {
             actor.movement += Vec2::FRONT;
 
             // TODO: count enemy body radius instead of self
-            if (position - enemy_position)
-                .is_shorter_than(actor.config.melee_distance + actor.config.radius)
-            {
+            if position.is_close(
+                enemy_position,
+                actor.config.melee_distance + actor.config.radius,
+            ) {
                 // enemy is close, attack
                 actor.actions |= ActorAction::Attack;
                 actor.look_at = Some(position.angle_to(enemy_position));
                 allow_spread_out = false;
             } else {
                 // otherwise go to the meet point
-                let meet_position =
-                    find_meet_point(position, inertia.velocity, enemy_position, enemy_velocity);
+                let meet_position = find_meet_point(
+                    position,
+                    inertia.velocity.length(),
+                    enemy_position,
+                    enemy_velocity,
+                );
 
                 let meet_distance = (position - meet_position).length_squared();
 

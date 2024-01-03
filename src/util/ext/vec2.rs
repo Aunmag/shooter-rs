@@ -14,15 +14,19 @@ pub trait Vec2Ext {
 
     fn angle(&self) -> f32;
 
-    fn angle_to(self, other: Self) -> f32;
+    fn angle_to(self, target: Self) -> f32;
+
+    fn distance_squared(self, target: Self) -> f32;
 
     fn is_zero(self) -> bool;
 
-    fn is_longer_than(&self, value: f32) -> bool;
+    fn is_close(self, target: Self, threshold: f32) -> bool;
 
-    fn is_shorter_than(&self, value: f32) -> bool {
-        return !self.is_longer_than(value);
-    }
+    fn is_far(self, target: Self, threshold: f32) -> bool;
+
+    fn is_long(self, threshold: f32) -> bool;
+
+    fn is_short(self, threshold: f32) -> bool;
 }
 
 impl Vec2Ext for Vec2 {
@@ -38,16 +42,32 @@ impl Vec2Ext for Vec2 {
         return f32::atan2(self.y, self.x);
     }
 
+    fn angle_to(self, target: Self) -> f32 {
+        return (target - self).angle();
+    }
+
+    fn distance_squared(self, target: Self) -> f32 {
+        return (self - target).length_squared();
+    }
+
     fn is_zero(self) -> bool {
         return self.x == 0.0 && self.y == 0.0;
     }
 
-    fn angle_to(self, other: Self) -> f32 {
-        return (other - self).angle();
+    fn is_close(self, target: Self, threshold: f32) -> bool {
+        return self.distance_squared(target) < threshold * threshold;
     }
 
-    fn is_longer_than(&self, value: f32) -> bool {
-        return self.length_squared() > value * value;
+    fn is_far(self, target: Self, threshold: f32) -> bool {
+        return !self.is_close(target, threshold);
+    }
+
+    fn is_long(self, threshold: f32) -> bool {
+        return self.length_squared() > threshold * threshold;
+    }
+
+    fn is_short(self, threshold: f32) -> bool {
+        return !self.is_long(threshold);
     }
 }
 

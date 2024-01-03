@@ -5,7 +5,7 @@ use crate::{
     model::TransformLite,
     resource::{Scenario, ScenarioLogic},
     util::{
-        ext::{Pcg32Ext, Vec2Ext},
+        ext::{RngExt, Vec2Ext},
         math::interpolate,
     },
 };

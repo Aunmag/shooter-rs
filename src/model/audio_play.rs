@@ -43,7 +43,7 @@ impl AudioPlay {
     pub fn has_same_source(&self, other: &Self) -> bool {
         match (self.source, other.source) {
             (Some(s1), Some(s2)) => {
-                return (s1 - s2).is_shorter_than(Self::CLOSE_DISTANCE);
+                return s1.is_close(s2, Self::CLOSE_DISTANCE);
             }
             (None, None) => {
                 return true;

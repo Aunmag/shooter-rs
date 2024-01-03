@@ -53,7 +53,7 @@ pub fn analyze(
                         }
                     }
                 } else {
-                    let position_meet = find_meet_point(p1, i1.velocity, p2, i2.velocity);
+                    let position_meet = find_meet_point(p1, i1.velocity.length(), p2, i2.velocity);
                     let distance = (p1 - position_meet).length_squared();
 
                     if distance < enemy_distance {

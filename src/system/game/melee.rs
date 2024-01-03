@@ -89,7 +89,7 @@ fn calc_target_data(
     let relative = target_transform.translation - attacker_transform.translation;
     let distance_to_hit = attacker.melee_distance + target.radius;
 
-    if relative.is_longer_than(distance_to_hit) {
+    if relative.is_long(distance_to_hit) {
         return None;
     }
 

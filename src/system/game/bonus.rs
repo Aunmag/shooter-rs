@@ -37,9 +37,7 @@ pub fn bonus(
 
             let player_position = player_transform.translation.xy();
 
-            if (bonus_position - player_position)
-                .is_shorter_than(Bonus::RADIUS + player_body.radius)
-            {
+            if player_position.is_close(bonus_position, Bonus::RADIUS + player_body.radius) {
                 commands.add(BonusActivate::new(bonus_entity, player_entity));
                 break;
             }

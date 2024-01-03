@@ -1,7 +1,7 @@
 use crate::{
     component::ProjectileConfig,
     util::{
-        ext::{DurationExt, Pcg32Ext},
+        ext::{DurationExt, RngExt},
         math::interpolate,
     },
 };

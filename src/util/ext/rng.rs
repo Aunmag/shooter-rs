@@ -1,14 +1,12 @@
 use rand::Rng;
 use rand_distr::StandardNormal;
-use rand_pcg::Pcg32;
 
-pub trait Pcg32Ext {
+pub trait RngExt {
     fn gen_range_safely(&mut self, min: f32, max: f32) -> f32;
-
     fn gen_normal(&mut self, deviation: f32) -> f32;
 }
 
-impl Pcg32Ext for Pcg32 {
+impl<R: Rng> RngExt for R {
     fn gen_range_safely(&mut self, mut min: f32, mut max: f32) -> f32 {
         if min > max {
             (min, max) = (max, min);

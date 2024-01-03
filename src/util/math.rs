@@ -26,7 +26,7 @@ pub fn normalize_radians(mut radians: f32) -> f32 {
 
 pub fn find_meet_point(
     origin_position: Vec2,
-    origin_velocity: Vec2,
+    origin_velocity: f32,
     target_position: Vec2,
     target_velocity: Vec2,
 ) -> Vec2 {
@@ -34,7 +34,7 @@ pub fn find_meet_point(
         return target_position;
     }
 
-    let origin_velocity_opposite = origin_velocity.length() * target_velocity.normalize().neg();
+    let origin_velocity_opposite = origin_velocity * target_velocity.normalize().neg();
     let distance = (target_position - origin_position).length_squared();
     let velocity = (target_velocity - origin_velocity_opposite).length_squared();
     let advance = (distance / velocity).sqrt();

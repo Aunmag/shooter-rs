@@ -70,7 +70,7 @@ pub fn projectile(
 }
 
 fn find_obstacle(
-    projectaile: &(Vec2, Vec2),
+    projectile: &(Vec2, Vec2),
     shooter: Option<Entity>,
     obstacles: &Query<(Entity, &Collision, &Transform), Without<Projectile>>,
 ) -> Option<(Entity, Vec2, Vec2, f32)> {
@@ -82,10 +82,10 @@ fn find_obstacle(
         }
 
         let obstacle = transform.translation.xy();
-        let contact = obstacle.project_on(projectaile);
+        let contact = obstacle.project_on(projectile);
 
-        if (obstacle - contact).is_shorter_than(collision.radius) {
-            let tail_distance = obstacle.distance_squared(projectaile.1);
+        if obstacle.is_close(contact, collision.radius) {
+            let tail_distance = obstacle.distance_squared(projectile.1);
 
             if result.map_or(true, |o| o.3 > tail_distance) {
                 result = Some((entity, obstacle, contact, tail_distance));
@@ -119,5 +119,5 @@ fn update_transform(projectile: &Projectile, head: Vec2, tail: Vec2, transform: 
 }
 
 fn has_stopped(velocity: Vec2) -> bool {
-    return velocity.is_shorter_than(Projectile::VELOCITY_MIN);
+    return velocity.is_short(Projectile::VELOCITY_MIN);
 }

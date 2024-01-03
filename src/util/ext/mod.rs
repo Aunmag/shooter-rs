@@ -1,7 +1,7 @@
 mod app;
 mod duration;
-mod pcg32;
+mod rng;
 mod transform;
 mod vec2;
 
-pub use self::{app::*, duration::*, pcg32::*, transform::*, vec2::*};
+pub use self::{app::*, duration::*, rng::*, transform::*, vec2::*};

@@ -143,7 +143,7 @@ fn is_position_free(position: Vec2, occupied_positions: &[Vec2]) -> bool {
 
     return occupied_positions
         .iter()
-        .all(|p| (*p - position).is_longer_than(TREE_BUFFER_ZONE));
+        .all(|p| p.is_far(position, TREE_BUFFER_ZONE));
 }
 
 fn is_position_on_bluff(n: f32) -> bool {
