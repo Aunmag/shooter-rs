@@ -7,6 +7,7 @@ use crate::{
 use bevy::{
     ecs::system::Query,
     input::mouse::{MouseMotion, MouseWheel},
+    math::Vec2,
     prelude::{EventReader, Input, KeyCode, MouseButton, Res, Transform},
     time::Time,
 };
@@ -42,23 +43,23 @@ pub fn player(
             continue;
         }
 
-        let player_rotation = rotation + player.add_extra_rotation(extra_rotation);
+        actor.movement = Vec2::ZERO;
 
-        actor
-            .actions
-            .set(ActorAction::MovementForward, keyboard.pressed(KeyCode::W));
+        if keyboard.pressed(KeyCode::W) {
+            actor.movement.x += 1.0;
+        }
 
-        actor
-            .actions
-            .set(ActorAction::MovementBackward, keyboard.pressed(KeyCode::S));
+        if keyboard.pressed(KeyCode::S) {
+            actor.movement.x -= 1.0;
+        }
 
-        actor
-            .actions
-            .set(ActorAction::MovementLeftward, keyboard.pressed(KeyCode::A));
+        if keyboard.pressed(KeyCode::A) {
+            actor.movement.y += 1.0;
+        }
 
-        actor
-            .actions
-            .set(ActorAction::MovementRightward, keyboard.pressed(KeyCode::D));
+        if keyboard.pressed(KeyCode::D) {
+            actor.movement.y -= 1.0;
+        }
 
         actor
             .actions
@@ -74,7 +75,7 @@ pub fn player(
 
         player.add_zoom(zoom, time);
         player.update(time, delta);
-        transform.rotate_local_z(player_rotation);
+        transform.rotate_local_z(rotation + player.add_extra_rotation(extra_rotation));
 
         let limit = WORLD_SIZE_HALF;
         transform.translation.x = transform.translation.x.clamp(-limit, limit);

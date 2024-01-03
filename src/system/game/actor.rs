@@ -1,12 +1,15 @@
 use crate::{
     component::{Actor, Inertia},
-    model::{ActorAction, ActorActionsExt},
-    util::{ext::TransformExt, math},
+    model::ActorActionsExt,
+    util::{
+        ext::{TransformExt, Vec2Ext},
+        math,
+    },
 };
 use bevy::{
     ecs::system::Query,
-    math::{Vec2, Vec3Swizzles},
-    prelude::{Res, Time, Vec3},
+    math::Vec2,
+    prelude::{Res, Time},
     transform::components::Transform,
 };
 
@@ -19,30 +22,11 @@ pub fn actor(mut query: Query<(&mut Actor, &mut Transform, &mut Inertia)>, time:
         actor.update_stamina(time_delta);
         turn(&actor, &mut transform, &mut inertia, time_delta);
 
-        if !actor.actions.is_moving() {
+        if actor.movement.is_zero() {
             continue;
         }
 
-        let mut movement = Vec3::new(0.0, 0.0, 0.0);
-
-        if actor.actions.contains(ActorAction::MovementForward) {
-            movement.x += 1.0;
-        }
-
-        if actor.actions.contains(ActorAction::MovementBackward) {
-            movement.x -= 1.0;
-        }
-
-        if actor.actions.contains(ActorAction::MovementLeftward) {
-            movement.y += 1.0;
-        }
-
-        if actor.actions.contains(ActorAction::MovementRightward) {
-            movement.y -= 1.0;
-        }
-
-        movement = transform.rotation
-            * normalize_movement(movement)
+        let mut movement = actor.movement.clamp_length_max(1.0).rotate_by_quat(transform.rotation)
             * actor.config.movement_velocity
             * actor.config.mass // since velocity configured for default mass, use int instead of real
             * actor.skill
@@ -52,7 +36,7 @@ pub fn actor(mut query: Query<(&mut Actor, &mut Transform, &mut Inertia)>, time:
             movement *= actor.config.sprint_factor;
         }
 
-        inertia.push(movement.xy(), 0.0, true, false);
+        inertia.push(movement, 0.0, true, false);
     }
 }
 
@@ -87,16 +71,4 @@ fn turn(actor: &Actor, transform: &mut Transform, inertia: &mut Inertia, time_de
     }
 
     inertia.push(Vec2::ZERO, velocity, true, false);
-}
-
-fn normalize_movement(mut movement: Vec3) -> Vec3 {
-    let length_squared = movement.length_squared();
-
-    if length_squared > 1.0 {
-        let length = length_squared.sqrt();
-        movement.x /= length;
-        movement.y /= length;
-    }
-
-    return movement;
 }

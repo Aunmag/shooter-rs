@@ -1,11 +1,22 @@
-use bevy::math::Vec2;
+use bevy::{
+    math::{Quat, Vec2},
+    prelude::Vec3Swizzles,
+};
 
+#[allow(clippy::wrong_self_convention)]
 pub trait Vec2Ext {
+    const FRONT: Vec2 = Vec2::new(1.0, 0.0);
+    const BACK: Vec2 = Vec2::new(-1.0, 0.0);
+
     fn from_length(length: f32, angle: f32) -> Self;
+
+    fn rotate_by_quat(self, quat: Quat) -> Self;
 
     fn angle(&self) -> f32;
 
     fn angle_to(self, other: Self) -> f32;
+
+    fn is_zero(self) -> bool;
 
     fn is_longer_than(&self, value: f32) -> bool;
 
@@ -19,8 +30,16 @@ impl Vec2Ext for Vec2 {
         return Self::from_angle(angle) * length;
     }
 
+    fn rotate_by_quat(self, quat: Quat) -> Self {
+        return (quat * self.extend(0.0)).xy();
+    }
+
     fn angle(&self) -> f32 {
         return f32::atan2(self.y, self.x);
+    }
+
+    fn is_zero(self) -> bool {
+        return self.x == 0.0 && self.y == 0.0;
     }
 
     fn angle_to(self, other: Self) -> f32 {

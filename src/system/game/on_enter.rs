@@ -147,5 +147,5 @@ fn is_position_free(position: Vec2, occupied_positions: &[Vec2]) -> bool {
 }
 
 fn is_position_on_bluff(n: f32) -> bool {
-    return (n.abs() - WORLD_SIZE_HALF).abs() < TREE_BUFFER_ZONE / 2.0; // TODO: why two abs?
+    return (n.abs() - WORLD_SIZE_HALF).abs() < TREE_BUFFER_ZONE / 2.0;
 }

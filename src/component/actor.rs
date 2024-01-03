@@ -1,8 +1,8 @@
 use crate::{
     model::{ActorActions, ActorActionsExt},
-    util::ext::DurationExt,
+    util::ext::{DurationExt, Vec2Ext},
 };
-use bevy::ecs::component::Component;
+use bevy::{ecs::component::Component, math::Vec2};
 use std::{f32::consts::TAU, time::Duration};
 
 #[derive(Component)]
@@ -10,6 +10,7 @@ pub struct Actor {
     pub config: &'static ActorConfig,
     pub skill: f32,
     pub stamina: f32,
+    pub movement: Vec2,
     pub actions: ActorActions,
     pub look_at: Option<f32>,
     pub melee_next: Duration,
@@ -55,6 +56,7 @@ impl Actor {
             config,
             skill,
             stamina: 1.0,
+            movement: Vec2::ZERO,
             actions: ActorActions::EMPTY,
             look_at: None,
             melee_next: Duration::ZERO,
@@ -62,6 +64,7 @@ impl Actor {
     }
 
     pub fn reset_actions(&mut self) {
+        self.movement = Vec2::ZERO;
         self.actions = ActorActions::EMPTY;
         self.look_at = None;
     }
@@ -69,7 +72,7 @@ impl Actor {
     pub fn update_stamina(&mut self, delta: f32) {
         let mut change = self.config.stamina.delta(delta);
 
-        if self.actions.is_moving() {
+        if !self.movement.is_zero() {
             if self.actions.is_sprinting() {
                 // spend stamina while sprinting
                 change = -change;

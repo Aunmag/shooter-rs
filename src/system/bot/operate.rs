@@ -49,7 +49,7 @@ mod sub_system {
             .map(|e| (e.0.translation.xy(), e.1.velocity))
         {
             let position = transform.translation.xy();
-            actor.actions |= ActorAction::MovementForward;
+            actor.movement += Vec2::FRONT;
 
             // TODO: count enemy body radius instead of self
             if (position - enemy_position)
@@ -119,7 +119,7 @@ mod sub_system {
             let turn = angle_difference(look_at, teammates_position.angle_to(position));
             let closeness = 1.0 - teammates_distance.sqrt() / bot.spread; // the closer teammates, the faster spread out
             actor.look_at = Some(look_at + turn * closeness * bot.spread_angular_factor);
-            actor.actions |= ActorAction::MovementForward;
+            actor.movement += Vec2::FRONT;
 
             if closeness > 0.75 {
                 actor.actions -= ActorAction::Sprint;
