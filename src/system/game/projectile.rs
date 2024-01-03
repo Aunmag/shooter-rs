@@ -1,5 +1,5 @@
 use crate::{
-    component::{Collision, Projectile},
+    component::{Actor, Collision, Projectile},
     model::{geometry::GeometryProjection, AudioPlay},
     resource::{AudioTracker, HitResource},
     util::{ext::Vec2Ext, math},
@@ -15,7 +15,7 @@ const TIME_DELTA_FOR_RENDER: Duration = Duration::from_millis(25); // 40 FPS
 
 pub fn projectile(
     mut projectiles: Query<(Entity, &mut Projectile, &mut Transform)>,
-    obstacles: Query<(Entity, &Collision, &Transform), Without<Projectile>>,
+    obstacles: Query<(Entity, &Collision, &Transform, &Actor), Without<Projectile>>,
     mut hits: ResMut<HitResource>,
     mut commands: Commands,
     mut audio: ResMut<AudioTracker>,
@@ -72,12 +72,16 @@ pub fn projectile(
 fn find_obstacle(
     projectile: &(Vec2, Vec2),
     shooter: Option<Entity>,
-    obstacles: &Query<(Entity, &Collision, &Transform), Without<Projectile>>,
+    obstacles: &Query<(Entity, &Collision, &Transform, &Actor), Without<Projectile>>,
 ) -> Option<(Entity, Vec2, Vec2, f32)> {
     let mut result: Option<(Entity, Vec2, Vec2, f32)> = None;
 
-    for (entity, collision, transform) in obstacles.iter() {
-        if shooter == Some(entity) {
+    let shooter_kind = shooter
+        .and_then(|e| obstacles.get(e).ok())
+        .map(|q| q.3.config.kind);
+
+    for (entity, collision, transform, actor) in obstacles.iter() {
+        if shooter == Some(entity) || shooter_kind == Some(actor.config.kind) {
             continue;
         }
 
