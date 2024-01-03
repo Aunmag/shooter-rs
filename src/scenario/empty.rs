@@ -1,6 +1,6 @@
 use crate::{
-    command::{ActorPlayerSet, ActorSet},
-    component::ActorConfig,
+    command::{ActorPlayerSet, ActorSet, WeaponSet},
+    component::{ActorConfig, WeaponConfig},
     model::TransformLite,
     resource::ScenarioLogic,
 };
@@ -23,6 +23,11 @@ impl ScenarioLogic for EmptyScenario {
         commands.add(ActorPlayerSet {
             entity,
             is_controllable: true,
+        });
+
+        commands.add(WeaponSet {
+            entity,
+            weapon: Some(&WeaponConfig::PM),
         });
 
         return Duration::ZERO;
