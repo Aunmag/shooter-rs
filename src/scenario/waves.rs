@@ -1,6 +1,6 @@
 use crate::{
-    command::{ActorBotSet, ActorPlayerSet, ActorSet, BonusSpawn, Notify},
-    component::{Actor, ActorConfig, ActorKind, Health},
+    command::{ActorBotSet, ActorPlayerSet, ActorSet, BonusSpawn, Notify, WeaponSet},
+    component::{Actor, ActorConfig, ActorKind, Health, WeaponConfig},
     event::ActorDeathEvent,
     model::TransformLite,
     resource::{Scenario, ScenarioLogic},
@@ -27,6 +27,7 @@ const ZOMBIE_SKILL_MIN: f32 = 1.0;
 const ZOMBIE_SKILL_MAX: f32 = 1.8;
 const BONUSES_PER_WAVE: f32 = 3.0;
 const GAME_OVER_TEXT_DURATION: Duration = Duration::from_secs(8);
+const DEFAULT_INTERVAL: Duration = Duration::from_secs(2);
 
 enum Task {
     StartNextWave,
@@ -38,9 +39,9 @@ enum Task {
 impl Task {
     fn get_timeout(&self) -> Duration {
         return match self {
-            Self::StartNextWave => Duration::from_secs(2),
+            Self::StartNextWave => DEFAULT_INTERVAL,
             Self::SpawnZombie => Duration::from_millis(800),
-            Self::CheckWaveCompletion => Duration::from_secs(2),
+            Self::CheckWaveCompletion => DEFAULT_INTERVAL,
             Self::CompleteWave => Duration::from_secs(4),
         };
     }
@@ -78,6 +79,11 @@ impl WavesScenario {
         commands.add(ActorPlayerSet {
             entity,
             is_controllable: true,
+        });
+
+        commands.add(WeaponSet {
+            entity,
+            weapon: Some(&WeaponConfig::PM),
         });
     }
 
@@ -124,7 +130,7 @@ impl WavesScenario {
             }
             Task::CheckWaveCompletion => {
                 commands.add(CountZombies);
-                log::debug!("Checking for wave completion");
+                log::trace!("Checking for wave completion");
                 return Task::CheckWaveCompletion;
             }
             Task::CompleteWave => {
@@ -169,9 +175,8 @@ impl WavesScenario {
 
 impl ScenarioLogic for WavesScenario {
     fn on_start(&mut self, commands: &mut Commands) -> Duration {
-        log::info!("Starting waves scenario");
         Self::spawn_player(commands);
-        return Duration::from_secs(2);
+        return DEFAULT_INTERVAL;
     }
 
     fn on_actor_death(&mut self, event: &ActorDeathEvent, commands: &mut Commands) {
@@ -211,13 +216,15 @@ impl ScenarioLogic for WavesScenario {
             {
                 commands.add(BonusSpawn::new(event.position, self.wave));
             }
-        } else {
-            commands.add(Notify {
-                text: "Game over".into(),
-                text_small: "You died. Press [ESC] to exit".into(),
-                duration: GAME_OVER_TEXT_DURATION,
-            });
         }
+    }
+
+    fn on_player_death(&mut self, _: &ActorDeathEvent, commands: &mut Commands) {
+        commands.add(Notify {
+            text: "Game over".into(),
+            text_small: "You died. Press [ESC] to exit".into(),
+            duration: GAME_OVER_TEXT_DURATION,
+        });
     }
 
     fn on_interval_update(&mut self, commands: &mut Commands) -> Duration {

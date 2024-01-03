@@ -1,11 +1,10 @@
 use crate::{
-    command::{ActorBotSet, ActorPlayerSet, ActorSet, Exit},
-    component::ActorConfig,
-    event::ActorDeathEvent,
+    command::{ActorBotSet, ActorPlayerSet, ActorSet, Exit, WeaponSet},
+    component::{ActorConfig, WeaponConfig},
     model::TransformLite,
     resource::ScenarioLogic,
 };
-use bevy::{ecs::event::EventReader, prelude::Commands};
+use bevy::prelude::Commands;
 use chrono::Local;
 use std::{
     any::Any,
@@ -42,6 +41,11 @@ impl BenchScenario {
         commands.add(ActorPlayerSet {
             entity,
             is_controllable: false,
+        });
+
+        commands.add(WeaponSet {
+            entity,
+            weapon: Some(&WeaponConfig::PM),
         });
 
         self.spawned += 1;
@@ -89,12 +93,9 @@ impl BenchScenario {
 
 impl ScenarioLogic for BenchScenario {
     fn on_start(&mut self, commands: &mut Commands) -> Duration {
-        log::info!("Benchmark started");
         self.spawn_player(commands);
         return INTERVAL;
     }
-
-    fn on_actor_deaths(&mut self, _: EventReader<ActorDeathEvent>, _: &mut Commands) {}
 
     fn on_interval_update(&mut self, commands: &mut Commands) -> Duration {
         self.calc_updates();

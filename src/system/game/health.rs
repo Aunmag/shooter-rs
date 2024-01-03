@@ -1,12 +1,15 @@
 use crate::{
     command::{ActorRelease, BloodSpawn},
-    component::{Actor, Health},
+    component::{Actor, Health, Player},
     event::ActorDeathEvent,
     model::AudioPlay,
-    resource::{AudioTracker, Config},
+    resource::{AudioTracker, Config, GameMode},
 };
 use bevy::{
-    ecs::system::{Query, Res, ResMut},
+    ecs::{
+        query::Has,
+        system::{Query, Res, ResMut},
+    },
     math::Vec3Swizzles,
     prelude::{Commands, DespawnRecursiveExt, Entity, EventWriter, Transform},
 };
@@ -16,13 +19,13 @@ const BLOOD_FACTOR_ON_DAMAGE: f32 = 24.0;
 const BLOOD_FACTOR_ON_DEATH: f32 = 16.0;
 
 pub fn health(
-    mut query: Query<(Entity, &Actor, &mut Health, &Transform)>,
+    mut query: Query<(Entity, &Actor, &mut Health, &Transform, Has<Player>)>,
     mut death_events: EventWriter<ActorDeathEvent>,
     mut audio: ResMut<AudioTracker>,
     mut commands: Commands,
     config: Res<Config>,
 ) {
-    for (entity, actor, mut health, transform) in query.iter_mut() {
+    for (entity, actor, mut health, transform, is_player) in query.iter_mut() {
         let actor = actor.config;
         let point = transform.translation.xy();
         let damage = health.get_damage();
@@ -38,7 +41,7 @@ pub fn health(
         }
 
         if health.is_just_died() {
-            if config.misc.bench {
+            if config.game.modes.contains(&GameMode::Bench) {
                 health.heal();
             } else {
                 audio.queue(AudioPlay {
@@ -49,7 +52,13 @@ pub fn health(
                 });
 
                 commands.add(ActorRelease(entity));
-                death_events.send(ActorDeathEvent::new(actor.kind, point));
+
+                death_events.send(ActorDeathEvent {
+                    kind: actor.kind,
+                    position: point,
+                    is_player,
+                });
+
                 blood += actor.radius * BLOOD_FACTOR_ON_DEATH;
                 commands.entity(entity).despawn_recursive();
             }

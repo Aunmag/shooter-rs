@@ -10,19 +10,13 @@ pub trait ScenarioLogic {
         return Duration::ZERO;
     }
 
-    fn on_actor_deaths(
-        &mut self,
-        mut events: EventReader<ActorDeathEvent>,
-        commands: &mut Commands,
-    ) {
-        for event in events.read() {
-            self.on_actor_death(event, commands);
-        }
-    }
-
     fn on_actor_death(&mut self, _event: &ActorDeathEvent, _commands: &mut Commands) {}
 
-    fn on_interval_update(&mut self, commands: &mut Commands) -> Duration;
+    fn on_player_death(&mut self, _event: &ActorDeathEvent, _commands: &mut Commands) {}
+
+    fn on_interval_update(&mut self, _commands: &mut Commands) -> Duration {
+        return Duration::from_secs(60);
+    }
 
     fn on_constant_update(&mut self, _commands: &mut Commands) {}
 
@@ -48,7 +42,7 @@ impl Scenario {
     pub fn update(
         &mut self,
         commands: &mut Commands,
-        death_events: EventReader<ActorDeathEvent>,
+        mut death_events: EventReader<ActorDeathEvent>,
         time: Duration,
     ) {
         if !self.is_started {
@@ -57,7 +51,13 @@ impl Scenario {
         }
 
         if !death_events.is_empty() {
-            self.logic.on_actor_deaths(death_events, commands);
+            for event in death_events.read() {
+                self.logic.on_actor_death(event, commands);
+
+                if event.is_player {
+                    self.logic.on_player_death(event, commands);
+                }
+            }
         }
 
         if self.timer <= time {

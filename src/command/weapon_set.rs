@@ -12,14 +12,12 @@ use bevy::{
     render::texture::Image,
     sprite::{Anchor, Sprite, SpriteBundle},
 };
-use derive_more::Constructor;
 
 const WEAPON_MASS_MULTIPLAYER: f32 = 5.0;
 
-#[derive(Constructor)]
 pub struct WeaponSet {
-    entity: Entity,
-    weapon: Option<&'static WeaponConfig>,
+    pub entity: Entity,
+    pub weapon: Option<&'static WeaponConfig>,
 }
 
 impl WeaponSet {

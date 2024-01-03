@@ -16,8 +16,10 @@ use crate::{
     material::{BloodMaterial, LaserMaterial, ProjectileMaterial, StatusBarMaterial},
     model::AppState,
     plugin::DebugPlugin,
-    resource::{AssetStorage, AudioStorage, AudioTracker, Config, HitResource, Misc, Scenario},
-    scenario::{BenchScenario, WavesScenario},
+    resource::{
+        AssetStorage, AudioStorage, AudioTracker, Config, GameMode, HitResource, Misc, Scenario,
+    },
+    scenario::{BenchScenario, EmptyScenario, WavesScenario},
     util::ext::AppExt,
 };
 use bevy::{
@@ -38,15 +40,15 @@ fn main() {
 
     application.add_plugins(
         DefaultPlugins
-            .set(init_log_plugin(config.misc.debug))
+            .set(init_log_plugin(&config))
             .set(ImagePlugin::default_nearest())
             .set(WindowPlugin {
                 primary_window: Some(Window {
                     title: APP_TITLE.to_string(),
                     mode: config.display.mode(),
                     resolution: WindowResolution::new(
-                        config.display.window_size_x,
-                        config.display.window_size_y,
+                        f32::from(config.display.window_size_x),
+                        f32::from(config.display.window_size_y),
                     ),
                     present_mode: config.display.present_mode(),
                     ..Default::default()
@@ -55,17 +57,27 @@ fn main() {
             }),
     );
 
-    if config.misc.debug {
-        log::info!("Starting with debug mode");
-        std::env::set_var("RUST_BACKTRACE", "1");
-        application.add_plugins(DebugPlugin);
+    let mut scenario = None;
+
+    for mode in &config.game.modes {
+        log::info!("Starting with game mode: {:?}", mode);
+
+        match &mode {
+            GameMode::Debug => {
+                std::env::set_var("RUST_BACKTRACE", "1");
+                application.add_plugins(DebugPlugin);
+            }
+            GameMode::Bench => {
+                scenario = Some(Scenario::new(BenchScenario::default()));
+            }
+            GameMode::Waves => {
+                scenario = Some(Scenario::new(WavesScenario::new()));
+            }
+            GameMode::LaserSight => {}
+        }
     }
 
-    if config.misc.bench {
-        application.insert_resource(Scenario::new(BenchScenario::default()));
-    } else {
-        application.insert_resource(Scenario::new(WavesScenario::new()));
-    }
+    application.insert_resource(scenario.unwrap_or_else(|| Scenario::new(EmptyScenario)));
 
     application
         .add_plugins(Material2dPlugin::<BloodMaterial>::default())
@@ -120,10 +132,10 @@ fn main() {
         .run();
 }
 
-fn init_log_plugin(debug: bool) -> LogPlugin {
+fn init_log_plugin(config: &Config) -> LogPlugin {
     let mut log_plugin = LogPlugin::default();
 
-    if debug {
+    if config.game.modes.contains(&GameMode::Debug) {
         if !log_plugin.filter.is_empty() {
             log_plugin.filter.push(',');
         }

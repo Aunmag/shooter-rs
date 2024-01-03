@@ -1,5 +1,10 @@
 use super::LaserSightSet;
-use crate::{command::StatusBarSet, component::Player, data::LAYER_ACTOR_PLAYER, resource::Config};
+use crate::{
+    command::StatusBarSet,
+    component::Player,
+    data::LAYER_ACTOR_PLAYER,
+    resource::{Config, GameMode},
+};
 use bevy::{
     ecs::system::Command,
     prelude::{Entity, Transform, World},
@@ -22,7 +27,12 @@ impl Command for ActorPlayerSet {
 
         StatusBarSet(self.entity).apply(world);
 
-        if world.resource::<Config>().misc.laser_sight {
+        if world
+            .resource::<Config>()
+            .game
+            .modes
+            .contains(&GameMode::LaserSight)
+        {
             LaserSightSet(self.entity).apply(world);
         }
     }
