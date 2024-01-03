@@ -8,27 +8,38 @@ use crate::{
 };
 use bevy::{
     math::{Vec2, Vec3Swizzles},
-    prelude::{Query, Transform, With},
+    prelude::{Query, Res, Transform, With},
+    time::Time,
 };
 
 const DEBUG_TEAMMATES: bool = false;
 
 pub fn operate(
-    mut bots: Query<(&Bot, &mut Actor, &Transform, &Inertia)>,
+    mut bots: Query<(&mut Bot, &mut Actor, &Transform, &Inertia)>,
     actors: Query<(&Transform, &Inertia), With<Actor>>,
+    time: Res<Time>,
 ) {
-    for (bot, mut actor, transform, inertia) in bots.iter_mut() {
+    let time = time.elapsed();
+
+    for (mut bot, mut actor, transform, inertia) in bots.iter_mut() {
         actor.reset_actions();
 
         let mut allow_spread_out = true;
 
-        if let Some((enemy_velocity, enemy_position)) = bot
+        let enemy = bot
             .enemy
             .and_then(|e| actors.get(e).ok())
-            .map(|e| (e.0.translation.xy(), e.1.velocity))
-        {
+            .map(|e| (e.0.translation.xy(), e.1.velocity));
+
+        if bot.enemy.is_some() && enemy.is_none() {
+            // enemy no longer exists. force new enemy search now
+            bot.enemy = None;
+            bot.update_timer.set(time);
+        }
+
+        if let Some((enemy_velocity, enemy_position)) = enemy {
             allow_spread_out = sub_system::follow_enemy(
-                bot,
+                &bot,
                 &mut actor,
                 transform.translation.xy(),
                 inertia.velocity,
@@ -36,11 +47,11 @@ pub fn operate(
                 enemy_position,
             );
         } else {
-            sub_system::idle(bot, &mut actor);
+            sub_system::idle(&bot, &mut actor);
         }
 
         if allow_spread_out {
-            sub_system::spread_out(bot, &mut actor, transform, &actors);
+            sub_system::spread_out(&bot, &mut actor, transform, &actors);
         }
     }
 }

@@ -15,4 +15,8 @@ impl Timer {
             return false;
         }
     }
+
+    pub fn set(&mut self, next: Duration) {
+        self.next = next;
+    }
 }
