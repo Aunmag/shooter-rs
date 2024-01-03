@@ -27,6 +27,7 @@ pub fn analyze(
                 return;
             }
 
+            bot.update_idle();
             bot.enemy = None;
 
             let p1 = t1.translation.xy();

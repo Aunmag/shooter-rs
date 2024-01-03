@@ -2,7 +2,10 @@ use crate::util::Timer;
 use bevy::{ecs::component::Component, prelude::Entity};
 use rand::{Rng, SeedableRng};
 use rand_pcg::Pcg32;
-use std::ops::Range;
+use std::{
+    f32::consts::{FRAC_PI_4, TAU},
+    ops::Range,
+};
 
 const SPRINT_DISTANCE: Range<f32> = 5.0..12.0;
 const SPREAD: Range<f32> = 0.8..5.0;
@@ -11,6 +14,8 @@ const SPREAD: Range<f32> = 0.8..5.0;
 /// 0.5 = 45 degrees
 const SPREAD_ANGULAR_FACTOR: Range<f32> = 0.2..0.5;
 const STAMINA_MIN: Range<f32> = 0.15..0.4;
+const IDLE_ROTATION: f32 = FRAC_PI_4;
+const IDLE_MOVEMENT_CHANCE: f64 = 0.1;
 
 #[derive(Component)]
 pub struct Bot {
@@ -22,6 +27,9 @@ pub struct Bot {
     pub teammates: Vec<Entity>,
     pub update_timer: Timer,
     pub voice_timer: Timer,
+    pub idle_direction: f32,
+    pub idle_movement: bool,
+    pub rng: Pcg32,
 }
 
 impl Bot {
@@ -37,6 +45,14 @@ impl Bot {
             teammates: Vec::new(),
             update_timer: Timer::default(),
             voice_timer: Timer::default(),
+            idle_direction: rng.gen_range(0.0..TAU),
+            idle_movement: false,
+            rng,
         };
+    }
+
+    pub fn update_idle(&mut self) {
+        self.idle_direction += self.rng.gen_range(-IDLE_ROTATION..IDLE_ROTATION);
+        self.idle_movement = self.rng.gen_bool(IDLE_MOVEMENT_CHANCE);
     }
 }

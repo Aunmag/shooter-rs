@@ -20,8 +20,24 @@ pub fn operate(
     for (bot, mut actor, transform, inertia) in bots.iter_mut() {
         actor.reset_actions();
 
-        let allow_spread_out =
-            sub_system::follow_enemy(bot, &mut actor, transform, inertia, &actors);
+        let mut allow_spread_out = true;
+
+        if let Some((enemy_velocity, enemy_position)) = bot
+            .enemy
+            .and_then(|e| actors.get(e).ok())
+            .map(|e| (e.0.translation.xy(), e.1.velocity))
+        {
+            allow_spread_out = sub_system::follow_enemy(
+                bot,
+                &mut actor,
+                transform.translation.xy(),
+                inertia.velocity,
+                enemy_velocity,
+                enemy_position,
+            );
+        } else {
+            sub_system::idle(bot, &mut actor);
+        }
 
         if allow_spread_out {
             sub_system::spread_out(bot, &mut actor, transform, &actors);
@@ -37,55 +53,52 @@ mod sub_system {
     pub fn follow_enemy(
         bot: &Bot,
         actor: &mut Actor,
-        transform: &Transform,
-        inertia: &Inertia,
-        actors: &Query<(&Transform, &Inertia), With<Actor>>,
+        position: Vec2,
+        velocity: Vec2,
+        enemy_position: Vec2,
+        enemy_velocity: Vec2,
     ) -> bool {
         let mut allow_spread_out = true;
+        actor.movement += Vec2::FRONT;
 
-        if let Some((enemy_position, enemy_velocity)) = bot
-            .enemy
-            .and_then(|e| actors.get(e).ok())
-            .map(|e| (e.0.translation.xy(), e.1.velocity))
-        {
-            let position = transform.translation.xy();
-            actor.movement += Vec2::FRONT;
+        // TODO: count enemy body radius instead of self
+        if position.is_close(
+            enemy_position,
+            actor.config.melee_distance + actor.config.radius,
+        ) {
+            // enemy is close, attack
+            actor.actions |= ActorAction::Attack;
+            actor.look_at = Some(position.angle_to(enemy_position));
+            allow_spread_out = false;
+        } else {
+            // otherwise go to the meet point
+            let meet_position =
+                find_meet_point(position, velocity.length(), enemy_position, enemy_velocity);
 
-            // TODO: count enemy body radius instead of self
-            if position.is_close(
-                enemy_position,
-                actor.config.melee_distance + actor.config.radius,
-            ) {
-                // enemy is close, attack
-                actor.actions |= ActorAction::Attack;
-                actor.look_at = Some(position.angle_to(enemy_position));
+            let meet_distance = (position - meet_position).length_squared();
+
+            if is_close(meet_distance, bot.spread) {
+                // meet point is near, no need to spread out
                 allow_spread_out = false;
-            } else {
-                // otherwise go to the meet point
-                let meet_position = find_meet_point(
-                    position,
-                    inertia.velocity.length(),
-                    enemy_position,
-                    enemy_velocity,
-                );
-
-                let meet_distance = (position - meet_position).length_squared();
-
-                if is_close(meet_distance, bot.spread) {
-                    // meet point is near, no need to spread out
-                    allow_spread_out = false;
-                }
-
-                if actor.stamina > bot.stamina_min && is_far(meet_distance, bot.sprint_distance) {
-                    // enemy is far, sprint
-                    actor.actions |= ActorAction::Sprint;
-                }
-
-                actor.look_at = Some(position.angle_to(meet_position));
             }
+
+            if actor.stamina > bot.stamina_min && is_far(meet_distance, bot.sprint_distance) {
+                // enemy is far, sprint
+                actor.actions |= ActorAction::Sprint;
+            }
+
+            actor.look_at = Some(position.angle_to(meet_position));
         }
 
         return allow_spread_out;
+    }
+
+    pub fn idle(bot: &Bot, actor: &mut Actor) {
+        actor.look_at = Some(bot.idle_direction);
+
+        if bot.idle_movement {
+            actor.movement += Vec2::FRONT;
+        }
     }
 
     pub fn spread_out(
