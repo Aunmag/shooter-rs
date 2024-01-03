@@ -1,5 +1,5 @@
 use crate::{
-    component::{Actor, ActorWeaponSprite, Inertia, Weapon, WeaponConfig, WeaponGrip},
+    component::{Actor, ActorWeaponSprite, Inertia, Player, Weapon, WeaponConfig, WeaponGrip},
     data::PIXELS_PER_METER,
     model::AudioPlay,
     resource::AudioTracker,
@@ -140,7 +140,10 @@ impl Command for WeaponSet {
             self.update_actor_weapon(world, weapon);
             self.update_actor_image(world, weapon);
             self.update_actor_mass(world, weapon.get_mass_with_full_ammo());
-            self.play_pickup_sound(world);
+
+            if world.get::<Player>(self.entity).is_some() {
+                self.play_pickup_sound(world);
+            }
         }
     }
 }
