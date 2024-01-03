@@ -11,6 +11,7 @@ pub fn on_enter(
     mut meshes: ResMut<Assets<Mesh>>,
     mut misc: ResMut<Misc>,
 ) {
+    log::info!("Loading...");
     asset_storage.load(&asset_server);
     init_dummy_image(&mut images, &mut misc);
     init_dummy_mesh(&mut meshes, &mut misc);

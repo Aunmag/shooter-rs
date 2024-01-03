@@ -22,7 +22,7 @@ fn on_update_inner(
 ) {
     match asset_storage.is_loaded(&asset_server) {
         None => {
-            log::info!("Loading...");
+            log::trace!("Loading...");
             asset_storage.load(&asset_server);
             return;
         }
