@@ -13,7 +13,6 @@ const SPREAD: Range<f32> = 0.8..5.0;
 /// 1.0 = 90 degrees
 /// 0.5 = 45 degrees
 const SPREAD_ANGULAR_FACTOR: Range<f32> = 0.2..0.5;
-const STAMINA_MIN: Range<f32> = 0.15..0.4;
 const IDLE_ROTATION: f32 = FRAC_PI_4;
 const IDLE_MOVEMENT_CHANCE: f64 = 0.1;
 
@@ -22,7 +21,6 @@ pub struct Bot {
     pub spread: f32,
     pub spread_angular_factor: f32,
     pub sprint_distance: f32,
-    pub stamina_min: f32,
     pub enemy: Option<Entity>,
     pub teammates: Vec<Entity>,
     pub update_timer: Timer,
@@ -40,7 +38,6 @@ impl Bot {
             spread: rng.gen_range(SPREAD),
             spread_angular_factor: rng.gen_range(SPREAD_ANGULAR_FACTOR),
             sprint_distance: rng.gen_range(SPRINT_DISTANCE),
-            stamina_min: rng.gen_range(STAMINA_MIN),
             enemy: None,
             teammates: Vec::new(),
             update_timer: Timer::default(),

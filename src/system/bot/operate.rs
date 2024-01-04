@@ -93,7 +93,7 @@ mod sub_system {
                 allow_spread_out = false;
             }
 
-            if actor.stamina > bot.stamina_min && is_far(meet_distance, bot.sprint_distance) {
+            if is_far(meet_distance, bot.sprint_distance) {
                 // enemy is far, sprint
                 actor.actions |= ActorAction::Sprint;
             }
