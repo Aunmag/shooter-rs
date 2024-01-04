@@ -58,7 +58,15 @@ fn startup(mut commands: Commands, asset_server: Res<AssetServer>) {
             TextSection::new("\nEntities: ", style.clone()),
             TextSection::from_style(style.clone()),
             TextSection::new("\nAudio sources: ", style.clone()),
-            TextSection::from_style(style),
+            TextSection::from_style(style.clone()),
+            TextSection::new(
+                "\n\
+                \nSpawn weapon: [J]\
+                \nSpawn human : [H] group: [+SHIFT]\
+                \nSpawn zombie: [G] group: [+SHIFT]\
+                ",
+                style,
+            ),
         ]),
         FpsText,
     ));
@@ -101,25 +109,17 @@ fn update_input(
     keyboard: Res<Input<KeyCode>>,
     mut commands: Commands,
 ) {
-    let bonus_level = if keyboard.just_pressed(KeyCode::Key0) {
-        0
-    } else if keyboard.just_pressed(KeyCode::Key1) {
-        1
-    } else if keyboard.just_pressed(KeyCode::Key2) {
-        2
-    } else if keyboard.just_pressed(KeyCode::Key3) {
-        3
-    } else if keyboard.just_pressed(KeyCode::Key4) {
-        4
-    } else if keyboard.just_pressed(KeyCode::Key5) {
-        5
-    } else if keyboard.just_pressed(KeyCode::Key6) {
-        6
+    let spawn = if keyboard.just_pressed(KeyCode::J) {
+        Some(Spawn::Weapon)
+    } else if keyboard.just_pressed(KeyCode::H) {
+        Some(Spawn::Human)
+    } else if keyboard.just_pressed(KeyCode::G) {
+        Some(Spawn::Zombie)
     } else {
-        -1
+        None
     };
 
-    if bonus_level != -1 {
+    if let Some(spawn) = spawn {
         let mut position = players
             .iter()
             .next()
@@ -128,27 +128,53 @@ fn update_input(
 
         position.translation += Vec2::from_length(2.0, position.direction);
 
-        if bonus_level == 0 {
-            spawn_actor(&mut commands, position);
+        let group = if keyboard.pressed(KeyCode::ShiftLeft) || keyboard.pressed(KeyCode::ShiftRight)
+        {
+            10
         } else {
-            spawn_bonus(&mut commands, position.translation, bonus_level as u8);
+            1
+        };
+
+        match spawn {
+            Spawn::Weapon => {
+                spawn_bonus(&mut commands, position.translation);
+            }
+            Spawn::Human => {
+                spawn_actors(&mut commands, position, &ActorConfig::HUMAN, group);
+            }
+            Spawn::Zombie => {
+                spawn_actors(&mut commands, position, &ActorConfig::ZOMBIE, group);
+            }
         }
     }
 }
 
-fn spawn_bonus(commands: &mut Commands, position: Vec2, level: u8) {
-    commands.add(BonusSpawn::new(position, level));
+fn spawn_bonus(commands: &mut Commands, position: Vec2) {
+    commands.add(BonusSpawn::new(position, 6));
 }
 
-fn spawn_actor(commands: &mut Commands, transform: TransformLite) {
-    let entity = commands.spawn_empty().id();
+fn spawn_actors(
+    commands: &mut Commands,
+    transform: TransformLite,
+    config: &'static ActorConfig,
+    group: u8,
+) {
+    for _ in 0..group {
+        let entity = commands.spawn_empty().id();
 
-    commands.add(ActorSet {
-        entity,
-        config: &ActorConfig::ZOMBIE,
-        skill: 1.0,
-        transform,
-    });
+        commands.add(ActorSet {
+            entity,
+            config,
+            skill: 1.0,
+            transform,
+        });
 
-    commands.add(ActorBotSet(entity));
+        commands.add(ActorBotSet(entity));
+    }
+}
+
+enum Spawn {
+    Weapon,
+    Human,
+    Zombie,
 }
