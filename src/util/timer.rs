@@ -19,4 +19,8 @@ impl Timer {
     pub fn set(&mut self, next: Duration) {
         self.next = next;
     }
+
+    pub fn is_ready_or_disabled(&self, now: Duration) -> bool {
+        return self.next < now;
+    }
 }

@@ -1,6 +1,6 @@
 use crate::{
     component::{Actor, Bot, Inertia},
-    util::math::find_meet_point,
+    util::{ext::RngExt, math::find_meet_point},
 };
 use bevy::{
     ecs::query::BatchingStrategy,
@@ -23,10 +23,12 @@ pub fn analyze(
     bots.par_iter_mut()
         .batching_strategy(BatchingStrategy::fixed(32))
         .for_each(|(mut bot, e1, a1, t1, i1)| {
-            if !bot.update_timer.next_if_ready(time, || UPDATE_INTERVAL) {
+            if !bot.update_timer.is_ready_or_disabled(time) {
                 return;
             }
 
+            let update_interval_fuzzed = bot.rng.fuzz_duration(UPDATE_INTERVAL);
+            bot.update_timer.set(time + update_interval_fuzzed);
             bot.update_idle();
             bot.enemy = None;
 
