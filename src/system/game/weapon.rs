@@ -124,7 +124,7 @@ pub fn weapon(
                         });
                     }
 
-                    let mut recoil = weapon.get_recoil();
+                    let mut recoil = weapon.get_recoil() / actor.skill;
 
                     if data.rng.gen::<bool>() {
                         recoil = -recoil;
