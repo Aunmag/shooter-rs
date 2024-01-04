@@ -71,7 +71,7 @@ impl Actor {
     }
 
     pub fn update_stamina(&mut self, delta: f32) {
-        let mut change = self.config.stamina.delta(delta);
+        let mut change = self.config.stamina.mul_f32(self.skill).delta(delta);
 
         if !self.movement.is_zero() {
             if self.actions.is_sprinting() {
