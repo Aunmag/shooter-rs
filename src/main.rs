@@ -138,7 +138,7 @@ fn main() {
             s.add(scenario);
             s.add(bot::analyze);
             s.add(bot::operate);
-            s.add(bot::sound);
+            s.add(bot::voice);
         })
         .run();
 }

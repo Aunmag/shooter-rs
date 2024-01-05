@@ -12,9 +12,9 @@ use bevy::{
 use rand::Rng as _;
 use std::{ops::Range, time::Duration};
 
-const INTERVAL: Range<Duration> = Duration::from_secs(2)..Duration::from_secs(30);
+const INTERVAL: Range<Duration> = Duration::from_secs(5)..Duration::from_secs(30);
 
-pub fn sound(
+pub fn voice(
     mut bots: Query<(&mut Bot, &Actor, &Transform)>,
     mut audio: ResMut<AudioTracker>,
     time: Res<Time>,

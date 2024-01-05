@@ -127,7 +127,7 @@ impl ActorConfig {
         sprint_factor: Self::HUMAN.sprint_factor,
         stamina: Duration::from_secs(10),
         health: Self::HUMAN.health * 0.6,
-        pain_threshold: 0.08,
+        pain_threshold: f32::INFINITY, // disabled
         radius: 0.21,
         mass: 70.0,
         melee_damage: Self::HUMAN.health / 16.0,

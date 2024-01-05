@@ -1,5 +1,5 @@
 mod analyze;
 mod operate;
-mod sound;
+mod voice;
 
-pub use self::{analyze::*, operate::*, sound::*};
+pub use self::{analyze::*, operate::*, voice::*};
