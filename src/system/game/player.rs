@@ -22,7 +22,6 @@ pub fn player(
     config: Res<Config>,
 ) {
     let delta = time.delta_seconds();
-    let time = time.elapsed();
 
     let mut mouse_delta_x = 0.0;
     let mut zoom = 0.0;
@@ -73,8 +72,8 @@ pub fn player(
             .actions
             .set(ActorAction::Reload, keyboard.pressed(KeyCode::R));
 
-        player.add_zoom(zoom, time);
-        player.update(time, delta);
+        player.add_zoom(zoom);
+        player.update(delta);
         transform.rotate_local_z(rotation + player.add_extra_rotation(extra_rotation));
 
         let limit = WORLD_SIZE_HALF;
