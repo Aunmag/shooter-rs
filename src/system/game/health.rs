@@ -14,9 +14,6 @@ use bevy::{
     prelude::{Commands, DespawnRecursiveExt, Entity, EventWriter, Transform},
 };
 
-const BLOOD_FACTOR_ON_DAMAGE: f32 = 24.0;
-const BLOOD_FACTOR_ON_DEATH: f32 = 16.0;
-
 pub fn health(
     mut query: Query<(Entity, &Actor, &mut Health, &Transform, Has<Player>)>,
     mut death_events: EventWriter<ActorDeathEvent>,
@@ -28,7 +25,6 @@ pub fn health(
         let actor = actor.config;
         let point = transform.translation.xy();
         let damage = health.get_damage_normalized();
-        let mut blood = actor.radius * damage * BLOOD_FACTOR_ON_DAMAGE;
 
         if health.is_alive() && damage > actor.pain_threshold {
             audio.queue(AudioPlay {
@@ -58,15 +54,18 @@ pub fn health(
                     is_player,
                 });
 
-                blood += actor.radius * BLOOD_FACTOR_ON_DEATH;
                 commands.entity(entity).despawn_recursive();
             }
         }
 
-        let blood = BloodSpawn::new(point, blood);
-
-        if !blood.is_too_small() {
+        if let Some(blood) = BloodSpawn::new(point, damage) {
             commands.add(blood);
+        }
+
+        if health.is_just_died() {
+            if let Some(blood) = BloodSpawn::new(point, 0.75) {
+                commands.add(blood);
+            }
         }
 
         health.commit();

@@ -2,6 +2,7 @@ use crate::{
     data::{LAYER_BLUFF, PIXELS_PER_METER},
     material::BloodMaterial,
     resource::{Cache, Config},
+    util::math::interpolate_unbounded,
 };
 use bevy::{
     asset::Handle,
@@ -12,6 +13,10 @@ use bevy::{
 };
 use rand::{thread_rng, Rng};
 
+const SIZE_MIN: f32 = 0.8;
+const SIZE_MAX: f32 = 6.0;
+const SCALE_MIN: f32 = 0.03;
+
 pub struct BloodSpawn {
     position: Vec2,
     size: f32,
@@ -19,23 +24,24 @@ pub struct BloodSpawn {
 }
 
 impl BloodSpawn {
-    /// NOTE: Visual blood size is always smaller than it's mesh size
-    const SIZE_MIN_PX: f32 = 8.0;
+    pub fn new(mut position: Vec2, mut scale: f32) -> Option<Self> {
+        scale = scale.clamp(0.0, 1.0);
 
-    pub fn new(mut position: Vec2, mut size: f32) -> Self {
+        if scale < SCALE_MIN {
+            return None;
+        }
+
+        let size_raw = interpolate_unbounded(SIZE_MIN, SIZE_MAX, scale);
+
         position = (position * PIXELS_PER_METER).floor() / PIXELS_PER_METER;
-        let size_px = (size * PIXELS_PER_METER / 2.0).floor() * 2.0; // size must be even
-        size = size_px / PIXELS_PER_METER;
+        let size_px = (size_raw * PIXELS_PER_METER / 2.0).floor() * 2.0; // size must be even
+        let size = size_px / PIXELS_PER_METER;
 
-        return Self {
+        return Some(Self {
             position,
             size,
             size_px,
-        };
-    }
-
-    pub fn is_too_small(&self) -> bool {
-        return self.size_px < Self::SIZE_MIN_PX;
+        });
     }
 }
 

@@ -8,6 +8,10 @@ pub fn interpolate(min: f32, max: f32, blend: f32) -> f32 {
     return min + (max - min) * blend.clamp(0.0, 1.0);
 }
 
+pub fn interpolate_unbounded(min: f32, max: f32, blend: f32) -> f32 {
+    return min + (max - min) * blend;
+}
+
 pub fn angle_difference(a: f32, b: f32) -> f32 {
     return normalize_radians(b - a);
 }
