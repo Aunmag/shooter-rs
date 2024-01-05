@@ -12,6 +12,7 @@ use bevy::{
     time::Time,
 };
 use rand::{thread_rng, Rng};
+use std::time::Duration;
 
 const SIZE_MIN: f32 = 0.8;
 const SIZE_MAX: f32 = 6.0;
@@ -90,8 +91,8 @@ impl Command for BloodSpawn {
 
 fn reserve_decal(world: &mut World) -> bool {
     let mut decals = 0;
-    let mut smallest = None;
-    let mut smallest_size = f32::INFINITY;
+    let mut oldest = None;
+    let mut oldest_time = Duration::MAX;
 
     let mut query = world.query::<(Entity, &Handle<BloodMaterial>)>();
     let assets = world.resource::<Assets<BloodMaterial>>();
@@ -100,16 +101,16 @@ fn reserve_decal(world: &mut World) -> bool {
         decals += 1;
 
         if let Some(material) = assets.get(handle) {
-            if material.size < smallest_size {
-                smallest = Some(entity);
-                smallest_size = material.size;
+            if material.spawned < oldest_time {
+                oldest = Some(entity);
+                oldest_time = material.spawned;
             }
         }
     }
 
     if decals >= world.resource::<Config>().graphic.decals {
-        if let Some(smallest) = smallest {
-            world.entity_mut(smallest).despawn_recursive();
+        if let Some(oldest) = oldest {
+            world.entity_mut(oldest).despawn_recursive();
             return true;
         } else {
             return false;
