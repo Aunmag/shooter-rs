@@ -180,7 +180,7 @@ impl<'a> BotHandler<'a> {
             self.spread_out = SpreadOut::Disallowed;
         }
 
-        if self.can_sprint() && !self.is_far(&meet, self.bot.config.sprint_distance) {
+        if self.can_sprint() && self.is_far(&meet, self.bot.config.sprint_distance) {
             // enemy is far, sprint
             self.actor.actions |= ActorAction::Sprint;
         }
