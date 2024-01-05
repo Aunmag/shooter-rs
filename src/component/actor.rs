@@ -23,24 +23,9 @@ pub enum ActorKind {
     Zombie,
 }
 
-impl ActorKind {
-    pub const fn get_bot_config(self) -> &'static BotConfig {
-        return match self {
-            Self::Human => BotConfig::HUMAN,
-            Self::Zombie => BotConfig::ZOMBIE,
-        };
-    }
-
-    pub const fn get_assets_path(self) -> &'static str {
-        return match self {
-            Self::Human => "actors/human",
-            Self::Zombie => "actors/zombie",
-        };
-    }
-}
-
 pub struct ActorConfig {
     pub kind: ActorKind,
+    pub name: &'static str,
     // movement
     pub movement_velocity: f32,
     pub rotation_velocity: f32,
@@ -60,6 +45,9 @@ pub struct ActorConfig {
     // shooting
     pub reloading_speed: f32,
     pub recoil_factor: f32,
+    // misc
+    pub bot: &'static BotConfig,
+    pub images: &'static [u8],
 }
 
 impl Actor {
@@ -106,6 +94,7 @@ impl ActorConfig {
 
     pub const HUMAN: Self = Self {
         kind: ActorKind::Human,
+        name: "human",
         movement_velocity: 2.8,
         rotation_velocity: 3.5,
         sprint_factor: 1.6,
@@ -120,10 +109,13 @@ impl ActorConfig {
         melee_interval: Duration::from_millis(600),
         reloading_speed: 0.6,
         recoil_factor: 1.0,
+        bot: BotConfig::HUMAN,
+        images: &[1, 2],
     };
 
     pub const ZOMBIE: Self = Self {
         kind: ActorKind::Zombie,
+        name: "zombie",
         movement_velocity: Self::HUMAN.movement_velocity * 0.33,
         rotation_velocity: Self::HUMAN.rotation_velocity * 0.4,
         sprint_factor: Self::HUMAN.sprint_factor,
@@ -138,15 +130,35 @@ impl ActorConfig {
         melee_interval: Self::HUMAN.melee_interval,
         reloading_speed: Self::HUMAN.reloading_speed * 2.0,
         recoil_factor: 6.0,
+        bot: BotConfig::ZOMBIE,
+        images: &[0, 1, 2],
     };
 
-    pub fn get_image_path(&self, mut suffix: u8) -> String {
-        suffix = match self.kind {
-            ActorKind::Human => suffix.clamp(1, 2),
-            ActorKind::Zombie => suffix.clamp(0, 2),
-        };
+    pub const ZOMBIE_AGILE: Self = Self {
+        kind: ActorKind::Zombie,
+        name: "zombie_agile",
+        movement_velocity: Self::HUMAN.movement_velocity * 0.8,
+        rotation_velocity: 4.0,
+        stamina: Duration::from_secs(60),
+        health: Self::ZOMBIE.health / 2.0,
+        radius: 0.19,
+        mass: 45.0,
+        melee_damage: Self::ZOMBIE.melee_damage / 2.0,
+        bot: BotConfig::ZOMBIE_AGILE,
+        images: &[0],
+        ..Self::ZOMBIE
+    };
 
-        return format!("{}/image_{}.png", self.kind.get_assets_path(), suffix);
+    pub fn get_assets_path(&self) -> String {
+        return format!("actors/{}", self.name);
+    }
+
+    pub fn get_image_path(&self, mut suffix: u8) -> String {
+        if !self.images.contains(&suffix) {
+            suffix = self.images.first().copied().unwrap_or(0);
+        }
+
+        return format!("{}/image_{}.png", self.get_assets_path(), suffix);
     }
 }
 

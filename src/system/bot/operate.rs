@@ -1,6 +1,7 @@
 use crate::{
     component::{Actor, Bot, BotShootingState, Inertia, Weapon},
-    model::{ActorAction, Moving},
+    data::BotConfig,
+    model::ActorAction,
     util::{
         ext::{TransformExt, Vec2Ext},
         math::angle_difference,
@@ -14,7 +15,7 @@ use bevy::{
     prelude::{Color, Query, Transform, With},
     time::Time,
 };
-use std::{ops::Div, time::Duration};
+use std::{f32::consts::FRAC_PI_2, ops::Div, time::Duration};
 
 const DEBUG_TEAMMATES: bool = false;
 const DEBUG_AIM: bool = false;
@@ -29,10 +30,14 @@ pub fn operate(
     for (mut bot, mut actor, transform, inertia, weapon) in bots.iter_mut() {
         actor.reset_actions();
 
-        let enemy = bot.enemy.and_then(|e| actors.get(e).ok()).map(|e| Moving {
-            position: e.0.translation.xy(),
-            velocity: e.1.velocity,
-        });
+        let enemy = bot
+            .enemy
+            .and_then(|e| actors.get(e).ok())
+            .map(|e| BotTarget {
+                position: e.0.translation.xy(),
+                velocity: e.1.velocity,
+                direction: e.0.direction(),
+            });
 
         if bot.enemy.is_some() && enemy.is_none() {
             // enemy no longer exists. force new enemy search now
@@ -47,13 +52,20 @@ pub fn operate(
             transform,
             velocity: inertia.velocity,
             spread_out: SpreadOut::Full,
+            is_dodging: false,
         };
 
         if let Some(enemy) = enemy {
-            if let Some(weapon) = weapon {
-                handler.attack_enemy_armed(&enemy, weapon, time);
-            } else {
-                handler.attack_enemy_melee(&enemy);
+            if handler.bot.config.is_agile {
+                handler.dodge_enemy(&enemy);
+            }
+
+            if !handler.is_dodging {
+                if let Some(weapon) = weapon {
+                    handler.attack_enemy_armed(&enemy, weapon, time);
+                } else {
+                    handler.attack_enemy_melee(&enemy);
+                }
             }
         } else {
             handler.idle();
@@ -77,10 +89,35 @@ struct BotHandler<'a> {
     transform: &'a Transform,
     velocity: Vec2,
     spread_out: SpreadOut,
+    is_dodging: bool,
 }
 
 impl<'a> BotHandler<'a> {
-    fn attack_enemy_armed(&mut self, target: &Moving, weapon: &Weapon, time: Duration) {
+    fn dodge_enemy(&mut self, enemy: &BotTarget) {
+        let bot_to_enemy = self.angle_to(enemy);
+        let enemy_to_bot = angle_difference(enemy.direction, enemy.angle_to(self));
+
+        if enemy_to_bot.abs() < BotConfig::DODGE_ANGLE {
+            let force = 1.0 - (enemy_to_bot.abs() / BotConfig::DODGE_ANGLE);
+
+            let turn = if enemy_to_bot > 0.0 {
+                -FRAC_PI_2
+            } else {
+                FRAC_PI_2
+            };
+
+            if force > 0.5 {
+                self.actor.actions |= ActorAction::Sprint;
+            }
+
+            self.look_at_direction(bot_to_enemy + turn * force);
+            self.actor.movement += Vec2::FRONT;
+            self.spread_out = SpreadOut::Disallowed;
+            self.is_dodging = true;
+        }
+    }
+
+    fn attack_enemy_armed(&mut self, target: &BotTarget, weapon: &Weapon, time: Duration) {
         if self.is_close(&target.position, self.bot.config.shoot_distance_min) {
             // don't come too close
             self.actor.movement += Vec2::BACK / 1.5;
@@ -156,7 +193,7 @@ impl<'a> BotHandler<'a> {
         }
     }
 
-    fn attack_enemy_melee(&mut self, target: &Moving) {
+    fn attack_enemy_melee(&mut self, target: &BotTarget) {
         // TODO: count enemy body radius instead of self
         let melee_distance = self.actor.config.melee_distance + self.actor.config.radius;
 
@@ -172,7 +209,7 @@ impl<'a> BotHandler<'a> {
         }
     }
 
-    fn chase(&mut self, target: &Moving) {
+    fn chase(&mut self, target: &BotTarget) {
         let meet = self.find_meet(target);
 
         if self.is_close(&meet, self.bot.config.spread) {
@@ -296,4 +333,22 @@ enum SpreadOut {
     Full,
     Restricted,
     Disallowed,
+}
+
+pub struct BotTarget {
+    pub position: Vec2,
+    pub velocity: Vec2,
+    pub direction: f32,
+}
+
+impl WithPosition for BotTarget {
+    fn position(&self) -> Vec2 {
+        return self.position;
+    }
+}
+
+impl WithVelocity for BotTarget {
+    fn velocity(&self) -> Vec2 {
+        return self.velocity;
+    }
 }

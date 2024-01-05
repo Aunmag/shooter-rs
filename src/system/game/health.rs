@@ -28,7 +28,7 @@ pub fn health(
 
         if health.is_alive() && damage > actor.pain_threshold {
             audio.queue(AudioPlay {
-                path: format!("{}/pain", actor.kind.get_assets_path()).into(),
+                path: format!("{}/pain", actor.get_assets_path()).into(),
                 volume: 0.9,
                 source: Some(point),
                 ..AudioPlay::DEFAULT
@@ -40,7 +40,7 @@ pub fn health(
                 health.heal();
             } else {
                 audio.queue(AudioPlay {
-                    path: format!("{}/death", actor.kind.get_assets_path()).into(),
+                    path: format!("{}/death", actor.get_assets_path()).into(),
                     volume: 1.0,
                     source: Some(point),
                     ..AudioPlay::DEFAULT

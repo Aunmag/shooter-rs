@@ -13,10 +13,7 @@ impl Command for ActorBotSet {
     fn apply(self, world: &mut World) {
         let entity_id = u64::from(self.entity.index());
 
-        if let Some(config) = world
-            .get::<Actor>(self.entity)
-            .map(|a| a.config.kind.get_bot_config())
-        {
+        if let Some(config) = world.get::<Actor>(self.entity).map(|a| a.config.bot) {
             world
                 .entity_mut(self.entity)
                 .insert(Bot::new(config, self.skill, entity_id));

@@ -34,7 +34,7 @@ pub fn voice(
         }
 
         audio.queue(AudioPlay {
-            path: format!("{}/misc", actor.config.kind.get_assets_path()).into(),
+            path: format!("{}/misc", actor.config.get_assets_path()).into(),
             volume: 0.7,
             source: Some(transform.translation.xy()),
             ..AudioPlay::DEFAULT

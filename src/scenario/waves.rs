@@ -17,44 +17,54 @@ use rand::{Rng, SeedableRng};
 use rand_pcg::Pcg32;
 use std::{any::Any, f32::consts::PI, time::Duration};
 
+const AGILE_CHANCE: f64 = 0.1;
+
 const WAVES: &[Wave] = &[
     // melee zombies only
     Wave {
         size: 5,
         pistol_chance: 0.0,
         rifle_chance: 0.0,
+        agile_chance: 0.0,
     },
     Wave {
         size: 25,
         pistol_chance: 0.0,
         rifle_chance: 0.0,
+        agile_chance: 0.0,
     },
+    // agile zombies
     Wave {
         size: 50,
-        pistol_chance: 0.015, // may be a little surprise
+        pistol_chance: 0.0,
         rifle_chance: 0.0,
+        agile_chance: AGILE_CHANCE,
     },
-    // zombies with pistols
     Wave {
         size: 75,
-        pistol_chance: 0.1,
+        pistol_chance: 0.0,
         rifle_chance: 0.0,
+        agile_chance: 0.3,
     },
+    // zombies with pistols
     Wave {
         size: 100,
         pistol_chance: 0.2,
         rifle_chance: 0.0,
+        agile_chance: AGILE_CHANCE,
     },
     Wave {
         size: 125,
         pistol_chance: 0.3,
         rifle_chance: 0.0,
+        agile_chance: AGILE_CHANCE,
     },
     // zombies with rifles
     Wave {
         size: 150,
         pistol_chance: 0.3,
         rifle_chance: 0.1,
+        agile_chance: AGILE_CHANCE,
     },
 ];
 
@@ -62,6 +72,7 @@ const WAVE_BONUS: Wave = Wave {
     size: u16::MAX,
     pistol_chance: 0.0,
     rifle_chance: 1.0,
+    agile_chance: 0.0,
 };
 
 const ZOMBIE_SPAWN_DISTANCE: f32 = VIEW_DISTANCE * 0.5;
@@ -155,20 +166,22 @@ impl WavesScenario {
             Task::SpawnZombie => {
                 log::debug!("Spawning a zombie");
 
-                let weapon = if self.rng.gen_bool(wave.pistol_chance) {
-                    Some(&WeaponConfig::PM)
-                } else if self.rng.gen_bool(wave.rifle_chance) {
-                    Some(&WeaponConfig::AKS_74U)
-                } else {
-                    None
-                };
-
-                commands.add(SpawnZombie {
+                let mut spawn = SpawnZombie {
                     skill: 1.0,
                     direction: self.rng.gen_range(-PI..PI),
-                    weapon,
-                });
+                    config: &ActorConfig::ZOMBIE,
+                    weapon: None,
+                };
 
+                if self.rng.gen_bool(wave.agile_chance) {
+                    spawn.config = &ActorConfig::ZOMBIE_AGILE;
+                } else if self.rng.gen_bool(wave.rifle_chance) {
+                    spawn.weapon = Some(&WeaponConfig::AKS_74U);
+                } else if self.rng.gen_bool(wave.pistol_chance) {
+                    spawn.weapon = Some(&WeaponConfig::PM);
+                }
+
+                commands.add(spawn);
                 self.zombies_spawned += 1;
 
                 if self.zombies_spawned < wave.size {
@@ -284,11 +297,13 @@ struct Wave {
     size: u16,
     pistol_chance: f64,
     rifle_chance: f64,
+    agile_chance: f64,
 }
 
 struct SpawnZombie {
     skill: f32,
     direction: f32,
+    config: &'static ActorConfig,
     weapon: Option<&'static WeaponConfig>,
 }
 
@@ -315,7 +330,7 @@ impl Command for SpawnZombie {
 
         ActorSet {
             entity,
-            config: &ActorConfig::ZOMBIE,
+            config: self.config,
             skill: self.skill,
             transform,
         }
