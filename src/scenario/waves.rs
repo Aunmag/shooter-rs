@@ -1,13 +1,11 @@
 use crate::{
     command::{ActorBotSet, ActorPlayerSet, ActorSet, BonusSpawn, Notify, WeaponSet},
     component::{Actor, ActorConfig, ActorKind, Health, WeaponConfig},
+    data::VIEW_DISTANCE,
     event::ActorDeathEvent,
     model::TransformLite,
     resource::{Scenario, ScenarioLogic},
-    util::{
-        ext::{RngExt, Vec2Ext},
-        math::interpolate,
-    },
+    util::ext::Vec2Ext,
 };
 use bevy::{
     ecs::system::Command,
@@ -66,8 +64,7 @@ const WAVE_BONUS: Wave = Wave {
     rifle_chance: 1.0,
 };
 
-const ZOMBIE_SPAWN_DISTANCE_MIN: f32 = 20.0;
-const ZOMBIE_SPAWN_DISTANCE_MAX: f32 = 60.0;
+const ZOMBIE_SPAWN_DISTANCE: f32 = VIEW_DISTANCE * 0.5;
 const BONUSES_PER_WAVE: f32 = 3.0;
 const GAME_OVER_TEXT_DURATION: Duration = Duration::from_secs(8);
 const DEFAULT_INTERVAL: Duration = Duration::from_secs(2);
@@ -168,7 +165,6 @@ impl WavesScenario {
 
                 commands.add(SpawnZombie {
                     skill: 1.0,
-                    distance: self.generate_spawn_distance(),
                     direction: self.rng.gen_range(-PI..PI),
                     weapon,
                 });
@@ -216,16 +212,6 @@ impl WavesScenario {
 
     fn wave_number(&self) -> u8 {
         return self.wave_index.saturating_add(1);
-    }
-
-    fn progress(&self) -> f32 {
-        return f32::min(f32::from(self.wave_index) / (WAVES.len() - 1) as f32, 1.0);
-    }
-
-    fn generate_spawn_distance(&mut self) -> f32 {
-        let min = ZOMBIE_SPAWN_DISTANCE_MIN;
-        let max = interpolate(min, ZOMBIE_SPAWN_DISTANCE_MAX, self.progress());
-        return self.rng.gen_range_safely(min, max);
     }
 }
 
@@ -302,7 +288,6 @@ struct Wave {
 
 struct SpawnZombie {
     skill: f32,
-    distance: f32,
     direction: f32,
     weapon: Option<&'static WeaponConfig>,
 }
@@ -324,7 +309,7 @@ impl Command for SpawnZombie {
         }
 
         let entity = world.spawn_empty().id();
-        let offset = Vec2::from_length(self.distance, self.direction);
+        let offset = Vec2::from_length(ZOMBIE_SPAWN_DISTANCE, self.direction);
         let transform =
             TransformLite::new(center.x + offset.x, center.y + offset.y, self.direction);
 
