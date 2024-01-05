@@ -10,6 +10,7 @@ use serde::Deserialize;
 pub struct Config {
     pub game: GameConfig,
     pub display: DisplayConfig,
+    pub graphic: GraphicConfig,
     pub audio: AudioConfig,
     pub controls: ControlsConfig,
 }
@@ -63,6 +64,17 @@ impl Default for DisplayConfig {
             window_size_y: 800,
             v_sync: false,
         };
+    }
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct GraphicConfig {
+    pub decals: usize,
+}
+
+impl Default for GraphicConfig {
+    fn default() -> Self {
+        return Self { decals: 128 };
     }
 }
 

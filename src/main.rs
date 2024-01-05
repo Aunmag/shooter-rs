@@ -17,7 +17,7 @@ use crate::{
     model::AppState,
     plugin::DebugPlugin,
     resource::{
-        AssetStorage, AudioStorage, AudioTracker, Config, GameMode, HitResource, Misc, Scenario,
+        AssetStorage, AudioStorage, AudioTracker, Cache, Config, GameMode, HitResource, Scenario,
     },
     scenario::{BenchScenario, EmptyScenario, WavesScenario},
     util::ext::AppExt,
@@ -101,7 +101,7 @@ fn main() {
         .insert_resource(AudioStorage::default())
         .insert_resource(AudioTracker::new(config.audio.sources))
         .insert_resource(HitResource::default())
-        .insert_resource(Misc::default())
+        .insert_resource(Cache::default())
         .insert_resource(config)
         .insert_resource(GizmoConfig {
             line_width: 5.0,

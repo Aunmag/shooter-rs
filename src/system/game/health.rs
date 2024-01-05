@@ -14,7 +14,6 @@ use bevy::{
     prelude::{Commands, DespawnRecursiveExt, Entity, EventWriter, Transform},
 };
 
-const BLOOD_MIN: f32 = 0.1;
 const BLOOD_FACTOR_ON_DAMAGE: f32 = 24.0;
 const BLOOD_FACTOR_ON_DEATH: f32 = 16.0;
 
@@ -64,8 +63,10 @@ pub fn health(
             }
         }
 
-        if blood > BLOOD_MIN {
-            commands.add(BloodSpawn::new(point, blood));
+        let blood = BloodSpawn::new(point, blood);
+
+        if !blood.is_too_small() {
+            commands.add(blood);
         }
 
         health.commit();

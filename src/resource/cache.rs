@@ -5,7 +5,7 @@ use bevy::{
 };
 
 #[derive(Default, Resource)]
-pub struct Misc {
+pub struct Cache {
     pub dummy_image: Option<Handle<Image>>,
     pub dummy_mesh: Option<Handle<Mesh>>,
 }
