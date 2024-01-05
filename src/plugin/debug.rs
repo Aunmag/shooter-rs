@@ -61,9 +61,9 @@ fn startup(mut commands: Commands, asset_server: Res<AssetServer>) {
             TextSection::from_style(style.clone()),
             TextSection::new(
                 "\n\
-                \nSpawn weapon: [J]\
+                \nSpawn weapon: [G]\
                 \nSpawn human : [H] group: [+SHIFT]\
-                \nSpawn zombie: [G] group: [+SHIFT]\
+                \nSpawn zombie: [J] group: [+SHIFT]\
                 ",
                 style,
             ),
@@ -109,48 +109,41 @@ fn update_input(
     keyboard: Res<Input<KeyCode>>,
     mut commands: Commands,
 ) {
-    let spawn = if keyboard.just_pressed(KeyCode::J) {
-        Some(Spawn::Weapon)
+    let spawn = if keyboard.just_pressed(KeyCode::G) {
+        Spawn::Bonus
     } else if keyboard.just_pressed(KeyCode::H) {
-        Some(Spawn::Human)
-    } else if keyboard.just_pressed(KeyCode::G) {
-        Some(Spawn::Zombie)
+        Spawn::Human
+    } else if keyboard.just_pressed(KeyCode::J) {
+        Spawn::Zombie
     } else {
-        None
+        return;
     };
 
-    if let Some(spawn) = spawn {
-        let mut position = players
-            .iter()
-            .next()
-            .map(TransformLite::from)
-            .unwrap_or_default();
+    let group = if keyboard.any_pressed([KeyCode::ShiftLeft, KeyCode::ShiftRight].into_iter()) {
+        10
+    } else {
+        1
+    };
 
-        position.translation += Vec2::from_length(2.0, position.direction);
+    let mut position = players
+        .iter()
+        .next()
+        .map(TransformLite::from)
+        .unwrap_or_default();
 
-        let group = if keyboard.pressed(KeyCode::ShiftLeft) || keyboard.pressed(KeyCode::ShiftRight)
-        {
-            10
-        } else {
-            1
-        };
+    position.translation += Vec2::from_length(3.0, position.direction);
 
-        match spawn {
-            Spawn::Weapon => {
-                spawn_bonus(&mut commands, position.translation);
-            }
-            Spawn::Human => {
-                spawn_actors(&mut commands, position, &ActorConfig::HUMAN, group);
-            }
-            Spawn::Zombie => {
-                spawn_actors(&mut commands, position, &ActorConfig::ZOMBIE, group);
-            }
+    match spawn {
+        Spawn::Bonus => {
+            commands.add(BonusSpawn::new(position.translation, 6)); // TODO: don't hardcode level
+        }
+        Spawn::Human => {
+            spawn_actors(&mut commands, position, &ActorConfig::HUMAN, group);
+        }
+        Spawn::Zombie => {
+            spawn_actors(&mut commands, position, &ActorConfig::ZOMBIE, group);
         }
     }
-}
-
-fn spawn_bonus(commands: &mut Commands, position: Vec2) {
-    commands.add(BonusSpawn::new(position, 6));
 }
 
 fn spawn_actors(
@@ -174,7 +167,7 @@ fn spawn_actors(
 }
 
 enum Spawn {
-    Weapon,
+    Bonus,
     Human,
     Zombie,
 }
