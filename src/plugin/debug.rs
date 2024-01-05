@@ -162,7 +162,7 @@ fn spawn_actors(
             transform,
         });
 
-        commands.add(ActorBotSet(entity));
+        commands.add(ActorBotSet { entity, skill: 1.0 });
     }
 }
 

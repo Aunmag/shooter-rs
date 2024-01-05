@@ -273,7 +273,11 @@ impl Command for SpawnZombie {
         }
         .apply(world);
 
-        ActorBotSet(entity).apply(world);
+        ActorBotSet {
+            entity,
+            skill: self.skill,
+        }
+        .apply(world);
     }
 }
 

@@ -17,11 +17,11 @@ pub struct Bot {
 }
 
 impl Bot {
-    pub fn new(config: &BotConfig, seed: u64) -> Self {
+    pub fn new(config: &BotConfig, skill: f32, seed: u64) -> Self {
         let mut rng = Pcg32::seed_from_u64(seed);
 
         return Self {
-            config: config.clone_with(&mut rng),
+            config: config.clone_with(skill, &mut rng),
             enemy: None,
             teammates: Vec::new(),
             update_timer: Timer::default(),

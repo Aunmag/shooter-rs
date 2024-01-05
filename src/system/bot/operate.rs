@@ -33,8 +33,9 @@ pub fn operate(
 
         if bot.enemy.is_some() && enemy.is_none() {
             // enemy no longer exists. force new enemy search now
+            let reaction = bot.config.reaction;
             bot.enemy = None;
-            bot.update_timer.set(time);
+            bot.update_timer.set(time + reaction);
         }
 
         if let Some((enemy_velocity, enemy_position)) = enemy {
