@@ -59,6 +59,7 @@ pub struct ActorConfig {
     pub melee_interval: Duration,
     // shooting
     pub reloading_speed: f32,
+    pub recoil_factor: f32,
 }
 
 impl Actor {
@@ -118,6 +119,7 @@ impl ActorConfig {
         melee_distance_angular: TAU / 5.0,
         melee_interval: Duration::from_millis(600),
         reloading_speed: 0.6,
+        recoil_factor: 1.0,
     };
 
     pub const ZOMBIE: Self = Self {
@@ -135,16 +137,13 @@ impl ActorConfig {
         melee_distance_angular: Self::HUMAN.melee_distance_angular,
         melee_interval: Self::HUMAN.melee_interval,
         reloading_speed: Self::HUMAN.reloading_speed * 2.0,
+        recoil_factor: 6.0,
     };
 
     pub fn get_image_path(&self, mut suffix: u8) -> String {
         suffix = match self.kind {
-            ActorKind::Human => {
-                suffix.clamp(1, 2) // since player has only 1 and 2
-            }
-            ActorKind::Zombie => {
-                0 // since zombie only has 0
-            }
+            ActorKind::Human => suffix.clamp(1, 2),
+            ActorKind::Zombie => suffix.clamp(0, 2),
         };
 
         return format!("{}/image_{}.png", self.kind.get_assets_path(), suffix);

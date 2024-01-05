@@ -19,12 +19,55 @@ use rand::{Rng, SeedableRng};
 use rand_pcg::Pcg32;
 use std::{any::Any, f32::consts::PI, time::Duration};
 
-const WAVE_FINAL: u8 = 6;
-const WAVE_SIZE_INITIAL: u16 = 5;
+const WAVES: &[Wave] = &[
+    // melee zombies only
+    Wave {
+        size: 5,
+        pistol_chance: 0.0,
+        rifle_chance: 0.0,
+    },
+    Wave {
+        size: 25,
+        pistol_chance: 0.0,
+        rifle_chance: 0.0,
+    },
+    Wave {
+        size: 50,
+        pistol_chance: 0.015, // may be a little surprise
+        rifle_chance: 0.0,
+    },
+    // zombies with pistols
+    Wave {
+        size: 75,
+        pistol_chance: 0.1,
+        rifle_chance: 0.0,
+    },
+    Wave {
+        size: 100,
+        pistol_chance: 0.2,
+        rifle_chance: 0.0,
+    },
+    Wave {
+        size: 125,
+        pistol_chance: 0.3,
+        rifle_chance: 0.0,
+    },
+    // zombies with rifles
+    Wave {
+        size: 150,
+        pistol_chance: 0.3,
+        rifle_chance: 0.1,
+    },
+];
+
+const WAVE_BONUS: Wave = Wave {
+    size: u16::MAX,
+    pistol_chance: 0.0,
+    rifle_chance: 1.0,
+};
+
 const ZOMBIE_SPAWN_DISTANCE_MIN: f32 = 20.0;
 const ZOMBIE_SPAWN_DISTANCE_MAX: f32 = 60.0;
-const ZOMBIE_SKILL_MIN: f32 = 1.0;
-const ZOMBIE_SKILL_MAX: f32 = 1.8;
 const BONUSES_PER_WAVE: f32 = 3.0;
 const GAME_OVER_TEXT_DURATION: Duration = Duration::from_secs(8);
 const DEFAULT_INTERVAL: Duration = Duration::from_secs(2);
@@ -49,7 +92,7 @@ impl Task {
 
 pub struct WavesScenario {
     task: Task,
-    wave: u8,
+    wave_index: u8,
     zombies_spawned: u16,
     kills: u16,
     rng: Pcg32,
@@ -59,7 +102,7 @@ impl WavesScenario {
     pub fn new() -> Self {
         return Self {
             task: Task::StartNextWave,
-            wave: 0,
+            wave_index: 0,
             zombies_spawned: 0,
             kills: 0,
             rng: Pcg32::seed_from_u64(32),
@@ -88,23 +131,24 @@ impl WavesScenario {
     }
 
     fn update(&mut self, commands: &mut Commands) -> Task {
+        let wave = self.wave();
+
         match self.task {
             Task::StartNextWave => {
-                self.wave += 1;
                 self.zombies_spawned = 0;
                 self.kills = 0;
 
-                if self.wave > WAVE_FINAL {
+                if usize::from(self.wave_index) < WAVES.len() {
+                    commands.add(HealHumans);
                     commands.add(Notify {
-                        text: "Wait".into(),
-                        text_small: "NOW IT IS TIME TO SUFFER".into(),
+                        text: format!("Wave {}/{}", self.wave_number(), WAVES.len()).into(),
+                        text_small: format!("Kill {} zombies", wave.size).into(),
                         ..Default::default()
                     });
                 } else {
-                    commands.add(HealHumans);
                     commands.add(Notify {
-                        text: format!("Wave {}/{}", self.wave, WAVE_FINAL).into(),
-                        text_small: format!("Kill {} zombies", self.wave_size()).into(),
+                        text: "Wait".into(),
+                        text_small: "NOW IT IS TIME TO SUFFER".into(),
                         ..Default::default()
                     });
                 }
@@ -114,15 +158,24 @@ impl WavesScenario {
             Task::SpawnZombie => {
                 log::debug!("Spawning a zombie");
 
+                let weapon = if self.rng.gen_bool(wave.pistol_chance) {
+                    Some(&WeaponConfig::PM)
+                } else if self.rng.gen_bool(wave.rifle_chance) {
+                    Some(&WeaponConfig::AKS_74U)
+                } else {
+                    None
+                };
+
                 commands.add(SpawnZombie {
-                    skill: interpolate(ZOMBIE_SKILL_MIN, ZOMBIE_SKILL_MAX, self.progress()),
+                    skill: 1.0,
                     distance: self.generate_spawn_distance(),
                     direction: self.rng.gen_range(-PI..PI),
+                    weapon,
                 });
 
                 self.zombies_spawned += 1;
 
-                if self.zombies_spawned < self.wave_size() {
+                if self.zombies_spawned < wave.size {
                     return Task::SpawnZombie;
                 } else {
                     return Task::CheckWaveCompletion;
@@ -134,36 +187,39 @@ impl WavesScenario {
                 return Task::CheckWaveCompletion;
             }
             Task::CompleteWave => {
-                if self.wave == WAVE_FINAL {
+                if usize::from(self.wave_number()) == WAVES.len() {
                     commands.add(Notify {
                         text: "Congratulations!".into(),
-                        text_small: format!("You've completed the all {} waves", WAVE_FINAL).into(),
+                        text_small: format!("You've completed the all {} waves", WAVES.len())
+                            .into(),
                         ..Default::default()
                     });
                 } else {
                     commands.add(Notify {
-                        text: format!("Wave {} completed!", self.wave).into(),
+                        text: format!("Wave {} completed!", self.wave_number()).into(),
                         text_small: "Prepare for the next".into(),
                         ..Default::default()
                     });
                 }
 
+                self.wave_index = self.wave_index.saturating_add(1);
                 return Task::StartNextWave;
             }
         }
     }
 
-    fn wave_size(&self) -> u16 {
-        if self.wave > WAVE_FINAL {
-            return u16::MAX;
-        } else {
-            let wave = u16::from(self.wave);
-            return WAVE_SIZE_INITIAL * wave * wave;
-        }
+    fn wave(&self) -> &'static Wave {
+        return WAVES
+            .get(usize::from(self.wave_index))
+            .unwrap_or(&WAVE_BONUS);
+    }
+
+    fn wave_number(&self) -> u8 {
+        return self.wave_index.saturating_add(1);
     }
 
     fn progress(&self) -> f32 {
-        return f32::min(f32::from(self.wave - 1) / f32::from(WAVE_FINAL - 1), 1.0);
+        return f32::min(f32::from(self.wave_index) / (WAVES.len() - 1) as f32, 1.0);
     }
 
     fn generate_spawn_distance(&mut self) -> f32 {
@@ -184,20 +240,20 @@ impl ScenarioLogic for WavesScenario {
             self.kills += 1;
 
             if self.kills == 1 {
-                match self.wave {
-                    1 => {
+                match self.wave_index {
+                    0 => {
                         commands.add(Notify {
                             text_small: "Press [R] to reload".into(),
                             ..Default::default()
                         });
                     }
-                    2 => {
+                    1 => {
                         commands.add(Notify {
                             text_small: "Press [SHIFT] to sprint".into(),
                             ..Default::default()
                         });
                     }
-                    3 => {
+                    2 => {
                         commands.add(Notify {
                             text_small: "Use mouse wheel to change zoom".into(),
                             ..Default::default()
@@ -207,14 +263,14 @@ impl ScenarioLogic for WavesScenario {
                 }
             }
 
-            let wave = f32::from(self.wave);
-            let wave_size = f32::from(self.wave_size());
+            let wave = f32::from(self.wave_number());
+            let wave_size = f32::from(self.wave().size);
 
             if self
                 .rng
                 .gen_bool(f32::min(BONUSES_PER_WAVE * wave / wave_size, 1.0).into())
             {
-                commands.add(BonusSpawn::new(event.position, self.wave));
+                commands.add(BonusSpawn::new(event.position, self.wave_number()));
             }
         }
     }
@@ -238,10 +294,17 @@ impl ScenarioLogic for WavesScenario {
     }
 }
 
+struct Wave {
+    size: u16,
+    pistol_chance: f64,
+    rifle_chance: f64,
+}
+
 struct SpawnZombie {
     skill: f32,
     distance: f32,
     direction: f32,
+    weapon: Option<&'static WeaponConfig>,
 }
 
 impl Command for SpawnZombie {
@@ -278,6 +341,14 @@ impl Command for SpawnZombie {
             skill: self.skill,
         }
         .apply(world);
+
+        if let Some(weapon) = self.weapon {
+            WeaponSet {
+                entity,
+                weapon: Some(weapon),
+            }
+            .apply(world);
+        }
     }
 }
 

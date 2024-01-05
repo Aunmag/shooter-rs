@@ -1,6 +1,6 @@
 use crate::{
-    command::{ActorBotSet, ActorSet, BonusSpawn},
-    component::{ActorConfig, Player},
+    command::{ActorBotSet, ActorSet, BonusSpawn, WeaponSet},
+    component::{ActorConfig, ActorKind, Player, WeaponConfig},
     data::FONT_PATH,
     model::{AppState, TransformLite},
     resource::AudioTracker,
@@ -23,9 +23,14 @@ use bevy::{
     time::Time,
     transform::components::Transform,
 };
+use rand::Rng;
 use std::time::Duration;
 
 const INTERVAL: Duration = Duration::from_millis(500);
+
+const ZOMBIE_PISTOL_CHANCE: f32 = 0.1;
+const ZOMBIE_RIFLE_CHANCE: f32 = 0.02;
+const HUMAN_RIFLE_CHANCE: f32 = 0.1;
 
 #[derive(Component)]
 struct FpsText;
@@ -163,6 +168,34 @@ fn spawn_actors(
         });
 
         commands.add(ActorBotSet { entity, skill: 1.0 });
+
+        let weapon_chance = rand::thread_rng().gen::<f32>();
+
+        let weapon = match config.kind {
+            ActorKind::Human => {
+                if weapon_chance < HUMAN_RIFLE_CHANCE {
+                    Some(&WeaponConfig::AKS_74U)
+                } else {
+                    Some(&WeaponConfig::PM)
+                }
+            }
+            ActorKind::Zombie => {
+                if weapon_chance < ZOMBIE_RIFLE_CHANCE {
+                    Some(&WeaponConfig::AKS_74U)
+                } else if weapon_chance < ZOMBIE_PISTOL_CHANCE {
+                    Some(&WeaponConfig::PM)
+                } else {
+                    None
+                }
+            }
+        };
+
+        if let Some(weapon) = weapon {
+            commands.add(WeaponSet {
+                entity,
+                weapon: Some(weapon),
+            });
+        }
     }
 }
 

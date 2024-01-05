@@ -12,6 +12,8 @@ pub trait Vec2Ext {
 
     fn rotate_by_quat(self, quat: Quat) -> Self;
 
+    fn rotate_by(self, angle: f32) -> Self;
+
     fn angle(&self) -> f32;
 
     fn angle_to(self, target: Self) -> f32;
@@ -36,6 +38,10 @@ impl Vec2Ext for Vec2 {
 
     fn rotate_by_quat(self, quat: Quat) -> Self {
         return (quat * self.extend(0.0)).xy();
+    }
+
+    fn rotate_by(self, angle: f32) -> Self {
+        return (Quat::from_rotation_z(angle) * self.extend(0.0)).xy();
     }
 
     fn angle(&self) -> f32 {
