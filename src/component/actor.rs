@@ -105,9 +105,9 @@ impl ActorConfig {
 
     pub const HUMAN: Self = Self {
         kind: ActorKind::Human,
-        movement_velocity: 2.5,
+        movement_velocity: 2.8,
         rotation_velocity: 3.5,
-        sprint_factor: 2.0,
+        sprint_factor: 1.6,
         stamina: Duration::from_secs(16),
         resistance: Self::HUMAN_RESISTANCE,
         pain_threshold: 0.02,
@@ -122,9 +122,9 @@ impl ActorConfig {
 
     pub const ZOMBIE: Self = Self {
         kind: ActorKind::Zombie,
-        movement_velocity: Self::HUMAN.movement_velocity * 0.4,
+        movement_velocity: Self::HUMAN.movement_velocity * 0.33,
         rotation_velocity: Self::HUMAN.rotation_velocity * 0.4,
-        sprint_factor: 1.8,
+        sprint_factor: Self::HUMAN.sprint_factor,
         stamina: Duration::from_secs(10),
         resistance: Self::HUMAN.resistance * 0.6,
         pain_threshold: 0.08,
