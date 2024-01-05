@@ -45,7 +45,9 @@ pub fn analyze(
                 let distance = p1.distance_squared(t2.translation.truncate());
 
                 if a1.config.kind == a2.config.kind {
-                    let distance_max = bot.spread * 2.0;
+                    // later teammate can come closer. so we store it event if it's outsize the
+                    // spread radius
+                    let distance_max = bot.config.spread * 2.0;
 
                     if distance < distance_max * distance_max {
                         teammates.try_add(e2, distance);

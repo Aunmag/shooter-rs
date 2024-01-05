@@ -1,4 +1,5 @@
 use crate::{
+    data::BotConfig,
     model::{ActorActions, ActorActionsExt},
     util::ext::{DurationExt, Vec2Ext},
 };
@@ -23,6 +24,13 @@ pub enum ActorKind {
 }
 
 impl ActorKind {
+    pub const fn get_bot_config(self) -> &'static BotConfig {
+        return match self {
+            Self::Human => BotConfig::HUMAN,
+            Self::Zombie => BotConfig::ZOMBIE,
+        };
+    }
+
     pub const fn get_assets_path(self) -> &'static str {
         return match self {
             Self::Human => "actors/human",
@@ -33,18 +41,23 @@ impl ActorKind {
 
 pub struct ActorConfig {
     pub kind: ActorKind,
+    // movement
     pub movement_velocity: f32,
     pub rotation_velocity: f32,
     pub sprint_factor: f32,
     pub stamina: Duration,
+    // health
     pub resistance: f32,
+    pub pain_threshold: f32,
+    // physics
     pub radius: f32,
     pub mass: f32,
+    // melee
     pub melee_damage: f32,
     pub melee_distance: f32,
     pub melee_distance_angular: f32,
     pub melee_interval: Duration,
-    pub pain_threshold: f32,
+    // shooting
     pub reloading_speed: f32,
 }
 
@@ -97,13 +110,13 @@ impl ActorConfig {
         sprint_factor: 2.0,
         stamina: Duration::from_secs(16),
         resistance: Self::HUMAN_RESISTANCE,
+        pain_threshold: 0.02,
         radius: 0.25,
         mass: 85.0,
         melee_damage: Self::HUMAN_RESISTANCE / 16.0, // 16 hits to kill human
         melee_distance: 0.7,
         melee_distance_angular: TAU / 5.0,
         melee_interval: Duration::from_millis(600),
-        pain_threshold: 0.02,
         reloading_speed: 0.6,
     };
 
@@ -114,13 +127,13 @@ impl ActorConfig {
         sprint_factor: 1.8,
         stamina: Duration::from_secs(10),
         resistance: Self::HUMAN.resistance * 0.6,
+        pain_threshold: 0.08,
         radius: 0.21,
         mass: 70.0,
         melee_damage: Self::HUMAN.resistance / 10.0, // 10 hits to kill human
         melee_distance: Self::HUMAN.melee_distance,
         melee_distance_angular: Self::HUMAN.melee_distance_angular,
         melee_interval: Self::HUMAN.melee_interval,
-        pain_threshold: 0.08,
         reloading_speed: Self::HUMAN.reloading_speed * 2.0,
     };
 

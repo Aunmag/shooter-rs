@@ -4,7 +4,6 @@ use bevy::{
     prelude::{Quat, Transform},
 };
 
-// TODO: no copy
 #[derive(Default, Clone, Copy, Debug, PartialEq)]
 pub struct TransformLite {
     pub translation: Vec2,

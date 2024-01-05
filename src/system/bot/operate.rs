@@ -88,12 +88,12 @@ mod sub_system {
 
             let meet_distance = (position - meet_position).length_squared();
 
-            if is_close(meet_distance, bot.spread) {
+            if is_close(meet_distance, bot.config.spread) {
                 // meet point is near, no need to spread out
                 allow_spread_out = false;
             }
 
-            if is_far(meet_distance, bot.sprint_distance) {
+            if is_far(meet_distance, bot.config.sprint_distance) {
                 // enemy is far, sprint
                 actor.actions |= ActorAction::Sprint;
             }
@@ -129,8 +129,8 @@ mod sub_system {
 
             let teammate_distance = (position - teammate_position).length_squared();
 
-            if teammate_distance < bot.spread * bot.spread {
-                let weight = 1.0 - teammate_distance.sqrt() / bot.spread;
+            if teammate_distance < bot.config.spread * bot.config.spread {
+                let weight = 1.0 - teammate_distance.sqrt() / bot.config.spread;
                 teammates_position_sum += teammate_position * weight;
                 teammates_position_sum_weight += weight;
             }
@@ -143,11 +143,11 @@ mod sub_system {
         let teammates_position = teammates_position_sum / teammates_position_sum_weight;
         let teammates_distance = (position - teammates_position).length_squared();
 
-        if is_close(teammates_distance, bot.spread) {
+        if is_close(teammates_distance, bot.config.spread) {
             let look_at = actor.look_at.unwrap_or_else(|| transform.direction());
             let turn = angle_difference(look_at, teammates_position.angle_to(position));
-            let closeness = 1.0 - teammates_distance.sqrt() / bot.spread; // the closer teammates, the faster spread out
-            actor.look_at = Some(look_at + turn * closeness * bot.spread_angular_factor);
+            let closeness = 1.0 - teammates_distance.sqrt() / bot.config.spread; // the closer teammates, the faster spread out
+            actor.look_at = Some(look_at + turn * closeness * bot.config.spread_force);
             actor.movement += Vec2::FRONT;
 
             if closeness > 0.75 {

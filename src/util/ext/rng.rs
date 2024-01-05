@@ -1,12 +1,13 @@
 use rand::Rng;
 use rand_distr::StandardNormal;
-use std::time::Duration;
+use std::{ops::Mul, time::Duration};
 
 const FUZZ_FACTOR: f32 = 0.4;
 
 pub trait RngExt {
     fn gen_range_safely(&mut self, min: f32, max: f32) -> f32;
     fn gen_normal(&mut self, deviation: f32) -> f32;
+    fn fuzz<T: Mul<f32, Output = T>>(&mut self, value: T) -> T;
     fn fuzz_duration(&mut self, duration: Duration) -> Duration;
 }
 
@@ -25,6 +26,10 @@ impl<R: Rng> RngExt for R {
 
     fn gen_normal(&mut self, deviation: f32) -> f32 {
         return (self.sample::<f32, _>(StandardNormal) - 0.5) * deviation;
+    }
+
+    fn fuzz<T: Mul<f32, Output = T>>(&mut self, value: T) -> T {
+        return value * (1.0 + self.gen_range(-FUZZ_FACTOR..FUZZ_FACTOR));
     }
 
     fn fuzz_duration(&mut self, duration: Duration) -> Duration {
