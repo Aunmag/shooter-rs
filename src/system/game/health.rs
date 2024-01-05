@@ -28,7 +28,7 @@ pub fn health(
     for (entity, actor, mut health, transform, is_player) in query.iter_mut() {
         let actor = actor.config;
         let point = transform.translation.xy();
-        let damage = health.get_damage();
+        let damage = health.get_damage_normalized();
         let mut blood = actor.radius * damage * BLOOD_FACTOR_ON_DAMAGE;
 
         if health.is_alive() && damage > actor.pain_threshold {

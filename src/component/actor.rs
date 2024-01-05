@@ -47,7 +47,7 @@ pub struct ActorConfig {
     pub sprint_factor: f32,
     pub stamina: Duration,
     // health
-    pub resistance: f32,
+    pub health: f32,
     pub pain_threshold: f32,
     // physics
     pub radius: f32,
@@ -101,7 +101,7 @@ impl Actor {
 }
 
 impl ActorConfig {
-    const HUMAN_RESISTANCE: f32 = 9.0;
+    const HUMAN_HEALTH: f32 = 9.0;
 
     pub const HUMAN: Self = Self {
         kind: ActorKind::Human,
@@ -109,11 +109,11 @@ impl ActorConfig {
         rotation_velocity: 3.5,
         sprint_factor: 1.6,
         stamina: Duration::from_secs(16),
-        resistance: Self::HUMAN_RESISTANCE,
+        health: Self::HUMAN_HEALTH,
         pain_threshold: 0.02,
         radius: 0.25,
         mass: 85.0,
-        melee_damage: Self::HUMAN_RESISTANCE / 16.0,
+        melee_damage: Self::HUMAN_HEALTH / 16.0,
         melee_distance: 0.7,
         melee_distance_angular: TAU / 5.0,
         melee_interval: Duration::from_millis(600),
@@ -126,11 +126,11 @@ impl ActorConfig {
         rotation_velocity: Self::HUMAN.rotation_velocity * 0.4,
         sprint_factor: Self::HUMAN.sprint_factor,
         stamina: Duration::from_secs(10),
-        resistance: Self::HUMAN.resistance * 0.6,
+        health: Self::HUMAN.health * 0.6,
         pain_threshold: 0.08,
         radius: 0.21,
         mass: 70.0,
-        melee_damage: Self::HUMAN.resistance / 16.0,
+        melee_damage: Self::HUMAN.health / 16.0,
         melee_distance: Self::HUMAN.melee_distance,
         melee_distance_angular: Self::HUMAN.melee_distance_angular,
         melee_interval: Self::HUMAN.melee_interval,

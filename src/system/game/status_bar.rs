@@ -24,7 +24,7 @@ pub fn status_bar(
     for (actor, health, weapon, children) in targets.iter() {
         for child in children.iter() {
             if let Some(material) = handles.get(*child).ok().and_then(|h| assets.get_mut(h)) {
-                material.health -= (material.health - health.get()) * interpolation;
+                material.health -= (material.health - health.get_normalized()) * interpolation;
 
                 if health.is_low() {
                     material.health_alpha = pulse;

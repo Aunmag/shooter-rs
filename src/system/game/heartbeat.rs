@@ -26,7 +26,7 @@ pub fn heartbeat_inner(
         if let Some((health, actor)) = players.iter().next() {
             if health.is_low() {
                 let speed = interpolate(SPEED_MIN, SPEED_MAX, 1.0 - actor.stamina.powf(4.0));
-                heartbeat.set_volume(VOLUME * (1.0 - health.get()));
+                heartbeat.set_volume(VOLUME * (1.0 - health.get_normalized()));
                 heartbeat.set_speed(speed);
 
                 if heartbeat.is_paused() {
