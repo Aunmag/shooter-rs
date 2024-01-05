@@ -5,14 +5,13 @@ use crate::{
     util::math::interpolate_unbounded,
 };
 use bevy::{
-    asset::Handle,
-    ecs::{entity::Entity, system::Command},
+    ecs::{component::Component, entity::Entity, query::With, system::Command},
     prelude::{Assets, DespawnRecursiveExt, Transform, Vec2, Vec3, World},
+    render::camera::Camera,
     sprite::MaterialMesh2dBundle,
     time::Time,
 };
 use rand::{thread_rng, Rng};
-use std::time::Duration;
 
 const SIZE_MIN: f32 = 0.8;
 const SIZE_MAX: f32 = 6.0;
@@ -76,40 +75,52 @@ impl Command for BloodSpawn {
                 image,
             });
 
-        world.spawn(MaterialMesh2dBundle {
-            transform: Transform {
-                translation: self.position.extend(LAYER_BLUFF),
-                scale: Vec3::splat(self.size),
-                ..Transform::default()
-            },
-            mesh: mesh.into(),
-            material,
-            ..Default::default()
-        });
+        world
+            .spawn(MaterialMesh2dBundle {
+                transform: Transform {
+                    translation: self.position.extend(LAYER_BLUFF),
+                    scale: Vec3::splat(self.size),
+                    ..Transform::default()
+                },
+                mesh: mesh.into(),
+                material,
+                ..Default::default()
+            })
+            .insert(BloodComponent);
     }
 }
 
 fn reserve_decal(world: &mut World) -> bool {
+    let camera = world
+        .query_filtered::<&Transform, With<Camera>>()
+        .iter(world)
+        .next()
+        .map(|t| t.translation.truncate());
+
     let mut decals = 0;
-    let mut oldest = None;
-    let mut oldest_time = Duration::MAX;
+    let mut furthest = None;
+    let mut furthest_distance = 0.0;
 
-    let mut query = world.query::<(Entity, &Handle<BloodMaterial>)>();
-    let assets = world.resource::<Assets<BloodMaterial>>();
-
-    for (entity, handle) in query.iter(world) {
+    for (entity, transform) in world
+        .query_filtered::<(Entity, &Transform), With<BloodComponent>>()
+        .iter(world)
+    {
         decals += 1;
 
-        if let Some(material) = assets.get(handle) {
-            if material.spawned < oldest_time {
-                oldest = Some(entity);
-                oldest_time = material.spawned;
+        if let Some(camera) = camera {
+            let distance = camera.distance(transform.translation.truncate());
+
+            if distance > furthest_distance {
+                furthest = Some(entity);
+                furthest_distance = distance;
             }
+        } else if furthest.is_none() {
+            furthest = Some(entity);
         }
     }
 
     if decals >= world.resource::<Config>().graphic.decals {
-        if let Some(oldest) = oldest {
+        if let Some(oldest) = furthest {
             world.entity_mut(oldest).despawn_recursive();
             return true;
         } else {
@@ -119,3 +130,6 @@ fn reserve_decal(world: &mut World) -> bool {
         return true;
     }
 }
+
+#[derive(Component)]
+struct BloodComponent;
