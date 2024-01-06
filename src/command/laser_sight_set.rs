@@ -1,4 +1,4 @@
-use crate::{data::PIXELS_PER_METER, resource::Cache, LaserMaterial};
+use crate::{data::PIXELS_PER_METER, resource::AssetStorage, LaserMaterial};
 use bevy::{
     asset::Assets,
     ecs::system::Command,
@@ -14,18 +14,9 @@ pub struct LaserSightSet(pub Entity);
 
 impl Command for LaserSightSet {
     fn apply(self, world: &mut World) {
-        let cache = world.resource::<Cache>();
-
-        let Some(image) = cache.dummy_image.clone() else {
-            log::warn!("Failed to set laser sight. The dummy image isn't initialized");
-            return;
-        };
-
-        let Some(mesh) = cache.dummy_mesh.clone() else {
-            log::warn!("Failed to set laser sight. The dummy mesh isn't initialized");
-            return;
-        };
-
+        let assets = world.resource::<AssetStorage>();
+        let image = assets.dummy_image().clone();
+        let mesh = assets.dummy_mesh().clone();
         let material = world
             .resource_mut::<Assets<LaserMaterial>>()
             .add(LaserMaterial { image });

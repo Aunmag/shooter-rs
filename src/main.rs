@@ -16,9 +16,7 @@ use crate::{
     material::{BloodMaterial, LaserMaterial, ProjectileMaterial, StatusBarMaterial},
     model::AppState,
     plugin::DebugPlugin,
-    resource::{
-        AssetStorage, AudioStorage, AudioTracker, Cache, Config, GameMode, HitResource, Scenario,
-    },
+    resource::{AssetStorage, AudioStorage, AudioTracker, Config, GameMode, HitResource, Scenario},
     scenario::{BenchScenario, EmptyScenario, WavesScenario},
     util::ext::AppExt,
 };
@@ -101,7 +99,6 @@ fn main() {
         .insert_resource(AudioStorage::default())
         .insert_resource(AudioTracker::new(config.audio.sources))
         .insert_resource(HitResource::default())
-        .insert_resource(Cache::default())
         .insert_resource(config)
         .insert_resource(GizmoConfig {
             line_width: 5.0,
@@ -109,7 +106,6 @@ fn main() {
         })
         .add_systems(Update, system::sys::audio)
         .add_systems(Update, system::ui::notification)
-        .add_state_system_enter(AppState::Loading, system::loading::on_enter)
         .add_state_system(AppState::Loading, system::loading::on_update())
         .add_state_system_enter(AppState::Game, system::game::on_enter)
         .add_state_systems(AppState::Game, |s| {

@@ -1,4 +1,4 @@
-use crate::{data::PIXELS_PER_METER, material::StatusBarMaterial, resource::Cache};
+use crate::{data::PIXELS_PER_METER, material::StatusBarMaterial, resource::AssetStorage};
 use bevy::{
     asset::Assets,
     ecs::system::Command,
@@ -10,18 +10,9 @@ pub struct StatusBarSet(pub Entity);
 
 impl Command for StatusBarSet {
     fn apply(self, world: &mut World) {
-        let cache = world.resource::<Cache>();
-
-        let Some(image) = cache.dummy_image.clone() else {
-            log::warn!("Failed to set status bar. The dummy image isn't initialized");
-            return;
-        };
-
-        let Some(mesh) = cache.dummy_mesh.clone() else {
-            log::warn!("Failed to set status bar. The dummy mesh isn't initialized");
-            return;
-        };
-
+        let assets = world.resource::<AssetStorage>();
+        let image = assets.dummy_image().clone();
+        let mesh = assets.dummy_mesh().clone();
         let material = world
             .resource_mut::<Assets<StatusBarMaterial>>()
             .add(StatusBarMaterial {

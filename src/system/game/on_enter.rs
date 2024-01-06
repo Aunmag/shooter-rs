@@ -1,14 +1,20 @@
 use crate::{
-    command::{CursorGrab, TerrainInit},
-    data::{LAYER_BLUFF, LAYER_TREE, WORLD_SIZE, WORLD_SIZE_HALF, WORLD_SIZE_VISUAL},
+    command::CursorGrab,
+    component::Terrain,
+    data::{
+        LAYER_BLUFF, LAYER_TERRAIN, LAYER_TREE, TRANSFORM_SCALE, WORLD_SIZE, WORLD_SIZE_HALF,
+        WORLD_SIZE_VISUAL,
+    },
     model::{AudioPlay, TransformLite},
     resource::AudioTracker,
     util::ext::Vec2Ext,
 };
 use bevy::{
-    asset::{AssetServer, Handle},
-    math::Vec2,
-    prelude::{Camera2dBundle, Commands, Image, Res, SpriteBundle},
+    asset::AssetServer,
+    ecs::{system::Command, world::World},
+    math::{Quat, Vec2, Vec3},
+    prelude::{Camera2dBundle, SpriteBundle},
+    transform::components::Transform,
 };
 use rand::{seq::SliceRandom, Rng, SeedableRng};
 use rand_pcg::Pcg32;
@@ -23,13 +29,110 @@ const TREE_BUFFER_ZONE: f32 = 3.2;
 const TREE_FIND_POSITION_ATTEMPTS: usize = 32;
 const BLUFF_SPRITE_SIZE: f32 = 4.0;
 
-pub fn on_enter(mut commands: Commands, assets: Res<AssetServer>, audio: Res<AudioTracker>) {
-    commands.add(CursorGrab(true));
-    commands.add(TerrainInit);
-    commands.spawn(Camera2dBundle::default());
-    spawn_bluffs(&mut commands, &assets);
-    spawn_trees(&mut commands, &assets);
+pub fn on_enter(world: &mut World) {
+    CursorGrab(true).apply(world);
+    world.spawn(Camera2dBundle::default());
+    spawn_terrain(world);
+    spawn_bluffs(world);
+    spawn_trees(world);
+    play_audio(world.resource::<AudioTracker>());
+}
 
+fn spawn_terrain(world: &mut World) {
+    let texture = world
+        .resource::<AssetServer>()
+        .get_handle("terrain/grass.png")
+        .unwrap_or_default();
+
+    for _ in 0..Terrain::get_count().pow(2) {
+        world
+            .spawn(SpriteBundle {
+                transform: TransformLite::default().as_transform(LAYER_TERRAIN),
+                texture: texture.clone(),
+                ..Default::default()
+            })
+            .insert(Terrain);
+    }
+}
+
+// TODO: maybe render bluff corner as tile map
+fn spawn_bluffs(world: &mut World) {
+    let n = WORLD_SIZE_HALF;
+    let z = LAYER_BLUFF;
+    let r1 = PI;
+    let r2 = 0.0;
+    let r3 = FRAC_PI_2;
+    let r4 = FRAC_PI_2 + PI;
+
+    let range = (WORLD_SIZE / BLUFF_SPRITE_SIZE).abs().round() as u32;
+    let image = "terrain/bluff.png";
+
+    for i in 1..range {
+        let j = BLUFF_SPRITE_SIZE * i as f32 - WORLD_SIZE_HALF;
+        spawn_sprite(world, Vec3::new(j, -n, z), r1, image);
+        spawn_sprite(world, Vec3::new(j, n, z), r2, image);
+        spawn_sprite(world, Vec3::new(-n, j, z), r3, image);
+        spawn_sprite(world, Vec3::new(n, j, z), r4, image);
+    }
+
+    let image_corner = "terrain/bluff_corner.png";
+    spawn_sprite(world, Vec3::new(-n, -n, z), r1, image_corner);
+    spawn_sprite(world, Vec3::new(n, n, z), r2, image_corner);
+    spawn_sprite(world, Vec3::new(-n, n, z), r3, image_corner);
+    spawn_sprite(world, Vec3::new(n, -n, z), r4, image_corner);
+}
+
+fn spawn_trees(world: &mut World) {
+    let mut rng = Pcg32::seed_from_u64(100);
+    let trees = f32::max(0.0, TREES_QUANTITY) as usize;
+    let image = [
+        "terrain/tree_0.png",
+        "terrain/tree_1.png",
+        "terrain/tree_2.png",
+    ];
+
+    let range = WORLD_SIZE_VISUAL / 2.0;
+    let mut occupied_positions = Vec::with_capacity(trees);
+
+    for _ in 0..trees {
+        for _ in 0..TREE_FIND_POSITION_ATTEMPTS {
+            let position = Vec2::new(rng.gen_range(-range..range), rng.gen_range(-range..range));
+
+            if is_position_free(position, &occupied_positions) {
+                let texture = image.choose(&mut rng).unwrap_or(&image[0]);
+
+                spawn_sprite(
+                    world,
+                    position.extend(LAYER_TREE),
+                    rng.gen_range(0.0..TAU),
+                    texture,
+                );
+
+                occupied_positions.push(position);
+                break;
+            }
+        }
+    }
+}
+
+fn spawn_sprite(world: &mut World, position: Vec3, direction: f32, path: &'static str) {
+    let Some(texture) = world.resource::<AssetServer>().get_handle(path) else {
+        log::warn!("Can't find texture: {}", path);
+        return;
+    };
+
+    world.spawn(SpriteBundle {
+        transform: Transform {
+            translation: position,
+            rotation: Quat::from_rotation_z(direction),
+            scale: TRANSFORM_SCALE,
+        },
+        texture,
+        ..Default::default()
+    });
+}
+
+fn play_audio(audio: &AudioTracker) {
     audio.queue(AudioPlay {
         path: "sounds/ambience_music".into(),
         volume: 0.3,
@@ -48,87 +151,6 @@ pub fn on_enter(mut commands: Commands, assets: Res<AssetServer>, audio: Res<Aud
         path: "sounds/heartbeat".into(),
         duration: Duration::MAX,
         ..AudioPlay::DEFAULT
-    });
-}
-
-// TODO: maybe render bluff corner as tile map
-fn spawn_bluffs(commands: &mut Commands, assets: &AssetServer) {
-    let n = WORLD_SIZE_HALF;
-    let z = LAYER_BLUFF;
-    let r1 = PI;
-    let r2 = 0.0;
-    let r3 = FRAC_PI_2;
-    let r4 = FRAC_PI_2 + PI;
-
-    let range = (WORLD_SIZE / BLUFF_SPRITE_SIZE).abs().round() as u32;
-    let texture = assets.get_handle("terrain/bluff.png").unwrap_or_default();
-
-    for i in 1..range {
-        let j = BLUFF_SPRITE_SIZE * i as f32 - WORLD_SIZE_HALF;
-        spawn_sprite(commands, j, -n, z, r1, texture.clone());
-        spawn_sprite(commands, j, n, z, r2, texture.clone());
-        spawn_sprite(commands, -n, j, z, r3, texture.clone());
-        spawn_sprite(commands, n, j, z, r4, texture.clone());
-    }
-
-    let texture_corner = assets
-        .get_handle("terrain/bluff_corner.png")
-        .unwrap_or_default();
-
-    spawn_sprite(commands, -n, -n, z, r1, texture_corner.clone());
-    spawn_sprite(commands, n, n, z, r2, texture_corner.clone());
-    spawn_sprite(commands, -n, n, z, r3, texture_corner.clone());
-    spawn_sprite(commands, n, -n, z, r4, texture_corner);
-}
-
-fn spawn_trees(commands: &mut Commands, assets: &AssetServer) {
-    let mut rng = Pcg32::seed_from_u64(100);
-    let trees_quantity = f32::max(0.0, TREES_QUANTITY) as usize;
-
-    let textures = [
-        assets.get_handle("terrain/tree_0.png").unwrap_or_default(),
-        assets.get_handle("terrain/tree_1.png").unwrap_or_default(),
-        assets.get_handle("terrain/tree_2.png").unwrap_or_default(),
-    ];
-
-    let range = WORLD_SIZE_VISUAL / 2.0;
-    let mut occupied_positions = Vec::with_capacity(trees_quantity);
-
-    for _ in 0..trees_quantity {
-        for _ in 0..TREE_FIND_POSITION_ATTEMPTS {
-            let position = Vec2::new(rng.gen_range(-range..range), rng.gen_range(-range..range));
-
-            if is_position_free(position, &occupied_positions) {
-                let texture = textures.choose(&mut rng).unwrap_or(&textures[0]).clone();
-
-                spawn_sprite(
-                    commands,
-                    position.x,
-                    position.y,
-                    LAYER_TREE,
-                    rng.gen_range(0.0..TAU),
-                    texture,
-                );
-
-                occupied_positions.push(position);
-                break;
-            }
-        }
-    }
-}
-
-fn spawn_sprite(
-    commands: &mut Commands,
-    x: f32,
-    y: f32,
-    z: f32,
-    direction: f32,
-    texture: Handle<Image>,
-) {
-    commands.spawn(SpriteBundle {
-        transform: TransformLite::new(x, y, direction).as_transform(z),
-        texture,
-        ..Default::default()
     });
 }
 

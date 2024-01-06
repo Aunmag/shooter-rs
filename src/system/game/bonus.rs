@@ -1,5 +1,5 @@
 use crate::{
-    command::BonusActivate,
+    command::WeaponSet,
     component::{Actor, ActorKind, Bonus, BonusImage, BonusLabel, Collision, Player},
     util::{ext::Vec2Ext, math::interpolate},
 };
@@ -38,7 +38,12 @@ pub fn bonus(
             let player_position = player_transform.translation.xy();
 
             if player_position.is_close(bonus_position, Bonus::RADIUS + player_body.radius) {
-                commands.add(BonusActivate::new(bonus_entity, player_entity));
+                commands.entity(bonus_entity).despawn_recursive();
+                commands.add(WeaponSet {
+                    entity: player_entity,
+                    weapon: Some(bonus.weapon),
+                });
+
                 break;
             }
         }

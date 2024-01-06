@@ -1,10 +1,10 @@
 use crate::{
-    command::{ActorBotSet, ActorPlayerSet, ActorSet, Exit, WeaponSet},
+    command::{ActorBotSet, ActorPlayerSet, ActorSet, WeaponSet},
     component::{ActorConfig, WeaponConfig},
     model::TransformLite,
     resource::ScenarioLogic,
 };
-use bevy::prelude::Commands;
+use bevy::{app::AppExit, ecs::world::World, prelude::Commands};
 use chrono::Local;
 use std::{
     any::Any,
@@ -111,7 +111,7 @@ impl ScenarioLogic for BenchScenario {
             }
 
             log::info!("Benchmark completed");
-            commands.add(Exit);
+            commands.add(|w: &mut World| w.send_event(AppExit));
         }
 
         return INTERVAL;

@@ -1,22 +1,65 @@
 use bevy::{
-    asset::{AssetServer, Handle, LoadedFolder},
+    asset::{AssetServer, Assets, Handle, LoadedFolder},
     ecs::system::Resource,
+    render::{
+        mesh::{shape::Quad, Mesh},
+        render_resource::Extent3d,
+        texture::Image,
+    },
 };
 
 #[derive(Default, Resource)]
 pub struct AssetStorage {
-    handle: Option<Handle<LoadedFolder>>,
+    assets: Option<Handle<LoadedFolder>>,
+    dummy_image: Handle<Image>,
+    dummy_mesh: Handle<Mesh>,
 }
 
 impl AssetStorage {
-    pub fn load(&mut self, asset_server: &AssetServer) {
-        self.handle = Some(asset_server.load_folder("."));
+    pub fn load(
+        &mut self,
+        asset_server: &AssetServer,
+        images: &mut Assets<Image>,
+        meshes: &mut Assets<Mesh>,
+    ) {
+        self.assets = Some(asset_server.load_folder("."));
+        self.dummy_image = images.add(init_dummy_image());
+        self.dummy_mesh = meshes.add(init_dummy_mesh());
     }
 
-    pub fn is_loaded(&self, asset_server: &AssetServer) -> Option<bool> {
-        return self
-            .handle
-            .as_ref()
-            .map(|h| asset_server.is_loaded_with_dependencies(h.id()));
+    pub fn is_lading_started(&self) -> bool {
+        return self.assets.is_some();
     }
+
+    pub fn is_loaded(&self, asset_server: &AssetServer) -> bool {
+        return self
+            .assets
+            .as_ref()
+            .map(|h| asset_server.is_loaded_with_dependencies(h.id()))
+            .unwrap_or(false);
+    }
+
+    pub fn dummy_image(&self) -> &Handle<Image> {
+        return &self.dummy_image;
+    }
+
+    pub fn dummy_mesh(&self) -> &Handle<Mesh> {
+        return &self.dummy_mesh;
+    }
+}
+
+fn init_dummy_image() -> Image {
+    let mut image = Image::default();
+
+    image.resize(Extent3d {
+        width: 1,
+        height: 1,
+        ..Default::default()
+    });
+
+    return image;
+}
+
+fn init_dummy_mesh() -> Mesh {
+    return Mesh::from(Quad::default());
 }

@@ -147,7 +147,7 @@ impl WavesScenario {
                 self.kills = 0;
 
                 if usize::from(self.wave_index) < WAVES.len() {
-                    commands.add(HealHumans);
+                    commands.add(heal_humans);
                     commands.add(Notify {
                         text: format!("Wave {}/{}", self.wave_number(), WAVES.len()).into(),
                         text_small: format!("Kill {} zombies", wave.size).into(),
@@ -191,7 +191,7 @@ impl WavesScenario {
                 }
             }
             Task::CheckWaveCompletion => {
-                commands.add(CountZombies);
+                commands.add(count_zombies);
                 log::trace!("Checking for wave completion");
                 return Task::CheckWaveCompletion;
             }
@@ -352,30 +352,22 @@ impl Command for SpawnZombie {
     }
 }
 
-struct CountZombies;
-
-impl Command for CountZombies {
-    fn apply(self, world: &mut World) {
-        if !world
-            .query::<&Actor>()
-            .iter(world)
-            .any(|a| a.config.kind == ActorKind::Zombie)
-        {
-            if let Some(scenario) = world.resource_mut::<Scenario>().logic::<WavesScenario>() {
-                scenario.task = Task::CompleteWave;
-            }
+fn count_zombies(world: &mut World) {
+    if !world
+        .query::<&Actor>()
+        .iter(world)
+        .any(|a| a.config.kind == ActorKind::Zombie)
+    {
+        if let Some(scenario) = world.resource_mut::<Scenario>().logic::<WavesScenario>() {
+            scenario.task = Task::CompleteWave;
         }
     }
 }
 
-struct HealHumans;
-
-impl Command for HealHumans {
-    fn apply(self, world: &mut World) {
-        for (actor, mut health) in world.query::<(&Actor, &mut Health)>().iter_mut(world) {
-            if let ActorKind::Human = actor.config.kind {
-                health.heal();
-            }
+fn heal_humans(world: &mut World) {
+    for (actor, mut health) in world.query::<(&Actor, &mut Health)>().iter_mut(world) {
+        if let ActorKind::Human = actor.config.kind {
+            health.heal();
         }
     }
 }

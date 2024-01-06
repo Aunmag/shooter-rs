@@ -3,7 +3,7 @@ use crate::{
     data::LAYER_PROJECTILE,
     material::ProjectileMaterial,
     model::TransformLite,
-    resource::Cache,
+    resource::AssetStorage,
     util::ext::Vec2Ext,
 };
 use bevy::{
@@ -23,17 +23,9 @@ pub struct ProjectileSpawn {
 
 impl Command for ProjectileSpawn {
     fn apply(self, world: &mut World) {
-        let cache = world.resource::<Cache>();
-
-        let Some(image) = cache.dummy_image.clone() else {
-            log::warn!("Failed to spawn a projectile. The dummy image isn't initialized");
-            return;
-        };
-
-        let Some(mesh) = cache.dummy_mesh.clone() else {
-            log::warn!("Failed to spawn a projectile. The dummy mesh isn't initialized");
-            return;
-        };
+        let assets = world.resource::<AssetStorage>();
+        let image = assets.dummy_image().clone();
+        let mesh = assets.dummy_mesh().clone();
 
         let projectile = Projectile::new(
             self.config,

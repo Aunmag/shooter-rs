@@ -1,12 +1,11 @@
 use crate::{
-    command::ActorMeleeReset,
     component::{Actor, ActorConfig, Weapon},
-    model::{ActorActionsExt, AudioPlay, TransformLite},
+    model::{ActorAction, ActorActionsExt, AudioPlay, TransformLite},
     resource::{AudioTracker, HitResource},
     util::{ext::Vec2Ext, math},
 };
 use bevy::{
-    ecs::entity::Entity,
+    ecs::{entity::Entity, world::World},
     math::Vec2Swizzles,
     prelude::{Commands, Query, Res, ResMut, Transform, Vec2, Without},
     time::Time,
@@ -67,7 +66,12 @@ pub fn melee(
                 ..AudioPlay::DEFAULT
             });
 
-            commands.add(ActorMeleeReset(attacker_entity));
+            commands.add(move |world: &mut World| {
+                if let Some(mut actor) = world.get_mut::<Actor>(attacker_entity) {
+                    actor.actions.remove(ActorAction::Attack);
+                    actor.melee_next = time + actor.config.melee_interval.div_f32(actor.skill);
+                }
+            });
         }
     }
 }

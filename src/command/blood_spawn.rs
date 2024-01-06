@@ -1,7 +1,7 @@
 use crate::{
     data::{LAYER_BLUFF, PIXELS_PER_METER},
     material::BloodMaterial,
-    resource::{Cache, Config},
+    resource::{AssetStorage, Config},
     util::math::interpolate_unbounded,
 };
 use bevy::{
@@ -47,22 +47,13 @@ impl BloodSpawn {
 
 impl Command for BloodSpawn {
     fn apply(self, world: &mut World) {
-        let cache = world.resource::<Cache>();
-
-        let Some(image) = cache.dummy_image.clone() else {
-            log::warn!("Failed to spawn blood. The dummy image isn't initialized");
-            return;
-        };
-
-        let Some(mesh) = cache.dummy_mesh.clone() else {
-            log::warn!("Failed to spawn blood. The dummy mesh isn't initialized");
-            return;
-        };
-
         if !reserve_decal(world) {
             return;
         }
 
+        let assets = world.resource::<AssetStorage>();
+        let image = assets.dummy_image().clone();
+        let mesh = assets.dummy_mesh().clone();
         let time = world.resource::<Time>().elapsed();
 
         let material = world

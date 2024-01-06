@@ -1,7 +1,6 @@
 use crate::{
     command::{ActorBotSet, ActorSet, BonusSpawn, WeaponSet},
     component::{ActorConfig, ActorKind, Player, WeaponConfig},
-    data::FONT_PATH,
     model::{AppState, TransformLite},
     resource::AudioTracker,
     util::{
@@ -12,12 +11,12 @@ use crate::{
 use bevy::{
     app::{App, Plugin},
     diagnostic::{DiagnosticsStore, EntityCountDiagnosticsPlugin, FrameTimeDiagnosticsPlugin},
-    ecs::{schedule::SystemConfigs, system::Local},
+    ecs::{schedule::SystemConfigs, system::Local, world::World},
     gizmos::gizmos::Gizmos,
     input::Input,
     prelude::{
-        AssetServer, Color, Commands, Component, IntoSystemConfigs, KeyCode, Query, Res, Startup,
-        TextBundle, Update, Vec2, With,
+        Commands, Component, IntoSystemConfigs, KeyCode, Query, Res, Startup, TextBundle, Update,
+        Vec2, With,
     },
     text::{Text, TextSection, TextStyle},
     time::Time,
@@ -49,14 +48,13 @@ impl Plugin for DebugPlugin {
     }
 }
 
-fn startup(mut commands: Commands, asset_server: Res<AssetServer>) {
+fn startup(world: &mut World) {
     let style = TextStyle {
-        font: asset_server.get_handle(FONT_PATH).unwrap_or_default(),
         font_size: 30.0,
-        color: Color::WHITE,
+        ..Default::default()
     };
 
-    commands.spawn((
+    world.spawn((
         TextBundle::from_sections([
             TextSection::new("FPS: ", style.clone()),
             TextSection::from_style(style.clone()),
