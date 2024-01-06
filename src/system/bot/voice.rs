@@ -6,7 +6,7 @@ use crate::{
 use bevy::{
     ecs::system::Res,
     math::Vec3Swizzles,
-    prelude::{Query, ResMut, Transform},
+    prelude::{Query, Transform},
     time::Time,
 };
 use rand::Rng as _;
@@ -16,7 +16,7 @@ const INTERVAL: Range<Duration> = Duration::from_secs(5)..Duration::from_secs(30
 
 pub fn voice(
     mut bots: Query<(&mut Bot, &Actor, &Transform)>,
-    mut audio: ResMut<AudioTracker>,
+    audio: Res<AudioTracker>,
     time: Res<Time>,
 ) {
     let time = time.elapsed();

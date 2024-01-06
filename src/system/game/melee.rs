@@ -16,7 +16,7 @@ pub fn melee(
     attackers: Query<(Entity, &Actor, &Transform), Without<Weapon>>,
     targets: Query<(Entity, &Actor, &Transform)>,
     mut hits: ResMut<HitResource>,
-    mut audio: ResMut<AudioTracker>,
+    audio: Res<AudioTracker>,
     mut commands: Commands,
     time: Res<Time>,
 ) {

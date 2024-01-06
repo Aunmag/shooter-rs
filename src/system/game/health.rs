@@ -8,7 +8,7 @@ use crate::{
 use bevy::{
     ecs::{
         query::Has,
-        system::{Query, Res, ResMut},
+        system::{Query, Res},
     },
     math::Vec3Swizzles,
     prelude::{Commands, DespawnRecursiveExt, Entity, EventWriter, Transform},
@@ -17,7 +17,7 @@ use bevy::{
 pub fn health(
     mut query: Query<(Entity, &Actor, &mut Health, &Transform, Has<Player>)>,
     mut death_events: EventWriter<ActorDeathEvent>,
-    mut audio: ResMut<AudioTracker>,
+    audio: Res<AudioTracker>,
     mut commands: Commands,
     config: Res<Config>,
 ) {

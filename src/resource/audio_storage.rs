@@ -56,7 +56,7 @@ impl AudioStorage {
         let handle = self
             .groups
             .get_mut(path)
-            .and_then(|c| c.choose(&mut self.generator));
+            .and_then(|g| g.choose(&mut self.generator));
 
         if handle.is_none() {
             // warn only once

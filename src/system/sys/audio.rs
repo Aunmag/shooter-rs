@@ -5,8 +5,7 @@ use crate::{
 use bevy::{
     audio::{AudioBundle, AudioSink, Volume, VolumeLevel},
     ecs::{entity::Entity, system::Commands},
-    math::Vec3Swizzles,
-    prelude::{AudioSinkPlayback, DespawnRecursiveExt, Query, Res, ResMut, Transform, Vec2, With},
+    prelude::{AudioSinkPlayback, DespawnRecursiveExt, Query, Res, ResMut, Transform, With},
     time::Time,
 };
 use std::time::Duration;
@@ -37,7 +36,7 @@ pub fn audio(
         }
     }
 
-    while let Some(queued) = tracker.pop_queued() {
+    for queued in &tracker.take_queue() {
         if let Some(source) = storage.choose(queued.path.as_ref()).cloned() {
             let is_heartbeat = queued.path.as_ref() == "sounds/heartbeat";
             let mut settings = queued.settings();

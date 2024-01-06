@@ -8,7 +8,7 @@ use crate::{
 use bevy::{
     ecs::system::{Local, Query},
     math::{Vec2, Vec3Swizzles},
-    prelude::{Commands, Entity, Res, ResMut, Time, Transform},
+    prelude::{Commands, Entity, Res, Time, Transform},
 };
 use rand::{Rng, SeedableRng};
 use rand_pcg::Pcg32;
@@ -38,7 +38,7 @@ pub fn weapon(
         Option<&mut Player>,
     )>,
     mut commands: Commands,
-    mut audio: ResMut<AudioTracker>,
+    audio: Res<AudioTracker>,
     time: Res<Time>,
 ) {
     let now = time.elapsed();

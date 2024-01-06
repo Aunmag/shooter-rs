@@ -5,7 +5,7 @@ use crate::{
     util::math::interpolate,
 };
 use bevy::{
-    ecs::system::{Query, ResMut},
+    ecs::system::Query,
     math::Vec3Swizzles,
     prelude::{Res, Time, Transform},
 };
@@ -16,7 +16,7 @@ const BREATH_INTERVAL_MAX: Duration = Duration::from_millis(2200);
 
 pub fn breath(
     mut query: Query<(&mut Breath, &Actor, &Transform)>,
-    mut audio: ResMut<AudioTracker>,
+    audio: Res<AudioTracker>,
     time: Res<Time>,
 ) {
     let time = time.elapsed();

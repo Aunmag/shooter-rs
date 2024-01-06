@@ -4,7 +4,6 @@ use bevy::{
         schedule::{IntoSystemConfigs, SystemConfigs},
         system::{Local, Res},
     },
-    prelude::ResMut,
     time::Time,
 };
 use rand::Rng as _;
@@ -12,7 +11,7 @@ use std::{ops::Range, time::Duration};
 
 const INTERVAL: Range<Duration> = Duration::from_secs(15)..Duration::from_secs(25);
 
-fn ambience_fx_inner(mut audio: ResMut<AudioTracker>) {
+fn ambience_fx_inner(audio: Res<AudioTracker>) {
     audio.queue(AudioPlay {
         path: "sounds/ambience_fx".into(),
         volume: 0.3,

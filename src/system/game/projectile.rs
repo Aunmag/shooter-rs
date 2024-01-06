@@ -18,7 +18,7 @@ pub fn projectile(
     obstacles: Query<(Entity, &Collision, &Transform, &Actor), Without<Projectile>>,
     mut hits: ResMut<HitResource>,
     mut commands: Commands,
-    mut audio: ResMut<AudioTracker>,
+    audio: Res<AudioTracker>,
     time: Res<Time>,
 ) {
     let t0 = time.elapsed();

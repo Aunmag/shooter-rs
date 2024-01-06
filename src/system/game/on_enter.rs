@@ -8,7 +8,7 @@ use crate::{
 use bevy::{
     asset::{AssetServer, Handle},
     math::Vec2,
-    prelude::{Camera2dBundle, Commands, Image, Res, ResMut, SpriteBundle},
+    prelude::{Camera2dBundle, Commands, Image, Res, SpriteBundle},
 };
 use rand::{seq::SliceRandom, Rng, SeedableRng};
 use rand_pcg::Pcg32;
@@ -23,32 +23,28 @@ const TREE_BUFFER_ZONE: f32 = 3.2;
 const TREE_FIND_POSITION_ATTEMPTS: usize = 32;
 const BLUFF_SPRITE_SIZE: f32 = 4.0;
 
-pub fn on_enter(
-    mut commands: Commands,
-    assets: Res<AssetServer>,
-    mut audio_tracker: ResMut<AudioTracker>,
-) {
+pub fn on_enter(mut commands: Commands, assets: Res<AssetServer>, audio: Res<AudioTracker>) {
     commands.add(CursorGrab(true));
     commands.add(TerrainInit);
     commands.spawn(Camera2dBundle::default());
     spawn_bluffs(&mut commands, &assets);
     spawn_trees(&mut commands, &assets);
 
-    audio_tracker.queue(AudioPlay {
+    audio.queue(AudioPlay {
         path: "sounds/ambience_music".into(),
         volume: 0.3,
         duration: Duration::MAX,
         ..AudioPlay::DEFAULT
     });
 
-    audio_tracker.queue(AudioPlay {
+    audio.queue(AudioPlay {
         path: "sounds/ambience_nature".into(),
         volume: 0.3,
         duration: Duration::MAX,
         ..AudioPlay::DEFAULT
     });
 
-    audio_tracker.queue(AudioPlay {
+    audio.queue(AudioPlay {
         path: "sounds/heartbeat".into(),
         duration: Duration::MAX,
         ..AudioPlay::DEFAULT
