@@ -20,12 +20,11 @@ pub fn audio(
 ) {
     let now = time.elapsed();
 
+    if let Some(listener) = listeners.iter().next() {
+        tracker.listener = listener.translation.truncate();
+    }
+
     tracker.playing = 0;
-    tracker.listener = listeners
-        .iter()
-        .next()
-        .map(|l| l.translation.xy())
-        .unwrap_or(Vec2::ZERO);
 
     for (entity, sink, expiration) in audio.iter() {
         if sink.empty() || expiration.map_or(false, |e| now > **e) {
