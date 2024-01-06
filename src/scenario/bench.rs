@@ -17,7 +17,7 @@ use std::{
 const SPAWN_BATCH: usize = 100;
 const SPAWN_MAX: usize = 3000;
 const INTERVAL: Duration = Duration::from_secs(1);
-const REPORTS_DIRECTORY: &str = "./tool/bench_report/reports";
+const REPORTS_DIRECTORY: &str = "./bench/temp";
 
 #[derive(Default)]
 pub struct BenchScenario {
