@@ -36,7 +36,7 @@ pub fn actor(mut query: Query<(&mut Actor, &mut Transform, &mut Inertia)>, time:
             movement *= actor.config.sprint_factor;
         }
 
-        inertia.push(movement, 0.0, true, false);
+        inertia.push(movement, 0.0, true);
     }
 }
 
@@ -70,5 +70,5 @@ fn turn(actor: &Actor, transform: &mut Transform, inertia: &mut Inertia, time_de
         velocity /= distance_excess;
     }
 
-    inertia.push(Vec2::ZERO, velocity, true, false);
+    inertia.push(Vec2::ZERO, velocity, true);
 }

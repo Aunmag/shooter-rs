@@ -13,7 +13,7 @@ LABEL = ""
 def main():
     if PASSES > 0:
         source = os.path.join(DIRECTORY, "temp")
-        # os.remove(source)  # TODO: fix
+        clear_report_files(source)
 
         for _ in range(PASSES):
             print("Sleeping...")
@@ -85,7 +85,15 @@ def show_report(directory):
     plt.show()
 
 
+def clear_report_files(directory):
+    for _, path in iter_report_files(directory):
+        os.remove(path)
+
+
 def iter_report_files(directory):
+    if not os.path.isdir(directory):
+        return
+
     for name in os.listdir(directory):
         path = os.path.join(directory, name)
 

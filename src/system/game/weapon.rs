@@ -1,12 +1,12 @@
 use crate::{
     command::ProjectileSpawn,
-    component::{Actor, Inertia, Player, Weapon, WeaponFireResult},
+    component::{Actor, Weapon, WeaponFireResult},
     model::{ActorActionsExt, AudioPlay, TransformLite},
-    resource::AudioTracker,
+    resource::{AudioTracker, HitResource},
     util::ext::Vec2Ext,
 };
 use bevy::{
-    ecs::system::{Local, Query},
+    ecs::system::{Deferred, Local, Query},
     math::{Vec2, Vec3Swizzles},
     prelude::{Commands, Entity, Res, Time, Transform},
 };
@@ -29,21 +29,15 @@ impl Default for WeaponSystemData {
 
 pub fn weapon(
     mut data: Local<WeaponSystemData>,
-    mut query: Query<(
-        Entity,
-        &Actor,
-        &Transform,
-        &mut Weapon,
-        &mut Inertia,
-        Option<&mut Player>,
-    )>,
+    mut query: Query<(Entity, &Actor, &Transform, &mut Weapon)>,
     mut commands: Commands,
+    mut hits: Deferred<HitResource>,
     audio: Res<AudioTracker>,
     time: Res<Time>,
 ) {
     let now = time.elapsed();
 
-    for (entity, actor, transform, mut weapon, mut inertia, mut player) in query.iter_mut() {
+    for (entity, actor, transform, mut weapon) in query.iter_mut() {
         if !actor.actions.is_attacking() {
             weapon.release_trigger();
         }
@@ -130,11 +124,7 @@ pub fn weapon(
                         recoil = -recoil;
                     }
 
-                    inertia.push(Vec2::ZERO, recoil, false, false);
-
-                    if let Some(player) = player.as_mut() {
-                        player.shake(recoil);
-                    }
+                    hits.add(entity, Vec2::ZERO, recoil, true);
                 }
             }
         }

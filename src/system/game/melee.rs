@@ -5,16 +5,16 @@ use crate::{
     util::{ext::Vec2Ext, math},
 };
 use bevy::{
-    ecs::{entity::Entity, world::World},
+    ecs::{entity::Entity, system::Deferred, world::World},
     math::Vec2Swizzles,
-    prelude::{Commands, Query, Res, ResMut, Transform, Vec2, Without},
+    prelude::{Commands, Query, Res, Transform, Vec2, Without},
     time::Time,
 };
 
 pub fn melee(
     attackers: Query<(Entity, &Actor, &Transform), Without<Weapon>>,
     targets: Query<(Entity, &Actor, &Transform)>,
-    mut hits: ResMut<HitResource>,
+    mut hits: Deferred<HitResource>,
     audio: Res<AudioTracker>,
     mut commands: Commands,
     time: Res<Time>,
@@ -57,7 +57,7 @@ pub fn melee(
         if let Some(victim) = victim {
             let momentum = attacker_actor.config.melee_damage * attacker_actor.skill;
             let force = Vec2::from_length(momentum, victim.angle_objective);
-            hits.add(victim.entity, force, -victim.angle_subjective);
+            hits.add(victim.entity, force, -victim.angle_subjective, false);
 
             audio.queue(AudioPlay {
                 path: "sounds/melee".into(),

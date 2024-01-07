@@ -8,8 +8,6 @@ pub struct Inertia {
 }
 
 impl Inertia {
-    pub const PUSH_MULTIPLIER: f32 = 40.0;
-    pub const PUSH_MULTIPLIER_ANGULAR: f32 = 350.0;
     pub const DRAG_FACTOR: f32 = 500.0;
 
     // TODO: make component's property
@@ -40,13 +38,7 @@ impl Inertia {
         }
     }
 
-    pub fn push(
-        &mut self,
-        mut force: Vec2,
-        mut force_angular: f32,
-        with_drag: bool,
-        with_push_multiplier: bool,
-    ) {
+    pub fn push(&mut self, mut force: Vec2, mut force_angular: f32, with_drag: bool) {
         let mass_inverse = self.mass_inverse();
         force *= mass_inverse;
         force_angular *= mass_inverse;
@@ -55,11 +47,6 @@ impl Inertia {
             let drag = self.drag();
             force *= drag;
             force_angular *= drag;
-        }
-
-        if with_push_multiplier {
-            force *= Self::PUSH_MULTIPLIER;
-            force_angular *= Self::PUSH_MULTIPLIER_ANGULAR;
         }
 
         self.velocity += force;

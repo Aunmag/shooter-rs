@@ -5,9 +5,12 @@ use crate::{
     util::{ext::Vec2Ext, math},
 };
 use bevy::{
-    ecs::{entity::Entity, system::Query},
+    ecs::{
+        entity::Entity,
+        system::{Deferred, Query},
+    },
     math::{Quat, Vec3Swizzles},
-    prelude::{Commands, DespawnRecursiveExt, Res, ResMut, Time, Transform, Vec2, Without},
+    prelude::{Commands, DespawnRecursiveExt, Res, Time, Transform, Vec2, Without},
 };
 use std::time::Duration;
 
@@ -16,7 +19,7 @@ const TIME_DELTA_FOR_RENDER: Duration = Duration::from_millis(25); // 40 FPS
 pub fn projectile(
     mut projectiles: Query<(Entity, &mut Projectile, &mut Transform)>,
     obstacles: Query<(Entity, &Collision, &Transform, &Actor), Without<Projectile>>,
-    mut hits: ResMut<HitResource>,
+    mut hits: Deferred<HitResource>,
     mut commands: Commands,
     audio: Res<AudioTracker>,
     time: Res<Time>,
@@ -55,6 +58,7 @@ pub fn projectile(
                 obstacle,
                 contact_velocity * projectile.config.fragment_mass(),
                 angle,
+                false,
             );
 
             head = contact_position;
