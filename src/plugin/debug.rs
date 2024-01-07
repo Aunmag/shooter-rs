@@ -138,7 +138,7 @@ fn update_input(
 
     match spawn {
         Spawn::Bonus => {
-            commands.add(BonusSpawn::new(position.translation, 6)); // TODO: don't hardcode level
+            commands.add(BonusSpawn::new(position.translation, u8::MAX));
         }
         Spawn::Human => {
             spawn_actors(&mut commands, position, &ActorConfig::HUMAN, group);

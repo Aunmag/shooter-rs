@@ -11,9 +11,7 @@ lazy_static::lazy_static! {
     static ref RE: Regex = Regex::new(r"(_+\d+)?\.ogg$").expect("Failed to parse audio regex");
 }
 
-const SPARE_PATHS: &[(&str, &str)] = &[
-    ("actors/zombie_agile/", "actors/zombie/"),
-];
+const SPARE_PATHS: &[(&str, &str)] = &[("actors/zombie_agile/", "actors/zombie/")];
 
 #[derive(Resource)]
 pub struct AudioStorage {

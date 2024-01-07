@@ -91,6 +91,8 @@ fn generate_weapon(level: u8) -> Option<&'static WeaponConfig> {
         .choose_weighted(&mut rand::thread_rng(), |weapon| {
             if weapon.level > level {
                 return 0.0;
+            } else if weapon.level == 1 {
+                return 0.5; // less pistols, they usually get in the way
             } else {
                 return 1.0;
             }

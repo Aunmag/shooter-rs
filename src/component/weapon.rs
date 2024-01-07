@@ -24,8 +24,8 @@ pub struct Weapon {
 
 pub struct WeaponConfig {
     pub name: &'static str,
-    pub mass: f32,
     pub level: u8,
+    pub mass: f32,
     pub muzzle_velocity: f32,
     pub deviation: f32,
     pub fire_rate: f32,
@@ -72,8 +72,8 @@ impl WeaponConfig {
 
     pub const PM: Self = Self {
         name: "PM",
-        mass: 0.73,
         level: 1,
+        mass: 0.73,
         muzzle_velocity: 315.0,
         deviation: 0.03,
         fire_rate: Self::SEMI_AUTO_FIRE_RATE,
@@ -88,8 +88,8 @@ impl WeaponConfig {
 
     pub const TT: Self = Self {
         name: "TT",
-        mass: 0.85,
         level: 1,
+        mass: 0.85,
         muzzle_velocity: 430.0,
         deviation: 0.025,
         fire_rate: Self::SEMI_AUTO_FIRE_RATE,
@@ -104,8 +104,8 @@ impl WeaponConfig {
 
     pub const MP_43_SAWED_OFF: Self = Self {
         name: "MP-43 sawed-off",
-        mass: 2.2,
         level: 2,
+        mass: 2.2,
         muzzle_velocity: 260.0,
         deviation: 0.06,
         fire_rate: Self::SEMI_AUTO_FIRE_RATE,
@@ -120,8 +120,8 @@ impl WeaponConfig {
 
     pub const PP_91_KEDR: Self = Self {
         name: "PP-91 Kedr",
-        mass: 1.6,
         level: 2,
+        mass: 1.6,
         muzzle_velocity: 310.0,
         deviation: 0.02,
         fire_rate: 900.0,
@@ -136,8 +136,8 @@ impl WeaponConfig {
 
     pub const MP_27: Self = Self {
         name: "MP-27",
-        mass: 3.2,
         level: 3,
+        mass: 3.2,
         muzzle_velocity: 410.0,
         deviation: 0.03,
         fire_rate: Self::SEMI_AUTO_FIRE_RATE,
@@ -152,8 +152,8 @@ impl WeaponConfig {
 
     pub const PP_19_BIZON: Self = Self {
         name: "PP-19 Bizon",
-        mass: 2.7,
         level: 3,
+        mass: 2.7,
         muzzle_velocity: 330.0,
         deviation: 0.015,
         fire_rate: 680.0,
@@ -168,8 +168,8 @@ impl WeaponConfig {
 
     pub const AKS_74U: Self = Self {
         name: "AKS-74U",
-        mass: 2.9,
         level: 4,
+        mass: 2.9,
         muzzle_velocity: 735.0,
         deviation: 0.015,
         fire_rate: 675.0,
@@ -184,8 +184,8 @@ impl WeaponConfig {
 
     pub const AK_74M: Self = Self {
         name: "AK-74M",
-        mass: 3.83,
         level: 4,
+        mass: 3.83,
         muzzle_velocity: 910.0,
         deviation: 0.014,
         fire_rate: 600.0,
@@ -200,8 +200,8 @@ impl WeaponConfig {
 
     pub const RPK_74: Self = Self {
         name: "RPK-74",
-        mass: 5.24,
         level: 5,
+        mass: 5.24,
         muzzle_velocity: 960.0,
         deviation: 0.012,
         fire_rate: 600.0,
@@ -216,8 +216,8 @@ impl WeaponConfig {
 
     pub const SAIGA_12K: Self = Self {
         name: "Saiga-12K",
+        level: 6,
         mass: 3.3,
-        level: 5,
         muzzle_velocity: 410.0,
         deviation: 0.035,
         fire_rate: Self::SEMI_AUTO_FIRE_RATE,
@@ -232,8 +232,8 @@ impl WeaponConfig {
 
     pub const PKM: Self = Self {
         name: "PKM",
+        level: 7,
         mass: 7.5,
-        level: 6,
         muzzle_velocity: 825.0,
         deviation: 0.011,
         fire_rate: 650.0,
@@ -248,8 +248,8 @@ impl WeaponConfig {
 
     pub const PKP_PECHENEG: Self = Self {
         name: "PKP Pecheneg",
+        level: 7,
         mass: 8.2,
-        level: 6,
         muzzle_velocity: 825.0,
         deviation: 0.01,
         fire_rate: 650.0,
