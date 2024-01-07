@@ -11,6 +11,10 @@ lazy_static::lazy_static! {
     static ref RE: Regex = Regex::new(r"(_+\d+)?\.ogg$").expect("Failed to parse audio regex");
 }
 
+const SPARE_PATHS: &[(&str, &str)] = &[
+    ("actors/zombie_agile/", "actors/zombie/"),
+];
+
 #[derive(Resource)]
 pub struct AudioStorage {
     groups: HashMap<String, AudioGroup>,
@@ -52,20 +56,32 @@ impl AudioStorage {
         log::debug!("Indexed groups: {}", self.groups.len());
     }
 
-    pub fn choose(&mut self, path: &str) -> Option<&Handle<AudioSource>> {
-        let handle = self
-            .groups
-            .get_mut(path)
-            .and_then(|g| g.choose(&mut self.generator));
+    pub fn choose(&mut self, path: &str) -> Option<Handle<AudioSource>> {
+        let mut audio = self.choose_exact(path);
 
-        if handle.is_none() {
-            // warn only once
-            if self.missing.insert(path.to_string()) {
+        if audio.is_none() && !self.missing.contains(path) {
+            for spare in SPARE_PATHS {
+                if path.starts_with(spare.0) {
+                    audio = self.choose_exact(&path.replace(spare.0, spare.1));
+                    break;
+                }
+            }
+
+            if audio.is_none() {
+                self.missing.insert(path.to_string());
                 log::warn!("Audio {} not found", path);
             }
         }
 
-        return handle;
+        return audio;
+    }
+
+    fn choose_exact(&mut self, path: &str) -> Option<Handle<AudioSource>> {
+        return self
+            .groups
+            .get_mut(path)
+            .and_then(|g| g.choose(&mut self.generator))
+            .cloned();
     }
 }
 

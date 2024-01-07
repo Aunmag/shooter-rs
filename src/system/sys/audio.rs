@@ -35,7 +35,7 @@ pub fn audio(
     }
 
     for audio in &tracker.take_queue() {
-        let Some(source) = storage.choose(audio.path.as_ref()).cloned() else {
+        let Some(source) = storage.choose(audio.path.as_ref()) else {
             continue;
         };
 
