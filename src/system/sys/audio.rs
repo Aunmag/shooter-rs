@@ -8,7 +8,6 @@ use bevy::{
     prelude::{AudioSinkPlayback, DespawnRecursiveExt, Query, Res, ResMut, Transform, With},
     time::Time,
 };
-use std::time::Duration;
 
 pub fn audio(
     mut tracker: ResMut<AudioTracker>,
@@ -35,26 +34,28 @@ pub fn audio(
         }
     }
 
-    for queued in &tracker.take_queue() {
-        if let Some(source) = storage.choose(queued.path.as_ref()).cloned() {
-            let is_heartbeat = queued.path.as_ref() == "sounds/heartbeat";
-            let mut settings = queued.settings();
+    for audio in &tracker.take_queue() {
+        let Some(source) = storage.choose(audio.path.as_ref()).cloned() else {
+            continue;
+        };
 
-            if is_heartbeat {
-                settings.volume = Volume::Relative(VolumeLevel::new(0.0));
-            }
+        let is_heartbeat = audio.path.as_ref() == "sounds/heartbeat";
+        let mut settings = audio.settings();
 
-            let mut entity = commands.spawn(AudioBundle { source, settings });
-
-            if is_heartbeat {
-                entity.insert(Heartbeat);
-            }
-
-            if Duration::ZERO < queued.duration && queued.duration < Duration::MAX {
-                entity.insert(AudioExpiration::new(now + queued.duration));
-            }
-
-            tracker.playing += 1;
+        if is_heartbeat {
+            settings.volume = Volume::Relative(VolumeLevel::new(0.0));
         }
+
+        let mut entity = commands.spawn(AudioBundle { source, settings });
+
+        if is_heartbeat {
+            entity.insert(Heartbeat);
+        }
+
+        if let Some(duration) = audio.duration() {
+            entity.insert(AudioExpiration::new(now + duration));
+        }
+
+        tracker.playing += 1;
     }
 }

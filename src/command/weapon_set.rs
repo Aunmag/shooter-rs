@@ -120,7 +120,7 @@ impl WeaponSet {
             .get::<Transform>(self.entity)
             .map(|t| t.translation.xy())
         {
-            world.resource_mut::<AudioTracker>().queue(AudioPlay {
+            world.resource::<AudioTracker>().queue(AudioPlay {
                 path: "sounds/pickup_weapon".into(),
                 volume: 0.9,
                 source: Some(source),

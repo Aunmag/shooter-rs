@@ -18,10 +18,7 @@ use bevy::{
 };
 use rand::{seq::SliceRandom, Rng, SeedableRng};
 use rand_pcg::Pcg32;
-use std::{
-    f32::consts::{FRAC_PI_2, PI, TAU},
-    time::Duration,
-};
+use std::f32::consts::{FRAC_PI_2, PI, TAU};
 
 const TREES_PER_METER: f32 = 0.02;
 const TREES_QUANTITY: f32 = WORLD_SIZE_VISUAL * WORLD_SIZE_VISUAL * TREES_PER_METER;
@@ -35,7 +32,7 @@ pub fn on_enter(world: &mut World) {
     spawn_terrain(world);
     spawn_bluffs(world);
     spawn_trees(world);
-    play_audio(world.resource::<AudioTracker>());
+    play_audio(world);
 }
 
 fn spawn_terrain(world: &mut World) {
@@ -132,24 +129,26 @@ fn spawn_sprite(world: &mut World, position: Vec3, direction: f32, path: &'stati
     });
 }
 
-fn play_audio(audio: &AudioTracker) {
+fn play_audio(world: &mut World) {
+    let audio = world.resource::<AudioTracker>();
+
     audio.queue(AudioPlay {
         path: "sounds/ambience_music".into(),
         volume: 0.3,
-        duration: Duration::MAX,
+        duration: AudioPlay::DURATION_FOREVER,
         ..AudioPlay::DEFAULT
     });
 
     audio.queue(AudioPlay {
         path: "sounds/ambience_nature".into(),
         volume: 0.3,
-        duration: Duration::MAX,
+        duration: AudioPlay::DURATION_FOREVER,
         ..AudioPlay::DEFAULT
     });
 
     audio.queue(AudioPlay {
         path: "sounds/heartbeat".into(),
-        duration: Duration::MAX,
+        duration: AudioPlay::DURATION_FOREVER,
         ..AudioPlay::DEFAULT
     });
 }

@@ -15,29 +15,48 @@ pub struct AudioPlay {
 }
 
 impl AudioPlay {
+    pub const DURATION_ONCE: Duration = Duration::ZERO;
+    pub const DURATION_FOREVER: Duration = Duration::MAX;
+
     const CLOSE_DISTANCE: f32 = 0.5;
 
     pub const DEFAULT: Self = Self {
         path: SmartString::Ref("sound/default"),
         volume: 1.0,
         source: None,
-        duration: Duration::ZERO,
+        duration: Self::DURATION_ONCE,
     };
 
     pub fn settings(&self) -> PlaybackSettings {
-        let settings = if self.duration.is_zero() {
-            PlaybackSettings::ONCE
-        } else {
+        let settings = if self.is_looped() {
             PlaybackSettings::LOOP
+        } else {
+            PlaybackSettings::ONCE
         };
 
         return settings.with_volume(Volume::Relative(VolumeLevel::new(self.volume)));
     }
 
+    pub fn is_looped(&self) -> bool {
+        return !self.duration.is_zero();
+    }
+
+    pub fn is_looped_forever(&self) -> bool {
+        return self.duration == Self::DURATION_FOREVER;
+    }
+
+    pub fn duration(&self) -> Option<Duration> {
+        if self.is_looped() && !self.is_looped_forever() {
+            return Some(self.duration);
+        } else {
+            return None;
+        }
+    }
+
     pub fn is_similar_to(&self, other: &Self) -> bool {
         return self.path == other.path
             && self.has_same_source(other)
-            && self.has_same_repeat_mode(other);
+            && self.is_looped() == other.is_looped();
     }
 
     pub fn has_same_source(&self, other: &Self) -> bool {
@@ -52,9 +71,5 @@ impl AudioPlay {
                 return false;
             }
         }
-    }
-
-    pub fn has_same_repeat_mode(&self, other: &Self) -> bool {
-        return self.duration.is_zero() && other.duration.is_zero();
     }
 }

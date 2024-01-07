@@ -74,7 +74,7 @@ impl Command for Notify {
             )
             .insert(notification);
 
-        world.resource_mut::<AudioTracker>().queue(AudioPlay {
+        world.resource::<AudioTracker>().queue(AudioPlay {
             path: "sounds/notification".into(),
             volume: 0.8,
             ..AudioPlay::DEFAULT
