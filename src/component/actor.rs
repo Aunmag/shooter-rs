@@ -124,7 +124,7 @@ impl ActorConfig {
         pain_threshold: f32::INFINITY, // disabled
         radius: 0.21,
         mass: 70.0,
-        melee_damage: Self::HUMAN.health / 12.0,
+        melee_damage: Self::HUMAN.health / 10.0,
         melee_distance: Self::HUMAN.melee_distance,
         melee_distance_angular: Self::HUMAN.melee_distance_angular,
         melee_interval: Self::HUMAN.melee_interval,
