@@ -120,7 +120,7 @@ impl ActorConfig {
         rotation_velocity: Self::HUMAN.rotation_velocity * 0.4,
         sprint_factor: Self::HUMAN.sprint_factor,
         stamina: Duration::from_secs(10),
-        health: Self::HUMAN.health * 0.6,
+        health: Self::HUMAN.health / 2.0,
         pain_threshold: f32::INFINITY, // disabled
         radius: 0.21,
         mass: 70.0,
