@@ -1,10 +1,11 @@
 use crate::util::ext::DurationExt;
-use bevy::ecs::component::Component;
+use bevy::ecs::{component::Component, entity::Entity};
 use std::time::Duration;
 
 #[derive(Component)]
 pub struct Player {
     pub is_controllable: bool,
+    pub crosshair: PlayerCrosshair,
     zoom: Zoom,
     shake: Shake,
     shake_abs: Shake,
@@ -15,9 +16,10 @@ impl Player {
     pub const EXTRA_ROTATION_MULTIPLAYER: f32 = 0.1;
     pub const EXTRA_ROTATION_MAX: f32 = 0.11;
 
-    pub fn new(is_controllable: bool) -> Self {
+    pub fn new(is_controllable: bool, crosshair: Entity) -> Self {
         return Self {
             is_controllable,
+            crosshair: PlayerCrosshair::new(crosshair),
             zoom: Zoom::default(),
             shake: Shake::default(),
             shake_abs: Shake::default(),
@@ -62,6 +64,20 @@ impl Player {
 
     pub fn get_extra_rotation(&self) -> f32 {
         return self.extra_rotation;
+    }
+}
+
+pub struct PlayerCrosshair {
+    pub entity: Entity,
+    pub distance: f32,
+}
+
+impl PlayerCrosshair {
+    pub fn new(entity: Entity) -> Self {
+        return Self {
+            entity,
+            distance: 1.0,
+        };
     }
 }
 

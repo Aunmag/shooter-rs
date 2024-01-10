@@ -1,22 +1,21 @@
 use crate::{
     command::{ActorBotSet, ActorSet, BonusSpawn, WeaponSet},
-    component::{ActorConfig, ActorKind, Player, WeaponConfig},
+    component::{ActorConfig, ActorKind, WeaponConfig},
+    material::CrosshairMaterial,
     model::{AppState, TransformLite},
     resource::AudioTracker,
-    util::{
-        ext::{AppExt, Vec2Ext},
-        Timer, GIZMOS,
-    },
+    util::{ext::AppExt, Timer, GIZMOS},
 };
 use bevy::{
     app::{App, Plugin},
+    asset::Handle,
     diagnostic::{DiagnosticsStore, EntityCountDiagnosticsPlugin, FrameTimeDiagnosticsPlugin},
     ecs::{schedule::SystemConfigs, system::Local, world::World},
     gizmos::gizmos::Gizmos,
     input::Input,
     prelude::{
         Commands, Component, IntoSystemConfigs, KeyCode, Query, Res, Startup, TextBundle, Update,
-        Vec2, With,
+        With,
     },
     text::{Text, TextSection, TextStyle},
     time::Time,
@@ -108,7 +107,7 @@ fn render_gizmos_static(mut gizmos: Gizmos) {
 }
 
 fn update_input(
-    players: Query<&Transform, With<Player>>,
+    crosshairs: Query<&Transform, With<Handle<CrosshairMaterial>>>,
     keyboard: Res<Input<KeyCode>>,
     mut commands: Commands,
 ) {
@@ -128,13 +127,11 @@ fn update_input(
         1
     };
 
-    let mut position = players
+    let position = crosshairs
         .iter()
         .next()
         .map(TransformLite::from)
         .unwrap_or_default();
-
-    position.translation += Vec2::from_length(3.0, position.direction);
 
     match spawn {
         Spawn::Bonus => {

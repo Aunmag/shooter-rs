@@ -13,7 +13,9 @@ mod util;
 use crate::{
     data::{APP_TITLE, CONFIG_PATH},
     event::ActorDeathEvent,
-    material::{BloodMaterial, LaserMaterial, ProjectileMaterial, StatusBarMaterial},
+    material::{
+        BloodMaterial, CrosshairMaterial, LaserMaterial, ProjectileMaterial, StatusBarMaterial,
+    },
     model::AppState,
     plugin::DebugPlugin,
     resource::{AssetStorage, AudioStorage, AudioTracker, Config, GameMode, Scenario},
@@ -90,9 +92,10 @@ fn main() {
 
     application
         .add_plugins(Material2dPlugin::<BloodMaterial>::default())
+        .add_plugins(Material2dPlugin::<CrosshairMaterial>::default())
         .add_plugins(Material2dPlugin::<LaserMaterial>::default())
-        .add_plugins(Material2dPlugin::<StatusBarMaterial>::default())
         .add_plugins(Material2dPlugin::<ProjectileMaterial>::default())
+        .add_plugins(Material2dPlugin::<StatusBarMaterial>::default())
         .add_state::<AppState>()
         .add_event::<ActorDeathEvent>()
         .insert_resource(AssetStorage::default())
@@ -122,6 +125,7 @@ fn main() {
             s.add(bonus_label);
             s.add(bonus.after(collision_resolve));
             s.add(camera.after(collision_resolve));
+            s.add(crosshair.after(camera));
             s.add(status_bar);
             s.add(blood);
             s.add(breath);

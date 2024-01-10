@@ -22,6 +22,12 @@ impl Command for ActorRelease {
             actor.look_at = None;
         }
 
+        if let Some(player) = world.get::<Player>(self.0) {
+            world
+                .entity_mut(player.crosshair.entity)
+                .despawn_recursive();
+        }
+
         let mut entity_mut = world.entity_mut(self.0);
         entity_mut.remove::<Bot>();
         entity_mut.remove::<Player>();

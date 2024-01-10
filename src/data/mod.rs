@@ -20,6 +20,7 @@ pub const LAYER_ACTOR_PLAYER: f32 = 0.3;
 pub const LAYER_BONUS: f32 = 0.4;
 pub const LAYER_PROJECTILE: f32 = 0.5;
 pub const LAYER_TREE: f32 = 0.6;
+pub const LAYER_CROSSHAIR: f32 = 1.0;
 
 pub const TRANSFORM_SCALE: Vec3 = Vec3::splat(1.0 / PIXELS_PER_METER);
 

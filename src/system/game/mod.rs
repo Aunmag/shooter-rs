@@ -6,6 +6,7 @@ mod breath;
 mod camera;
 mod collision_find;
 mod collision_resolve;
+mod crosshair;
 mod footsteps;
 mod health;
 mod heartbeat;
@@ -22,6 +23,7 @@ mod weapon;
 
 pub use self::{
     actor::*, ambience_fx::*, blood::*, bonus::*, breath::*, camera::*, collision_find::*,
-    collision_resolve::*, footsteps::*, health::*, heartbeat::*, inertia::*, input::*, melee::*,
-    on_enter::*, player::*, projectile::*, scenario::*, status_bar::*, terrain::*, weapon::*,
+    collision_resolve::*, crosshair::*, footsteps::*, health::*, heartbeat::*, inertia::*,
+    input::*, melee::*, on_enter::*, player::*, projectile::*, scenario::*, status_bar::*,
+    terrain::*, weapon::*,
 };
