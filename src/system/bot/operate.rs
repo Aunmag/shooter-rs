@@ -51,6 +51,7 @@ pub fn operate(
             actor: &mut actor,
             transform,
             velocity: inertia.velocity,
+            weapon,
             spread_out: SpreadOut::Full,
             is_dodging: false,
         };
@@ -61,11 +62,7 @@ pub fn operate(
             }
 
             if !handler.is_dodging {
-                if let Some(weapon) = weapon {
-                    handler.attack_enemy_armed(&enemy, weapon, time);
-                } else {
-                    handler.attack_enemy_melee(&enemy);
-                }
+                handler.attack_enemy(&enemy, time);
             }
         } else {
             handler.idle();
@@ -88,6 +85,7 @@ struct BotHandler<'a> {
     actor: &'a mut Actor,
     transform: &'a Transform,
     velocity: Vec2,
+    weapon: Option<&'a Weapon>,
     spread_out: SpreadOut,
     is_dodging: bool,
 }
@@ -117,6 +115,14 @@ impl<'a> BotHandler<'a> {
         }
     }
 
+    fn attack_enemy(&mut self, enemy: &BotTarget, time: Duration) {
+        if let Some(weapon) = self.weapon {
+            self.attack_enemy_armed(enemy, weapon, time);
+        } else {
+            self.attack_enemy_melee(enemy);
+        }
+    }
+
     fn attack_enemy_armed(&mut self, target: &BotTarget, weapon: &Weapon, time: Duration) {
         if self.is_close(&target.position, self.bot.config.shoot_distance_min) {
             // don't come too close
@@ -124,8 +130,7 @@ impl<'a> BotHandler<'a> {
             self.spread_out = SpreadOut::Disallowed;
         }
 
-        if !weapon.is_armed() {
-            self.actor.actions |= ActorAction::Reload;
+        if self.is_reloading() {
             return;
         }
 
@@ -306,13 +311,20 @@ impl<'a> BotHandler<'a> {
             < self.bot.config.angular_deviation;
     }
 
+    fn is_reloading(&self) -> bool {
+        if let Some(weapon) = self.weapon {
+            return self.actor.actions.contains(ActorAction::Reload) || weapon.is_reloading();
+        } else {
+            return false;
+        }
+    }
+
     fn can_sprint(&self) -> bool {
-        return !self.actor.actions.contains(ActorAction::Reload);
+        return !self.is_reloading();
     }
 
     fn can_aim_at(&self, target: Vec2) -> bool {
-        return !self.actor.actions.contains(ActorAction::Reload)
-            && self.is_close(&target, self.bot.config.shoot_distance_max);
+        return !self.is_reloading() && self.is_close(&target, self.bot.config.shoot_distance_max);
     }
 }
 

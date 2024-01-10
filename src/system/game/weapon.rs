@@ -1,6 +1,6 @@
 use crate::{
     command::ProjectileSpawn,
-    component::{Actor, Weapon, WeaponFireResult},
+    component::{Actor, Weapon},
     model::{ActorActionsExt, AudioPlay, TransformLite},
     resource::{AudioTracker, HitResource},
     util::ext::Vec2Ext,
@@ -38,11 +38,57 @@ pub fn weapon(
     let now = time.elapsed();
 
     for (entity, actor, transform, mut weapon) in query.iter_mut() {
-        if !actor.actions.is_attacking() {
-            weapon.release_trigger();
+        if weapon.is_reloading() && weapon.is_ready(now) {
+            let was_armed = weapon.is_armed();
+            weapon.complete_reloading(now);
+
+            if !was_armed {
+                audio.queue(AudioPlay {
+                    path: "sounds/reloaded".into(),
+                    volume: 0.8,
+                    source: Some(transform.translation.xy()),
+                    ..AudioPlay::DEFAULT
+                });
+            }
         }
 
-        if actor.actions.is_reloading() && !weapon.is_reloading() {
+        if actor.actions.is_attacking() && weapon.try_fire(now) {
+            let mut transform = TransformLite::from(transform);
+            transform.translation += Vec2::from_length(BARREL_LENGTH, transform.direction);
+
+            audio.queue(AudioPlay {
+                path: "sounds/shot".into(),
+                volume: 1.0,
+                source: Some(transform.translation),
+                ..AudioPlay::DEFAULT
+            });
+
+            for _ in 0..weapon.config.projectile.fragments {
+                let deviation = weapon.config.generate_deviation(&mut data.rng);
+                let velocity = weapon.config.generate_velocity(&mut data.rng);
+
+                commands.add(ProjectileSpawn {
+                    config: weapon.config.projectile,
+                    transform: TransformLite::new(
+                        transform.translation.x,
+                        transform.translation.y,
+                        transform.direction + deviation,
+                    ),
+                    velocity,
+                    shooter: Some(entity),
+                });
+            }
+
+            let mut recoil = weapon.get_recoil() * actor.config.recoil_factor / actor.skill;
+
+            if data.rng.gen::<bool>() {
+                recoil = -recoil;
+            }
+
+            hits.add(entity, Vec2::ZERO, recoil, true);
+        }
+
+        if !weapon.is_reloading() && (!weapon.has_ammo() || actor.actions.is_reloading()) {
             let reloading_duration = weapon
                 .config
                 .reloading_time
@@ -59,74 +105,6 @@ pub fn weapon(
             });
 
             continue;
-        }
-
-        if weapon.is_reloading() && weapon.is_ready(now) {
-            let was_armed = weapon.is_armed();
-            weapon.complete_reloading(now);
-
-            if !was_armed {
-                audio.queue(AudioPlay {
-                    path: "sounds/reloaded".into(),
-                    volume: 0.8,
-                    source: Some(transform.translation.xy()),
-                    ..AudioPlay::DEFAULT
-                });
-            }
-        }
-
-        if actor.actions.is_attacking() {
-            let was_cocked = weapon.is_cocked();
-            let was_trigger_pressed = weapon.is_trigger_pressed();
-
-            match weapon.fire(now) {
-                WeaponFireResult::Empty => {
-                    if !was_trigger_pressed || (was_cocked && !weapon.is_cocked()) {
-                        audio.queue(AudioPlay {
-                            path: "sounds/dry_fire".into(),
-                            volume: 0.4,
-                            source: Some(transform.translation.xy()),
-                            ..AudioPlay::DEFAULT
-                        });
-                    }
-                }
-                WeaponFireResult::NotReady => {}
-                WeaponFireResult::Fire => {
-                    let mut transform = TransformLite::from(transform);
-                    transform.translation += Vec2::from_length(BARREL_LENGTH, transform.direction);
-
-                    audio.queue(AudioPlay {
-                        path: "sounds/shot".into(),
-                        volume: 1.0,
-                        source: Some(transform.translation),
-                        ..AudioPlay::DEFAULT
-                    });
-
-                    for _ in 0..weapon.config.projectile.fragments {
-                        let deviation = weapon.config.generate_deviation(&mut data.rng);
-                        let velocity = weapon.config.generate_velocity(&mut data.rng);
-
-                        commands.add(ProjectileSpawn {
-                            config: weapon.config.projectile,
-                            transform: TransformLite::new(
-                                transform.translation.x,
-                                transform.translation.y,
-                                transform.direction + deviation,
-                            ),
-                            velocity,
-                            shooter: Some(entity),
-                        });
-                    }
-
-                    let mut recoil = weapon.get_recoil() * actor.config.recoil_factor / actor.skill;
-
-                    if data.rng.gen::<bool>() {
-                        recoil = -recoil;
-                    }
-
-                    hits.add(entity, Vec2::ZERO, recoil, true);
-                }
-            }
         }
     }
 }

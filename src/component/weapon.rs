@@ -1,9 +1,6 @@
 use crate::{
     component::ProjectileConfig,
-    util::{
-        ext::{DurationExt, RngExt},
-        math::interpolate,
-    },
+    util::ext::{DurationExt, RngExt},
 };
 use bevy::ecs::component::Component;
 use rand_pcg::Pcg32;
@@ -14,9 +11,6 @@ const ARMING_DURATION: Duration = Duration::from_millis(300);
 #[derive(Component)]
 pub struct Weapon {
     pub config: &'static WeaponConfig,
-    is_armed: bool,
-    is_cocked: bool,
-    is_trigger_pressed: bool,
     reloading: Option<Duration>,
     ammo: u8,
     next_time: Duration,
@@ -33,14 +27,14 @@ pub struct WeaponConfig {
     pub projectile: &'static ProjectileConfig,
     pub ammo_capacity: u8,
     pub reloading_time: Duration,
-    pub partial_reloading: bool,
+    pub has_bolt: bool,
     pub grip: WeaponGrip,
     pub image_offset: f32,
 }
 
 impl WeaponConfig {
     const VELOCITY_DEVIATION: f32 = 0.06;
-    const SEMI_AUTO_FIRE_RATE: f32 = 400.0;
+    const FIRE_RATE_SHOTGUN: f32 = 85.0;
 
     const RELOADING_TIME_PISTOL: Duration = Duration::from_millis(3000);
     const RELOADING_TIME_SHOTGUN_LIGHT: Duration = Duration::from_millis(1200);
@@ -76,12 +70,12 @@ impl WeaponConfig {
         mass: 0.73,
         muzzle_velocity: 315.0,
         deviation: 0.03,
-        fire_rate: Self::SEMI_AUTO_FIRE_RATE,
+        fire_rate: 120.0,
         is_automatic: false,
         projectile: &ProjectileConfig::_9X18,
         ammo_capacity: 8,
         reloading_time: Self::RELOADING_TIME_PISTOL,
-        partial_reloading: false,
+        has_bolt: true,
         grip: WeaponGrip::OneHand,
         image_offset: 2.0,
     };
@@ -92,12 +86,12 @@ impl WeaponConfig {
         mass: 0.85,
         muzzle_velocity: 430.0,
         deviation: 0.025,
-        fire_rate: Self::SEMI_AUTO_FIRE_RATE,
+        fire_rate: 110.0,
         is_automatic: false,
         projectile: &ProjectileConfig::_7_62X25,
         ammo_capacity: 8,
         reloading_time: Self::RELOADING_TIME_PISTOL,
-        partial_reloading: false,
+        has_bolt: true,
         grip: WeaponGrip::OneHand,
         image_offset: 2.0,
     };
@@ -108,12 +102,12 @@ impl WeaponConfig {
         mass: 2.2,
         muzzle_velocity: 260.0,
         deviation: 0.06,
-        fire_rate: Self::SEMI_AUTO_FIRE_RATE,
+        fire_rate: Self::FIRE_RATE_SHOTGUN,
         is_automatic: false,
         projectile: &ProjectileConfig::_12X76,
         ammo_capacity: 2,
         reloading_time: Self::RELOADING_TIME_SHOTGUN_LIGHT,
-        partial_reloading: true,
+        has_bolt: false,
         grip: WeaponGrip::TwoHands,
         image_offset: 3.5,
     };
@@ -129,7 +123,7 @@ impl WeaponConfig {
         projectile: &ProjectileConfig::_9X18,
         ammo_capacity: 20,
         reloading_time: Self::RELOADING_TIME_SMG,
-        partial_reloading: false,
+        has_bolt: true,
         grip: WeaponGrip::TwoHands,
         image_offset: 3.5,
     };
@@ -140,12 +134,12 @@ impl WeaponConfig {
         mass: 3.2,
         muzzle_velocity: 410.0,
         deviation: 0.03,
-        fire_rate: Self::SEMI_AUTO_FIRE_RATE,
+        fire_rate: Self::FIRE_RATE_SHOTGUN,
         is_automatic: false,
         projectile: &ProjectileConfig::_12X76,
         ammo_capacity: 2,
         reloading_time: Self::RELOADING_TIME_SHOTGUN,
-        partial_reloading: true,
+        has_bolt: false,
         grip: WeaponGrip::TwoHandsWithButt,
         image_offset: 10.0,
     };
@@ -161,7 +155,7 @@ impl WeaponConfig {
         projectile: &ProjectileConfig::_9X18,
         ammo_capacity: 64,
         reloading_time: Self::RELOADING_TIME_SMG,
-        partial_reloading: false,
+        has_bolt: true,
         grip: WeaponGrip::TwoHandsWithButt,
         image_offset: 7.0,
     };
@@ -177,7 +171,7 @@ impl WeaponConfig {
         projectile: &ProjectileConfig::_5_45X39,
         ammo_capacity: 30,
         reloading_time: Self::RELOADING_TIME_CARBINE,
-        partial_reloading: false,
+        has_bolt: true,
         grip: WeaponGrip::TwoHandsWithButt,
         image_offset: 8.0,
     };
@@ -193,7 +187,7 @@ impl WeaponConfig {
         projectile: &ProjectileConfig::_5_45X39,
         ammo_capacity: 30,
         reloading_time: Self::RELOADING_TIME_RIFLE,
-        partial_reloading: false,
+        has_bolt: true,
         grip: WeaponGrip::TwoHandsWithButt,
         image_offset: 9.0,
     };
@@ -209,7 +203,7 @@ impl WeaponConfig {
         projectile: &ProjectileConfig::_5_45X39,
         ammo_capacity: 45,
         reloading_time: Self::RELOADING_TIME_RIFLE_HEAVY,
-        partial_reloading: false,
+        has_bolt: true,
         grip: WeaponGrip::TwoHandsWithButt,
         image_offset: 9.0,
     };
@@ -220,12 +214,12 @@ impl WeaponConfig {
         mass: 3.3,
         muzzle_velocity: 410.0,
         deviation: 0.035,
-        fire_rate: Self::SEMI_AUTO_FIRE_RATE,
+        fire_rate: Self::FIRE_RATE_SHOTGUN,
         is_automatic: false,
         projectile: &ProjectileConfig::_12X76,
         ammo_capacity: 8,
         reloading_time: Self::RELOADING_TIME_RIFLE,
-        partial_reloading: false,
+        has_bolt: true,
         grip: WeaponGrip::TwoHandsWithButt,
         image_offset: 9.0,
     };
@@ -241,7 +235,7 @@ impl WeaponConfig {
         projectile: &ProjectileConfig::_7_62X54,
         ammo_capacity: 100,
         reloading_time: Self::RELOADING_TIME_MACHINE_GUN,
-        partial_reloading: false,
+        has_bolt: true,
         grip: WeaponGrip::TwoHandsWithButt,
         image_offset: 10.0,
     };
@@ -257,7 +251,7 @@ impl WeaponConfig {
         projectile: &ProjectileConfig::_7_62X54,
         ammo_capacity: 100,
         reloading_time: Self::RELOADING_TIME_MACHINE_GUN,
-        partial_reloading: false,
+        has_bolt: true,
         grip: WeaponGrip::TwoHandsWithButt,
         image_offset: 10.0,
     };
@@ -292,57 +286,24 @@ impl Weapon {
     pub const fn new(config: &'static WeaponConfig) -> Self {
         return Self {
             config,
-            is_armed: true,
-            is_cocked: true,
-            is_trigger_pressed: false,
             reloading: None,
             ammo: config.ammo_capacity,
             next_time: Duration::from_secs(0),
         };
     }
 
-    pub fn fire(&mut self, time: Duration) -> WeaponFireResult {
-        if !self.config.is_automatic && self.is_trigger_pressed {
-            return WeaponFireResult::NotReady;
-        }
-
-        self.is_trigger_pressed = true;
-
-        if self.is_ready(time) {
+    pub fn try_fire(&mut self, time: Duration) -> bool {
+        if self.is_ready(time) && self.has_ammo() {
+            self.ammo = self.ammo.saturating_sub(1);
             self.next_time = time + Duration::from_secs_f32(60.0 / self.config.fire_rate);
-
-            if self.config.ammo_capacity == 0 {
-                return WeaponFireResult::Fire;
-            } else if self.ammo > 0 {
-                self.ammo -= 1;
-                return WeaponFireResult::Fire;
-            } else {
-                if !self.config.partial_reloading {
-                    self.is_armed = false;
-                }
-
-                self.is_cocked = false;
-                return WeaponFireResult::Empty;
-            }
+            return true;
         } else {
-            return WeaponFireResult::NotReady;
+            return false;
         }
-    }
-
-    pub fn release_trigger(&mut self) {
-        self.is_trigger_pressed = false;
     }
 
     pub fn reload(&mut self, time: Duration, duration: Duration) {
         if self.reloading.is_none() {
-            if self.config.partial_reloading {
-                if self.ammo == self.config.ammo_capacity {
-                    self.ammo = self.ammo.saturating_sub(1);
-                }
-            } else {
-                self.ammo = 0;
-            }
-
             self.reloading = Some(duration);
             self.next_time = time + duration;
         }
@@ -350,19 +311,11 @@ impl Weapon {
 
     pub fn complete_reloading(&mut self, time: Duration) {
         if self.reloading.is_some() {
-            self.is_cocked = true;
+            let was_armed = self.is_armed();
             self.reloading = None;
+            self.ammo = self.config.ammo_capacity;
 
-            if self.config.partial_reloading {
-                if self.ammo < self.config.ammo_capacity {
-                    self.ammo += 1;
-                }
-            } else {
-                self.ammo = self.config.ammo_capacity;
-            }
-
-            if !self.is_armed {
-                self.is_armed = true;
+            if !was_armed {
                 self.next_time = time + ARMING_DURATION;
             }
         }
@@ -388,30 +341,18 @@ impl Weapon {
                 self.next_time,
             );
 
-            if self.config.partial_reloading {
-                return interpolate(
-                    self.config.get_ammo_normalized(self.ammo),
-                    self.config.get_ammo_normalized(self.ammo + 1),
-                    progress,
-                );
-            } else {
-                return progress;
-            }
+            return progress;
         } else {
             return self.config.get_ammo_normalized(self.ammo);
         }
     }
 
-    pub fn is_cocked(&self) -> bool {
-        return self.is_cocked;
-    }
-
-    pub fn is_trigger_pressed(&self) -> bool {
-        return self.is_trigger_pressed;
+    pub fn has_ammo(&self) -> bool {
+        return self.ammo > 0 || self.config.ammo_capacity == 0;
     }
 
     pub fn is_armed(&self) -> bool {
-        return self.is_armed;
+        return !self.config.has_bolt || self.has_ammo();
     }
 
     pub fn is_reloading(&self) -> bool {
@@ -421,12 +362,6 @@ impl Weapon {
     pub fn is_ready(&self, time: Duration) -> bool {
         return self.next_time < time;
     }
-}
-
-pub enum WeaponFireResult {
-    NotReady,
-    Empty,
-    Fire,
 }
 
 pub enum WeaponGrip {
