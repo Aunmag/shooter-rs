@@ -151,7 +151,7 @@ impl Config {
 impl DisplayConfig {
     pub fn mode(&self) -> WindowMode {
         if self.fullscreen {
-            return WindowMode::Fullscreen;
+            return WindowMode::BorderlessFullscreen;
         } else {
             return WindowMode::Windowed;
         }
