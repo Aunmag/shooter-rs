@@ -89,14 +89,8 @@ pub fn weapon(
         }
 
         if !weapon.is_reloading() && (!weapon.has_ammo() || actor.actions.is_reloading()) {
-            let reloading_duration = weapon
-                .config
-                .reloading_time
-                .mul_f32(actor.config.reloading_speed)
-                .div_f32(actor.skill);
-
+            let reloading_duration = weapon.config.reloading_time.div_f32(actor.skill);
             weapon.reload(now, reloading_duration);
-
             audio.queue(AudioPlay {
                 path: "sounds/reloading".into(),
                 volume: 0.4,

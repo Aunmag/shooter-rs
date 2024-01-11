@@ -43,7 +43,6 @@ pub struct ActorConfig {
     pub melee_distance_angular: f32,
     pub melee_interval: Duration,
     // shooting
-    pub reloading_speed: f32,
     pub recoil_factor: f32,
     // misc
     pub bot: &'static BotConfig,
@@ -107,7 +106,6 @@ impl ActorConfig {
         melee_distance: 0.7,
         melee_distance_angular: TAU / 5.0,
         melee_interval: Duration::from_millis(600),
-        reloading_speed: 0.6,
         recoil_factor: 1.0,
         bot: BotConfig::HUMAN,
         images: &[1, 2],
@@ -128,7 +126,6 @@ impl ActorConfig {
         melee_distance: Self::HUMAN.melee_distance,
         melee_distance_angular: Self::HUMAN.melee_distance_angular,
         melee_interval: Self::HUMAN.melee_interval,
-        reloading_speed: Self::HUMAN.reloading_speed * 2.0,
         recoil_factor: 6.0,
         bot: BotConfig::ZOMBIE,
         images: &[0, 1, 2],

@@ -36,14 +36,14 @@ impl WeaponConfig {
     const VELOCITY_DEVIATION: f32 = 0.06;
     const FIRE_RATE_SHOTGUN: f32 = 85.0;
 
-    const RELOADING_TIME_PISTOL: Duration = Duration::from_millis(3000);
-    const RELOADING_TIME_SHOTGUN_LIGHT: Duration = Duration::from_millis(1200);
-    const RELOADING_TIME_SHOTGUN: Duration = Duration::from_millis(1800);
-    const RELOADING_TIME_SMG: Duration = Duration::from_millis(3800);
-    const RELOADING_TIME_CARBINE: Duration = Duration::from_millis(4200);
-    const RELOADING_TIME_RIFLE: Duration = Duration::from_millis(5000);
-    const RELOADING_TIME_RIFLE_HEAVY: Duration = Duration::from_millis(5800);
-    const RELOADING_TIME_MACHINE_GUN: Duration = Duration::from_millis(10000);
+    const RELOADING_TIME_PISTOL: Duration = Duration::from_millis(1100);
+    const RELOADING_TIME_SHOTGUN_LIGHT: Duration = Duration::from_millis(900);
+    const RELOADING_TIME_SHOTGUN: Duration = Duration::from_millis(1100);
+    const RELOADING_TIME_SMG: Duration = Duration::from_millis(1200);
+    const RELOADING_TIME_CARBINE: Duration = Duration::from_millis(1900);
+    const RELOADING_TIME_RIFLE: Duration = Duration::from_millis(2200);
+    const RELOADING_TIME_RIFLE_HEAVY: Duration = Duration::from_millis(2500);
+    const RELOADING_TIME_MACHINE_GUN: Duration = Duration::from_millis(8000);
 
     const RECOIL_MASS_POW: f32 = 0.25;
     const RECOIL_POW: f32 = 0.5;
