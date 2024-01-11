@@ -248,11 +248,17 @@ impl ScenarioLogic for WavesScenario {
                     }
                     1 => {
                         commands.add(Notify {
-                            text_small: "Press [SHIFT] to sprint".into(),
+                            text_small: "Press [RMB] to aim".into(),
                             ..Default::default()
                         });
                     }
                     2 => {
+                        commands.add(Notify {
+                            text_small: "Press [SHIFT] to sprint".into(),
+                            ..Default::default()
+                        });
+                    }
+                    3 => {
                         commands.add(Notify {
                             text_small: "Use mouse wheel to change zoom".into(),
                             ..Default::default()

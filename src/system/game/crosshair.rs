@@ -1,5 +1,8 @@
 use crate::{
-    component::Player, data::PIXELS_PER_METER, material::CrosshairMaterial, util::ext::Vec2Ext,
+    component::Player,
+    data::PIXELS_PER_METER,
+    material::CrosshairMaterial,
+    util::{ext::Vec2Ext, math::angle_difference},
 };
 use bevy::{
     asset::Handle,
@@ -20,7 +23,7 @@ const SIZE: f32 = PIXELS_PER_METER * 1.2;
 pub fn crosshair(
     mut crosshairs: Query<&mut Transform, (With<Handle<CrosshairMaterial>>, Without<Player>)>,
     cameras: Query<(&Camera, &GlobalTransform, &OrthographicProjection)>,
-    mut players: Query<(&mut Player, &Transform)>,
+    mut players: Query<(&mut Player, &mut Transform)>,
     mut mouse_motion: EventReader<MouseMotion>,
 ) {
     let mut cursor_delta = Vec2::ZERO;
@@ -33,7 +36,7 @@ pub fn crosshair(
         return;
     };
 
-    for (mut player, player_transform) in players.iter_mut() {
+    for (mut player, mut player_transform) in players.iter_mut() {
         let player_position = player_transform.translation.truncate();
 
         let player_on_screen = camera
@@ -52,7 +55,12 @@ pub fn crosshair(
                 .unwrap();
 
             let mut on_screen_new = on_screen_old;
-            on_screen_new.y += cursor_delta.y;
+
+            if player.is_aiming {
+                on_screen_new.y += cursor_delta.y;
+            } else {
+                on_screen_new += cursor_delta;
+            }
 
             // clamp crosshair inside view port
             if let Some(viewport_size) = camera.logical_viewport_size() {
@@ -60,8 +68,10 @@ pub fn crosshair(
                 on_screen_new.y = on_screen_new.y.clamp(0.0, viewport_size.y);
             }
 
-            // don't allow crosshair go below player
-            on_screen_new.y = f32::min(on_screen_new.y, player_on_screen.y);
+            if player.is_aiming {
+                // don't allow crosshair go below player
+                on_screen_new.y = f32::min(on_screen_new.y, player_on_screen.y);
+            }
 
             // put crosshair to it's updated position
             let on_world_new = camera
@@ -78,6 +88,14 @@ pub fn crosshair(
             if on_screen_new != on_screen_old {
                 // update crosshair distance only when it'd moved. otherwise distance error may grow
                 player.crosshair.distance = player_position.distance(on_world_new);
+
+                if !player.is_aiming {
+                    // if crosshair had rotated, i.e. by input, then rote the player too
+                    player_transform.rotate_local_z(angle_difference(
+                        player_position.angle_to(on_world),
+                        player_position.angle_to(on_world_new),
+                    ));
+                }
             }
 
             transform.rotation = player_transform.rotation;

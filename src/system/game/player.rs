@@ -3,21 +3,30 @@ use crate::{
     data::WORLD_SIZE_HALF,
     model::{ActorAction, ActorActionsExt},
     resource::Config,
+    util::ext::{TransformExt, Vec2Ext},
 };
 use bevy::{
-    ecs::system::Query,
+    ecs::{
+        query::{With, Without},
+        system::{Commands, Query},
+        world::World,
+    },
     input::mouse::{MouseMotion, MouseWheel},
-    math::Vec2,
+    math::{Quat, Vec2},
     prelude::{EventReader, Input, KeyCode, MouseButton, Res, Transform},
+    render::camera::Camera,
     time::Time,
 };
+use std::f32::consts::FRAC_PI_2;
 
 pub fn player(
-    mut query: Query<(&mut Player, &mut Actor, &mut Transform)>,
+    mut players: Query<(&mut Player, &mut Actor, &mut Transform), Without<Camera>>,
+    cameras: Query<&Transform, With<Camera>>,
     keyboard: Res<Input<KeyCode>>,
     mouse: Res<Input<MouseButton>>,
     mut mouse_motion: EventReader<MouseMotion>,
     mut mouse_scroll: EventReader<MouseWheel>,
+    mut commands: Commands,
     time: Res<Time>,
     config: Res<Config>,
 ) {
@@ -34,10 +43,7 @@ pub fn player(
         zoom += event.y;
     }
 
-    let rotation = mouse_delta_x * config.controls.mouse_sensitivity;
-    let extra_rotation = rotation * Player::EXTRA_ROTATION_MULTIPLAYER;
-
-    for (mut player, mut actor, mut transform) in query.iter_mut() {
+    for (mut player, mut actor, mut transform) in players.iter_mut() {
         if !player.is_controllable {
             continue;
         }
@@ -72,12 +78,43 @@ pub fn player(
             .actions
             .set(ActorAction::Reload, keyboard.pressed(KeyCode::R));
 
+        let direction = transform.direction() - FRAC_PI_2;
+
+        if mouse.just_pressed(MouseButton::Right) {
+            player.is_aiming = !player.is_aiming;
+
+            if !player.is_aiming {
+                commands.add(move |world: &mut World| {
+                    for mut camera in world
+                        .query_filtered::<&mut Transform, With<Camera>>()
+                        .iter_mut(world)
+                    {
+                        camera.rotation = Quat::from_rotation_z(direction);
+                    }
+                });
+            }
+        }
+
         player.add_zoom(zoom);
         player.update(delta);
-        transform.rotate_local_z(rotation + player.add_extra_rotation(extra_rotation));
 
         let limit = WORLD_SIZE_HALF;
         transform.translation.x = transform.translation.x.clamp(-limit, limit);
         transform.translation.y = transform.translation.y.clamp(-limit, limit);
+
+        if player.is_aiming {
+            let rotation_base = mouse_delta_x * config.controls.mouse_sensitivity;
+            let rotation_extra = rotation_base * Player::EXTRA_ROTATION_MULTIPLAYER;
+            transform.rotate_local_z(rotation_base + player.add_extra_rotation(rotation_extra));
+        } else {
+            // TODO: optimize and simplify
+            actor.movement = actor
+                .movement
+                .rotate_by_quat(Quat::from_rotation_z(-direction));
+
+            if let Some(camera) = cameras.iter().next() {
+                actor.movement = actor.movement.rotate_by_quat(camera.rotation);
+            }
+        }
     }
 }

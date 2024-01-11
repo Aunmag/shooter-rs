@@ -4,6 +4,7 @@ use std::time::Duration;
 
 #[derive(Component)]
 pub struct Player {
+    pub is_aiming: bool,
     pub is_controllable: bool,
     pub crosshair: PlayerCrosshair,
     zoom: Zoom,
@@ -18,6 +19,7 @@ impl Player {
 
     pub fn new(is_controllable: bool, crosshair: Entity) -> Self {
         return Self {
+            is_aiming: false,
             is_controllable,
             crosshair: PlayerCrosshair::new(crosshair),
             zoom: Zoom::default(),

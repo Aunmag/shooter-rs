@@ -47,16 +47,11 @@ impl SystemBuffer for HitResource {
             let mut skip_recoil_push = false;
 
             if let Ok(player) = players.get_mut(world, hit.entity).as_mut() {
-                let mut shake_angle = angle;
-
-                if hit.is_recoil {
-                    // to make weapon handling more peasant for player, if it's recoil, don't push
-                    // body, only shake camera. but bots still must be pushed when there's recoil
+                if player.is_aiming && hit.is_recoil {
                     skip_recoil_push = true;
-                    shake_angle *= 1.5;
                 }
 
-                player.shake(shake_angle);
+                player.shake(angle);
             }
 
             if !skip_recoil_push {
