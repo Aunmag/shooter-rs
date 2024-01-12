@@ -2,16 +2,19 @@
 
 ### About
 
-A work-in-progress top-down shooter. Actually, it's a Rust port of [my Java game](https://github.com/aunmag/shooter-java). For now, its goal is very simply to shoot zombies chasing after you. The game has several advantages, like high-quality bullet ballistics and geocentric camera rotation relative to the player. I want to make something similar to S.T.A.L.K.E.R., with open locations, quests, cooperative mode, and so on. It may take a lot of time and effort.
+2D zombie shooter written in [Rust](https://rust-lang.org/) programming language using [Bevy](https://bevyengine.org).
 
-Feel free to leave any comments or questions in the open [discussion](https://github.com/aunmag/shooter-rust/discussions/1) on GitHub.
+This game is inspired by [Crimsonland](https://store.steampowered.com/app/262830): eliminate hordes of zombies that relentlessly chase after you. I endeavored to implement projectile ballistics as accurately as possible in a 2D setting, where bullets slow down over distance, resulting in decreased damage. The game features two camera modes: static (classic) and dynamic, which causes the screen to rotate with the player, creating a unique 2D first-person shooter experience. Various weapons and enemy types are included.
 
-If you'd like to support this project just star it on [GitHub](https://github.com/aunmag/shooter-rust) or share it with friends.
+In the future, I plan to add animations, diverse locations with buildings, and RPG elements to create an open-world experience reminiscent of S.T.A.L.K.E.R. but in 2D. However, achieving these goals will require a considerable amount of time.
+
+If you'd like to support this project, simply give it a star on [GitHub](https://github.com/aunmag/shooter-rs) or share it with your friends. Also, consider checking out the game development blog on [Telegram](https://t.me/shooter_rs).
 
 ### Links
-- [Downloads](https://github.com/aunmag/shooter-rust/releases)
+- [Downloads](https://github.com/aunmag/shooter-rs/releases)
+- [Telegram blog](https://t.me/shooter_rs)
+- [VK blog](https://vk.com/shooter_rs)
 - [YouTube](https://youtube.com/playlist?list=PLwfCZwsceTzLbEv_VMsAo_185FxjSRw7X)
-- [VK blog (in Russian)](https://vk.com/aunmag_dev)
 
 ### Note
 This repository uses [Git LFS](https://git-lfs.github.com/), so make sure you have it installed to fetch all the assets such as images, etc.
