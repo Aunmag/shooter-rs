@@ -141,7 +141,7 @@ fn play_audio(world: &mut World) {
 
     audio.queue(AudioPlay {
         path: "sounds/ambience_nature".into(),
-        volume: 0.3,
+        volume: 0.2,
         duration: AudioPlay::DURATION_FOREVER,
         ..AudioPlay::DEFAULT
     });
