@@ -51,6 +51,10 @@ impl AudioStorage {
             }
         }
 
+        for (_, group) in self.groups.iter_mut() {
+            group.audios.shuffle(&mut self.generator);
+        }
+
         log::debug!("Indexed groups: {}", self.groups.len());
     }
 
