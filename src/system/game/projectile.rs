@@ -90,7 +90,7 @@ fn find_obstacle(
         }
 
         let obstacle = transform.translation.xy();
-        let contact = obstacle.project_on(projectile);
+        let contact = obstacle.project_on_clamped(projectile);
 
         if obstacle.is_close(contact, collision.radius) {
             let tail_distance = obstacle.distance_squared(projectile.1);

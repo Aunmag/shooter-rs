@@ -121,6 +121,7 @@ fn main() {
             s.add(weapon.after(collision_resolve));
             s.add(melee.after(collision_resolve));
             s.add(projectile.after(collision_resolve));
+            s.add(projectile_whiz);
             s.add(bonus_image);
             s.add(bonus_label);
             s.add(bonus.after(collision_resolve));

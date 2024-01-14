@@ -16,6 +16,7 @@ mod melee;
 mod on_enter;
 mod player;
 mod projectile;
+mod projectile_whiz;
 mod scenario;
 mod status_bar;
 mod terrain;
@@ -24,6 +25,6 @@ mod weapon;
 pub use self::{
     actor::*, ambience_fx::*, blood::*, bonus::*, breath::*, camera::*, collision_find::*,
     collision_resolve::*, crosshair::*, footsteps::*, health::*, heartbeat::*, inertia::*,
-    input::*, melee::*, on_enter::*, player::*, projectile::*, scenario::*, status_bar::*,
-    terrain::*, weapon::*,
+    input::*, melee::*, on_enter::*, player::*, projectile::*, projectile_whiz::*, scenario::*,
+    status_bar::*, terrain::*, weapon::*,
 };
