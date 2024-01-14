@@ -11,8 +11,10 @@ const ARMING_DURATION: Duration = Duration::from_millis(300);
 #[derive(Component)]
 pub struct Weapon {
     pub config: &'static WeaponConfig,
-    reloading: Option<Duration>,
     ammo: u8,
+    deviation_temporal: f32,
+    reloading: Option<Duration>,
+    last_shot: Duration,
     next_time: Duration,
 }
 
@@ -35,6 +37,7 @@ pub struct WeaponConfig {
 impl WeaponConfig {
     const VELOCITY_DEVIATION: f32 = 0.06;
     const FIRE_RATE_SHOTGUN: f32 = 85.0;
+    const DEVIATION_COOL_DOWN: Duration = Duration::from_millis(800);
 
     const RELOADING_TIME_PISTOL: Duration = Duration::from_millis(1100);
     const RELOADING_TIME_SHOTGUN_LIGHT: Duration = Duration::from_millis(900);
@@ -69,7 +72,7 @@ impl WeaponConfig {
         level: 1,
         mass: 0.73,
         muzzle_velocity: 315.0,
-        deviation: 0.03,
+        deviation: 0.015,
         fire_rate: 120.0,
         is_automatic: false,
         projectile: &ProjectileConfig::_9X18,
@@ -85,7 +88,7 @@ impl WeaponConfig {
         level: 1,
         mass: 0.85,
         muzzle_velocity: 430.0,
-        deviation: 0.025,
+        deviation: 0.013,
         fire_rate: 110.0,
         is_automatic: false,
         projectile: &ProjectileConfig::_7_62X25,
@@ -117,7 +120,7 @@ impl WeaponConfig {
         level: 2,
         mass: 1.6,
         muzzle_velocity: 310.0,
-        deviation: 0.02,
+        deviation: 0.01,
         fire_rate: 900.0,
         is_automatic: true,
         projectile: &ProjectileConfig::_9X18,
@@ -149,7 +152,7 @@ impl WeaponConfig {
         level: 3,
         mass: 2.7,
         muzzle_velocity: 330.0,
-        deviation: 0.015,
+        deviation: 0.008,
         fire_rate: 680.0,
         is_automatic: true,
         projectile: &ProjectileConfig::_9X18,
@@ -165,7 +168,7 @@ impl WeaponConfig {
         level: 4,
         mass: 2.9,
         muzzle_velocity: 735.0,
-        deviation: 0.015,
+        deviation: 0.008,
         fire_rate: 675.0,
         is_automatic: true,
         projectile: &ProjectileConfig::_5_45X39,
@@ -181,7 +184,7 @@ impl WeaponConfig {
         level: 4,
         mass: 3.83,
         muzzle_velocity: 910.0,
-        deviation: 0.014,
+        deviation: 0.007,
         fire_rate: 600.0,
         is_automatic: true,
         projectile: &ProjectileConfig::_5_45X39,
@@ -197,7 +200,7 @@ impl WeaponConfig {
         level: 5,
         mass: 5.24,
         muzzle_velocity: 960.0,
-        deviation: 0.012,
+        deviation: 0.0065,
         fire_rate: 600.0,
         is_automatic: true,
         projectile: &ProjectileConfig::_5_45X39,
@@ -229,7 +232,7 @@ impl WeaponConfig {
         level: 7,
         mass: 7.5,
         muzzle_velocity: 825.0,
-        deviation: 0.011,
+        deviation: 0.006,
         fire_rate: 650.0,
         is_automatic: true,
         projectile: &ProjectileConfig::_7_62X54,
@@ -245,7 +248,7 @@ impl WeaponConfig {
         level: 7,
         mass: 8.2,
         muzzle_velocity: 825.0,
-        deviation: 0.01,
+        deviation: 0.0055,
         fire_rate: 650.0,
         is_automatic: true,
         projectile: &ProjectileConfig::_7_62X54,
@@ -259,10 +262,6 @@ impl WeaponConfig {
     pub fn generate_velocity(&self, rng: &mut Pcg32) -> f32 {
         let deviation = rng.gen_normal(self.muzzle_velocity * Self::VELOCITY_DEVIATION);
         return self.muzzle_velocity + deviation;
-    }
-
-    pub fn generate_deviation(&self, rng: &mut Pcg32) -> f32 {
-        return rng.gen_normal(self.deviation);
     }
 
     pub fn get_mass_with_full_ammo(&self) -> f32 {
@@ -286,16 +285,21 @@ impl Weapon {
     pub const fn new(config: &'static WeaponConfig) -> Self {
         return Self {
             config,
-            reloading: None,
             ammo: config.ammo_capacity,
-            next_time: Duration::from_secs(0),
+            deviation_temporal: 0.0,
+            reloading: None,
+            last_shot: Duration::ZERO,
+            next_time: Duration::ZERO,
         };
     }
 
     pub fn try_fire(&mut self, time: Duration) -> bool {
         if self.is_ready(time) && self.has_ammo() {
+            let deviation = self.get_deviation_temporal(time);
             self.ammo = self.ammo.saturating_sub(1);
+            self.last_shot = time;
             self.next_time = time + Duration::from_secs_f32(60.0 / self.config.fire_rate);
+            self.deviation_temporal = self.config.deviation + deviation;
             return true;
         } else {
             return false;
@@ -319,6 +323,19 @@ impl Weapon {
                 self.next_time = time + ARMING_DURATION;
             }
         }
+    }
+
+    pub fn get_deviation_temporal(&self, time: Duration) -> f32 {
+        let accuracy = time.progress(
+            self.last_shot,
+            self.last_shot + WeaponConfig::DEVIATION_COOL_DOWN,
+        );
+
+        return self.deviation_temporal * (1.0 - accuracy);
+    }
+
+    pub fn get_deviation(&self, time: Duration) -> f32 {
+        return self.config.deviation + self.get_deviation_temporal(time);
     }
 
     pub fn get_mass(&self) -> f32 {

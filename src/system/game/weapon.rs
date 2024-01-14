@@ -1,19 +1,25 @@
 use crate::{
     command::ProjectileSpawn,
     component::{Actor, Weapon},
+    data::VIEW_DISTANCE,
     model::{ActorActionsExt, AudioPlay, TransformLite},
     resource::{AudioTracker, HitResource},
-    util::ext::Vec2Ext,
+    util::{
+        ext::{RngExt, TransformExt, Vec2Ext},
+        GIZMOS,
+    },
 };
 use bevy::{
     ecs::system::{Deferred, Local, Query},
     math::{Vec2, Vec3Swizzles},
     prelude::{Commands, Entity, Res, Time, Transform},
+    render::color::Color,
 };
 use rand::{Rng, SeedableRng};
 use rand_pcg::Pcg32;
 
 const BARREL_LENGTH: f32 = 0.6; // TODO: don't hardcode
+const DEBUG_DEVIATION: bool = false;
 
 pub struct WeaponSystemData {
     rng: Pcg32,
@@ -52,6 +58,13 @@ pub fn weapon(
             }
         }
 
+        // get deviation before shoot, because it will increase after
+        let deviation = weapon.get_deviation(now);
+
+        if DEBUG_DEVIATION {
+            debug_deviation(transform, deviation);
+        }
+
         if actor.actions.is_attacking() && weapon.try_fire(now) {
             let mut transform = TransformLite::from(transform);
             transform.translation += Vec2::from_length(BARREL_LENGTH, transform.direction);
@@ -64,7 +77,7 @@ pub fn weapon(
             });
 
             for _ in 0..weapon.config.projectile.fragments {
-                let deviation = weapon.config.generate_deviation(&mut data.rng);
+                let deviation = data.rng.gen_range_safely(-deviation, deviation);
                 let velocity = weapon.config.generate_velocity(&mut data.rng);
 
                 commands.add(ProjectileSpawn {
@@ -101,4 +114,13 @@ pub fn weapon(
             continue;
         }
     }
+}
+
+fn debug_deviation(transform: &Transform, deviation: f32) {
+    let p = transform.translation.truncate();
+    let d = transform.direction();
+    let l = VIEW_DISTANCE / 2.0;
+    let color = Color::WHITE.with_a(0.5);
+    GIZMOS.ln(p, p + Vec2::from_length(l, d + deviation), color);
+    GIZMOS.ln(p, p + Vec2::from_length(l, d - deviation), color);
 }

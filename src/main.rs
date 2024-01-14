@@ -103,7 +103,7 @@ fn main() {
         .insert_resource(AudioTracker::new(config.audio.sources))
         .insert_resource(config)
         .insert_resource(GizmoConfig {
-            line_width: 5.0,
+            line_width: 3.0,
             ..Default::default()
         })
         .add_systems(Update, system::sys::audio)
