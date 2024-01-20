@@ -329,7 +329,7 @@ impl Command for SpawnZombie {
         let entity = world.spawn_empty().id();
         let offset = Vec2::from_length(ZOMBIE_SPAWN_DISTANCE, self.direction);
         let transform =
-            TransformLite::new(center.x + offset.x, center.y + offset.y, self.direction);
+            TransformLite::new(center.x - offset.x, center.y - offset.y, self.direction);
 
         ActorSet {
             entity,
