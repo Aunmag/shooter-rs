@@ -17,12 +17,14 @@ pub struct Config {
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct GameConfig {
+    pub difficulty: f32,
     pub modes: Vec<GameMode>,
 }
 
 impl Default for GameConfig {
     fn default() -> Self {
         return Self {
+            difficulty: 1.0,
             modes: vec![GameMode::Waves],
         };
     }

@@ -6,17 +6,19 @@ use bevy::{
 
 pub struct ActorBotSet {
     pub entity: Entity,
-    pub skill: f32,
 }
 
 impl Command for ActorBotSet {
     fn apply(self, world: &mut World) {
         let entity_id = u64::from(self.entity.index());
 
-        if let Some(config) = world.get::<Actor>(self.entity).map(|a| a.config.bot) {
+        if let Some(actor) = world.get::<Actor>(self.entity) {
+            let config = actor.config.bot;
+            let skill = actor.skill;
+
             world
                 .entity_mut(self.entity)
-                .insert(Bot::new(config, self.skill, entity_id));
+                .insert(Bot::new(config, skill, entity_id));
         } else {
             log::warn!("Can't set bot. Entity has no actor component");
         }

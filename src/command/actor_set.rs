@@ -2,6 +2,7 @@ use crate::{
     component::{Actor, ActorConfig, ActorKind, Breath, Collision, Footsteps, Health, Inertia},
     data::LAYER_ACTOR,
     model::TransformLite,
+    resource::Config,
 };
 use bevy::{
     ecs::system::Command,
@@ -11,12 +12,12 @@ use bevy::{
 pub struct ActorSet {
     pub entity: Entity,
     pub config: &'static ActorConfig,
-    pub skill: f32,
     pub transform: TransformLite,
 }
 
 impl Command for ActorSet {
     fn apply(self, world: &mut World) {
+        let difficulty = world.resource::<Config>().game.difficulty;
         let texture_path = self.config.get_image_path(0);
         let texture = world
             .resource::<AssetServer>()
@@ -35,8 +36,8 @@ impl Command for ActorSet {
                 radius: self.config.radius,
             })
             .insert(Inertia::new(self.config.mass))
-            .insert(Actor::new(self.config, self.skill))
-            .insert(Health::new(self.config.health)) // NOTE: health must not be affected by skill
+            .insert(Actor::new(self.config, difficulty))
+            .insert(Health::new(self.config.health))
             .insert(Footsteps::default());
 
         if let ActorKind::Human = self.config.kind {

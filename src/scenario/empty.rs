@@ -16,7 +16,6 @@ impl ScenarioLogic for EmptyScenario {
         commands.add(ActorSet {
             entity,
             config: &ActorConfig::HUMAN,
-            skill: 1.0,
             transform: TransformLite::default(),
         });
 

@@ -2,6 +2,7 @@ use crate::{
     component::{Actor, Bot, Breath, Player},
     material::StatusBarMaterial,
     model::ActorActions,
+    resource::Config,
 };
 use bevy::{
     asset::Handle,
@@ -11,15 +12,19 @@ use bevy::{
     prelude::{Entity, World},
 };
 
+// TODO: reset health multiplier
 pub struct ActorRelease(pub Entity);
 
 impl Command for ActorRelease {
     fn apply(self, world: &mut World) {
+        let difficulty = world.resource::<Config>().game.difficulty;
+
         // TODO: find a way to stop all sounds
         if let Some(actor) = world.get_mut::<Actor>(self.0).as_mut() {
             actor.movement = Vec2::ZERO;
             actor.actions = ActorActions::EMPTY;
             actor.look_at = None;
+            actor.skill = difficulty;
         }
 
         if let Some(player) = world.get::<Player>(self.0) {

@@ -1,5 +1,6 @@
 use bevy::ecs::component::Component;
 
+/// NOTE: health must not be affected by skill, excepting player
 #[derive(Component)]
 pub struct Health {
     value_max: f32,
@@ -16,6 +17,12 @@ impl Health {
             value: value_max,
             value_previous: value_max,
         };
+    }
+
+    pub fn multiply(&mut self, n: f32) {
+        self.value_max *= n;
+        self.value *= n;
+        self.value_previous *= n;
     }
 
     pub fn damage(&mut self, damage: f32) {

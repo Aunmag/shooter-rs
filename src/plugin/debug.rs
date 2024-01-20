@@ -158,11 +158,10 @@ fn spawn_actors(
         commands.add(ActorSet {
             entity,
             config,
-            skill: 1.0,
             transform,
         });
 
-        commands.add(ActorBotSet { entity, skill: 1.0 });
+        commands.add(ActorBotSet { entity });
 
         let weapon_chance = rand::thread_rng().gen::<f32>();
 

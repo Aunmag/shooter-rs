@@ -34,7 +34,6 @@ impl BenchScenario {
         commands.add(ActorSet {
             entity,
             config: &ActorConfig::HUMAN,
-            skill: 1.0,
             transform: TransformLite::default(),
         });
 
@@ -58,11 +57,10 @@ impl BenchScenario {
             commands.add(ActorSet {
                 entity,
                 config: &ActorConfig::ZOMBIE,
-                skill: 1.0,
                 transform: TransformLite::default(),
             });
 
-            commands.add(ActorBotSet { entity, skill: 1.0 });
+            commands.add(ActorBotSet { entity });
 
             self.spawned += 1;
         }

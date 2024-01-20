@@ -123,7 +123,6 @@ impl WavesScenario {
         commands.add(ActorSet {
             entity,
             config: &ActorConfig::HUMAN,
-            skill: 1.0,
             transform: TransformLite::default(),
         });
 
@@ -167,7 +166,6 @@ impl WavesScenario {
                 log::debug!("Spawning a zombie");
 
                 let mut spawn = SpawnZombie {
-                    skill: 1.0,
                     direction: self.rng.gen_range(-PI..PI),
                     config: &ActorConfig::ZOMBIE,
                     weapon: None,
@@ -307,7 +305,6 @@ struct Wave {
 }
 
 struct SpawnZombie {
-    skill: f32,
     direction: f32,
     config: &'static ActorConfig,
     weapon: Option<&'static WeaponConfig>,
@@ -337,16 +334,11 @@ impl Command for SpawnZombie {
         ActorSet {
             entity,
             config: self.config,
-            skill: self.skill,
             transform,
         }
         .apply(world);
 
-        ActorBotSet {
-            entity,
-            skill: self.skill,
-        }
-        .apply(world);
+        ActorBotSet { entity }.apply(world);
 
         if let Some(weapon) = self.weapon {
             WeaponSet {
