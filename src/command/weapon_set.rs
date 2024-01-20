@@ -3,6 +3,7 @@ use crate::{
     data::PIXELS_PER_METER,
     model::AudioPlay,
     resource::AudioTracker,
+    util::ext::ImageExt,
 };
 use bevy::{
     asset::{AssetServer, Assets, Handle},
@@ -78,10 +79,7 @@ impl WeaponSet {
 
         if let Some(image) = world.resource::<Assets<Image>>().get(image) {
             let offset = weapon.image_offset - arms_length * PIXELS_PER_METER;
-            return Anchor::Custom(Vec2::new(
-                offset / image.texture_descriptor.size.width as f32 - 0.5,
-                0.0,
-            ));
+            return Anchor::Custom(Vec2::new(offset / image.size_x() as f32 - 0.5, 0.0));
         } else {
             log::warn!(
                 "Unable to set anchor for image {} since it hasn't loaded yet",

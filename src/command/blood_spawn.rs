@@ -2,7 +2,7 @@ use crate::{
     data::{LAYER_BLUFF, PIXELS_PER_METER},
     material::BloodMaterial,
     resource::{AssetStorage, Config},
-    util::math::interpolate_unbounded,
+    util::math::{floor_by, interpolate_unbounded},
 };
 use bevy::{
     ecs::{component::Component, entity::Entity, query::With, system::Command},
@@ -34,7 +34,7 @@ impl BloodSpawn {
         let size_raw = interpolate_unbounded(SIZE_MIN, SIZE_MAX, scale);
 
         position = (position * PIXELS_PER_METER).floor() / PIXELS_PER_METER;
-        let size_px = (size_raw * PIXELS_PER_METER / 2.0).floor() * 2.0; // size must be even
+        let size_px = floor_by(size_raw * PIXELS_PER_METER, 2.0); // size must be even
         let size = size_px / PIXELS_PER_METER;
 
         return Some(Self {
