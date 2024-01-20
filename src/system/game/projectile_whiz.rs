@@ -49,7 +49,7 @@ pub fn projectile_whiz(
 
             audio.queue(AudioPlay {
                 path: "sounds/bullet_whiz".into(),
-                volume: 0.5,
+                volume: 0.8,
                 source: Some(projection),
                 ..AudioPlay::DEFAULT
             });
