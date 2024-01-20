@@ -36,7 +36,7 @@ impl Command for ActorSet {
             })
             .insert(Inertia::new(self.config.mass))
             .insert(Actor::new(self.config, self.skill))
-            .insert(Health::new(self.config.health * self.skill))
+            .insert(Health::new(self.config.health)) // NOTE: health must not be affected by skill
             .insert(Footsteps::default());
 
         if let ActorKind::Human = self.config.kind {
