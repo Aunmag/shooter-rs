@@ -1,15 +1,16 @@
 use crate::{
-    component::{Actor, Bot, Breath, Player},
+    component::{Actor, Bot, Breath, Heartbeat, Player},
     material::StatusBarMaterial,
     model::ActorActions,
     resource::Config,
 };
 use bevy::{
     asset::Handle,
-    ecs::system::Command,
+    audio::AudioSink,
+    ecs::{query::With, system::Command},
     hierarchy::{Children, DespawnRecursiveExt},
     math::Vec2,
-    prelude::{Entity, World},
+    prelude::{AudioSinkPlayback, Entity, World},
 };
 
 // TODO: reset health multiplier
@@ -50,6 +51,13 @@ impl Command for ActorRelease {
 
         for entity in &to_remove {
             world.entity_mut(*entity).despawn_recursive();
+        }
+
+        for heartbeat in world
+            .query_filtered::<&mut AudioSink, With<Heartbeat>>()
+            .iter_mut(world)
+        {
+            heartbeat.pause();
         }
     }
 }
