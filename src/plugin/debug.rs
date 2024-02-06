@@ -10,7 +10,11 @@ use bevy::{
     app::{App, Plugin},
     asset::Handle,
     diagnostic::{DiagnosticsStore, EntityCountDiagnosticsPlugin, FrameTimeDiagnosticsPlugin},
-    ecs::{schedule::SystemConfigs, system::Local, world::World},
+    ecs::{
+        schedule::SystemConfigs,
+        system::{Local, ResMut, Resource},
+        world::World,
+    },
     gizmos::gizmos::Gizmos,
     input::Input,
     prelude::{
@@ -31,17 +35,26 @@ const ZOMBIE_RIFLE_CHANCE: f32 = 0.02;
 const HUMAN_RIFLE_CHANCE: f32 = 0.1;
 
 #[derive(Component)]
-struct FpsText;
+struct DiagnosticsText;
+
+#[derive(Default, Resource)]
+struct DiagnosticsData {
+    fps: Option<i32>,
+    entities: Option<i32>,
+    audio_sources: Option<i32>,
+}
 
 pub struct DebugPlugin;
 
 impl Plugin for DebugPlugin {
     fn build(&self, application: &mut App) {
         application
+            .insert_resource(DiagnosticsData::default())
             .add_plugins(FrameTimeDiagnosticsPlugin)
             .add_plugins(EntityCountDiagnosticsPlugin)
             .add_systems(Startup, startup)
-            .add_systems(Update, update_diagnostics())
+            .add_systems(Update, update_diagnostics_data)
+            .add_systems(Update, update_diagnostics_text())
             .add_systems(Update, render_gizmos_static)
             .add_state_system(AppState::Game, update_input);
     }
@@ -70,36 +83,58 @@ fn startup(world: &mut World) {
                 style,
             ),
         ]),
-        FpsText,
+        DiagnosticsText,
     ));
 }
 
-fn update_diagnostics_inner(
+fn update_diagnostics_data(
     diagnostics: Res<DiagnosticsStore>,
     audio_tracker: Res<AudioTracker>,
-    mut query: Query<&mut Text, With<FpsText>>,
+    mut data: ResMut<DiagnosticsData>,
 ) {
-    let fps = diagnostics
+    if let Some(value) = diagnostics
         .get(FrameTimeDiagnosticsPlugin::FPS)
-        .and_then(|v| v.average())
-        .unwrap_or(-1.0);
+        .and_then(|d| d.value())
+    {
+        let value = value as i32;
+        data.fps = Some(i32::min(value, data.fps.unwrap_or(value)));
+    }
 
-    let entities = diagnostics
+    if let Some(value) = diagnostics
         .get(EntityCountDiagnosticsPlugin::ENTITY_COUNT)
-        .and_then(|v| v.value())
-        .unwrap_or(-1.0);
+        .and_then(|d| d.value())
+    {
+        let value = value as i32;
+        data.entities = Some(i32::max(value, data.entities.unwrap_or(value)));
+    }
 
-    for mut text in &mut query {
-        text.sections[1].value = format!("{:.0}", fps);
-        text.sections[3].value = format!("{:.0}", entities);
-        text.sections[5].value = format!("{}", audio_tracker.playing);
+    {
+        let value = audio_tracker.playing as i32;
+        data.audio_sources = Some(i32::max(value, data.audio_sources.unwrap_or(value)));
     }
 }
 
-fn update_diagnostics() -> SystemConfigs {
-    return update_diagnostics_inner.run_if(|mut r: Local<Timer>, t: Res<Time>| {
-        return r.next_if_ready(t.elapsed(), || INTERVAL);
-    });
+fn update_diagnostics_text_inner(
+    mut data: ResMut<DiagnosticsData>,
+    mut query: Query<&mut Text, With<DiagnosticsText>>,
+) {
+    for mut text in &mut query {
+        text.sections[1].value = format!("{}", data.fps.unwrap_or(-1));
+        text.sections[3].value = format!("{}", data.entities.unwrap_or(-1));
+        text.sections[5].value = format!("{}", data.audio_sources.unwrap_or(-1));
+    }
+
+    data.fps = None;
+    data.entities = None;
+    data.audio_sources = None;
+}
+
+fn update_diagnostics_text() -> SystemConfigs {
+    return update_diagnostics_text_inner
+        .after(update_diagnostics_data)
+        .run_if(|mut r: Local<Timer>, t: Res<Time>| {
+            return r.next_if_ready(t.elapsed(), || INTERVAL);
+        });
 }
 
 fn render_gizmos_static(mut gizmos: Gizmos) {
