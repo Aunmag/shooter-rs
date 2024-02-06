@@ -6,7 +6,6 @@ mod breath;
 mod collision;
 mod footsteps;
 mod health;
-mod heartbeat;
 mod inertia;
 mod notification;
 mod player;
@@ -16,6 +15,5 @@ mod weapon;
 
 pub use self::{
     actor::*, audio_expiration::*, bonus::*, bot::*, breath::*, collision::*, footsteps::*,
-    health::*, heartbeat::*, inertia::*, notification::*, player::*, projectile::*, terrain::*,
-    weapon::*,
+    health::*, inertia::*, notification::*, player::*, projectile::*, terrain::*, weapon::*,
 };

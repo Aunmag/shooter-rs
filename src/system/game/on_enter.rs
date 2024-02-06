@@ -145,12 +145,6 @@ fn play_audio(world: &mut World) {
         duration: AudioPlay::DURATION_FOREVER,
         ..AudioPlay::DEFAULT
     });
-
-    audio.queue(AudioPlay {
-        path: "sounds/heartbeat".into(),
-        duration: AudioPlay::DURATION_FOREVER,
-        ..AudioPlay::DEFAULT
-    });
 }
 
 fn is_position_free(position: Vec2, occupied_positions: &[Vec2]) -> bool {

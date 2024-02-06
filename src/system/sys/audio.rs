@@ -1,6 +1,6 @@
 use crate::{
-    component::{AudioExpiration, Heartbeat},
-    plugin::CameraTarget,
+    component::AudioExpiration,
+    plugin::{CameraTarget, Heartbeat},
     resource::{AudioStorage, AudioTracker},
 };
 use bevy::{
@@ -40,7 +40,7 @@ pub fn audio(
             continue;
         };
 
-        let is_heartbeat = audio.path.as_ref() == "sounds/heartbeat";
+        let is_heartbeat = audio.path.as_ref() == Heartbeat::PATH;
         let mut settings = audio.settings();
 
         if is_heartbeat {
