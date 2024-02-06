@@ -5,6 +5,7 @@ use bevy::{
         world::World,
     },
     prelude::{Entity, Vec2},
+    time::Time,
 };
 
 const PUSH_MULTIPLIER: f32 = 40.0;
@@ -32,6 +33,7 @@ impl SystemBuffer for HitResource {
             return;
         }
 
+        let time = world.resource::<Time>().elapsed();
         let mut targets = world.query::<(&mut Inertia, &mut Health)>();
         let mut players = world.query::<&mut Player>();
 
@@ -59,7 +61,7 @@ impl SystemBuffer for HitResource {
                     inertia.push(hit.momentum * PUSH_MULTIPLIER, angle, false);
 
                     if !hit.is_recoil {
-                        health.damage(momentum_linear);
+                        health.damage(momentum_linear, time);
                     }
                 }
             }

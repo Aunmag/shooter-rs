@@ -1,5 +1,5 @@
 use crate::{
-    component::{Actor, Inertia},
+    component::{Actor, Health, Inertia},
     model::ActorActionsExt,
     util::{
         ext::{TransformExt, Vec2Ext},
@@ -15,11 +15,20 @@ use bevy::{
 
 const TURN_EPSILON: f32 = 0.01;
 
-pub fn actor(mut query: Query<(&mut Actor, &mut Transform, &mut Inertia)>, time: Res<Time>) {
+pub fn actor(
+    mut query: Query<(&mut Actor, &Health, &mut Transform, &mut Inertia)>,
+    time: Res<Time>,
+) {
     let time_delta = time.delta_seconds();
+    let time = time.elapsed();
 
-    for (mut actor, mut transform, mut inertia) in query.iter_mut() {
+    for (mut actor, health, mut transform, mut inertia) in query.iter_mut() {
         actor.update_stamina(time_delta);
+
+        if health.is_stunned(time) {
+            continue;
+        }
+
         turn(&actor, &mut transform, &mut inertia, time_delta);
 
         if actor.movement.is_zero() {
