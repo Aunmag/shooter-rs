@@ -17,7 +17,7 @@ use crate::{
         BloodMaterial, CrosshairMaterial, LaserMaterial, ProjectileMaterial, StatusBarMaterial,
     },
     model::AppState,
-    plugin::DebugPlugin,
+    plugin::{sys_camera_target, CameraTargetPlugin, DebugPlugin},
     resource::{AssetStorage, AudioStorage, AudioTracker, Config, GameMode, Scenario},
     scenario::{BenchScenario, EmptyScenario, WavesScenario},
     util::ext::AppExt,
@@ -91,6 +91,7 @@ fn main() {
     application.insert_resource(scenario.unwrap_or_else(|| Scenario::new(EmptyScenario)));
 
     application
+        .add_plugins(CameraTargetPlugin)
         .add_plugins(Material2dPlugin::<BloodMaterial>::default())
         .add_plugins(Material2dPlugin::<CrosshairMaterial>::default())
         .add_plugins(Material2dPlugin::<LaserMaterial>::default())
@@ -125,8 +126,7 @@ fn main() {
             s.add(bonus_image);
             s.add(bonus_label);
             s.add(bonus.after(collision_resolve));
-            s.add(camera.after(collision_resolve));
-            s.add(crosshair.after(camera));
+            s.add(crosshair.after(sys_camera_target));
             s.add(status_bar);
             s.add(blood);
             s.add(breath);

@@ -57,9 +57,9 @@ pub fn crosshair(
             let mut on_screen_new = on_screen_old;
 
             if player.is_aiming {
-                on_screen_new.y += cursor_delta.y;
-            } else {
                 on_screen_new += cursor_delta;
+            } else {
+                on_screen_new.y += cursor_delta.y;
             }
 
             // clamp crosshair inside view port
@@ -68,7 +68,7 @@ pub fn crosshair(
                 on_screen_new.y = on_screen_new.y.clamp(0.0, viewport_size.y);
             }
 
-            if player.is_aiming {
+            if !player.is_aiming {
                 // don't allow crosshair go below player
                 on_screen_new.y = f32::min(on_screen_new.y, player_on_screen.y);
             }
@@ -89,7 +89,7 @@ pub fn crosshair(
                 // update crosshair distance only when it'd moved. otherwise distance error may grow
                 player.crosshair.distance = player_position.distance(on_world_new);
 
-                if !player.is_aiming {
+                if player.is_aiming {
                     // if crosshair had rotated, i.e. by input, then rote the player too
                     player_transform.rotate_local_z(angle_difference(
                         player_position.angle_to(on_world),

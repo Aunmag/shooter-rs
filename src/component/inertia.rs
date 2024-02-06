@@ -9,8 +9,6 @@ pub struct Inertia {
 
 impl Inertia {
     pub const DRAG_FACTOR: f32 = 500.0;
-
-    // TODO: make component's property
     pub const RIGIDITY: f32 = 0.05;
 
     pub fn new(mass: f32) -> Self {
@@ -30,7 +28,7 @@ impl Inertia {
             return dot
                 * inertia_1.mass
                 * inertia_2.mass
-                * (1.0 + Self::RIGIDITY) // TODO: f32::min(i1.rigidity, i3.rigidity))
+                * (1.0 + Self::RIGIDITY) // 32::min(i1.rigidity, i3.rigidity))
                 / (inertia_1.mass + inertia_2.mass)
                 * relative_angle;
         } else {
@@ -38,19 +36,19 @@ impl Inertia {
         }
     }
 
-    pub fn push(&mut self, mut force: Vec2, mut force_angular: f32, with_drag: bool) {
+    pub fn push(&mut self, mut push: Vec2, mut spin: f32, with_drag: bool) {
         let mass_inverse = self.mass_inverse();
-        force *= mass_inverse;
-        force_angular *= mass_inverse;
+        push *= mass_inverse;
+        spin *= mass_inverse;
 
         if with_drag {
             let drag = self.drag();
-            force *= drag;
-            force_angular *= drag;
+            push *= drag;
+            spin *= drag;
         }
 
-        self.velocity += force;
-        self.velocity_angular += force_angular;
+        self.velocity += push;
+        self.velocity_angular += spin;
     }
 
     pub fn mass_inverse(&self) -> f32 {

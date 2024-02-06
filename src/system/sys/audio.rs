@@ -1,5 +1,6 @@
 use crate::{
-    component::{AudioExpiration, Heartbeat, Player},
+    component::{AudioExpiration, Heartbeat},
+    plugin::CameraTarget,
     resource::{AudioStorage, AudioTracker},
 };
 use bevy::{
@@ -14,7 +15,7 @@ pub fn audio(
     mut storage: ResMut<AudioStorage>,
     mut commands: Commands,
     audio: Query<(Entity, &AudioSink, Option<&AudioExpiration>)>,
-    listeners: Query<&Transform, With<Player>>,
+    listeners: Query<&Transform, With<CameraTarget>>,
     time: Res<Time>,
 ) {
     let now = time.elapsed();

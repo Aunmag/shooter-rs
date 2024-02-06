@@ -1,6 +1,7 @@
 use crate::{
-    component::{Player, Projectile},
+    component::Projectile,
     model::{geometry::GeometryProjection, AudioPlay},
+    plugin::CameraTarget,
     resource::AudioTracker,
     util::GIZMOS,
 };
@@ -14,25 +15,25 @@ const DEBUG: bool = false;
 
 pub fn projectile_whiz(
     mut projectiles: Query<&Projectile>,
-    players: Query<&Transform, With<Player>>,
+    listeners: Query<&Transform, With<CameraTarget>>,
     audio: Res<AudioTracker>,
     time: Res<Time>,
 ) {
     let t0 = time.elapsed();
     let t1 = t0.saturating_sub(time.delta());
 
-    for player in players.iter() {
-        let player_position = player.translation.truncate();
+    for listener in listeners.iter() {
+        let listener = listener.translation.truncate();
 
         for projectile in projectiles.iter_mut() {
             let head = projectile.calc_data(t0).0;
             let tail = projectile.calc_data(t1).0;
             let length = head.distance_squared(tail);
 
-            let projection = player_position.project_on(&(head, tail));
+            let projection = listener.project_on(&(head, tail));
 
             if DEBUG {
-                GIZMOS.ln(player_position, projection, Color::RED);
+                GIZMOS.ln(listener, projection, Color::RED);
             }
 
             let to_head_distance = projection.distance_squared(head);

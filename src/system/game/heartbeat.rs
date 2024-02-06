@@ -19,6 +19,7 @@ const SPEED_MAX: f32 = 1.9;
 const UPDATE_INTERVAL: Duration = Duration::from_millis(1500);
 
 pub fn heartbeat_inner(
+    // TODO: simplify
     mut heartbeats: Query<&AudioSink, With<Heartbeat>>,
     players: Query<(&Health, &Actor), With<Player>>,
 ) {

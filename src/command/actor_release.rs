@@ -2,6 +2,7 @@ use crate::{
     component::{Actor, Bot, Breath, Heartbeat, Player},
     material::StatusBarMaterial,
     model::ActorActions,
+    plugin::CameraTarget,
     resource::Config,
 };
 use bevy::{
@@ -38,6 +39,7 @@ impl Command for ActorRelease {
         entity_mut.remove::<Bot>();
         entity_mut.remove::<Player>();
         entity_mut.remove::<Breath>();
+        entity_mut.remove::<CameraTarget>();
 
         let mut to_remove = Vec::new();
 

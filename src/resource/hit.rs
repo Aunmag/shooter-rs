@@ -1,4 +1,7 @@
-use crate::component::{Health, Inertia, Player};
+use crate::{
+    component::{Health, Inertia},
+    plugin::CameraTarget,
+};
 use bevy::{
     ecs::{
         system::{Resource, SystemBuffer, SystemMeta},
@@ -9,7 +12,7 @@ use bevy::{
 };
 
 const PUSH_MULTIPLIER: f32 = 40.0;
-const PUSH_MULTIPLIER_ANGULAR: f32 = 350.0;
+const SPIN_MULTIPLIER: f32 = 350.0;
 
 #[derive(Default, Resource)]
 pub struct HitResource {
@@ -17,11 +20,11 @@ pub struct HitResource {
 }
 
 impl HitResource {
-    pub fn add(&mut self, entity: Entity, momentum: Vec2, angle: f32, is_recoil: bool) {
+    pub fn add(&mut self, entity: Entity, momentum: Vec2, spin: f32, is_recoil: bool) {
         self.hits.push(Hit {
             entity,
             momentum,
-            angle,
+            spin,
             is_recoil,
         });
     }
@@ -34,35 +37,24 @@ impl SystemBuffer for HitResource {
         }
 
         let time = world.resource::<Time>().elapsed();
-        let mut targets = world.query::<(&mut Inertia, &mut Health)>();
-        let mut players = world.query::<&mut Player>();
+        let mut targets = world.query::<(&mut Inertia, &mut Health, Option<&mut CameraTarget>)>();
 
         for hit in self.hits.drain(..) {
-            let mut angle = hit.angle;
-            let momentum_linear = hit.momentum.length();
+            if let Ok((mut inertia, mut health, camera)) = targets.get_mut(world, hit.entity) {
+                let momentum_linear = hit.momentum.length();
+                let mut push = hit.momentum;
+                let mut spin = hit.spin * momentum_linear;
 
-            if !hit.is_recoil {
-                angle *= momentum_linear;
-                angle *= PUSH_MULTIPLIER_ANGULAR;
-            }
-
-            let mut skip_recoil_push = false;
-
-            if let Ok(player) = players.get_mut(world, hit.entity).as_mut() {
-                if player.is_aiming && hit.is_recoil {
-                    skip_recoil_push = true;
+                if !hit.is_recoil {
+                    push *= PUSH_MULTIPLIER;
+                    spin *= SPIN_MULTIPLIER;
+                    health.damage(momentum_linear, time);
                 }
 
-                player.shake(angle);
-            }
+                inertia.push(push, spin, false);
 
-            if !skip_recoil_push {
-                if let Ok((mut inertia, mut health)) = targets.get_mut(world, hit.entity) {
-                    inertia.push(hit.momentum * PUSH_MULTIPLIER, angle, false);
-
-                    if !hit.is_recoil {
-                        health.damage(momentum_linear, time);
-                    }
+                if let Some(mut camera) = camera {
+                    camera.shake(push, spin);
                 }
             }
         }
@@ -72,6 +64,6 @@ impl SystemBuffer for HitResource {
 struct Hit {
     entity: Entity,
     momentum: Vec2,
-    angle: f32,
+    spin: f32,
     is_recoil: bool,
 }

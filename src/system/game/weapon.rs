@@ -11,13 +11,14 @@ use crate::{
 };
 use bevy::{
     ecs::system::{Deferred, Local, Query},
-    math::{Vec2, Vec3Swizzles},
+    math::{Vec2, Vec3, Vec3Swizzles},
     prelude::{Commands, Entity, Res, Time, Transform},
     render::color::Color,
 };
 use rand::{Rng, SeedableRng};
 use rand_pcg::Pcg32;
 
+const RECOIL_SPIN: f32 = 1.0;
 const BARREL_LENGTH: f32 = 0.6; // TODO: don't hardcode
 const DEBUG_DEVIATION: bool = false;
 
@@ -66,13 +67,13 @@ pub fn weapon(
         }
 
         if actor.actions.is_attacking() && weapon.try_fire(now) {
-            let mut transform = TransformLite::from(transform);
-            transform.translation += Vec2::from_length(BARREL_LENGTH, transform.direction);
+            let mut position = TransformLite::from(transform);
+            position.translation += Vec2::from_length(BARREL_LENGTH, position.direction);
 
             audio.queue(AudioPlay {
                 path: "sounds/shot".into(),
                 volume: 1.0,
-                source: Some(transform.translation),
+                source: Some(position.translation),
                 ..AudioPlay::DEFAULT
             });
 
@@ -83,22 +84,26 @@ pub fn weapon(
                 commands.add(ProjectileSpawn {
                     config: weapon.config.projectile,
                     transform: TransformLite::new(
-                        transform.translation.x,
-                        transform.translation.y,
-                        transform.direction + deviation,
+                        position.translation.x,
+                        position.translation.y,
+                        position.direction + deviation,
                     ),
                     velocity,
                     shooter: Some(entity),
                 });
             }
 
-            let mut recoil = weapon.get_recoil() * actor.config.recoil_factor / actor.skill;
+            let mut recoil_push = Vec3::ZERO;
+            recoil_push.x -= weapon.get_recoil() * actor.config.recoil_factor / actor.skill;
+            recoil_push = transform.rotation * recoil_push;
 
-            if data.rng.gen::<bool>() {
-                recoil = -recoil;
-            }
+            let recoil_spin = if data.rng.gen::<bool>() {
+                RECOIL_SPIN
+            } else {
+                -RECOIL_SPIN
+            };
 
-            hits.add(entity, Vec2::ZERO, recoil, true);
+            hits.add(entity, recoil_push.truncate(), recoil_spin, true);
         }
 
         if !weapon.is_reloading() && (!weapon.has_ammo() || actor.actions.is_reloading()) {

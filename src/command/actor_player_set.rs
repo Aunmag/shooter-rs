@@ -1,9 +1,9 @@
-use super::LaserSightSet;
 use crate::{
-    command::StatusBarSet,
+    command::{LaserSightSet, StatusBarSet},
     component::{Actor, Health, Player},
     data::{LAYER_ACTOR_PLAYER, LAYER_CROSSHAIR},
     material::CrosshairMaterial,
+    plugin::CameraTarget,
     resource::{AssetStorage, Config, GameMode},
 };
 use bevy::{
@@ -37,9 +37,11 @@ impl Command for ActorPlayerSet {
 
         let crosshair = spawn_crosshair(world);
 
+        // TODO: don't insert player if it isn't controllable
         world
             .entity_mut(self.entity)
-            .insert(Player::new(self.is_controllable, crosshair));
+            .insert(Player::new(self.is_controllable, crosshair))
+            .insert(CameraTarget::default());
 
         StatusBarSet(self.entity).apply(world);
 
