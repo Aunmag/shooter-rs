@@ -1,5 +1,5 @@
 use crate::{
-    component::{Actor, Bot, Player},
+    component::{Actor, Bot, Inertia, Player},
     model::ActorActions,
     plugin::{Breath, CameraTarget, StatusBar},
     resource::Config,
@@ -31,6 +31,10 @@ impl Command for ActorRelease {
             world
                 .entity_mut(player.crosshair.entity)
                 .despawn_recursive();
+        }
+
+        if let Some(inertia) = world.get_mut::<Inertia>(self.0).as_mut() {
+            inertia.drag = Inertia::DRAG_DEFAULT;
         }
 
         let mut entity_mut = world.entity_mut(self.0);

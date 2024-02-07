@@ -3,12 +3,14 @@ use bevy::{ecs::component::Component, math::Vec2};
 #[derive(Component)]
 pub struct Inertia {
     pub mass: f32,
+    pub drag: f32,
     pub velocity: Vec2,
     pub velocity_angular: f32,
 }
 
 impl Inertia {
-    pub const DRAG_FACTOR: f32 = 500.0;
+    pub const DRAG_DEFAULT: f32 = 300.0;
+    pub const DRAG_PLAYER: f32 = 400.0;
     pub const RIGIDITY: f32 = 0.05;
 
     pub fn new(mass: f32) -> Self {
@@ -16,6 +18,7 @@ impl Inertia {
 
         return Self {
             mass,
+            drag: Self::DRAG_DEFAULT,
             velocity: Vec2::new(0.0, 0.0),
             velocity_angular: 0.0,
         };
@@ -56,6 +59,6 @@ impl Inertia {
     }
 
     pub fn drag(&self) -> f32 {
-        return self.mass_inverse() * Self::DRAG_FACTOR;
+        return self.mass_inverse() * self.drag;
     }
 }

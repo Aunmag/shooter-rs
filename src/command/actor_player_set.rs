@@ -1,5 +1,5 @@
 use crate::{
-    component::{Actor, Health, Player},
+    component::{Actor, Health, Inertia, Player},
     data::LAYER_ACTOR_PLAYER,
     plugin::{CameraTarget, Crosshair, LaserSight, StatusBar},
     resource::{Config, GameMode},
@@ -28,6 +28,10 @@ impl Command for ActorPlayerSet {
 
         if let Some(mut transform) = world.get_mut::<Transform>(self.entity) {
             transform.translation.z = LAYER_ACTOR_PLAYER;
+        }
+
+        if let Some(mut inertia) = world.get_mut::<Inertia>(self.entity) {
+            inertia.drag = Inertia::DRAG_PLAYER;
         }
 
         let crosshair = Crosshair::spawn(world);
