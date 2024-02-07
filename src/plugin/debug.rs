@@ -1,7 +1,7 @@
+use super::Crosshair;
 use crate::{
     command::{ActorBotSet, ActorSet, BonusSpawn, WeaponSet},
     component::{ActorConfig, ActorKind, WeaponConfig},
-    material::CrosshairMaterial,
     model::{AppState, TransformLite},
     resource::AudioTracker,
     util::{ext::AppExt, Timer, GIZMOS},
@@ -142,7 +142,7 @@ fn render_gizmos_static(mut gizmos: Gizmos) {
 }
 
 fn update_input(
-    crosshairs: Query<&Transform, With<Handle<CrosshairMaterial>>>,
+    crosshairs: Query<&Transform, With<Handle<Crosshair>>>,
     keyboard: Res<Input<KeyCode>>,
     mut commands: Commands,
 ) {

@@ -1,12 +1,8 @@
 mod actor;
 mod ambience_fx;
-mod blood;
 mod bonus;
-mod breath;
 mod collision_find;
 mod collision_resolve;
-mod crosshair;
-mod footsteps;
 mod health;
 mod inertia;
 mod input;
@@ -16,13 +12,11 @@ mod player;
 mod projectile;
 mod projectile_whiz;
 mod scenario;
-mod status_bar;
 mod terrain;
 mod weapon;
 
 pub use self::{
-    actor::*, ambience_fx::*, blood::*, bonus::*, breath::*, collision_find::*,
-    collision_resolve::*, crosshair::*, footsteps::*, health::*, inertia::*, input::*, melee::*,
-    on_enter::*, player::*, projectile::*, projectile_whiz::*, scenario::*, status_bar::*,
-    terrain::*, weapon::*,
+    actor::*, ambience_fx::*, bonus::*, collision_find::*, collision_resolve::*, health::*,
+    inertia::*, input::*, melee::*, on_enter::*, player::*, projectile::*, projectile_whiz::*,
+    scenario::*, terrain::*, weapon::*,
 };

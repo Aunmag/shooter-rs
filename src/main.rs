@@ -2,7 +2,6 @@ mod command;
 mod component;
 mod data;
 mod event;
-mod material;
 mod model;
 mod plugin;
 mod resource;
@@ -11,13 +10,14 @@ mod system;
 mod util;
 
 use crate::{
+    component::ProjectileMaterial,
     data::{APP_TITLE, CONFIG_PATH},
     event::ActorDeathEvent,
-    material::{
-        BloodMaterial, CrosshairMaterial, LaserMaterial, ProjectileMaterial, StatusBarMaterial,
-    },
     model::AppState,
-    plugin::{sys_camera_target, CameraTargetPlugin, DebugPlugin, HeartbeatPlugin},
+    plugin::{
+        BloodPlugin, BreathPlugin, CameraTargetPlugin, CrosshairPlugin, DebugPlugin,
+        FootstepsPlugin, HeartbeatPlugin, LaserSightPlugin, StatusBarPlugin, UiNotificationPlugin,
+    },
     resource::{AssetStorage, AudioStorage, AudioTracker, Config, GameMode, Scenario},
     scenario::{BenchScenario, EmptyScenario, WavesScenario},
     util::ext::AppExt,
@@ -91,13 +91,16 @@ fn main() {
     application.insert_resource(scenario.unwrap_or_else(|| Scenario::new(EmptyScenario)));
 
     application
+        .add_plugins(BloodPlugin)
+        .add_plugins(BreathPlugin)
         .add_plugins(CameraTargetPlugin)
+        .add_plugins(CrosshairPlugin)
+        .add_plugins(FootstepsPlugin)
         .add_plugins(HeartbeatPlugin)
-        .add_plugins(Material2dPlugin::<BloodMaterial>::default())
-        .add_plugins(Material2dPlugin::<CrosshairMaterial>::default())
-        .add_plugins(Material2dPlugin::<LaserMaterial>::default())
+        .add_plugins(LaserSightPlugin)
+        .add_plugins(StatusBarPlugin)
+        .add_plugins(UiNotificationPlugin)
         .add_plugins(Material2dPlugin::<ProjectileMaterial>::default())
-        .add_plugins(Material2dPlugin::<StatusBarMaterial>::default())
         .add_state::<AppState>()
         .add_event::<ActorDeathEvent>()
         .insert_resource(AssetStorage::default())
@@ -109,7 +112,6 @@ fn main() {
             ..Default::default()
         })
         .add_systems(Update, system::sys::audio)
-        .add_systems(Update, system::ui::notification)
         .add_state_system(AppState::Loading, system::loading::on_update())
         .add_state_system_enter(AppState::Game, system::game::on_enter)
         .add_state_systems(AppState::Game, |s| {
@@ -127,11 +129,6 @@ fn main() {
             s.add(bonus_image);
             s.add(bonus_label);
             s.add(bonus.after(collision_resolve));
-            s.add(crosshair.after(sys_camera_target));
-            s.add(status_bar);
-            s.add(blood);
-            s.add(breath);
-            s.add(footsteps);
             s.add(ambience_fx());
             s.add(terrain);
             s.add(scenario);

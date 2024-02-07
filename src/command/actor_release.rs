@@ -1,8 +1,7 @@
 use crate::{
-    component::{Actor, Bot, Breath, Player},
-    material::StatusBarMaterial,
+    component::{Actor, Bot, Player},
     model::ActorActions,
-    plugin::CameraTarget,
+    plugin::{Breath, CameraTarget, StatusBar},
     resource::Config,
 };
 use bevy::{
@@ -44,7 +43,7 @@ impl Command for ActorRelease {
 
         if let Some(children) = world.get::<Children>(self.0) {
             for &child in children {
-                if world.get::<Handle<StatusBarMaterial>>(child).is_some() {
+                if world.get::<Handle<StatusBar>>(child).is_some() {
                     to_remove.push(child);
                 }
             }

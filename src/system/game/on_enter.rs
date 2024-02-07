@@ -52,7 +52,6 @@ fn spawn_terrain(world: &mut World) {
     }
 }
 
-// TODO: maybe render bluff corner as tile map
 fn spawn_bluffs(world: &mut World) {
     let n = WORLD_SIZE_HALF;
     let z = LAYER_BLUFF;

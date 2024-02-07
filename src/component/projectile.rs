@@ -1,6 +1,11 @@
 use bevy::{
+    asset::Asset,
     ecs::{component::Component, entity::Entity},
     math::Vec2,
+    prelude::{Handle, Image},
+    reflect::TypePath,
+    render::render_resource::{AsBindGroup, ShaderRef},
+    sprite::Material2d,
 };
 use std::time::Duration;
 
@@ -89,5 +94,18 @@ impl Projectile {
         let v0 = self.initial_velocity;
         let v1 = v0 * (t * a).exp();
         return (p + (v1 - v0) / a * Projectile::VELOCITY_VISUAL_FACTOR, v1);
+    }
+}
+
+#[derive(Debug, Clone, Asset, TypePath, AsBindGroup)]
+pub struct ProjectileMaterial {
+    #[texture(0)]
+    #[sampler(1)]
+    pub image: Handle<Image>,
+}
+
+impl Material2d for ProjectileMaterial {
+    fn fragment_shader() -> ShaderRef {
+        return "shader/projectile.wgsl".into();
     }
 }

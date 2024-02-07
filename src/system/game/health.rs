@@ -1,8 +1,9 @@
 use crate::{
-    command::{ActorRelease, BloodSpawn},
+    command::ActorRelease,
     component::{Actor, Health, Player},
     event::ActorDeathEvent,
     model::AudioPlay,
+    plugin::BloodSpawn,
     resource::{AudioTracker, Config, GameMode},
 };
 use bevy::{

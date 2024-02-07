@@ -1,9 +1,12 @@
 use crate::{
-    component::Footsteps, model::AudioPlay, resource::AudioTracker, util::math::interpolate,
+    model::{AppState, AudioPlay},
+    resource::AudioTracker,
+    util::{ext::AppExt, math::interpolate},
 };
 use bevy::{
-    ecs::system::Query,
-    math::Vec3Swizzles,
+    app::{App, Plugin},
+    ecs::{component::Component, system::Query},
+    math::{Vec2, Vec3Swizzles},
     prelude::{Res, Time, Transform},
 };
 use std::time::Duration;
@@ -12,8 +15,22 @@ const STRIDE_DISTANCE_MIN: f32 = 0.1;
 const STRIDE_RATE_MIN: (f32, f32, f32) = (0.1, 70.0, 0.04);
 const STRIDE_RATE_MAX: (f32, f32, f32) = (5.0, 135.0, 0.19);
 
+pub struct FootstepsPlugin;
+
+impl Plugin for FootstepsPlugin {
+    fn build(&self, app: &mut App) {
+        app.add_state_system(AppState::Game, on_update);
+    }
+}
+
+#[derive(Default, Component)]
+pub struct Footsteps {
+    position: Vec2,
+    time: Duration,
+}
+
 // TODO: play sound on turn
-pub fn footsteps(
+fn on_update(
     mut query: Query<(&mut Footsteps, &Transform)>,
     audio: Res<AudioTracker>,
     time: Res<Time>,

@@ -1,17 +1,12 @@
 use crate::{
-    command::{LaserSightSet, StatusBarSet},
     component::{Actor, Health, Player},
-    data::{LAYER_ACTOR_PLAYER, LAYER_CROSSHAIR},
-    material::CrosshairMaterial,
-    plugin::CameraTarget,
-    resource::{AssetStorage, Config, GameMode},
+    data::LAYER_ACTOR_PLAYER,
+    plugin::{CameraTarget, Crosshair, LaserSight, StatusBar},
+    resource::{Config, GameMode},
 };
 use bevy::{
-    asset::Assets,
     ecs::system::Command,
-    math::Vec3,
     prelude::{Entity, Transform, World},
-    sprite::MaterialMesh2dBundle,
 };
 
 pub struct ActorPlayerSet {
@@ -35,7 +30,7 @@ impl Command for ActorPlayerSet {
             transform.translation.z = LAYER_ACTOR_PLAYER;
         }
 
-        let crosshair = spawn_crosshair(world);
+        let crosshair = Crosshair::spawn(world);
 
         // TODO: don't insert player if it isn't controllable
         world
@@ -43,7 +38,7 @@ impl Command for ActorPlayerSet {
             .insert(Player::new(self.is_controllable, crosshair))
             .insert(CameraTarget::default());
 
-        StatusBarSet(self.entity).apply(world);
+        StatusBar::spawn(world, self.entity);
 
         if world
             .resource::<Config>()
@@ -51,28 +46,7 @@ impl Command for ActorPlayerSet {
             .modes
             .contains(&GameMode::LaserSight)
         {
-            LaserSightSet(self.entity).apply(world);
+            LaserSight::spawn(world, self.entity);
         }
     }
-}
-
-fn spawn_crosshair(world: &mut World) -> Entity {
-    let assets = world.resource::<AssetStorage>();
-    let image = assets.dummy_image().clone();
-    let mesh = assets.dummy_mesh().clone();
-    let material = world
-        .resource_mut::<Assets<CrosshairMaterial>>()
-        .add(CrosshairMaterial { image });
-
-    return world
-        .spawn(MaterialMesh2dBundle {
-            transform: Transform {
-                translation: Vec3::new(0.0, 0.0, LAYER_CROSSHAIR),
-                ..Transform::default()
-            },
-            mesh: mesh.into(),
-            material,
-            ..Default::default()
-        })
-        .id();
 }

@@ -1,27 +1,86 @@
 use crate::{
     component::Player,
-    data::PIXELS_PER_METER,
-    material::CrosshairMaterial,
-    util::{ext::Vec2Ext, math::angle_difference},
+    data::{LAYER_CROSSHAIR, PIXELS_PER_METER},
+    model::AppState,
+    plugin::sys_camera_target,
+    resource::AssetStorage,
+    util::{
+        ext::{AppExt, Vec2Ext},
+        math::angle_difference,
+    },
 };
 use bevy::{
-    asset::Handle,
+    app::{App, Plugin},
+    asset::{Asset, Assets, Handle},
     ecs::{
+        entity::Entity,
         query::{With, Without},
+        schedule::IntoSystemConfigs,
         system::Query,
+        world::World,
     },
     input::mouse::MouseMotion,
-    math::Vec2,
-    prelude::{EventReader, Transform},
-    render::camera::{Camera, OrthographicProjection},
+    math::{Vec2, Vec3},
+    prelude::{EventReader, Image, Transform},
+    reflect::TypePath,
+    render::{
+        camera::{Camera, OrthographicProjection},
+        render_resource::{AsBindGroup, ShaderRef},
+    },
+    sprite::{Material2d, Material2dPlugin, MaterialMesh2dBundle},
     transform::components::GlobalTransform,
 };
 
 const SIZE: f32 = PIXELS_PER_METER * 1.2;
 
+pub struct CrosshairPlugin;
+
+impl Plugin for CrosshairPlugin {
+    fn build(&self, app: &mut App) {
+        app.add_plugins(Material2dPlugin::<Crosshair>::default());
+        app.add_state_system(AppState::Game, on_update.after(sys_camera_target));
+    }
+}
+
+#[derive(Debug, Clone, Asset, TypePath, AsBindGroup)]
+pub struct Crosshair {
+    #[texture(1)]
+    #[sampler(2)]
+    image: Handle<Image>,
+}
+
+impl Crosshair {
+    pub fn spawn(world: &mut World) -> Entity {
+        let assets = world.resource::<AssetStorage>();
+        let image = assets.dummy_image().clone();
+        let mesh = assets.dummy_mesh().clone();
+        let material = world
+            .resource_mut::<Assets<Crosshair>>()
+            .add(Crosshair { image });
+
+        return world
+            .spawn(MaterialMesh2dBundle {
+                transform: Transform {
+                    translation: Vec3::new(0.0, 0.0, LAYER_CROSSHAIR),
+                    ..Transform::default()
+                },
+                mesh: mesh.into(),
+                material,
+                ..Default::default()
+            })
+            .id();
+    }
+}
+
+impl Material2d for Crosshair {
+    fn fragment_shader() -> ShaderRef {
+        return "shader/crosshair.wgsl".into();
+    }
+}
+
 #[allow(clippy::unwrap_used)]
-pub fn crosshair(
-    mut crosshairs: Query<&mut Transform, (With<Handle<CrosshairMaterial>>, Without<Player>)>,
+fn on_update(
+    mut crosshairs: Query<&mut Transform, (With<Handle<Crosshair>>, Without<Player>)>,
     cameras: Query<(&Camera, &GlobalTransform, &OrthographicProjection)>,
     mut players: Query<(&mut Player, &mut Transform)>,
     mut mouse_motion: EventReader<MouseMotion>,
