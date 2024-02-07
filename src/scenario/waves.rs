@@ -1,6 +1,6 @@
 use crate::{
     command::{ActorBotSet, ActorPlayerSet, ActorSet, BonusSpawn, WeaponSet},
-    component::{Actor, ActorConfig, ActorKind, Health, WeaponConfig},
+    component::{Actor, ActorConfig, ActorKind, Health, Player, WeaponConfig},
     data::VIEW_DISTANCE,
     event::ActorDeathEvent,
     model::TransformLite,
@@ -9,12 +9,12 @@ use crate::{
     util::ext::Vec2Ext,
 };
 use bevy::{
-    ecs::system::Command,
+    ecs::{query::With, system::Command},
     math::{Vec2, Vec3Swizzles},
     prelude::{Commands, World},
     transform::components::Transform,
 };
-use rand::{Rng, SeedableRng};
+use rand::{seq::SliceRandom, Rng, SeedableRng};
 use rand_pcg::Pcg32;
 use std::{any::Any, f32::consts::PI, time::Duration};
 
@@ -71,15 +71,16 @@ const WAVES: &[Wave] = &[
 
 const WAVE_BONUS: Wave = Wave {
     size: u16::MAX,
-    pistol_chance: 0.0,
-    rifle_chance: 1.0,
+    pistol_chance: 0.4,
+    rifle_chance: 0.2,
     agile_chance: 0.0,
 };
 
-const ZOMBIE_SPAWN_DISTANCE: f32 = VIEW_DISTANCE * 0.5;
+const ENEMY_SPAWN_DISTANCE: f32 = VIEW_DISTANCE * 0.5;
 const BONUSES_PER_WAVE: f32 = 3.0;
 const GAME_OVER_TEXT_DURATION: Duration = Duration::from_secs(8);
 const DEFAULT_INTERVAL: Duration = Duration::from_secs(2);
+const WAVE_BONUS_HUMANS: u8 = 16;
 
 enum Task {
     StartNextWave,
@@ -146,28 +147,29 @@ impl WavesScenario {
                 self.zombies_spawned = 0;
                 self.kills = 0;
 
-                if usize::from(self.wave_index) < WAVES.len() {
-                    commands.add(heal_humans);
+                if self.is_wave_bonus() {
+                    commands.add(Notify {
+                        text: "Bonus wave".into(),
+                        text_small: "How long will you stay? Support is on the way...".into(),
+                        ..Default::default()
+                    });
+                } else {
                     commands.add(Notify {
                         text: format!("Wave {}/{}", self.wave_number(), WAVES.len()).into(),
                         text_small: format!("Kill {} zombies", wave.size).into(),
                         ..Default::default()
                     });
-                } else {
-                    commands.add(Notify {
-                        text: "Wait".into(),
-                        text_small: "NOW IT IS TIME TO SUFFER".into(),
-                        ..Default::default()
-                    });
                 }
 
+                commands.add(heal_humans);
                 return Task::SpawnZombie;
             }
             Task::SpawnZombie => {
                 log::debug!("Spawning a zombie");
 
-                let mut spawn = SpawnZombie {
+                let mut spawn = SpawnActor {
                     direction: self.rng.gen_range(-PI..PI),
+                    distance: ENEMY_SPAWN_DISTANCE,
                     config: &ActorConfig::ZOMBIE,
                     weapon: None,
                 };
@@ -195,7 +197,7 @@ impl WavesScenario {
                 return Task::CheckWaveCompletion;
             }
             Task::CompleteWave => {
-                if usize::from(self.wave_number()) == WAVES.len() {
+                if self.is_wave_last() {
                     commands.add(Notify {
                         text: "Congratulations!".into(),
                         text_small: format!("You've completed the all {} waves", WAVES.len())
@@ -224,6 +226,14 @@ impl WavesScenario {
 
     fn wave_number(&self) -> u8 {
         return self.wave_index.saturating_add(1);
+    }
+
+    fn is_wave_last(&self) -> bool {
+        return usize::from(self.wave_number()) == WAVES.len();
+    }
+
+    fn is_wave_bonus(&self) -> bool {
+        return usize::from(self.wave_index) == WAVES.len();
     }
 }
 
@@ -265,6 +275,21 @@ impl ScenarioLogic for WavesScenario {
                     }
                     _ => {}
                 }
+
+                if self.is_wave_bonus() {
+                    let direction = self.rng.gen_range(-PI..PI);
+
+                    for _ in 0..WAVE_BONUS_HUMANS {
+                        let weapon = WeaponConfig::ALL.choose(&mut self.rng);
+
+                        commands.add(SpawnActor {
+                            direction,
+                            distance: ENEMY_SPAWN_DISTANCE * 2.0,
+                            config: &ActorConfig::HUMAN,
+                            weapon,
+                        });
+                    }
+                }
             }
 
             let wave = f32::from(self.wave_number());
@@ -305,32 +330,33 @@ struct Wave {
     agile_chance: f64,
 }
 
-struct SpawnZombie {
+struct SpawnActor {
     direction: f32,
+    distance: f32,
     config: &'static ActorConfig,
     weapon: Option<&'static WeaponConfig>,
 }
 
-impl Command for SpawnZombie {
+impl Command for SpawnActor {
     fn apply(self, world: &mut World) {
         let mut center = Vec2::ZERO;
-        let mut humans = 0.0;
+        let mut players = 0.0;
 
-        for (transform, actor) in world.query::<(&Transform, &Actor)>().iter(world) {
-            if let ActorKind::Human = actor.config.kind {
-                center += transform.translation.xy();
-                humans += 1.0;
-            }
+        for transform in world
+            .query_filtered::<&Transform, With<Player>>()
+            .iter(world)
+        {
+            center += transform.translation.xy();
+            players += 1.0;
         }
 
-        if humans > 0.0 {
-            center /= humans;
+        if players > 0.0 {
+            center /= players;
         }
 
         let entity = world.spawn_empty().id();
-        let offset = Vec2::from_length(ZOMBIE_SPAWN_DISTANCE, self.direction);
-        let transform =
-            TransformLite::new(center.x - offset.x, center.y - offset.y, self.direction);
+        let mut transform = TransformLite::new(center.x, center.y, self.direction);
+        transform.translation -= Vec2::from_length(self.distance, self.direction);
 
         ActorSet {
             entity,
