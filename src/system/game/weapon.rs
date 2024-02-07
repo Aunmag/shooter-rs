@@ -18,7 +18,6 @@ use bevy::{
 use rand::{Rng, SeedableRng};
 use rand_pcg::Pcg32;
 
-const RECOIL_SPIN: f32 = 1.0;
 const BARREL_LENGTH: f32 = 0.6; // TODO: don't hardcode
 const DEBUG_DEVIATION: bool = false;
 
@@ -93,14 +92,11 @@ pub fn weapon(
                 });
             }
 
-            let mut recoil_push = Vec3::ZERO;
-            recoil_push.x -= weapon.get_recoil() * actor.config.recoil_factor / actor.skill;
-            recoil_push = transform.rotation * recoil_push;
-
+            let recoil_push = transform.rotation * Vec3::new(-weapon.get_recoil(), 0.0, 0.0);
             let recoil_spin = if data.rng.gen::<bool>() {
-                RECOIL_SPIN
+                actor.config.recoil_factor / actor.skill
             } else {
-                -RECOIL_SPIN
+                actor.config.recoil_factor / -actor.skill
             };
 
             hits.add(entity, recoil_push.truncate(), recoil_spin, true);
