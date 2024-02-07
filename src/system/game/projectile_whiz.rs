@@ -24,6 +24,8 @@ pub fn projectile_whiz(
 
     for listener in listeners.iter() {
         let listener = listener.translation.truncate();
+        let mut closest = None;
+        let mut closest_distance = f32::INFINITY;
 
         for projectile in projectiles.iter_mut() {
             let head = projectile.calc_data(t0).0;
@@ -48,10 +50,19 @@ pub fn projectile_whiz(
                 continue;
             }
 
+            let distance = listener.distance_squared(projection);
+
+            if distance < closest_distance {
+                closest = Some(projection);
+                closest_distance = distance;
+            }
+        }
+
+        if let Some(source) = closest {
             audio.queue(AudioPlay {
                 path: "sounds/bullet_whiz".into(),
                 volume: 0.8,
-                source: Some(projection),
+                source: Some(source),
                 ..AudioPlay::DEFAULT
             });
         }
