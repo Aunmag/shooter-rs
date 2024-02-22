@@ -3,7 +3,7 @@ use crate::{
     data::LAYER_ACTOR,
     model::TransformLite,
     plugin::{Breath, Footsteps},
-    resource::Config,
+    resource::Settings,
 };
 use bevy::{
     ecs::system::Command,
@@ -18,7 +18,7 @@ pub struct ActorSet {
 
 impl Command for ActorSet {
     fn apply(self, world: &mut World) {
-        let difficulty = world.resource::<Config>().game.difficulty;
+        let difficulty = world.resource::<Settings>().game.difficulty;
         let texture_path = self.config.get_image_path(0);
         let texture = world
             .resource::<AssetServer>()

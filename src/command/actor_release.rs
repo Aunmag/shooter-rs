@@ -2,7 +2,7 @@ use crate::{
     component::{Actor, Bot, Inertia, Player},
     model::ActorActions,
     plugin::{Breath, CameraTarget, StatusBar},
-    resource::Config,
+    resource::Settings,
 };
 use bevy::{
     asset::Handle,
@@ -17,7 +17,7 @@ pub struct ActorRelease(pub Entity);
 
 impl Command for ActorRelease {
     fn apply(self, world: &mut World) {
-        let difficulty = world.resource::<Config>().game.difficulty;
+        let difficulty = world.resource::<Settings>().game.difficulty;
 
         // TODO: find a way to stop all sounds
         if let Some(actor) = world.get_mut::<Actor>(self.0).as_mut() {

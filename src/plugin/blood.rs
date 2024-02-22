@@ -1,7 +1,7 @@
 use crate::{
     data::{LAYER_BLUFF, PIXELS_PER_METER},
     model::AppState,
-    resource::{AssetStorage, Config},
+    resource::{AssetStorage, Settings},
     util::{
         ext::{AppExt, DurationExt},
         math::{floor_by, interpolate_unbounded},
@@ -60,7 +60,7 @@ fn reserve_decal(world: &mut World) -> bool {
         }
     }
 
-    if decals >= world.resource::<Config>().graphic.decals {
+    if decals >= world.resource::<Settings>().graphic.decals {
         if let Some(oldest) = furthest {
             world.entity_mut(oldest).despawn_recursive();
             return true;

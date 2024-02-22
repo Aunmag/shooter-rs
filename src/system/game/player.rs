@@ -3,7 +3,7 @@ use crate::{
     data::WORLD_SIZE_HALF,
     model::{ActorAction, ActorActionsExt},
     plugin::CameraTarget,
-    resource::Config,
+    resource::Settings,
     util::ext::{TransformExt, Vec2Ext},
 };
 use bevy::{
@@ -35,7 +35,7 @@ pub fn player(
     mouse: Res<Input<MouseButton>>,
     mut mouse_motion: EventReader<MouseMotion>,
     mut commands: Commands,
-    config: Res<Config>,
+    settings: Res<Settings>,
 ) {
     let mut mouse_delta_x = 0.0;
 
@@ -100,7 +100,7 @@ pub fn player(
         transform.translation.y = transform.translation.y.clamp(-limit, limit);
 
         if !player.is_aiming {
-            let rotation_base = mouse_delta_x * config.controls.mouse_sensitivity;
+            let rotation_base = mouse_delta_x * settings.controls.mouse_sensitivity;
             let rotation_extra = rotation_base * Player::EXTRA_ROTATION_MULTIPLAYER;
             transform.rotate_local_z(rotation_base + player.add_extra_rotation(rotation_extra));
         } else {

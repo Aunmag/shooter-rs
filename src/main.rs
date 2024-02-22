@@ -11,14 +11,14 @@ mod util;
 
 use crate::{
     component::ProjectileMaterial,
-    data::{APP_TITLE, CONFIG_PATH},
+    data::APP_TITLE,
     event::ActorDeathEvent,
     model::AppState,
     plugin::{
         BloodPlugin, BreathPlugin, CameraTargetPlugin, CrosshairPlugin, DebugPlugin,
         FootstepsPlugin, HeartbeatPlugin, LaserSightPlugin, StatusBarPlugin, UiNotificationPlugin,
     },
-    resource::{AssetStorage, AudioStorage, AudioTracker, Config, GameMode, Scenario},
+    resource::{AssetStorage, AudioStorage, AudioTracker, GameMode, Scenario, Settings},
     scenario::{BenchScenario, EmptyScenario, WavesScenario},
     util::ext::AppExt,
 };
@@ -33,17 +33,17 @@ use bevy::{
 
 fn main() {
     // TODO: init logger earlier
-    log::info!("Loading config from {}", CONFIG_PATH);
+    log::info!("Loading settings...");
 
-    let config = match Config::load_from(CONFIG_PATH) {
-        Ok(config) => {
-            log::info!("Config loaded: {:?}", config);
-            config
+    let settings = match Settings::load() {
+        Ok(settings) => {
+            log::info!("Settings loaded: {:?}", settings);
+            settings
         }
         Err(error) => {
             log::error!("{:?}", error);
-            log::warn!("Default config will be used");
-            Config::default()
+            log::warn!("Default settings will be used");
+            Settings::default()
         }
     };
 
@@ -51,17 +51,17 @@ fn main() {
 
     application.add_plugins(
         DefaultPlugins
-            .set(init_log_plugin(&config))
+            .set(init_log_plugin(&settings))
             .set(ImagePlugin::default_nearest())
             .set(WindowPlugin {
                 primary_window: Some(Window {
                     title: APP_TITLE.to_string(),
-                    mode: config.display.mode(),
+                    mode: settings.display.mode(),
                     resolution: WindowResolution::new(
-                        f32::from(config.display.window_size_x),
-                        f32::from(config.display.window_size_y),
+                        f32::from(settings.display.window_size_x),
+                        f32::from(settings.display.window_size_y),
                     ),
-                    present_mode: config.display.present_mode(),
+                    present_mode: settings.display.present_mode(),
                     ..Default::default()
                 }),
                 ..Default::default()
@@ -70,7 +70,7 @@ fn main() {
 
     let mut scenario = None;
 
-    for mode in &config.game.modes {
+    for mode in &settings.game.modes {
         log::info!("Starting with game mode: {:?}", mode);
 
         match &mode {
@@ -105,8 +105,8 @@ fn main() {
         .add_event::<ActorDeathEvent>()
         .insert_resource(AssetStorage::default())
         .insert_resource(AudioStorage::default())
-        .insert_resource(AudioTracker::new(config.audio.sources))
-        .insert_resource(config)
+        .insert_resource(AudioTracker::new(settings.audio.sources))
+        .insert_resource(settings)
         .insert_resource(GizmoConfig {
             line_width: 3.0,
             ..Default::default()
@@ -139,10 +139,10 @@ fn main() {
         .run();
 }
 
-fn init_log_plugin(config: &Config) -> LogPlugin {
+fn init_log_plugin(settings: &Settings) -> LogPlugin {
     let mut log_plugin = LogPlugin::default();
 
-    if config.game.modes.contains(&GameMode::Debug) {
+    if settings.game.modes.contains(&GameMode::Debug) {
         if !log_plugin.filter.is_empty() {
             log_plugin.filter.push(',');
         }

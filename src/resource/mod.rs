@@ -1,10 +1,10 @@
 mod asset_storage;
 mod audio_storage;
 mod audio_tracker;
-mod config;
 mod hit;
 mod scenario;
+mod settings;
 
 pub(crate) use self::{
-    asset_storage::*, audio_storage::*, audio_tracker::*, config::*, hit::*, scenario::*,
+    asset_storage::*, audio_storage::*, audio_tracker::*, hit::*, scenario::*, settings::*,
 };

@@ -2,7 +2,7 @@ use crate::{
     component::{Actor, Health, Inertia, Player},
     data::LAYER_ACTOR_PLAYER,
     plugin::{CameraTarget, Crosshair, LaserSight, StatusBar},
-    resource::{Config, GameMode},
+    resource::{GameMode, Settings},
 };
 use bevy::{
     ecs::system::Command,
@@ -16,7 +16,7 @@ pub struct ActorPlayerSet {
 
 impl Command for ActorPlayerSet {
     fn apply(self, world: &mut World) {
-        let health_multiplier = 1.0 / world.resource::<Config>().game.difficulty;
+        let health_multiplier = 1.0 / world.resource::<Settings>().game.difficulty;
 
         if let Some(mut actor) = world.get_mut::<Actor>(self.entity) {
             actor.skill = 1.0; // to keep game balance well, player skill must always be 1.0
@@ -45,7 +45,7 @@ impl Command for ActorPlayerSet {
         StatusBar::spawn(world, self.entity);
 
         if world
-            .resource::<Config>()
+            .resource::<Settings>()
             .game
             .modes
             .contains(&GameMode::LaserSight)

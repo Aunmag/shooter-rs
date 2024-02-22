@@ -4,7 +4,7 @@ use crate::{
     event::ActorDeathEvent,
     model::AudioPlay,
     plugin::BloodSpawn,
-    resource::{AudioTracker, Config, GameMode},
+    resource::{AudioTracker, GameMode, Settings},
 };
 use bevy::{
     ecs::{
@@ -20,7 +20,7 @@ pub fn health(
     mut death_events: EventWriter<ActorDeathEvent>,
     audio: Res<AudioTracker>,
     mut commands: Commands,
-    config: Res<Config>,
+    settings: Res<Settings>,
 ) {
     for (entity, actor, mut health, transform, is_player) in query.iter_mut() {
         let actor = actor.config;
@@ -37,7 +37,7 @@ pub fn health(
         }
 
         if health.is_just_died() {
-            if config.game.modes.contains(&GameMode::Bench) {
+            if settings.game.modes.contains(&GameMode::Bench) {
                 health.heal();
             } else {
                 audio.queue(AudioPlay {

@@ -5,7 +5,7 @@ import subprocess
 
 
 EXECUTABLE = "shooter.exe"
-CONFIG = "config.toml"
+SETTINGS = "settings.toml"
 ASSETS = "assets"
 GIT_TAG = False
 
@@ -30,7 +30,7 @@ def main():
         shutil.rmtree(output)
     output.mkdir()
     shutil.copyfile(target.joinpath("release").joinpath(EXECUTABLE), output.joinpath(EXECUTABLE))
-    shutil.copyfile(root.joinpath(CONFIG), output.joinpath(CONFIG))
+    shutil.copyfile(root.joinpath(SETTINGS), output.joinpath(SETTINGS))
     shutil.copytree(root.joinpath(ASSETS), output.joinpath(ASSETS))
 
     print("Zipping...")

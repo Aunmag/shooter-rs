@@ -4,7 +4,6 @@ pub use self::bot_config::*;
 use bevy::prelude::Vec3;
 
 pub const APP_TITLE: &str = "A Zombie Shooter Game";
-pub const CONFIG_PATH: &str = "./config.toml";
 
 pub const PIXELS_PER_METER: f32 = 32.0;
 pub const VIEW_DISTANCE: f32 = 37.5;
