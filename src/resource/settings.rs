@@ -55,7 +55,7 @@ impl GameMode {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct DisplaySettings {
-    pub fullscreen: bool,
+    pub full_screen: bool,
     pub window_size_x: u16,
     pub window_size_y: u16,
     pub v_sync: bool,
@@ -64,7 +64,7 @@ pub struct DisplaySettings {
 impl Default for DisplaySettings {
     fn default() -> Self {
         return Self {
-            fullscreen: true,
+            full_screen: true,
             window_size_x: 800,
             window_size_y: 800,
             v_sync: false,
@@ -123,7 +123,7 @@ impl Settings {
             log::error!("{:?}", error);
             log::warn!("Default settings will be used");
             let settings = Settings::default();
-            settings.save_or_log();
+            settings.clone().save_in_background();
             settings
         });
     }
@@ -137,10 +137,12 @@ impl Settings {
         return Ok(());
     }
 
-    pub fn save_or_log(&self) {
-        if let Err(error) = self.save() {
-            log::error!("{:?}", error);
-        }
+    pub fn save_in_background(self) {
+        std::thread::spawn(move || {
+            if let Err(error) = self.save() {
+                log::error!("{:?}", error);
+            }
+        });
     }
 
     pub fn normalize(&mut self) {
@@ -149,7 +151,7 @@ impl Settings {
         if self.game.modes.contains(&GameMode::Bench) {
             *self = Self::default();
             self.game.modes = vec![GameMode::Bench];
-            self.display.fullscreen = false;
+            self.display.full_screen = false;
             self.audio.sources = 0;
         }
 
@@ -175,7 +177,7 @@ impl Settings {
 
 impl DisplaySettings {
     pub fn mode(&self) -> WindowMode {
-        if self.fullscreen {
+        if self.full_screen {
             return WindowMode::BorderlessFullscreen;
         } else {
             return WindowMode::Windowed;
