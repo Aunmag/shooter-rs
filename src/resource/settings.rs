@@ -3,9 +3,11 @@ use bevy::{
     ecs::system::Resource,
     window::{PresentMode, WindowMode},
 };
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Default, Clone, Deserialize, Resource)]
+const FILE: &str = "settings.toml";
+
+#[derive(Debug, Default, Clone, Serialize, Deserialize, Resource)]
 #[serde(default)]
 pub struct Settings {
     pub game: GameSettings,
@@ -15,8 +17,9 @@ pub struct Settings {
     pub controls: ControlsSettings,
 }
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct GameSettings {
+    /// 0.8 - easy, 1.0 - medium, 1.2 - hard
     pub difficulty: f32,
     pub modes: Vec<GameMode>,
 }
@@ -30,7 +33,7 @@ impl Default for GameSettings {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum GameMode {
     Waves,
@@ -50,7 +53,7 @@ impl GameMode {
     }
 }
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct DisplaySettings {
     pub fullscreen: bool,
     pub window_size_x: u16,
@@ -69,7 +72,7 @@ impl Default for DisplaySettings {
     }
 }
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct GraphicSettings {
     pub decals: usize,
 }
@@ -80,7 +83,7 @@ impl Default for GraphicSettings {
     }
 }
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AudioSettings {
     pub sources: usize,
 }
@@ -91,7 +94,7 @@ impl Default for AudioSettings {
     }
 }
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ControlsSettings {
     pub mouse_sensitivity: f32,
 }
@@ -106,17 +109,38 @@ impl Default for ControlsSettings {
 
 impl Settings {
     pub fn load() -> Result<Self> {
+        log::info!("Loading settings...");
         let context = "Failed to load settings";
-        let mut settings = config::Config::builder()
-            .add_source(config::File::with_name("settings.toml"))
-            .build()
-            .context(context)?
-            .try_deserialize::<Self>()
-            .context(context)?;
-
+        let encoded = std::fs::read_to_string(FILE).context(context)?;
+        let mut settings: Self = toml::from_str(&encoded).context(context)?;
         settings.normalize();
-
+        log::info!("Settings loaded: {:?}", settings);
         return Ok(settings);
+    }
+
+    pub fn load_or_default() -> Self {
+        return Self::load().unwrap_or_else(|error| {
+            log::error!("{:?}", error);
+            log::warn!("Default settings will be used");
+            let settings = Settings::default();
+            settings.save_or_log();
+            settings
+        });
+    }
+
+    pub fn save(&self) -> Result<()> {
+        log::info!("Saving settings...");
+        let context = "Failed to save settings";
+        let encoded = toml::to_string_pretty(&self).context(context)?;
+        std::fs::write(FILE, encoded).context(context)?;
+        log::info!("Settings saved");
+        return Ok(());
+    }
+
+    pub fn save_or_log(&self) {
+        if let Err(error) = self.save() {
+            log::error!("{:?}", error);
+        }
     }
 
     pub fn normalize(&mut self) {
@@ -164,5 +188,21 @@ impl DisplaySettings {
         } else {
             return PresentMode::AutoNoVsync;
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_default_is_normalized() {
+        let mut normalized = Settings::default();
+        normalized.normalize();
+
+        assert_eq!(
+            format!("{:?}", normalized),
+            format!("{:?}", Settings::default()),
+        );
     }
 }

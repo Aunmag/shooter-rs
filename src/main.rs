@@ -33,20 +33,7 @@ use bevy::{
 
 fn main() {
     // TODO: init logger earlier
-    log::info!("Loading settings...");
-
-    let settings = match Settings::load() {
-        Ok(settings) => {
-            log::info!("Settings loaded: {:?}", settings);
-            settings
-        }
-        Err(error) => {
-            log::error!("{:?}", error);
-            log::warn!("Default settings will be used");
-            Settings::default()
-        }
-    };
-
+    let settings = Settings::load_or_default();
     let mut application = App::new();
 
     application.add_plugins(
