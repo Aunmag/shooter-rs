@@ -36,27 +36,27 @@ pub fn health(
             });
         }
 
+        if settings.game.modes.contains(&GameMode::Bench) {
+            health.heal();
+        }
+
         if health.is_just_died() {
-            if settings.game.modes.contains(&GameMode::Bench) {
-                health.heal();
-            } else {
-                audio.queue(AudioPlay {
-                    path: format!("{}/death", actor.get_assets_path()).into(),
-                    volume: 1.0,
-                    source: Some(point),
-                    ..AudioPlay::DEFAULT
-                });
+            audio.queue(AudioPlay {
+                path: format!("{}/death", actor.get_assets_path()).into(),
+                volume: 1.0,
+                source: Some(point),
+                ..AudioPlay::DEFAULT
+            });
 
-                commands.add(ActorRelease(entity));
+            commands.add(ActorRelease(entity));
 
-                death_events.send(ActorDeathEvent {
-                    kind: actor.kind,
-                    position: point,
-                    is_player,
-                });
+            death_events.send(ActorDeathEvent {
+                kind: actor.kind,
+                position: point,
+                is_player,
+            });
 
-                commands.entity(entity).despawn_recursive();
-            }
+            commands.entity(entity).despawn_recursive();
         }
 
         if let Some(blood) = BloodSpawn::new(point, damage) {
