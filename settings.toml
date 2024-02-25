@@ -13,9 +13,6 @@ window_size_x = 800
 window_size_y = 800
 v_sync = false
 
-[graphic]
-decals = 128
-
 [audio]
 sources = 128
 

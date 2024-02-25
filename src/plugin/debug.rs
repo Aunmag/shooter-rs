@@ -1,4 +1,4 @@
-use super::Crosshair;
+use super::{Crosshair, TileMap};
 use crate::{
     command::{ActorBotSet, ActorSet, BonusSpawn, WeaponSet},
     component::{ActorConfig, ActorKind, WeaponConfig},
@@ -42,6 +42,9 @@ struct DiagnosticsData {
     fps: Option<i32>,
     entities: Option<i32>,
     audio_sources: Option<i32>,
+    map_layers: Option<i32>,
+    map_tiles: Option<i32>,
+    map_queue: Option<i32>,
 }
 
 pub struct DebugPlugin;
@@ -74,6 +77,12 @@ fn startup(world: &mut World) {
             TextSection::from_style(style.clone()),
             TextSection::new("\nAudio sources: ", style.clone()),
             TextSection::from_style(style.clone()),
+            TextSection::new("\n\nMap. Layers: ", style.clone()),
+            TextSection::from_style(style.clone()),
+            TextSection::new("\nMap. Tiles: ", style.clone()),
+            TextSection::from_style(style.clone()),
+            TextSection::new("\nMap. Queue: ", style.clone()),
+            TextSection::from_style(style.clone()),
             TextSection::new(
                 "\n\
                 \nSpawn weapon: [G]\
@@ -90,6 +99,7 @@ fn startup(world: &mut World) {
 fn update_diagnostics_data(
     diagnostics: Res<DiagnosticsStore>,
     audio_tracker: Res<AudioTracker>,
+    tile_map: Res<TileMap>,
     mut data: ResMut<DiagnosticsData>,
 ) {
     if let Some(value) = diagnostics
@@ -112,6 +122,21 @@ fn update_diagnostics_data(
         let value = audio_tracker.playing as i32;
         data.audio_sources = Some(i32::max(value, data.audio_sources.unwrap_or(value)));
     }
+
+    {
+        let value = tile_map.count_layers() as i32;
+        data.map_layers = Some(i32::max(value, data.map_layers.unwrap_or(value)));
+    }
+
+    {
+        let value = tile_map.count_tiles() as i32;
+        data.map_tiles = Some(i32::max(value, data.map_tiles.unwrap_or(value)));
+    }
+
+    {
+        let value = tile_map.count_queue() as i32;
+        data.map_queue = Some(i32::max(value, data.map_queue.unwrap_or(value)));
+    }
 }
 
 fn update_diagnostics_text_inner(
@@ -122,11 +147,17 @@ fn update_diagnostics_text_inner(
         text.sections[1].value = format!("{}", data.fps.unwrap_or(-1));
         text.sections[3].value = format!("{}", data.entities.unwrap_or(-1));
         text.sections[5].value = format!("{}", data.audio_sources.unwrap_or(-1));
+        text.sections[7].value = format!("{}", data.map_layers.unwrap_or(-1));
+        text.sections[9].value = format!("{}", data.map_tiles.unwrap_or(-1));
+        text.sections[11].value = format!("{}", data.map_queue.unwrap_or(-1));
     }
 
     data.fps = None;
     data.entities = None;
     data.audio_sources = None;
+    data.map_layers = None;
+    data.map_tiles = None;
+    data.map_queue = None;
 }
 
 fn update_diagnostics_text() -> SystemConfigs {

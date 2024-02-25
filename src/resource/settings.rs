@@ -12,7 +12,6 @@ const FILE: &str = "settings.toml";
 pub struct Settings {
     pub game: GameSettings,
     pub display: DisplaySettings,
-    pub graphic: GraphicSettings,
     pub audio: AudioSettings,
     pub controls: ControlsSettings,
 }
@@ -69,17 +68,6 @@ impl Default for DisplaySettings {
             window_size_y: 800,
             v_sync: false,
         };
-    }
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct GraphicSettings {
-    pub decals: usize,
-}
-
-impl Default for GraphicSettings {
-    fn default() -> Self {
-        return Self { decals: 128 };
     }
 }
 

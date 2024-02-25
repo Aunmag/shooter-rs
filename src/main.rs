@@ -16,7 +16,8 @@ use crate::{
     model::AppState,
     plugin::{
         BloodPlugin, BreathPlugin, CameraTargetPlugin, CrosshairPlugin, DebugPlugin,
-        FootstepsPlugin, HeartbeatPlugin, LaserSightPlugin, StatusBarPlugin, UiNotificationPlugin,
+        FootstepsPlugin, HeartbeatPlugin, LaserSightPlugin, StatusBarPlugin, TileMapPlugin,
+        UiNotificationPlugin,
     },
     resource::{AssetStorage, AudioStorage, AudioTracker, GameMode, Scenario, Settings},
     scenario::{BenchScenario, EmptyScenario, WavesScenario},
@@ -86,6 +87,7 @@ fn main() {
         .add_plugins(HeartbeatPlugin)
         .add_plugins(LaserSightPlugin)
         .add_plugins(StatusBarPlugin)
+        .add_plugins(TileMapPlugin)
         .add_plugins(UiNotificationPlugin)
         .add_plugins(Material2dPlugin::<ProjectileMaterial>::default())
         .add_state::<AppState>()

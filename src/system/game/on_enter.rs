@@ -2,19 +2,18 @@ use crate::{
     command::CursorGrab,
     component::Terrain,
     data::{
-        LAYER_BLUFF, LAYER_TERRAIN, LAYER_TREE, TRANSFORM_SCALE, WORLD_SIZE, WORLD_SIZE_HALF,
-        WORLD_SIZE_VISUAL,
+        LAYER_BACKGROUND, LAYER_GROUND, LAYER_TREE, WORLD_SIZE, WORLD_SIZE_HALF, WORLD_SIZE_VISUAL,
     },
     model::{AudioPlay, TransformLite},
+    plugin::TileBlend,
     resource::AudioTracker,
     util::ext::Vec2Ext,
 };
 use bevy::{
     asset::AssetServer,
     ecs::{system::Command, world::World},
-    math::{Quat, Vec2, Vec3},
+    math::{Vec2, Vec3},
     prelude::{Camera2dBundle, SpriteBundle},
-    transform::components::Transform,
 };
 use rand::{seq::SliceRandom, Rng, SeedableRng};
 use rand_pcg::Pcg32;
@@ -44,7 +43,7 @@ fn spawn_terrain(world: &mut World) {
     for _ in 0..Terrain::get_count().pow(2) {
         world
             .spawn(SpriteBundle {
-                transform: TransformLite::default().as_transform(LAYER_TERRAIN),
+                transform: TransformLite::default().as_transform(LAYER_BACKGROUND),
                 texture: texture.clone(),
                 ..Default::default()
             })
@@ -54,7 +53,7 @@ fn spawn_terrain(world: &mut World) {
 
 fn spawn_bluffs(world: &mut World) {
     let n = WORLD_SIZE_HALF;
-    let z = LAYER_BLUFF;
+    let z = LAYER_GROUND;
     let r1 = PI;
     let r2 = 0.0;
     let r3 = FRAC_PI_2;
@@ -65,17 +64,17 @@ fn spawn_bluffs(world: &mut World) {
 
     for i in 1..range {
         let j = BLUFF_SPRITE_SIZE * i as f32 - WORLD_SIZE_HALF;
-        spawn_sprite(world, Vec3::new(j, -n, z), r1, image);
-        spawn_sprite(world, Vec3::new(j, n, z), r2, image);
-        spawn_sprite(world, Vec3::new(-n, j, z), r3, image);
-        spawn_sprite(world, Vec3::new(n, j, z), r4, image);
+        blend_sprite(world, Vec3::new(j, -n, z), r1, image);
+        blend_sprite(world, Vec3::new(j, n, z), r2, image);
+        blend_sprite(world, Vec3::new(-n, j, z), r3, image);
+        blend_sprite(world, Vec3::new(n, j, z), r4, image);
     }
 
     let image_corner = "terrain/bluff_corner.png";
-    spawn_sprite(world, Vec3::new(-n, -n, z), r1, image_corner);
-    spawn_sprite(world, Vec3::new(n, n, z), r2, image_corner);
-    spawn_sprite(world, Vec3::new(-n, n, z), r3, image_corner);
-    spawn_sprite(world, Vec3::new(n, -n, z), r4, image_corner);
+    blend_sprite(world, Vec3::new(-n, -n, z), r1, image_corner);
+    blend_sprite(world, Vec3::new(n, n, z), r2, image_corner);
+    blend_sprite(world, Vec3::new(-n, n, z), r3, image_corner);
+    blend_sprite(world, Vec3::new(n, -n, z), r4, image_corner);
 }
 
 fn spawn_trees(world: &mut World) {
@@ -97,7 +96,7 @@ fn spawn_trees(world: &mut World) {
             if is_position_free(position, &occupied_positions) {
                 let texture = image.choose(&mut rng).unwrap_or(&image[0]);
 
-                spawn_sprite(
+                blend_sprite(
                     world,
                     position.extend(LAYER_TREE),
                     rng.gen_range(0.0..TAU),
@@ -109,23 +108,17 @@ fn spawn_trees(world: &mut World) {
             }
         }
     }
+
+    log::debug!("Spawned trees: {}", occupied_positions.len());
 }
 
-fn spawn_sprite(world: &mut World, position: Vec3, direction: f32, path: &'static str) {
-    let Some(texture) = world.resource::<AssetServer>().get_handle(path) else {
-        log::warn!("Can't find texture: {}", path);
+pub fn blend_sprite(world: &mut World, position: Vec3, direction: f32, path: &'static str) {
+    let Some(image) = world.resource::<AssetServer>().get_handle(path) else {
+        log::warn!("Can't find image: {}", path);
         return;
     };
 
-    world.spawn(SpriteBundle {
-        transform: Transform {
-            translation: position,
-            rotation: Quat::from_rotation_z(direction),
-            scale: TRANSFORM_SCALE,
-        },
-        texture,
-        ..Default::default()
-    });
+    TileBlend::image(image, position, direction).apply(world);
 }
 
 fn play_audio(world: &mut World) {
