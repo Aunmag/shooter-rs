@@ -1,10 +1,7 @@
 use crate::{
     command::CursorGrab,
-    component::Terrain,
-    data::{
-        LAYER_BACKGROUND, LAYER_GROUND, LAYER_TREE, WORLD_SIZE, WORLD_SIZE_HALF, WORLD_SIZE_VISUAL,
-    },
-    model::{AudioPlay, TransformLite},
+    data::{LAYER_GROUND, LAYER_TREE, WORLD_SIZE, WORLD_SIZE_HALF, WORLD_SIZE_VISUAL},
+    model::AudioPlay,
     plugin::TileBlend,
     resource::AudioTracker,
     util::ext::Vec2Ext,
@@ -13,7 +10,7 @@ use bevy::{
     asset::AssetServer,
     ecs::{system::Command, world::World},
     math::{Vec2, Vec3},
-    prelude::{Camera2dBundle, SpriteBundle},
+    prelude::Camera2dBundle,
 };
 use rand::{seq::SliceRandom, Rng, SeedableRng};
 use rand_pcg::Pcg32;
@@ -28,27 +25,9 @@ const BLUFF_SPRITE_SIZE: f32 = 4.0;
 pub fn on_enter(world: &mut World) {
     CursorGrab(true).apply(world);
     world.spawn(Camera2dBundle::default());
-    spawn_terrain(world);
     spawn_bluffs(world);
     spawn_trees(world);
     play_audio(world);
-}
-
-fn spawn_terrain(world: &mut World) {
-    let texture = world
-        .resource::<AssetServer>()
-        .get_handle("terrain/grass.png")
-        .unwrap_or_default();
-
-    for _ in 0..Terrain::get_count().pow(2) {
-        world
-            .spawn(SpriteBundle {
-                transform: TransformLite::default().as_transform(LAYER_BACKGROUND),
-                texture: texture.clone(),
-                ..Default::default()
-            })
-            .insert(Terrain);
-    }
 }
 
 fn spawn_bluffs(world: &mut World) {
@@ -112,9 +91,9 @@ fn spawn_trees(world: &mut World) {
     log::debug!("Spawned trees: {}", occupied_positions.len());
 }
 
-pub fn blend_sprite(world: &mut World, position: Vec3, direction: f32, path: &'static str) {
+fn blend_sprite(world: &mut World, position: Vec3, direction: f32, path: &'static str) {
     let Some(image) = world.resource::<AssetServer>().get_handle(path) else {
-        log::warn!("Can't find image: {}", path);
+        log::warn!("Image {} not found", path);
         return;
     };
 

@@ -7,10 +7,9 @@ mod health;
 mod inertia;
 mod player;
 mod projectile;
-mod terrain;
 mod weapon;
 
 pub use self::{
     actor::*, audio_expiration::*, bonus::*, bot::*, collision::*, health::*, inertia::*,
-    player::*, projectile::*, terrain::*, weapon::*,
+    player::*, projectile::*, weapon::*,
 };

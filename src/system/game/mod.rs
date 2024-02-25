@@ -12,11 +12,10 @@ mod player;
 mod projectile;
 mod projectile_whiz;
 mod scenario;
-mod terrain;
 mod weapon;
 
 pub use self::{
     actor::*, ambience_fx::*, bonus::*, collision_find::*, collision_resolve::*, health::*,
     inertia::*, input::*, melee::*, on_enter::*, player::*, projectile::*, projectile_whiz::*,
-    scenario::*, terrain::*, weapon::*,
+    scenario::*, weapon::*,
 };

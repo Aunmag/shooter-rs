@@ -16,8 +16,8 @@ use crate::{
     model::AppState,
     plugin::{
         BloodPlugin, BreathPlugin, CameraTargetPlugin, CrosshairPlugin, DebugPlugin,
-        FootstepsPlugin, HeartbeatPlugin, LaserSightPlugin, StatusBarPlugin, TileMapPlugin,
-        UiNotificationPlugin,
+        FootstepsPlugin, HeartbeatPlugin, LaserSightPlugin, StatusBarPlugin, TerrainPlugin,
+        TileMapPlugin, UiNotificationPlugin,
     },
     resource::{AssetStorage, AudioStorage, AudioTracker, GameMode, Scenario, Settings},
     scenario::{BenchScenario, EmptyScenario, WavesScenario},
@@ -87,6 +87,7 @@ fn main() {
         .add_plugins(HeartbeatPlugin)
         .add_plugins(LaserSightPlugin)
         .add_plugins(StatusBarPlugin)
+        .add_plugins(TerrainPlugin)
         .add_plugins(TileMapPlugin)
         .add_plugins(UiNotificationPlugin)
         .add_plugins(Material2dPlugin::<ProjectileMaterial>::default())
@@ -119,7 +120,6 @@ fn main() {
             s.add(bonus_label);
             s.add(bonus.after(collision_resolve));
             s.add(ambience_fx());
-            s.add(terrain);
             s.add(scenario);
             s.add(bot::analyze);
             s.add(bot::operate);
