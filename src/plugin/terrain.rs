@@ -20,7 +20,7 @@ use bevy::{
     sprite::{ColorMaterial, ColorMesh2dBundle},
 };
 
-const PATH: &str = "terrain/grass.png";
+const PATH: &str = "decor/terrain_3.png";
 
 pub struct TerrainPlugin;
 

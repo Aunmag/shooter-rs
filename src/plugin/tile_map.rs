@@ -13,13 +13,13 @@ use bevy::{
         core_2d::{Camera2d, Camera2dBundle},
     },
     ecs::{
-        entity::Entity,
+        entity::{Entity},
         schedule::IntoSystemConfigs,
         system::{Command, Commands, Res, ResMut},
         world::Mut,
     },
     hierarchy::DespawnRecursiveExt,
-    math::{Quat, Vec3},
+    math::{Quat, Vec2, Vec3},
     prelude::{Assets, Handle, Image, Resource, SpriteBundle, Transform, World},
     render::{
         camera::{Camera, CameraOutputMode, RenderTarget},
@@ -135,18 +135,13 @@ pub enum TileBlend {
         image: Handle<Image>,
         position: Vec3,
         direction: f32,
+        flip_x: bool,
+        flip_y: bool,
+        resize: Option<f32>,
     },
 }
 
 impl TileBlend {
-    pub fn image(image: Handle<Image>, position: Vec3, direction: f32) -> Self {
-        return Self::Image {
-            image,
-            position,
-            direction,
-        };
-    }
-
     fn provide_position(&self, world: &World) -> Option<Vec3> {
         match self {
             Self::Entity(entity) => {
@@ -167,9 +162,18 @@ impl TileBlend {
                 position,
                 direction,
                 image,
+                flip_x,
+                flip_y,
+                resize: custom_size,
             } => {
                 return world
                     .spawn(SpriteBundle {
+                        sprite: Sprite {
+                            flip_x,
+                            flip_y,
+                            custom_size: custom_size.map(Vec2::splat),
+                            ..Default::default()
+                        },
                         transform: Transform {
                             translation: position,
                             rotation: Quat::from_rotation_z(direction),
