@@ -36,7 +36,6 @@ use std::collections::HashMap;
 const TILE_SIZE: f32 = 16.0;
 const TILE_SIZE_PX: u32 = (TILE_SIZE * PIXELS_PER_METER) as u32;
 const SPRITE_REACH: f32 = 4.0;
-const RENDER_LAYER: RenderLayers = RenderLayers::layer(1);
 
 pub struct TileMapPlugin;
 
@@ -55,14 +54,14 @@ pub struct TileMap {
     tiles: HashMap<Index, Handle<Image>>,
     to_blend: HashMap<Index, Vec<Entity>>,
     to_remove: Vec<Entity>,
-    wait: bool, // TODO: rework
+    wait_frames: u8,
 }
 
 impl TileMap {
     pub fn count_layers(&self) -> usize {
         let mut layers = Vec::new();
 
-        for layer in self.tiles.keys().map(|i| i.2) {
+        for layer in self.tiles.keys().map(|i| i.layer) {
             if !layers.contains(&layer) {
                 layers.push(layer);
             }
@@ -91,29 +90,19 @@ impl TileMap {
 }
 
 fn on_update(mut tile_map: ResMut<TileMap>, mut commands: Commands) {
-    if tile_map.wait {
-        tile_map.wait = false;
-        return;
+    for entity in tile_map.to_remove.drain(..) {
+        commands.entity(entity).despawn_recursive();
     }
 
-    let mut wait = false;
+    tile_map.wait_frames = tile_map.wait_frames.saturating_sub(1);
 
-    for blended in tile_map.to_remove.drain(..) {
-        commands.entity(blended).despawn_recursive();
-        wait = true;
-    }
-
-    tile_map.wait = wait;
-
-    if tile_map.wait {
+    if tile_map.wait_frames != 0 {
         return;
     }
 
     let Some((index, entities)) = tile_map.to_blend.pop() else {
         return;
     };
-
-    let position: Vec3 = index.into();
 
     for entity in entities {
         let mut is_last = true;
@@ -135,33 +124,9 @@ fn on_update(mut tile_map: ResMut<TileMap>, mut commands: Commands) {
         return;
     };
 
-    let mut transform = Transform::default();
-    transform.translation.x = position.x + TILE_SIZE / 2.0;
-    transform.translation.y = position.y + TILE_SIZE / 2.0;
-    transform.scale = TRANSFORM_SCALE;
-
-    // TODO: don't spawn every time?
-    let camera = commands
-        .spawn(Camera2dBundle {
-            camera: Camera {
-                target: RenderTarget::Image(target),
-                output_mode: CameraOutputMode::Write {
-                    blend_state: Some(BlendState::PREMULTIPLIED_ALPHA_BLENDING),
-                    color_attachment_load_op: LoadOp::Load,
-                },
-                ..Default::default()
-            },
-            camera_2d: Camera2d {
-                clear_color: ClearColorConfig::None,
-            },
-            transform,
-            ..Default::default()
-        })
-        .insert(RENDER_LAYER)
-        .insert(UiCameraConfig { show_ui: false }) // TODO: remove later. issue: https://github.com/bevyengine/bevy/issues/6069
-        .id();
-
+    let camera = spawn_camera(&mut commands, index, target);
     tile_map.to_remove.push(camera);
+    tile_map.wait_frames = 3; // I don't know why we have to wait exactly 3 frames
 }
 
 pub enum TileBlend {
@@ -202,7 +167,6 @@ impl TileBlend {
                 position,
                 direction,
                 image,
-                ..
             } => {
                 return world
                     .spawn(SpriteBundle {
@@ -224,19 +188,21 @@ impl Command for TileBlend {
     fn apply(self, world: &mut World) {
         if let Some(position) = self.provide_position(world) {
             let entity = self.provide_entity(world);
-            world.entity_mut(entity).insert(RENDER_LAYER);
+            let index = Index::from(position);
+            world.entity_mut(entity).insert(index.render_layers());
 
             let mut indexes = Vec::with_capacity(4);
+            indexes.push(index);
 
             for x in [-SPRITE_REACH, 0.0, SPRITE_REACH] {
                 for y in [-SPRITE_REACH, 0.0, SPRITE_REACH] {
-                    let mut position_near = position;
-                    position_near.x += x;
-                    position_near.y += y;
-                    let index = Index::from(position_near);
+                    let mut near_position = position;
+                    near_position.x += x;
+                    near_position.y += y;
+                    let near_index = Index::from(near_position);
 
-                    if !indexes.contains(&index) {
-                        indexes.push(index);
+                    if !indexes.contains(&near_index) {
+                        indexes.push(near_index);
                     }
                 }
             }
@@ -262,22 +228,75 @@ impl Command for TileBlend {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-struct Index(i32, i32, u8);
+struct Index {
+    x: i32,
+    y: i32,
+    layer: u8,
+}
+
+impl Index {
+    fn render_layers(&self) -> RenderLayers {
+        return RenderLayers::layer(self.layer + 1);
+    }
+}
 
 impl From<Vec3> for Index {
     fn from(v: Vec3) -> Self {
-        return Self(
-            floor_by(v.x, TILE_SIZE) as i32,
-            floor_by(v.y, TILE_SIZE) as i32,
-            v.z.clamp(LAYER_GROUND, LAYER_TREE).trunc() as u8,
-        );
+        let layer = if v.z < LAYER_TREE {
+            0
+        } else {
+            1
+        };
+
+        return Self {
+            x: floor_by(v.x, TILE_SIZE) as i32,
+            y: floor_by(v.y, TILE_SIZE) as i32,
+            layer,
+        };
     }
 }
 
 impl From<Index> for Vec3 {
     fn from(i: Index) -> Self {
-        return Vec3::new(i.0 as f32, i.1 as f32, i.2 as f32);
+        let z = if i.layer == 0 {
+            LAYER_GROUND
+        } else {
+            LAYER_TREE
+        };
+
+        return Vec3::new(i.x as f32, i.y as f32, z);
     }
+}
+
+fn spawn_camera(commands: &mut Commands, index: Index, target: Handle<Image>) -> Entity {
+    let mut translation = Vec3::from(index);
+    translation.x += TILE_SIZE / 2.0;
+    translation.y += TILE_SIZE / 2.0;
+    translation.z = 1.0;
+
+    return commands
+        .spawn(Camera2dBundle {
+            camera: Camera {
+                target: RenderTarget::Image(target),
+                output_mode: CameraOutputMode::Write {
+                    blend_state: Some(BlendState::PREMULTIPLIED_ALPHA_BLENDING),
+                    color_attachment_load_op: LoadOp::Load,
+                },
+                ..Default::default()
+            },
+            camera_2d: Camera2d {
+                clear_color: ClearColorConfig::None,
+            },
+            transform: Transform {
+                translation,
+                scale: TRANSFORM_SCALE,
+                ..Default::default()
+            },
+            ..Default::default()
+        })
+        .insert(index.render_layers())
+        .insert(UiCameraConfig { show_ui: false }) // TODO: remove later. issue: https://github.com/bevyengine/bevy/issues/6069
+        .id();
 }
 
 fn spawn_tile(world: &mut World, position: Vec3) -> Handle<Image> {
