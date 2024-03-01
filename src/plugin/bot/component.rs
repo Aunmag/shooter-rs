@@ -1,5 +1,5 @@
 use crate::{
-    data::BotConfig,
+    plugin::bot::BotConfig,
     util::{ext::RngExt, Timer},
 };
 use bevy::{ecs::component::Component, prelude::Entity};

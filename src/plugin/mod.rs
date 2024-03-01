@@ -1,4 +1,5 @@
 mod blood;
+pub mod bot;
 mod breath;
 mod camera_target;
 mod crosshair;

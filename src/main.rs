@@ -31,6 +31,7 @@ use bevy::{
     sprite::Material2dPlugin,
     window::{Window, WindowPlugin, WindowResolution},
 };
+use plugin::bot::BotPlugin;
 
 fn main() {
     // TODO: init logger earlier
@@ -80,6 +81,7 @@ fn main() {
 
     application
         .add_plugins(BloodPlugin)
+        .add_plugins(BotPlugin)
         .add_plugins(BreathPlugin)
         .add_plugins(CameraTargetPlugin)
         .add_plugins(CrosshairPlugin)
@@ -105,7 +107,7 @@ fn main() {
         .add_state_system(AppState::Loading, system::loading::on_update())
         .add_state_system_enter(AppState::Game, system::game::on_enter)
         .add_state_systems(AppState::Game, |s| {
-            use crate::system::{bot, game::*};
+            use crate::system::game::*;
             s.add(input);
             s.add(health);
             s.add(player);
@@ -121,9 +123,6 @@ fn main() {
             s.add(bonus.after(collision_resolve));
             s.add(ambience_fx());
             s.add(scenario);
-            s.add(bot::analyze);
-            s.add(bot::operate);
-            s.add(bot::voice);
         })
         .run();
 }

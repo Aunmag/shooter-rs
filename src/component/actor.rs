@@ -1,6 +1,6 @@
 use crate::{
-    data::BotConfig,
     model::{ActorActions, ActorActionsExt},
+    plugin::bot::BotConfig,
     util::ext::{DurationExt, Vec2Ext},
 };
 use bevy::{ecs::component::Component, math::Vec2};

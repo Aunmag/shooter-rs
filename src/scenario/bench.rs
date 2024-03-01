@@ -1,7 +1,8 @@
 use crate::{
-    command::{ActorBotSet, ActorPlayerSet, ActorSet, WeaponSet},
+    command::{ActorPlayerSet, ActorSet, WeaponSet},
     component::{ActorConfig, WeaponConfig},
     model::TransformLite,
+    plugin::bot::ActorBotSet,
     resource::ScenarioLogic,
 };
 use bevy::{app::AppExit, ecs::world::World, prelude::Commands};

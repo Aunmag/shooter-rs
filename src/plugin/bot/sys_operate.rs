@@ -1,7 +1,7 @@
 use crate::{
-    component::{Actor, Bot, BotShootingState, Inertia, Weapon},
-    data::BotConfig,
+    component::{Actor, Inertia, Weapon},
     model::ActorAction,
+    plugin::bot::{Bot, BotConfig, BotShootingState},
     util::{
         ext::{TransformExt, Vec2Ext},
         math::angle_difference,
@@ -20,7 +20,7 @@ use std::{f32::consts::FRAC_PI_2, ops::Div, time::Duration};
 const DEBUG_TEAMMATES: bool = false;
 const DEBUG_AIM: bool = false;
 
-pub fn operate(
+pub fn on_update(
     mut bots: Query<(&mut Bot, &mut Actor, &Transform, &Inertia, Option<&Weapon>)>,
     actors: Query<(&Transform, &Inertia), With<Actor>>,
     time: Res<Time>,

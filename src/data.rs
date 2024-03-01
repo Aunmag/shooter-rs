@@ -1,6 +1,3 @@
-mod bot_config;
-
-pub use self::bot_config::*;
 use bevy::prelude::Vec3;
 
 pub const APP_TITLE: &str = "A Zombie Shooter Game";

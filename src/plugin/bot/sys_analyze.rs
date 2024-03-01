@@ -1,7 +1,4 @@
-use crate::{
-    component::{Actor, Bot},
-    util::ext::RngExt,
-};
+use crate::{component::Actor, plugin::bot::Bot, util::ext::RngExt};
 use bevy::{
     ecs::query::BatchingStrategy,
     math::Vec3Swizzles,
@@ -13,7 +10,7 @@ use std::time::Duration;
 const TEAMMATES_MAX: usize = 8;
 const UPDATE_INTERVAL: Duration = Duration::from_millis(1500);
 
-pub fn analyze(
+pub fn on_update(
     mut bots: Query<(&mut Bot, Entity, &Actor, &Transform)>,
     actors: Query<(Entity, &Actor, &Transform)>,
     time: Res<Time>,

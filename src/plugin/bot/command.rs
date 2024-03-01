@@ -1,4 +1,5 @@
-use crate::component::{Actor, Bot};
+use super::Bot;
+use crate::component::Actor;
 use bevy::{
     ecs::system::Command,
     prelude::{Entity, World},
