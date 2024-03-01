@@ -13,7 +13,7 @@ use bevy::{
         core_2d::{Camera2d, Camera2dBundle},
     },
     ecs::{
-        entity::{Entity},
+        entity::Entity,
         schedule::IntoSystemConfigs,
         system::{Command, Commands, Res, ResMut},
         world::Mut,

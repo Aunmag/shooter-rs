@@ -10,7 +10,6 @@ pub const VIEW_DISTANCE: f32 = 37.5;
 
 pub const WORLD_SIZE: f32 = 50.0;
 pub const WORLD_SIZE_HALF: f32 = WORLD_SIZE / 2.0;
-pub const WORLD_SIZE_VISUAL: f32 = WORLD_SIZE + VIEW_DISTANCE;
 
 pub const LAYER_BACKGROUND: f32 = -1.0;
 pub const LAYER_GROUND: f32 = 0.0;

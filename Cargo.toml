@@ -20,6 +20,7 @@ toml = "0.8"
 
 [dev-dependencies]
 approx = "0.5"
+image = "0.24"
 
 [lints.clippy]
 # basic

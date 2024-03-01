@@ -8,6 +8,7 @@ mod resource;
 mod scenario;
 mod system;
 mod util;
+mod tool;
 
 use crate::{
     component::ProjectileMaterial,
