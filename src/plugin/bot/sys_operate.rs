@@ -1,7 +1,8 @@
+use super::component::BotShootingState;
 use crate::{
     component::{Actor, Inertia, Weapon},
     model::ActorAction,
-    plugin::bot::{Bot, BotConfig, BotShootingState},
+    plugin::bot::{Bot, BotConfig},
     util::{
         ext::{TransformExt, Vec2Ext},
         math::angle_difference,
@@ -15,10 +16,15 @@ use bevy::{
     prelude::{Color, Query, Transform, With},
     time::Time,
 };
-use std::{f32::consts::FRAC_PI_2, ops::Div, time::Duration};
+use std::{
+    f32::consts::{FRAC_PI_2, FRAC_PI_6},
+    ops::Div,
+    time::Duration,
+};
 
 const DEBUG_TEAMMATES: bool = false;
 const DEBUG_AIM: bool = false;
+const DEBUG_SPREAD: bool = false;
 
 pub fn on_update(
     mut bots: Query<(&mut Bot, &mut Actor, &Transform, &Inertia, Option<&Weapon>)>,
@@ -52,7 +58,7 @@ pub fn on_update(
             transform,
             velocity: inertia.velocity,
             weapon,
-            spread_out: SpreadOut::Full,
+            spread_out: SpreadOut::Default,
             is_dodging: false,
         };
 
@@ -68,15 +74,7 @@ pub fn on_update(
             handler.idle();
         }
 
-        match handler.spread_out {
-            SpreadOut::Full => {
-                handler.spread_out(true, &actors);
-            }
-            SpreadOut::Restricted => {
-                handler.spread_out(false, &actors);
-            }
-            SpreadOut::Disallowed => {}
-        }
+        handler.spread_out(&actors);
     }
 }
 
@@ -110,7 +108,7 @@ impl<'a> BotHandler<'a> {
 
             self.look_at_direction(bot_to_enemy + turn * force);
             self.actor.movement += Vec2::FRONT;
-            self.spread_out = SpreadOut::Disallowed;
+            self.spread_out.set(SpreadOut::Compact);
             self.is_dodging = true;
         }
     }
@@ -127,7 +125,7 @@ impl<'a> BotHandler<'a> {
         if self.is_close(&target.position, self.bot.config.shoot_distance_min) {
             // don't come too close
             self.actor.movement += Vec2::BACK / 1.5;
-            self.spread_out = SpreadOut::Disallowed;
+            self.spread_out.set(SpreadOut::Disallowed);
         }
 
         if self.is_reloading() {
@@ -135,9 +133,7 @@ impl<'a> BotHandler<'a> {
         }
 
         if self.can_aim_at(target.position) {
-            if self.spread_out != SpreadOut::Disallowed {
-                self.spread_out = SpreadOut::Restricted;
-            }
+            self.spread_out.set(SpreadOut::Simplified);
 
             if self.bot.config.is_silly
                 && self.is_far(&target.position, self.bot.config.shoot_distance_min * 1.25)
@@ -207,7 +203,7 @@ impl<'a> BotHandler<'a> {
             self.look_at_position(target.position);
             self.actor.actions |= ActorAction::Attack;
             self.actor.movement += Vec2::FRONT;
-            self.spread_out = SpreadOut::Disallowed;
+            self.spread_out.set(SpreadOut::Disallowed);
         } else {
             // otherwise just chase
             self.chase(target);
@@ -218,8 +214,8 @@ impl<'a> BotHandler<'a> {
         let meet = self.find_meet(target);
 
         if self.is_close(&meet, self.bot.config.spread) {
-            // meet point is near, no need to spread out
-            self.spread_out = SpreadOut::Disallowed;
+            // meet point is near, no need to spread
+            self.spread_out.set(SpreadOut::Disallowed);
         }
 
         if self.can_sprint() && self.is_far(&meet, self.bot.config.sprint_distance) {
@@ -239,7 +235,32 @@ impl<'a> BotHandler<'a> {
         }
     }
 
-    fn spread_out(&mut self, is_full: bool, actors: &Query<(&Transform, &Inertia), With<Actor>>) {
+    fn spread_out(&mut self, actors: &Query<(&Transform, &Inertia), With<Actor>>) {
+        let mut spread = self.bot.config.spread;
+        let is_full;
+
+        match self.spread_out {
+            SpreadOut::Default => {
+                is_full = true;
+            }
+            SpreadOut::Compact => {
+                spread = 0.0;
+                is_full = true;
+            }
+            SpreadOut::Simplified => {
+                is_full = false;
+            }
+            SpreadOut::Disallowed => {
+                return;
+            }
+        }
+
+        spread = f32::max(spread, self.actor.config.radius * 3.0);
+
+        if DEBUG_SPREAD {
+            GIZMOS.circle(self.position(), spread, Color::ORANGE.with_a(0.3));
+        }
+
         let mut teammates_position_sum = Vec2::ZERO;
         let mut teammates_position_sum_weight = 0.0;
 
@@ -250,8 +271,8 @@ impl<'a> BotHandler<'a> {
 
             let teammate_distance = self.distance_squared(&teammate_position);
 
-            if teammate_distance < self.bot.config.spread * self.bot.config.spread {
-                let weight = 1.0 - teammate_distance.sqrt() / self.bot.config.spread;
+            if teammate_distance < spread * spread {
+                let weight = 1.0 - teammate_distance.sqrt() / spread;
                 teammates_position_sum += teammate_position * weight;
                 teammates_position_sum_weight += weight;
             }
@@ -262,27 +283,26 @@ impl<'a> BotHandler<'a> {
         }
 
         let teammates_position = teammates_position_sum / teammates_position_sum_weight;
-        let teammates_distance = self.distance_squared(&teammates_position);
 
         if DEBUG_TEAMMATES {
             GIZMOS.ln(self.position(), teammates_position, Color::GREEN);
         }
 
-        if teammates_distance < self.bot.config.spread * self.bot.config.spread {
+        if self.is_close(&teammates_position, spread) {
             if is_full {
-                let look_at = self.get_look_at(); // TODO: maybe use just direction or movement?
-                let turn = angle_difference(look_at, teammates_position.angle_to(self.position())); // turn away from teammate
-                let closeness = 1.0 - teammates_distance.sqrt() / self.bot.config.spread; // the closer teammates, the faster spread out
-                self.look_at_direction(look_at + turn * closeness * self.bot.config.spread_force);
-                self.actor.movement += Vec2::FRONT;
+                let angle_look = self.get_look_at();
+                let angle_to_group = self.angle_to(&teammates_position);
+                let angle_distance = angle_difference(angle_look, angle_to_group);
 
-                // cancel splint if group is too tight
-                if closeness > 0.75 {
+                self.look_at_direction(angle_look - FRAC_PI_2 * angle_distance.signum());
+
+                if angle_distance.abs() > FRAC_PI_6 {
+                    self.actor.movement += Vec2::FRONT;
+                } else {
                     self.actor.actions -= ActorAction::Sprint;
                 }
             } else {
-                // TODO: simplify
-                // find subjection direction to teammates, and go in opposite direction
+                // find subjective direction to teammates, and go in opposite direction
                 self.actor.movement -= (teammates_position - self.position())
                     .normalize_or_zero()
                     .rotate_by(-self.transform.direction())
@@ -340,11 +360,20 @@ impl<'a> WithVelocity for BotHandler<'a> {
     }
 }
 
-#[derive(PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 enum SpreadOut {
-    Full,
-    Restricted,
-    Disallowed,
+    Default = 0,
+    Compact = 1,
+    Simplified = 2,
+    Disallowed = 3,
+}
+
+impl SpreadOut {
+    fn set(&mut self, new: SpreadOut) {
+        if (*self as u8) < (new as u8) {
+            *self = new;
+        }
+    }
 }
 
 pub struct BotTarget {

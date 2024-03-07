@@ -42,13 +42,7 @@ pub fn on_update(
                 let distance = p1.distance_squared(t2.translation.truncate());
 
                 if a1.config.kind == a2.config.kind {
-                    // later teammate can come closer. so we store it event if it's outsize the
-                    // spread radius
-                    let distance_max = bot.config.spread * 2.0;
-
-                    if distance < distance_max * distance_max {
-                        teammates.try_add(e2, distance);
-                    }
+                    teammates.try_add(e2, distance);
                 } else if distance < enemy_distance {
                     bot.enemy = Some(e2);
                     enemy_distance = distance;
