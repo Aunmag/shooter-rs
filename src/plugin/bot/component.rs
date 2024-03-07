@@ -1,3 +1,4 @@
+use super::sys_detour::Detour;
 use crate::{
     plugin::bot::BotConfig,
     util::{ext::RngExt, Timer},
@@ -12,12 +13,13 @@ pub struct Bot {
     pub config: BotConfig,
     pub enemy: Option<Entity>,
     pub teammates: Vec<Entity>,
+    pub detour: Option<Detour>,
     pub update_timer: Timer,
     pub voice_timer: Timer,
     pub idle_direction: f32,
     pub idle_movement: bool,
     pub was_burst_fire: bool,
-    pub rng: Pcg32,
+    pub rng: Pcg32, // TODO: use global
     shooting_state: BotShootingState,
     shooting_timer: Timer,
 }
@@ -30,6 +32,7 @@ impl Bot {
             config: config.clone_with(skill, &mut rng),
             enemy: None,
             teammates: Vec::new(),
+            detour: None,
             update_timer: Timer::default(),
             voice_timer: Timer::default(),
             idle_direction: rng.gen_range(0.0..TAU),

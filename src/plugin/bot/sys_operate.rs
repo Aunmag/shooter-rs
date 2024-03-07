@@ -25,6 +25,7 @@ use std::{
 const DEBUG_TEAMMATES: bool = false;
 const DEBUG_AIM: bool = false;
 const DEBUG_SPREAD: bool = false;
+const DEBUG_DETOUR: bool = false;
 
 pub fn on_update(
     mut bots: Query<(&mut Bot, &mut Actor, &Transform, &Inertia, Option<&Weapon>)>,
@@ -149,7 +150,7 @@ impl<'a> BotHandler<'a> {
                 .get_shooting_state(weapon.config.is_automatic, time);
 
             let debug_color;
-            let is_aimed = self.is_aimed_at(target.position);
+            let is_aimed = self.is_aimed_at_point(target.position);
 
             if shooting_state == BotShootingState::Shoot && (is_aimed || self.bot.was_burst_fire) {
                 self.actor.actions |= ActorAction::Attack;
@@ -210,21 +211,61 @@ impl<'a> BotHandler<'a> {
         }
     }
 
+    #[allow(clippy::needless_late_init)]
     fn chase(&mut self, target: &BotTarget) {
         let meet = self.find_meet(target);
+        let target = target.position;
+        let detour;
 
         if self.is_close(&meet, self.bot.config.spread) {
-            // meet point is near, no need to spread
+            // meet point is near, no need to spread out and detour
             self.spread_out.set(SpreadOut::Disallowed);
+            detour = None;
+        } else {
+            detour = self
+                .bot
+                .detour
+                .as_ref()
+                .and_then(|d| d.calc(self.position(), target));
         }
 
-        if self.can_sprint() && self.is_far(&meet, self.bot.config.sprint_distance) {
-            // enemy is far, sprint
-            self.actor.actions |= ActorAction::Sprint;
+        if let Some(detour) = detour {
+            if self.can_sprint() && self.is_aimed_at_angle(detour) {
+                self.actor.actions |= ActorAction::Sprint;
+            }
+
+            self.spread_out.set(SpreadOut::Compact);
+            self.look_at_direction(detour);
+            self.actor.movement += Vec2::FRONT;
+        } else {
+            if self.can_sprint() && self.is_far(&target, self.bot.config.sprint_distance) {
+                // enemy is far, sprint
+                self.actor.actions |= ActorAction::Sprint;
+            }
+
+            self.look_at_position(meet);
+            self.actor.movement += Vec2::FRONT;
         }
 
-        self.look_at_position(meet);
-        self.actor.movement += Vec2::FRONT;
+        if DEBUG_DETOUR {
+            let color = Color::WHITE.with_a(0.4);
+            let mut p0 = self.position();
+            let mut detour_sign = f32::NAN;
+
+            while let Some(detour) = self.bot.detour.as_ref().and_then(|d| d.calc(p0, target)) {
+                let p1 = p0 + Vec2::from_length(0.05, detour);
+                GIZMOS.ln(p0, p1, color);
+                p0 = p1;
+
+                if !detour_sign.is_nan() && detour_sign != detour.signum() {
+                    break;
+                }
+
+                detour_sign = detour.signum();
+            }
+
+            GIZMOS.ln(p0, target, color.with_a(0.1));
+        }
     }
 
     fn idle(&mut self) {
@@ -326,8 +367,12 @@ impl<'a> BotHandler<'a> {
             .unwrap_or_else(|| self.transform.direction());
     }
 
-    fn is_aimed_at(&self, target: Vec2) -> bool {
-        return angle_difference(self.transform.direction(), self.angle_to(&target)).abs()
+    fn is_aimed_at_point(&self, point: Vec2) -> bool {
+        return self.is_aimed_at_angle(self.angle_to(&point));
+    }
+
+    fn is_aimed_at_angle(&self, angle: f32) -> bool {
+        return angle_difference(self.transform.direction(), angle).abs()
             < self.bot.config.angular_deviation;
     }
 
