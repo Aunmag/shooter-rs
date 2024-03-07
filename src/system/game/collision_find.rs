@@ -28,8 +28,8 @@ pub fn collision_find(
     for (entity, _, transform, _) in query.iter() {
         chunks
             .entry(ChunkId::from(transform.translation.truncate()))
-            .and_modify(|e| e.push(entity))
-            .or_insert_with(|| vec![entity]);
+            .or_insert_with(Vec::new)
+            .push(entity);
     }
 
     if DEBUG {

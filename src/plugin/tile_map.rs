@@ -217,8 +217,8 @@ impl Command for TileBlend {
                     tile_map
                         .to_blend
                         .entry(index)
-                        .and_modify(|e| e.push(entity))
-                        .or_insert_with(|| vec![entity]);
+                        .or_insert_with(Vec::new)
+                        .push(entity);
                 }
             });
         } else if let Self::Entity(entity) = self {
