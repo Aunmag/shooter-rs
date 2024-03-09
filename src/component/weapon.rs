@@ -6,7 +6,7 @@ use bevy::ecs::component::Component;
 use rand_pcg::Pcg32;
 use std::time::Duration;
 
-const ARMING_DURATION: Duration = Duration::from_millis(300);
+const ARMING_DURATION: Duration = Duration::from_millis(150);
 
 #[derive(Component)]
 pub struct Weapon {
@@ -39,14 +39,14 @@ impl WeaponConfig {
     const FIRE_RATE_SHOTGUN: f32 = 85.0;
     const DEVIATION_COOL_DOWN: Duration = Duration::from_millis(800);
 
-    const RELOADING_TIME_PISTOL: Duration = Duration::from_millis(1100);
+    const RELOADING_TIME_PISTOL: Duration = Duration::from_millis(800);
     const RELOADING_TIME_SHOTGUN_LIGHT: Duration = Duration::from_millis(900);
     const RELOADING_TIME_SHOTGUN: Duration = Duration::from_millis(1100);
-    const RELOADING_TIME_SMG: Duration = Duration::from_millis(1200);
-    const RELOADING_TIME_CARBINE: Duration = Duration::from_millis(1900);
-    const RELOADING_TIME_RIFLE: Duration = Duration::from_millis(2200);
-    const RELOADING_TIME_RIFLE_HEAVY: Duration = Duration::from_millis(2500);
-    const RELOADING_TIME_MACHINE_GUN: Duration = Duration::from_millis(8000);
+    const RELOADING_TIME_SMG: Duration = Duration::from_millis(1000);
+    const RELOADING_TIME_CARBINE: Duration = Duration::from_millis(1200);
+    const RELOADING_TIME_RIFLE: Duration = Duration::from_millis(1400);
+    const RELOADING_TIME_RIFLE_HEAVY: Duration = Duration::from_millis(1600);
+    const RELOADING_TIME_MACHINE_GUN: Duration = Duration::from_millis(3500);
 
     const RECOIL_MASS_POW: f32 = 0.25;
     const RECOIL_POW: f32 = 0.5;
