@@ -1,5 +1,5 @@
 use crate::{
-    command::ActorRelease,
+    command::ActorKill,
     component::{Actor, Health, Player},
     event::ActorDeathEvent,
     model::AudioPlay,
@@ -12,7 +12,7 @@ use bevy::{
         system::{Query, Res},
     },
     math::Vec3Swizzles,
-    prelude::{Commands, DespawnRecursiveExt, Entity, EventWriter, Transform},
+    prelude::{Commands, Entity, EventWriter, Transform},
 };
 
 pub fn health(
@@ -41,6 +41,7 @@ pub fn health(
         }
 
         if health.is_just_died() {
+            // TODO: move to command?
             audio.queue(AudioPlay {
                 path: format!("{}/death", actor.get_assets_path()).into(),
                 volume: 1.0,
@@ -48,25 +49,18 @@ pub fn health(
                 ..AudioPlay::DEFAULT
             });
 
-            commands.add(ActorRelease(entity));
-
+            // TODO: move to command?
             death_events.send(ActorDeathEvent {
                 kind: actor.kind,
                 position: point,
                 is_player,
             });
 
-            commands.entity(entity).despawn_recursive();
+            commands.add(ActorKill(entity));
         }
 
         if let Some(blood) = BloodSpawn::new(point, damage) {
             commands.add(blood);
-        }
-
-        if health.is_just_died() {
-            if let Some(blood) = BloodSpawn::new(point, 0.75) {
-                commands.add(blood);
-            }
         }
 
         health.commit();

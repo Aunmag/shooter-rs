@@ -1,3 +1,4 @@
+mod animation;
 mod blood;
 pub mod bot;
 mod breath;
@@ -13,6 +14,6 @@ mod tile_map;
 mod ui_notification;
 
 pub use self::{
-    blood::*, breath::*, camera_target::*, crosshair::*, debug::*, footsteps::*, heartbeat::*,
-    laser::*, status_bar::*, terrain::*, tile_map::*, ui_notification::*,
+    animation::*, blood::*, breath::*, camera_target::*, crosshair::*, debug::*, footsteps::*,
+    heartbeat::*, laser::*, status_bar::*, terrain::*, tile_map::*, ui_notification::*,
 };

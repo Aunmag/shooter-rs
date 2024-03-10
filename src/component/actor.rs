@@ -14,7 +14,7 @@ pub struct Actor {
     pub movement: Vec2,
     pub actions: ActorActions,
     pub look_at: Option<f32>,
-    pub melee_next: Duration,
+    pub melee_next: Duration, // TODO: move to melee?
 }
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]

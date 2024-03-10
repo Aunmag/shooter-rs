@@ -11,15 +11,11 @@ pub struct ActorBotSet {
 
 impl Command for ActorBotSet {
     fn apply(self, world: &mut World) {
-        let entity_id = u64::from(self.entity.index());
+        let mut entity = world.entity_mut(self.entity);
 
-        if let Some(actor) = world.get::<Actor>(self.entity) {
-            let config = actor.config.bot;
-            let skill = actor.skill;
-
-            world
-                .entity_mut(self.entity)
-                .insert(Bot::new(config, skill, entity_id));
+        if let Some((config, skill)) = entity.get::<Actor>().map(|a| (a.config.bot, a.skill)) {
+            let seed = u64::from(self.entity.index());
+            entity.insert(Bot::new(config, skill, seed));
         } else {
             log::warn!("Can't set bot. Entity has no actor component");
         }

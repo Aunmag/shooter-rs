@@ -2,7 +2,7 @@ use crate::{
     component::{Actor, ActorConfig, ActorKind, Collision, Health, Inertia},
     data::LAYER_ACTOR,
     model::TransformLite,
-    plugin::{Breath, Footsteps},
+    plugin::{AnimationConfig, Breath, Footsteps},
     resource::Settings,
 };
 use bevy::{
@@ -43,6 +43,8 @@ impl Command for ActorSet {
 
         if let ActorKind::Human = self.config.kind {
             entity_mut.insert(Breath::default());
+        } else {
+            entity_mut.insert(AnimationConfig::ZOMBIE_WALK.to_component());
         }
     }
 }

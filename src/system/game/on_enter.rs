@@ -59,6 +59,7 @@ fn spawn_bluffs(world: &mut World) {
 fn spawn_trees(world: &mut World) {
     let mut rng = Pcg32::seed_from_u64(100);
     let trees = f32::max(0.0, TREES_QUANTITY) as usize;
+    // TODO: just use groups
     let image = [
         "terrain/tree_0.png",
         "terrain/tree_1.png",

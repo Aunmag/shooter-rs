@@ -19,32 +19,35 @@ impl Command for ActorRelease {
     fn apply(self, world: &mut World) {
         let difficulty = world.resource::<Settings>().game.difficulty;
 
-        // TODO: find a way to stop all sounds
-        if let Some(actor) = world.get_mut::<Actor>(self.0).as_mut() {
-            actor.movement = Vec2::ZERO;
-            actor.actions = ActorActions::EMPTY;
-            actor.look_at = None;
-            actor.skill = difficulty;
-        }
-
+        // TODO: optimize?
         if let Some(player) = world.get::<Player>(self.0) {
             world
                 .entity_mut(player.crosshair.entity)
                 .despawn_recursive();
         }
 
-        if let Some(inertia) = world.get_mut::<Inertia>(self.0).as_mut() {
+        let mut entity = world.entity_mut(self.0);
+
+        // TODO: find a way to stop all sounds
+        if let Some(actor) = entity.get_mut::<Actor>().as_mut() {
+            actor.movement = Vec2::ZERO;
+            actor.actions = ActorActions::EMPTY;
+            actor.look_at = None;
+            actor.skill = difficulty;
+        }
+
+        if let Some(inertia) = entity.get_mut::<Inertia>().as_mut() {
             inertia.drag = Inertia::DRAG_DEFAULT;
         }
 
-        let mut entity_mut = world.entity_mut(self.0);
-        entity_mut.remove::<Bot>();
-        entity_mut.remove::<Player>();
-        entity_mut.remove::<Breath>();
-        entity_mut.remove::<CameraTarget>();
+        entity.remove::<Bot>();
+        entity.remove::<Player>();
+        entity.remove::<Breath>();
+        entity.remove::<CameraTarget>();
 
         let mut to_remove = Vec::new();
 
+        // TODO: optimize?
         if let Some(children) = world.get::<Children>(self.0) {
             for &child in children {
                 if world.get::<Handle<StatusBar>>(child).is_some() {

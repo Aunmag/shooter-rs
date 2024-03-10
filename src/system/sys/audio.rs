@@ -1,10 +1,10 @@
 use crate::{
     component::AudioExpiration,
     plugin::{CameraTarget, Heartbeat},
-    resource::{AudioStorage, AudioTracker},
+    resource::{AssetGroups, AudioTracker},
 };
 use bevy::{
-    audio::{AudioBundle, AudioSink, Volume, VolumeLevel},
+    audio::{AudioBundle, AudioSink, AudioSource, Volume, VolumeLevel},
     ecs::{entity::Entity, system::Commands},
     prelude::{AudioSinkPlayback, DespawnRecursiveExt, Query, Res, ResMut, Transform, With},
     time::Time,
@@ -12,7 +12,7 @@ use bevy::{
 
 pub fn audio(
     mut tracker: ResMut<AudioTracker>,
-    mut storage: ResMut<AudioStorage>,
+    mut storage: ResMut<AssetGroups<AudioSource>>,
     mut commands: Commands,
     audio: Query<(Entity, &AudioSink, Option<&AudioExpiration>)>,
     listeners: Query<&Transform, With<CameraTarget>>,
@@ -36,7 +36,10 @@ pub fn audio(
     }
 
     for audio in &tracker.take_queue() {
-        let Some(source) = storage.choose(audio.path.as_ref()) else {
+        let Some(source) = storage
+            .get_group(audio.path.as_ref())
+            .and_then(|g| g.get_next(true))
+        else {
             continue;
         };
 

@@ -26,7 +26,8 @@ use bevy::{
     transform::components::Transform,
 };
 use rand::Rng;
-use std::time::Duration;
+use std::{f32::consts::PI, time::Duration};
+use crate::plugin::Animation;
 
 const INTERVAL: Duration = Duration::from_millis(500);
 
@@ -41,6 +42,7 @@ struct DiagnosticsText;
 struct DiagnosticsData {
     fps: Option<i32>,
     entities: Option<i32>,
+    animations: Option<i32>,
     audio_sources: Option<i32>,
     map_layers: Option<i32>,
     map_tiles: Option<i32>,
@@ -75,6 +77,8 @@ fn startup(world: &mut World) {
             TextSection::from_style(style.clone()),
             TextSection::new("\nEntities: ", style.clone()),
             TextSection::from_style(style.clone()),
+            TextSection::new("\nAnimations: ", style.clone()),
+            TextSection::from_style(style.clone()),
             TextSection::new("\nAudio sources: ", style.clone()),
             TextSection::from_style(style.clone()),
             TextSection::new("\n\nMap. Layers: ", style.clone()),
@@ -97,6 +101,7 @@ fn startup(world: &mut World) {
 }
 
 fn update_diagnostics_data(
+    animations: Query<(), With<Animation>>,
     diagnostics: Res<DiagnosticsStore>,
     audio_tracker: Res<AudioTracker>,
     tile_map: Res<TileMap>,
@@ -116,6 +121,11 @@ fn update_diagnostics_data(
     {
         let value = value as i32;
         data.entities = Some(i32::max(value, data.entities.unwrap_or(value)));
+    }
+
+    {
+        let value = animations.iter().len() as i32;
+        data.animations = Some(i32::max(value, data.animations.unwrap_or(value)));
     }
 
     {
@@ -146,14 +156,16 @@ fn update_diagnostics_text_inner(
     for mut text in &mut query {
         text.sections[1].value = format!("{}", data.fps.unwrap_or(-1));
         text.sections[3].value = format!("{}", data.entities.unwrap_or(-1));
-        text.sections[5].value = format!("{}", data.audio_sources.unwrap_or(-1));
-        text.sections[7].value = format!("{}", data.map_layers.unwrap_or(-1));
-        text.sections[9].value = format!("{}", data.map_tiles.unwrap_or(-1));
-        text.sections[11].value = format!("{}", data.map_queue.unwrap_or(-1));
+        text.sections[5].value = format!("{}", data.animations.unwrap_or(-1));
+        text.sections[7].value = format!("{}", data.audio_sources.unwrap_or(-1));
+        text.sections[9].value = format!("{}", data.map_layers.unwrap_or(-1));
+        text.sections[11].value = format!("{}", data.map_tiles.unwrap_or(-1));
+        text.sections[13].value = format!("{}", data.map_queue.unwrap_or(-1));
     }
 
     data.fps = None;
     data.entities = None;
+    data.animations = None;
     data.audio_sources = None;
     data.map_layers = None;
     data.map_tiles = None;
@@ -188,16 +200,17 @@ fn update_input(
     };
 
     let group = if keyboard.any_pressed([KeyCode::ShiftLeft, KeyCode::ShiftRight].into_iter()) {
-        10
+        5
     } else {
         1
     };
 
-    let position = crosshairs
+    let mut position = crosshairs
         .iter()
         .next()
         .map(TransformLite::from)
         .unwrap_or_default();
+    position.direction += PI;
 
     match spawn {
         Spawn::Bonus => {

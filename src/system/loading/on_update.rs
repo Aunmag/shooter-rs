@@ -1,6 +1,6 @@
 use crate::{
     model::AppState,
-    resource::{AssetStorage, AudioStorage},
+    resource::{AssetGroups, AssetStorage},
     util::Timer,
 };
 use bevy::{
@@ -20,13 +20,15 @@ fn on_update_inner(
     mut images: ResMut<Assets<Image>>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut asset_storage: ResMut<AssetStorage>,
-    mut audio_storage: ResMut<AudioStorage>,
+    mut audio_storage: ResMut<AssetGroups<AudioSource>>,
+    mut image_storage: ResMut<AssetGroups<Image>>,
     mut next_state: ResMut<NextState<AppState>>,
 ) {
     if asset_storage.is_lading_started() {
         if asset_storage.is_loaded(&asset_server) {
             log::info!("Loaded");
-            audio_storage.index(&audio_assets, &asset_server);
+            audio_storage.index(&audio_assets, &asset_server, true);
+            image_storage.index(&images, &asset_server, false);
             next_state.set(AppState::Game);
         } else {
             log::trace!("Loading...");

@@ -15,11 +15,11 @@ use crate::{
     event::ActorDeathEvent,
     model::AppState,
     plugin::{
-        BloodPlugin, BreathPlugin, CameraTargetPlugin, CrosshairPlugin, DebugPlugin,
-        FootstepsPlugin, HeartbeatPlugin, LaserSightPlugin, StatusBarPlugin, TerrainPlugin,
-        TileMapPlugin, UiNotificationPlugin,
+        AnimationPlugin, BloodPlugin, BreathPlugin, CameraTargetPlugin, CrosshairPlugin,
+        DebugPlugin, FootstepsPlugin, HeartbeatPlugin, LaserSightPlugin, StatusBarPlugin,
+        TerrainPlugin, TileMapPlugin, UiNotificationPlugin,
     },
-    resource::{AssetStorage, AudioStorage, AudioTracker, GameMode, Scenario, Settings},
+    resource::{AssetGroups, AssetStorage, AudioTracker, GameMode, Scenario, Settings},
     scenario::{BenchScenario, EmptyScenario, WavesScenario},
     util::ext::AppExt,
 };
@@ -80,6 +80,7 @@ fn main() {
     application.insert_resource(scenario.unwrap_or_else(|| Scenario::new(EmptyScenario)));
 
     application
+        .add_plugins(AnimationPlugin)
         .add_plugins(BloodPlugin)
         .add_plugins(BotPlugin)
         .add_plugins(BreathPlugin)
@@ -96,7 +97,8 @@ fn main() {
         .add_state::<AppState>()
         .add_event::<ActorDeathEvent>()
         .insert_resource(AssetStorage::default())
-        .insert_resource(AudioStorage::default())
+        .insert_resource(AssetGroups::new_for_audio())
+        .insert_resource(AssetGroups::new_for_image())
         .insert_resource(AudioTracker::new(settings.audio.sources))
         .insert_resource(settings)
         .insert_resource(GizmoConfig {
