@@ -2,7 +2,7 @@ use crate::{
     data::VIEW_DISTANCE,
     model::AppState,
     system::game::collision_resolve,
-    util::ext::{AppExt, DurationExt, TransformExt},
+    util::{ext::{AppExt, DurationExt, TransformExt}},
 };
 use bevy::{
     app::{App, Plugin},
@@ -43,6 +43,8 @@ pub struct CameraTarget {
     shake_push: Shake<Vec2>,
     shake_spin: Shake<f32>,
     direction: f32,
+    offset: Vec2,
+    offset_speed: Vec2,
 }
 
 impl CameraTarget {
@@ -56,14 +58,6 @@ impl CameraTarget {
     pub fn shake(&mut self, push: Vec2, spin: f32) {
         self.shake_push.add(push);
         self.shake_spin.add(spin);
-    }
-
-    pub const fn offset_y(&self) -> f32 {
-        if self.sync_angle.is_some() {
-            return 0.5;
-        } else {
-            return 0.0;
-        }
     }
 }
 
@@ -94,22 +88,40 @@ pub fn sys_camera_target(
             / window_size.length()
             / (target.zoom.get() - target.shake_push.get().length() * SHAKE_Z * target.zoom.get());
 
-        if let Some(offset_r) = target.sync_angle {
-            target.direction = target_transform.direction() - FRAC_PI_2 - offset_r;
+        let target_direction = target_transform.direction() - FRAC_PI_2 - target.sync_angle.unwrap_or(0.0);
+
+        if target.sync_angle.is_some() {
+            target.direction = target_direction;
         };
 
-        let rotation = Quat::from_rotation_z(target.direction + target.shake_spin.get() * SHAKE_R);
+        let r1 = Quat::from_rotation_z(target.direction + target.shake_spin.get() * SHAKE_R);
+        let r2 = Quat::from_rotation_z(target_direction + target.shake_spin.get() * SHAKE_R);
 
-        let mut offset = Vec3::ZERO;
-        offset.y += window_size.y / 2.0 * scale * target.offset_y();
-        offset = rotation * offset;
-        offset += target.shake_push.get().extend(0.0) * SHAKE_Y;
+        let mut offset_target = Vec3::ZERO;
+        offset_target.y += window_size.y * scale / 4.0; // TODO: get min size
+        offset_target = r2 * offset_target;
+
+        if target.sync_angle.is_some() {
+            target.offset = offset_target.truncate();
+            target.offset_speed = Vec2::ZERO;
+        } else {
+            // TODO: the closer cursor to edge, to faster speed
+            let speed = (offset_target.truncate() - target.offset).clamp_length_max(1.0);
+
+            let sd = speed - target.offset_speed;
+            target.offset_speed += sd * delta;
+
+            let s = target.offset_speed * delta;
+            target.offset += s;
+        }
+
+        let offset = target.offset + target.shake_push.get() * SHAKE_Y;
 
         if let Some((mut camera_transform, mut camera_projection)) = cameras.iter_mut().next() {
             camera_transform.translation.x = target_transform.translation.x + offset.x;
             camera_transform.translation.y = target_transform.translation.y + offset.y;
             camera_projection.scale = scale;
-            camera_transform.rotation = rotation;
+            camera_transform.rotation = r1;
         }
     }
 }
