@@ -78,7 +78,7 @@ pub struct AudioSettings {
 
 impl Default for AudioSettings {
     fn default() -> Self {
-        return Self { sources: 128 };
+        return Self { sources: 32 };
     }
 }
 
@@ -194,5 +194,13 @@ mod tests {
             format!("{:?}", normalized),
             format!("{:?}", Settings::default()),
         );
+    }
+
+    #[test]
+    #[allow(clippy::unwrap_used)]
+    fn test_default_and_actual() {
+        let default = format!("{:?}", Settings::default());
+        let actual = format!("{:?}", Settings::load().unwrap());
+        assert_eq!(default, actual);
     }
 }

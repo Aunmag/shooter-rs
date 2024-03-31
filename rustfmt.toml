@@ -1,5 +1,6 @@
-group_imports = "One" # Use with nightly like `cargo +nightly fmt`
-imports_granularity = "Crate" # Use with nightly like `cargo +nightly fmt`
+# cargo fmt -- --config unstable_features=true --config group_imports=One --config imports_granularity=Crate
+group_imports = "One"
+imports_granularity = "Crate"
 single_line_if_else_max_width = 0
 use_field_init_shorthand = true
 use_try_shorthand = true
