@@ -2,7 +2,7 @@ use crate::{
     data::{LAYER_GROUND, LAYER_TREE, PIXELS_PER_METER, TRANSFORM_SCALE},
     model::AppState,
     util::{
-        ext::{AppExt, HashMapExt, ImageExt},
+        ext::{AppExt, ImageExt},
         math::floor_by,
     },
 };
@@ -58,6 +58,20 @@ pub struct TileMap {
 }
 
 impl TileMap {
+    fn pop_queued(&mut self) -> Option<(Index, Vec<Entity>)> {
+        let mut biggest: Option<(Index, usize)> = None;
+
+        for (&index, queue) in self.to_blend.iter() {
+            let size = queue.len();
+
+            if biggest.map(|b| size > b.1).unwrap_or(true) {
+                biggest = Some((index, size));
+            }
+        }
+
+        return biggest.and_then(|(i, _)| self.to_blend.remove(&i).map(|q| (i, q)));
+    }
+
     pub fn count_layers(&self) -> usize {
         let mut layers = Vec::new();
 
@@ -100,7 +114,7 @@ fn on_update(mut tile_map: ResMut<TileMap>, mut commands: Commands) {
         return;
     }
 
-    let Some((index, entities)) = tile_map.to_blend.pop() else {
+    let Some((index, entities)) = tile_map.pop_queued() else {
         return;
     };
 
