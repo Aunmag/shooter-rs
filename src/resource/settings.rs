@@ -137,10 +137,7 @@ impl Settings {
         self.game.modes.dedup();
 
         if self.game.modes.contains(&GameMode::Bench) {
-            *self = Self::default();
             self.game.modes = vec![GameMode::Bench];
-            self.display.full_screen = false;
-            self.audio.sources = 0;
         }
 
         loop {
