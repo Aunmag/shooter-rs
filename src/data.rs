@@ -5,7 +5,7 @@ pub const APP_TITLE: &str = "A Zombie Shooter Game";
 pub const PIXELS_PER_METER: f32 = 32.0;
 pub const VIEW_DISTANCE: f32 = 37.5;
 
-pub const WORLD_SIZE: f32 = 50.0;
+pub const WORLD_SIZE: f32 = 52.0;
 pub const WORLD_SIZE_HALF: f32 = WORLD_SIZE / 2.0;
 pub const WORLD_SIZE_VISUAL: f32 = WORLD_SIZE + VIEW_DISTANCE;
 
@@ -22,3 +22,17 @@ pub const TRANSFORM_SCALE: Vec3 = Vec3::splat(1.0 / PIXELS_PER_METER);
 
 pub const FONT_PATH: &str = "fonts/OpenSans.ttf";
 pub const FONT_PATH_BOLD: &str = "fonts/OpenSans-Bold.ttf";
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_world_size() {
+        assert_eq!(
+            WORLD_SIZE % 4.0,
+            0.0,
+            "Because of bluff tiles, world size must be multiple of 4",
+        );
+    }
+}
