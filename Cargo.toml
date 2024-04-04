@@ -19,7 +19,15 @@ serde = { version = "1.0", features = ["derive"] }
 toml = "0.8"
 
 [dev-dependencies]
+bevy = { version = "0.12", features = ["dynamic_linking"] }
 approx = "0.5"
+
+# Enable more optimizations for dependencies in debug mode but not the project code itself
+# See: https://bevyengine.org/learn/quick-start/getting-started/setup/#compile-with-performance-optimizations
+[profile.dev]
+opt-level = 1
+[profile.dev.package."*"]
+opt-level = 3
 
 [lints.clippy]
 # basic
