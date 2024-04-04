@@ -17,7 +17,6 @@ use rand::{thread_rng, Rng};
 
 const SIZE_MIN: f32 = 0.8;
 const SIZE_MAX: f32 = 6.0;
-const SCALE_MIN: f32 = 0.03;
 
 pub struct BloodPlugin;
 
@@ -50,17 +49,14 @@ pub struct BloodSpawn {
 }
 
 impl BloodSpawn {
-    pub fn new(position: Vec2, mut scale: f32) -> Option<Self> {
-        scale = scale.clamp(0.0, 1.0);
+    pub fn new(position: Vec2, scale: f32) -> Option<Self> {
+        let size = interpolate_unbounded(0.0, SIZE_MAX, f32::min(scale, 1.0));
 
-        if scale < SCALE_MIN {
+        if size < SIZE_MIN {
             return None;
+        } else {
+            return Some(Self { position, size });
         }
-
-        return Some(Self {
-            position,
-            size: interpolate_unbounded(SIZE_MIN, SIZE_MAX, scale),
-        });
     }
 }
 

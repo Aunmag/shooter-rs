@@ -1,7 +1,8 @@
 use crate::{
-    component::{Actor, Health, Weapon},
+    component::{Actor, Weapon},
     data::PIXELS_PER_METER,
     model::AppState,
+    plugin::Health,
     resource::AssetStorage,
     util::ext::AppExt,
 };
@@ -93,7 +94,7 @@ fn on_update(
     for (actor, health, weapon, children) in targets.iter() {
         for child in children.iter() {
             if let Some(material) = handles.get(*child).ok().and_then(|h| assets.get_mut(h)) {
-                material.health -= (material.health - health.get_normalized()) * interpolation;
+                material.health -= (material.health - health.get()) * interpolation;
 
                 if health.is_low() {
                     material.health_alpha = pulse;

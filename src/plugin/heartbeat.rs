@@ -1,7 +1,7 @@
 use crate::{
-    component::{Actor, Health},
+    component::Actor,
     model::{AppState, AudioPlay},
-    plugin::CameraTarget,
+    plugin::{CameraTarget, Health},
     resource::AudioTracker,
     util::{ext::AppExt, math::interpolate, Timer},
 };
@@ -61,7 +61,7 @@ fn on_update(
 
     for (health, actor) in targets.iter() {
         if health.is_alive() && health.is_low() {
-            volume = f32::max(volume, VOLUME * (1.0 - health.get_normalized()));
+            volume = f32::max(volume, VOLUME * (1.0 - health.get()));
             speed = f32::max(
                 speed,
                 interpolate(SPEED_MIN, SPEED_MAX, 1.0 - actor.stamina.powf(4.0)),

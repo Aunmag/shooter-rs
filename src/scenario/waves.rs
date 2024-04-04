@@ -1,10 +1,10 @@
 use crate::{
     command::{ActorPlayerSet, ActorSet, BonusSpawn, WeaponSet},
-    component::{Actor, ActorConfig, ActorKind, Health, Player, WeaponConfig},
+    component::{Actor, ActorConfig, ActorKind, Player, WeaponConfig},
     data::VIEW_DISTANCE,
     event::ActorDeathEvent,
     model::TransformLite,
-    plugin::{bot::ActorBotSet, Notify},
+    plugin::{bot::ActorBotSet, Health, Notify},
     resource::{Scenario, ScenarioLogic},
     util::ext::Vec2Ext,
 };

@@ -1,7 +1,7 @@
 use crate::{
-    component::{Actor, Health, Inertia, Player},
+    component::{Actor, Inertia, Player},
     data::LAYER_ACTOR_PLAYER,
-    plugin::{CameraTarget, Crosshair, LaserSight, StatusBar},
+    plugin::{CameraTarget, Crosshair, Health, LaserSight, StatusBar},
     resource::{GameMode, Settings},
 };
 use bevy::{
@@ -23,7 +23,7 @@ impl Command for ActorPlayerSet {
         }
 
         if let Some(mut health) = world.get_mut::<Health>(self.entity) {
-            health.multiply(health_multiplier);
+            health.multiply_resistance(health_multiplier);
         }
 
         if let Some(mut transform) = world.get_mut::<Transform>(self.entity) {

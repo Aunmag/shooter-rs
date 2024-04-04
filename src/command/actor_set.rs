@@ -1,8 +1,8 @@
 use crate::{
-    component::{Actor, ActorConfig, ActorKind, Collision, Health, Inertia},
+    component::{Actor, ActorConfig, ActorKind, Collision, Inertia},
     data::LAYER_ACTOR,
     model::TransformLite,
-    plugin::{Breath, Footsteps},
+    plugin::{Breath, Footsteps, Health},
     resource::Settings,
 };
 use bevy::{

@@ -1,6 +1,6 @@
 use crate::{
-    component::{Health, Inertia},
-    plugin::CameraTarget,
+    component::Inertia,
+    plugin::{CameraTarget, Health},
 };
 use bevy::{
     ecs::{
@@ -8,7 +8,6 @@ use bevy::{
         world::World,
     },
     prelude::{Entity, Vec2},
-    time::Time,
 };
 
 const PUSH_MULTIPLIER: f32 = 40.0;
@@ -36,7 +35,6 @@ impl SystemBuffer for HitResource {
             return;
         }
 
-        let time = world.resource::<Time>().elapsed();
         let mut targets = world.query::<(&mut Inertia, &mut Health, Option<&mut CameraTarget>)>();
 
         for hit in self.hits.drain(..) {
@@ -48,7 +46,7 @@ impl SystemBuffer for HitResource {
                 if !hit.is_recoil {
                     push *= PUSH_MULTIPLIER;
                     spin *= SPIN_MULTIPLIER;
-                    health.damage(momentum_linear, time);
+                    health.damage(momentum_linear);
                 }
 
                 inertia.push(push, spin, false);

@@ -15,9 +15,9 @@ use crate::{
     event::ActorDeathEvent,
     model::AppState,
     plugin::{
-        BloodPlugin, BreathPlugin, CameraTargetPlugin, CrosshairPlugin, DebugPlugin,
-        FootstepsPlugin, HeartbeatPlugin, LaserSightPlugin, StatusBarPlugin, TerrainPlugin,
-        TileMapPlugin, UiNotificationPlugin,
+        bot::BotPlugin, BloodPlugin, BreathPlugin, CameraTargetPlugin, CrosshairPlugin,
+        DebugPlugin, FootstepsPlugin, HealthPlugin, HeartbeatPlugin, LaserSightPlugin,
+        StatusBarPlugin, TerrainPlugin, TileMapPlugin, UiNotificationPlugin,
     },
     resource::{AssetStorage, AudioStorage, AudioTracker, GameMode, Scenario, Settings},
     scenario::{BenchScenario, EmptyScenario, WavesScenario},
@@ -31,7 +31,6 @@ use bevy::{
     sprite::Material2dPlugin,
     window::{Window, WindowPlugin, WindowResolution},
 };
-use plugin::bot::BotPlugin;
 
 fn main() {
     // TODO: init logger earlier
@@ -86,6 +85,7 @@ fn main() {
         .add_plugins(CameraTargetPlugin)
         .add_plugins(CrosshairPlugin)
         .add_plugins(FootstepsPlugin)
+        .add_plugins(HealthPlugin)
         .add_plugins(HeartbeatPlugin)
         .add_plugins(LaserSightPlugin)
         .add_plugins(StatusBarPlugin)
@@ -109,7 +109,6 @@ fn main() {
         .add_state_systems(AppState::Game, |s| {
             use crate::system::game::*;
             s.add(input);
-            s.add(health);
             s.add(player);
             s.add(actor.after(player));
             s.add(inertia.after(actor));
