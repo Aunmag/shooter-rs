@@ -3,7 +3,7 @@ use crate::{
     component::{Actor, Player},
     event::ActorDeathEvent,
     model::{AppState, AudioPlay},
-    plugin::BloodSpawn,
+    plugin::{BloodSpawn, FleshParticleSpawn},
     resource::{AudioTracker, GameMode, Settings},
     util::{ext::AppExt, Timer},
 };
@@ -14,7 +14,7 @@ use bevy::{
         query::Has,
         system::{Local, Query, Res},
     },
-    math::Vec3Swizzles,
+    math::{Vec2, Vec3Swizzles},
     prelude::{Commands, DespawnRecursiveExt, Entity, EventWriter, IntoSystemConfigs, Transform},
     time::Time,
 };
@@ -23,8 +23,9 @@ use std::time::Duration;
 /// Increased buffering helps to summarize small and frequent damage events into one which is good
 /// for visual effects like blood. But also it increases the delay
 const BUFFERING: Duration = Duration::from_millis(100);
-
 const LOW_VALUE: f32 = 0.4;
+const FLESH_PARTICLE_PER_DAMAGE: f32 = 0.2;
+const FLESH_PARTICLES_MAX: i32 = 8;
 
 pub struct HealthPlugin;
 
@@ -91,10 +92,6 @@ impl Health {
         return self.health;
     }
 
-    pub fn get_damage_clamped(&self) -> f32 {
-        return f32::min(self.damage, 1.0);
-    }
-
     pub fn is_alive(&self) -> bool {
         return self.health > 0.0;
     }
@@ -114,9 +111,8 @@ fn on_update(
     for (entity, actor, mut health, transform, is_player) in query.iter_mut() {
         let actor = actor.config;
         let point = transform.translation.xy();
-        let damage = health.get_damage_clamped();
 
-        if health.is_alive() && damage > actor.pain_threshold {
+        if health.is_alive() && health.damage > actor.pain_threshold {
             audio.queue(AudioPlay {
                 path: format!("{}/pain", actor.get_assets_path()).into(),
                 volume: 0.9,
@@ -125,13 +121,8 @@ fn on_update(
             });
         }
 
-        let mut blood_amount = damage;
-        if health.just_died {
-            blood_amount = f32::min(blood_amount * 1.5, 1.0);
-        }
-        if let Some(blood) = BloodSpawn::new(point, blood_amount) {
-            commands.add(blood);
-        }
+        spawn_blood(&health, &mut commands, point);
+        spawn_flesh(&health, &mut commands, entity);
 
         if settings.game.modes.contains(&GameMode::Bench) {
             health.health = 1.0;
@@ -159,5 +150,33 @@ fn on_update(
         }
 
         health.damage = 0.0;
+    }
+}
+
+fn spawn_blood(health: &Health, commands: &mut Commands, point: Vec2) {
+    let mut amount = health.damage;
+
+    if health.just_died {
+        amount *= 1.5;
+    }
+
+    if let Some(blood) = BloodSpawn::new(point, f32::min(amount, 1.0)) {
+        commands.add(blood);
+    }
+}
+
+fn spawn_flesh(health: &Health, commands: &mut Commands, entity: Entity) {
+    let particles = if health.just_died {
+        // TODO: play smash sound
+        FLESH_PARTICLES_MAX
+    } else {
+        i32::min(
+            (health.damage / FLESH_PARTICLE_PER_DAMAGE) as i32,
+            FLESH_PARTICLES_MAX,
+        )
+    };
+
+    for _ in 0..particles {
+        commands.add(FleshParticleSpawn(entity));
     }
 }

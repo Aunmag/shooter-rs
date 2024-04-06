@@ -16,8 +16,8 @@ use crate::{
     model::AppState,
     plugin::{
         bot::BotPlugin, BloodPlugin, BreathPlugin, CameraTargetPlugin, CrosshairPlugin,
-        DebugPlugin, FootstepsPlugin, HealthPlugin, HeartbeatPlugin, LaserSightPlugin,
-        StatusBarPlugin, TerrainPlugin, TileMapPlugin, UiNotificationPlugin,
+        DebugPlugin, FleshParticlePlugin, FootstepsPlugin, HealthPlugin, HeartbeatPlugin,
+        LaserSightPlugin, StatusBarPlugin, TerrainPlugin, TileMapPlugin, UiNotificationPlugin,
     },
     resource::{AssetStorage, AudioStorage, AudioTracker, GameMode, Scenario, Settings},
     scenario::{BenchScenario, EmptyScenario, WavesScenario},
@@ -84,6 +84,7 @@ fn main() {
         .add_plugins(BreathPlugin)
         .add_plugins(CameraTargetPlugin)
         .add_plugins(CrosshairPlugin)
+        .add_plugins(FleshParticlePlugin)
         .add_plugins(FootstepsPlugin)
         .add_plugins(HealthPlugin)
         .add_plugins(HeartbeatPlugin)
