@@ -1,7 +1,7 @@
 use crate::{
     component::{Actor, Inertia, Player},
     data::LAYER_ACTOR_PLAYER,
-    plugin::{CameraTarget, Crosshair, Health, LaserSight, StatusBar},
+    plugin::{CameraTarget, Health, LaserSight, StatusBar},
     resource::{GameMode, Settings},
 };
 use bevy::{
@@ -34,12 +34,10 @@ impl Command for ActorPlayerSet {
             inertia.drag = Inertia::DRAG_PLAYER;
         }
 
-        let crosshair = Crosshair::spawn(world);
-
         // TODO: don't insert player if it isn't controllable
         world
             .entity_mut(self.entity)
-            .insert(Player::new(self.is_controllable, crosshair))
+            .insert(Player::new(self.is_controllable))
             .insert(CameraTarget::default());
 
         StatusBar::spawn(world, self.entity);

@@ -96,68 +96,57 @@ fn on_update(
     };
 
     for (mut player, mut player_transform) in players.iter_mut() {
+        let Some(crosshair) = player.crosshair.as_mut() else {
+            continue;
+        };
+
+        let Ok(mut transform) = crosshairs.get_mut(crosshair.entity) else {
+            continue;
+        };
+
         let player_position = player_transform.translation.truncate();
 
-        let player_on_screen = camera
-            .world_to_viewport(camera_transform, player_position.extend(0.0))
+        // crosshair must in sync with player while it moves, also player direction can be
+        // changed because of weapon recoil, so crosshair shod be affected too
+        let on_world = player_position
+            + Vec2::new(crosshair.distance, 0.0).rotate_by_quat(player_transform.rotation);
+
+        let on_screen_old = camera
+            .world_to_viewport(camera_transform, on_world.extend(0.0))
             .unwrap();
 
-        if let Ok(mut transform) = crosshairs.get_mut(player.crosshair.entity) {
-            // crosshair must in sync with player while it moves, also player direction can be
-            // changed because of weapon recoil, so crosshair shod be affected too
-            let on_world = player_position
-                + Vec2::new(player.crosshair.distance, 0.0)
-                    .rotate_by_quat(player_transform.rotation);
+        let mut on_screen_new = on_screen_old + cursor_delta;
 
-            let on_screen_old = camera
-                .world_to_viewport(camera_transform, on_world.extend(0.0))
-                .unwrap();
-
-            let mut on_screen_new = on_screen_old;
-
-            if player.is_aiming {
-                on_screen_new += cursor_delta;
-            } else {
-                on_screen_new.y += cursor_delta.y;
-            }
-
-            // clamp crosshair inside view port
-            if let Some(viewport_size) = camera.logical_viewport_size() {
-                on_screen_new.x = on_screen_new.x.clamp(0.0, viewport_size.x);
-                on_screen_new.y = on_screen_new.y.clamp(0.0, viewport_size.y);
-            }
-
-            if !player.is_aiming {
-                // don't allow crosshair go below player
-                on_screen_new.y = f32::min(on_screen_new.y, player_on_screen.y);
-            }
-
-            // put crosshair to it's updated position
-            let on_world_new = camera
-                .viewport_to_world(camera_transform, on_screen_new)
-                .unwrap()
-                .origin
-                .truncate();
-
-            transform.translation.x = on_world_new.x;
-            transform.translation.y = on_world_new.y;
-            transform.scale.x = SIZE * camera_projection.scale;
-            transform.scale.y = SIZE * camera_projection.scale;
-
-            if on_screen_new != on_screen_old {
-                // update crosshair distance only when it'd moved. otherwise distance error may grow
-                player.crosshair.distance = player_position.distance(on_world_new);
-
-                if player.is_aiming {
-                    // if crosshair had rotated, i.e. by input, then rote the player too
-                    player_transform.rotate_local_z(angle_difference(
-                        player_position.angle_to(on_world),
-                        player_position.angle_to(on_world_new),
-                    ));
-                }
-            }
-
-            transform.rotation = player_transform.rotation;
+        // clamp crosshair inside view port
+        if let Some(viewport_size) = camera.logical_viewport_size() {
+            on_screen_new.x = on_screen_new.x.clamp(0.0, viewport_size.x);
+            on_screen_new.y = on_screen_new.y.clamp(0.0, viewport_size.y);
         }
+
+        transform.scale.x = SIZE * camera_projection.scale;
+        transform.scale.y = SIZE * camera_projection.scale;
+
+        // put crosshair to it's updated position
+        let on_world_new = camera
+            .viewport_to_world(camera_transform, on_screen_new)
+            .unwrap()
+            .origin
+            .truncate();
+
+        transform.translation.x = on_world_new.x;
+        transform.translation.y = on_world_new.y;
+
+        if on_screen_new != on_screen_old {
+            // update crosshair distance only when it'd moved. otherwise distance error may grow
+            crosshair.distance = player_position.distance(on_world_new);
+
+            // if crosshair had rotated, i.e. by input, then rote the player too
+            player_transform.rotate_local_z(angle_difference(
+                player_position.angle_to(on_world),
+                player_position.angle_to(on_world_new),
+            ));
+        }
+
+        transform.rotation = player_transform.rotation;
     }
 }

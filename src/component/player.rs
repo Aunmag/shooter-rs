@@ -2,9 +2,8 @@ use bevy::ecs::{component::Component, entity::Entity};
 
 #[derive(Component)]
 pub struct Player {
-    pub is_aiming: bool,
     pub is_controllable: bool,
-    pub crosshair: PlayerCrosshair,
+    pub crosshair: Option<PlayerCrosshair>,
     extra_rotation: f32,
 }
 
@@ -12,11 +11,10 @@ impl Player {
     pub const EXTRA_ROTATION_MULTIPLAYER: f32 = 0.1;
     pub const EXTRA_ROTATION_MAX: f32 = 0.11;
 
-    pub fn new(is_controllable: bool, crosshair: Entity) -> Self {
+    pub fn new(is_controllable: bool) -> Self {
         return Self {
-            is_aiming: false,
             is_controllable,
-            crosshair: PlayerCrosshair::new(crosshair),
+            crosshair: None,
             extra_rotation: 0.0,
         };
     }

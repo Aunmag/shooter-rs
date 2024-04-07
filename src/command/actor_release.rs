@@ -27,10 +27,11 @@ impl Command for ActorRelease {
             actor.skill = difficulty;
         }
 
-        if let Some(player) = world.get::<Player>(self.0) {
-            world
-                .entity_mut(player.crosshair.entity)
-                .despawn_recursive();
+        if let Some(crosshair) = world
+            .get::<Player>(self.0)
+            .and_then(|p| p.crosshair.as_ref())
+        {
+            world.entity_mut(crosshair.entity).despawn_recursive();
         }
 
         if let Some(inertia) = world.get_mut::<Inertia>(self.0).as_mut() {
