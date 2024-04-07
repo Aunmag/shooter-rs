@@ -30,6 +30,7 @@ pub struct WeaponConfig {
     pub ammo_capacity: u8,
     pub reloading_time: Duration,
     pub has_bolt: bool,
+    pub is_shotgun: bool,
     pub grip: WeaponGrip,
     pub image_offset: f32,
 }
@@ -79,6 +80,7 @@ impl WeaponConfig {
         ammo_capacity: 8,
         reloading_time: Self::RELOADING_TIME_PISTOL,
         has_bolt: true,
+        is_shotgun: false,
         grip: WeaponGrip::OneHand,
         image_offset: 2.0,
     };
@@ -95,6 +97,7 @@ impl WeaponConfig {
         ammo_capacity: 8,
         reloading_time: Self::RELOADING_TIME_PISTOL,
         has_bolt: true,
+        is_shotgun: false,
         grip: WeaponGrip::OneHand,
         image_offset: 2.0,
     };
@@ -111,6 +114,7 @@ impl WeaponConfig {
         ammo_capacity: 2,
         reloading_time: Self::RELOADING_TIME_SHOTGUN_LIGHT,
         has_bolt: false,
+        is_shotgun: true,
         grip: WeaponGrip::TwoHands,
         image_offset: 3.5,
     };
@@ -127,6 +131,7 @@ impl WeaponConfig {
         ammo_capacity: 20,
         reloading_time: Self::RELOADING_TIME_SMG,
         has_bolt: true,
+        is_shotgun: false,
         grip: WeaponGrip::TwoHands,
         image_offset: 3.5,
     };
@@ -143,6 +148,7 @@ impl WeaponConfig {
         ammo_capacity: 2,
         reloading_time: Self::RELOADING_TIME_SHOTGUN,
         has_bolt: false,
+        is_shotgun: true,
         grip: WeaponGrip::TwoHandsWithButt,
         image_offset: 10.0,
     };
@@ -159,6 +165,7 @@ impl WeaponConfig {
         ammo_capacity: 64,
         reloading_time: Self::RELOADING_TIME_SMG,
         has_bolt: true,
+        is_shotgun: false,
         grip: WeaponGrip::TwoHandsWithButt,
         image_offset: 7.0,
     };
@@ -175,6 +182,7 @@ impl WeaponConfig {
         ammo_capacity: 30,
         reloading_time: Self::RELOADING_TIME_CARBINE,
         has_bolt: true,
+        is_shotgun: false,
         grip: WeaponGrip::TwoHandsWithButt,
         image_offset: 8.0,
     };
@@ -191,6 +199,7 @@ impl WeaponConfig {
         ammo_capacity: 30,
         reloading_time: Self::RELOADING_TIME_RIFLE,
         has_bolt: true,
+        is_shotgun: false,
         grip: WeaponGrip::TwoHandsWithButt,
         image_offset: 9.0,
     };
@@ -207,6 +216,7 @@ impl WeaponConfig {
         ammo_capacity: 45,
         reloading_time: Self::RELOADING_TIME_RIFLE_HEAVY,
         has_bolt: true,
+        is_shotgun: false,
         grip: WeaponGrip::TwoHandsWithButt,
         image_offset: 9.0,
     };
@@ -223,6 +233,7 @@ impl WeaponConfig {
         ammo_capacity: 8,
         reloading_time: Self::RELOADING_TIME_RIFLE,
         has_bolt: true,
+        is_shotgun: true,
         grip: WeaponGrip::TwoHandsWithButt,
         image_offset: 9.0,
     };
@@ -239,6 +250,7 @@ impl WeaponConfig {
         ammo_capacity: 100,
         reloading_time: Self::RELOADING_TIME_MACHINE_GUN,
         has_bolt: true,
+        is_shotgun: false,
         grip: WeaponGrip::TwoHandsWithButt,
         image_offset: 10.0,
     };
@@ -255,6 +267,7 @@ impl WeaponConfig {
         ammo_capacity: 100,
         reloading_time: Self::RELOADING_TIME_MACHINE_GUN,
         has_bolt: true,
+        is_shotgun: false,
         grip: WeaponGrip::TwoHandsWithButt,
         image_offset: 10.0,
     };
@@ -282,6 +295,8 @@ impl WeaponConfig {
 }
 
 impl Weapon {
+    pub const BARREL_LENGTH: f32 = 0.6; // TODO: don't hardcode
+
     pub const fn new(config: &'static WeaponConfig) -> Self {
         return Self {
             config,

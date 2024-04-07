@@ -9,7 +9,6 @@ pub const WORLD_SIZE: f32 = 52.0;
 pub const WORLD_SIZE_HALF: f32 = WORLD_SIZE / 2.0;
 pub const WORLD_SIZE_VISUAL: f32 = WORLD_SIZE + VIEW_DISTANCE;
 
-pub const LAYER_HIDDEN: f32 = -2.0;
 pub const LAYER_BACKGROUND: f32 = -1.0;
 pub const LAYER_GROUND: f32 = 0.0;
 pub const LAYER_ACTOR: f32 = 0.1;

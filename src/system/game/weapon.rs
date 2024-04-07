@@ -3,6 +3,7 @@ use crate::{
     component::{Actor, Weapon},
     data::VIEW_DISTANCE,
     model::{ActorActionsExt, AudioPlay, TransformLite},
+    plugin::ShellParticleSpawn,
     resource::{AudioTracker, HitResource},
     util::{
         ext::{RngExt, TransformExt, Vec2Ext},
@@ -18,7 +19,6 @@ use bevy::{
 use rand::{Rng, SeedableRng};
 use rand_pcg::Pcg32;
 
-const BARREL_LENGTH: f32 = 0.6; // TODO: don't hardcode
 const DEBUG_DEVIATION: bool = false;
 
 pub struct WeaponSystemData {
@@ -67,7 +67,7 @@ pub fn weapon(
 
         if actor.actions.is_attacking() && weapon.try_fire(now) {
             let mut position = TransformLite::from(transform);
-            position.translation += Vec2::from_length(BARREL_LENGTH, position.direction);
+            position.translation += Vec2::from_length(Weapon::BARREL_LENGTH, position.direction);
 
             audio.queue(AudioPlay {
                 path: "sounds/shot".into(),
@@ -75,6 +75,10 @@ pub fn weapon(
                 source: Some(position.translation),
                 ..AudioPlay::DEFAULT
             });
+
+            if weapon.config.has_bolt {
+                commands.add(ShellParticleSpawn(entity));
+            }
 
             for _ in 0..weapon.config.projectile.fragments {
                 let deviation = data.rng.gen_range_safely(-deviation, deviation);
@@ -111,6 +115,12 @@ pub fn weapon(
                 source: Some(transform.translation.xy()),
                 duration: reloading_duration, // TODO: stop if weapon will be changed earlier
             });
+
+            if !weapon.config.has_bolt {
+                for _ in 0..weapon.config.ammo_capacity {
+                    commands.add(ShellParticleSpawn(entity));
+                }
+            }
 
             continue;
         }
