@@ -10,6 +10,7 @@ use std::time::Duration;
 pub struct AudioPlay {
     pub path: SmartString<'static>,
     pub volume: f32,
+    pub speed: f32,
     pub source: Option<Vec2>,
     pub duration: Duration,
 }
@@ -23,6 +24,7 @@ impl AudioPlay {
     pub const DEFAULT: Self = Self {
         path: SmartString::Ref("sound/default"),
         volume: 1.0,
+        speed: 1.0,
         source: None,
         duration: Self::DURATION_ONCE,
     };
@@ -34,7 +36,9 @@ impl AudioPlay {
             PlaybackSettings::ONCE
         };
 
-        return settings.with_volume(Volume::Relative(VolumeLevel::new(self.volume)));
+        return settings
+            .with_volume(Volume::Relative(VolumeLevel::new(self.volume)))
+            .with_speed(self.speed);
     }
 
     pub fn is_looped(&self) -> bool {

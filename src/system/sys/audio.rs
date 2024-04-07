@@ -35,6 +35,8 @@ pub fn audio(
         }
     }
 
+    tracker.update_delayed(now);
+
     for audio in &tracker.take_queue() {
         let Some(source) = storage.choose(audio.path.as_ref()) else {
             continue;

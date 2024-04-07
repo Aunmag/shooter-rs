@@ -114,6 +114,7 @@ pub fn weapon(
                 volume: 0.4,
                 source: Some(transform.translation.xy()),
                 duration: reloading_duration, // TODO: stop if weapon will be changed earlier
+                ..AudioPlay::DEFAULT
             });
 
             if !weapon.config.has_bolt {

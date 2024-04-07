@@ -1,6 +1,6 @@
 use crate::model::AudioPlay;
 use bevy::prelude::{Resource, Vec2};
-use std::sync::Mutex;
+use std::{sync::Mutex, time::Duration};
 
 const VOLUME_MIN: f32 = 0.01;
 const SOUND_DISTANCE_FACTOR: f32 = 2.0;
@@ -8,6 +8,7 @@ const SOUND_DISTANCE_FACTOR: f32 = 2.0;
 #[derive(Resource)]
 pub struct AudioTracker {
     queue: Mutex<Vec<AudioPlay>>,
+    queue_delayed: Mutex<Vec<(AudioPlay, Duration)>>,
     limit: usize,
     pub playing: usize,
     pub listener: Vec2,
@@ -17,6 +18,7 @@ impl AudioTracker {
     pub fn new(sources_limit: usize) -> Self {
         return Self {
             queue: Mutex::new(Vec::with_capacity(sources_limit)),
+            queue_delayed: Mutex::new(Vec::new()),
             playing: 0,
             limit: sources_limit,
             listener: Vec2::ZERO,
@@ -59,6 +61,24 @@ impl AudioTracker {
             }
         } else {
             queue.push(audio);
+        }
+    }
+
+    pub fn queue_delayed(&self, time: Duration, audio: AudioPlay) {
+        if let Ok(mut queue) = self.queue_delayed.lock() {
+            queue.push((audio, time));
+        }
+    }
+
+    pub fn update_delayed(&self, now: Duration) {
+        let Ok(mut queue_delayed) = self.queue_delayed.lock() else {
+            return;
+        };
+
+        for i in (0..queue_delayed.len()).rev() {
+            if queue_delayed[i].1 <= now {
+                self.queue(queue_delayed.swap_remove(i).0);
+            }
         }
     }
 
