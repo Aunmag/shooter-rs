@@ -1,9 +1,8 @@
 use crate::{
-    component::Weapon,
     model::AudioPlay,
     plugin::{
         particle::{Particle, ParticleConfig},
-        AudioTracker, TileBlend,
+        AudioTracker, TileBlend, Weapon,
     },
     util::ext::{RngExt, TransformExt, Vec2Ext},
 };

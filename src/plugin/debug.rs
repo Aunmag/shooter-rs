@@ -1,9 +1,9 @@
 use super::{bot::ActorBotSet, BonusSpawn, Crosshair, TileMap};
 use crate::{
-    command::{ActorSet, WeaponSet},
-    component::{ActorConfig, ActorKind, WeaponConfig},
+    command::ActorSet,
+    component::{ActorConfig, ActorKind},
     model::{AppState, TransformLite},
-    plugin::AudioTracker,
+    plugin::{AudioTracker, WeaponConfig, WeaponSet},
     util::{ext::AppExt, Timer, GIZMOS},
 };
 use bevy::{

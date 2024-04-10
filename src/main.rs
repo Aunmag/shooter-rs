@@ -32,6 +32,7 @@ use bevy::{
     sprite::Material2dPlugin,
     window::{Window, WindowPlugin, WindowResolution},
 };
+use plugin::WeaponPlugin;
 
 fn main() {
     // TODO: init logger earlier
@@ -96,6 +97,7 @@ fn main() {
         .add_plugins(TerrainPlugin)
         .add_plugins(TileMapPlugin)
         .add_plugins(UiNotificationPlugin)
+        .add_plugins(WeaponPlugin)
         .add_plugins(Material2dPlugin::<ProjectileMaterial>::default())
         .add_state::<AppState>()
         .add_event::<ActorDeathEvent>()
@@ -116,7 +118,6 @@ fn main() {
             s.add(actor.after(player));
             s.add(inertia.after(actor));
             s.add(collision_find.pipe(collision_resolve).after(inertia));
-            s.add(weapon.after(collision_resolve));
             s.add(melee.after(collision_resolve));
             s.add(projectile.after(collision_resolve));
             s.add(projectile_whiz);

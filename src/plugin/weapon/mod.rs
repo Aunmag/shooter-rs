@@ -1,19 +1,25 @@
+mod command;
+mod component;
+mod config;
+
+pub use self::{command::*, component::*, config::*};
 use crate::{
     command::ProjectileSpawn,
-    component::{Actor, Weapon},
+    component::Actor,
     data::VIEW_DISTANCE,
-    model::{ActorActionsExt, AudioPlay, TransformLite},
+    model::{ActorActionsExt, AppState, AudioPlay, TransformLite},
     plugin::{AudioTracker, ShellParticleSpawn},
     resource::HitResource,
+    system::game::collision_resolve,
     util::{
-        ext::{RngExt, TransformExt, Vec2Ext},
+        ext::{AppExt, RngExt, TransformExt, Vec2Ext},
         GIZMOS,
     },
 };
 use bevy::{
     ecs::system::{Deferred, Local, Query},
     math::{Vec2, Vec3, Vec3Swizzles},
-    prelude::{Commands, Entity, Res, Time, Transform},
+    prelude::{App, Commands, Entity, IntoSystemConfigs, Plugin, Res, Time, Transform},
     render::color::Color,
 };
 use rand::{Rng, SeedableRng};
@@ -21,11 +27,19 @@ use rand_pcg::Pcg32;
 
 const DEBUG_DEVIATION: bool = false;
 
-pub struct WeaponSystemData {
+pub struct WeaponPlugin;
+
+impl Plugin for WeaponPlugin {
+    fn build(&self, app: &mut App) {
+        app.add_state_system(AppState::Game, on_update.after(collision_resolve));
+    }
+}
+
+struct Data {
     rng: Pcg32,
 }
 
-impl Default for WeaponSystemData {
+impl Default for Data {
     fn default() -> Self {
         return Self {
             rng: Pcg32::seed_from_u64(0),
@@ -33,8 +47,8 @@ impl Default for WeaponSystemData {
     }
 }
 
-pub fn weapon(
-    mut data: Local<WeaponSystemData>,
+fn on_update(
+    mut data: Local<Data>,
     mut query: Query<(Entity, &Actor, &Transform, &mut Weapon)>,
     mut commands: Commands,
     mut hits: Deferred<HitResource>,

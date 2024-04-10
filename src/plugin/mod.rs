@@ -15,9 +15,10 @@ mod status_bar;
 mod terrain;
 mod tile_map;
 mod ui_notification;
+mod weapon;
 
 pub use self::{
     audio::*, blood::*, bonus::*, breath::*, camera_target::*, crosshair::*, debug::*,
     footsteps::*, health::*, heartbeat::*, laser::*, particle::*, status_bar::*, terrain::*,
-    tile_map::*, ui_notification::*,
+    tile_map::*, ui_notification::*, weapon::*,
 };

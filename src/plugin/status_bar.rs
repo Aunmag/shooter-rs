@@ -1,8 +1,8 @@
 use crate::{
-    component::{Actor, Weapon},
+    component::Actor,
     data::PIXELS_PER_METER,
     model::AppState,
-    plugin::Health,
+    plugin::{Health, Weapon},
     resource::AssetStorage,
     util::ext::AppExt,
 };

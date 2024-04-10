@@ -1,7 +1,8 @@
 use crate::{
-    command::{ActorPlayerSet, ActorSet, WeaponSet},
-    component::{ActorConfig, WeaponConfig},
+    command::{ActorPlayerSet, ActorSet},
+    component::ActorConfig,
     model::TransformLite,
+    plugin::{WeaponConfig, WeaponSet},
     resource::ScenarioLogic,
 };
 use bevy::ecs::system::Commands;

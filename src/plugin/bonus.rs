@@ -1,8 +1,8 @@
 use crate::{
-    command::WeaponSet,
-    component::{Actor, ActorKind, Collision, Player, WeaponConfig},
+    component::{Actor, ActorKind, Collision, Player},
     data::{FONT_PATH, LAYER_BONUS, PIXELS_PER_METER, TRANSFORM_SCALE},
     model::AppState,
+    plugin::{WeaponConfig, WeaponSet},
     system::game::collision_resolve,
     util::{
         ext::{AppExt, Vec2Ext},

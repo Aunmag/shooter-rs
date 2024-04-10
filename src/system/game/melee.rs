@@ -1,7 +1,7 @@
 use crate::{
-    component::{Actor, ActorConfig, Weapon},
+    component::{Actor, ActorConfig},
     model::{ActorAction, ActorActionsExt, AudioPlay, TransformLite},
-    plugin::AudioTracker,
+    plugin::{AudioTracker, Weapon},
     resource::HitResource,
     util::{ext::Vec2Ext, math},
 };

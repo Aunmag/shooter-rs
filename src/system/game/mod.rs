@@ -10,9 +10,8 @@ mod player;
 mod projectile;
 mod projectile_whiz;
 mod scenario;
-mod weapon;
 
 pub use self::{
     actor::*, ambience_fx::*, collision_find::*, collision_resolve::*, inertia::*, input::*,
-    melee::*, on_enter::*, player::*, projectile::*, projectile_whiz::*, scenario::*, weapon::*,
+    melee::*, on_enter::*, player::*, projectile::*, projectile_whiz::*, scenario::*,
 };

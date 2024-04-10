@@ -1,8 +1,11 @@
 use super::component::BotShootingState;
 use crate::{
-    component::{Actor, Inertia, Weapon},
+    component::{Actor, Inertia},
     model::ActorAction,
-    plugin::bot::{Bot, BotConfig},
+    plugin::{
+        bot::{Bot, BotConfig},
+        Weapon,
+    },
     util::{
         ext::{TransformExt, Vec2Ext},
         math::angle_difference,
