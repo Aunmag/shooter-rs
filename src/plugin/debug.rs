@@ -1,6 +1,6 @@
-use super::{bot::ActorBotSet, Crosshair, TileMap};
+use super::{bot::ActorBotSet, BonusSpawn, Crosshair, TileMap};
 use crate::{
-    command::{ActorSet, BonusSpawn, WeaponSet},
+    command::{ActorSet, WeaponSet},
     component::{ActorConfig, ActorKind, WeaponConfig},
     model::{AppState, TransformLite},
     resource::AudioTracker,

@@ -15,9 +15,10 @@ use crate::{
     event::ActorDeathEvent,
     model::AppState,
     plugin::{
-        bot::BotPlugin, BloodPlugin, BreathPlugin, CameraTargetPlugin, CrosshairPlugin,
-        DebugPlugin, FootstepsPlugin, HealthPlugin, HeartbeatPlugin, LaserSightPlugin,
-        ParticlePlugin, StatusBarPlugin, TerrainPlugin, TileMapPlugin, UiNotificationPlugin,
+        bot::BotPlugin, BloodPlugin, BonusPlugin, BreathPlugin, CameraTargetPlugin,
+        CrosshairPlugin, DebugPlugin, FootstepsPlugin, HealthPlugin, HeartbeatPlugin,
+        LaserSightPlugin, ParticlePlugin, StatusBarPlugin, TerrainPlugin, TileMapPlugin,
+        UiNotificationPlugin,
     },
     resource::{AssetStorage, AudioStorage, AudioTracker, GameMode, Scenario, Settings},
     scenario::{BenchScenario, EmptyScenario, WavesScenario},
@@ -80,6 +81,7 @@ fn main() {
 
     application
         .add_plugins(BloodPlugin)
+        .add_plugins(BonusPlugin)
         .add_plugins(BotPlugin)
         .add_plugins(BreathPlugin)
         .add_plugins(CameraTargetPlugin)
@@ -118,9 +120,6 @@ fn main() {
             s.add(melee.after(collision_resolve));
             s.add(projectile.after(collision_resolve));
             s.add(projectile_whiz);
-            s.add(bonus_image);
-            s.add(bonus_label);
-            s.add(bonus.after(collision_resolve));
             s.add(ambience_fx());
             s.add(scenario);
         })
