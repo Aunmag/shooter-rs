@@ -3,7 +3,7 @@ use crate::{
     command::{ActorSet, WeaponSet},
     component::{ActorConfig, ActorKind, WeaponConfig},
     model::{AppState, TransformLite},
-    resource::AudioTracker,
+    plugin::AudioTracker,
     util::{ext::AppExt, Timer, GIZMOS},
 };
 use bevy::{

@@ -3,8 +3,8 @@ use crate::{
     component::{Actor, Weapon},
     data::VIEW_DISTANCE,
     model::{ActorActionsExt, AudioPlay, TransformLite},
-    plugin::ShellParticleSpawn,
-    resource::{AudioTracker, HitResource},
+    plugin::{AudioTracker, ShellParticleSpawn},
+    resource::HitResource,
     util::{
         ext::{RngExt, TransformExt, Vec2Ext},
         GIZMOS,

@@ -1,4 +1,4 @@
-use crate::{model::AudioPlay, resource::AudioTracker, util::Timer};
+use crate::{model::AudioPlay, plugin::AudioTracker, util::Timer};
 use bevy::{
     ecs::{
         schedule::{IntoSystemConfigs, SystemConfigs},

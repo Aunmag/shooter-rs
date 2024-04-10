@@ -1,7 +1,8 @@
 use crate::{
     component::{Actor, Collision, Projectile},
     model::{geometry::GeometryProjection, AudioPlay},
-    resource::{AudioTracker, HitResource},
+    plugin::AudioTracker,
+    resource::HitResource,
     util::{ext::Vec2Ext, math},
 };
 use bevy::{

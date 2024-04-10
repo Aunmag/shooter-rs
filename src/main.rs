@@ -15,19 +15,19 @@ use crate::{
     event::ActorDeathEvent,
     model::AppState,
     plugin::{
-        bot::BotPlugin, BloodPlugin, BonusPlugin, BreathPlugin, CameraTargetPlugin,
-        CrosshairPlugin, DebugPlugin, FootstepsPlugin, HealthPlugin, HeartbeatPlugin,
-        LaserSightPlugin, ParticlePlugin, StatusBarPlugin, TerrainPlugin, TileMapPlugin,
-        UiNotificationPlugin,
+        bot::BotPlugin, AudioTracker, AudioTrackerPlugin, BloodPlugin, BonusPlugin, BreathPlugin,
+        CameraTargetPlugin, CrosshairPlugin, DebugPlugin, FootstepsPlugin, HealthPlugin,
+        HeartbeatPlugin, LaserSightPlugin, ParticlePlugin, StatusBarPlugin, TerrainPlugin,
+        TileMapPlugin, UiNotificationPlugin,
     },
-    resource::{AssetStorage, AudioStorage, AudioTracker, GameMode, Scenario, Settings},
+    resource::{AssetStorage, AudioStorage, GameMode, Scenario, Settings},
     scenario::{BenchScenario, EmptyScenario, WavesScenario},
     util::ext::AppExt,
 };
 use bevy::{
     gizmos::GizmoConfig,
     log::LogPlugin,
-    prelude::{App, DefaultPlugins, IntoSystem, IntoSystemConfigs, PluginGroup, Update},
+    prelude::{App, DefaultPlugins, IntoSystem, IntoSystemConfigs, PluginGroup},
     render::texture::ImagePlugin,
     sprite::Material2dPlugin,
     window::{Window, WindowPlugin, WindowResolution},
@@ -80,6 +80,7 @@ fn main() {
     application.insert_resource(scenario.unwrap_or_else(|| Scenario::new(EmptyScenario)));
 
     application
+        .add_plugins(AudioTrackerPlugin)
         .add_plugins(BloodPlugin)
         .add_plugins(BonusPlugin)
         .add_plugins(BotPlugin)
@@ -106,7 +107,6 @@ fn main() {
             line_width: 3.0,
             ..Default::default()
         })
-        .add_systems(Update, system::sys::audio)
         .add_state_system(AppState::Loading, system::loading::on_update())
         .add_state_system_enter(AppState::Game, system::game::on_enter)
         .add_state_systems(AppState::Game, |s| {

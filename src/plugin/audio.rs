@@ -1,9 +1,29 @@
-use crate::model::AudioPlay;
-use bevy::prelude::{Resource, Vec2};
+use crate::{
+    model::AudioPlay,
+    plugin::{CameraTarget, Heartbeat},
+    resource::AudioStorage,
+};
+use bevy::{
+    app::Update,
+    audio::{AudioBundle, AudioSink, Volume, VolumeLevel},
+    ecs::{component::Component, entity::Entity},
+    prelude::{
+        App, AudioSinkPlayback, Commands, DespawnRecursiveExt, Plugin, Query, Res, ResMut,
+        Resource, Time, Transform, Vec2, With,
+    },
+};
 use std::{sync::Mutex, time::Duration};
 
 const VOLUME_MIN: f32 = 0.01;
 const SOUND_DISTANCE_FACTOR: f32 = 2.0;
+
+pub struct AudioTrackerPlugin;
+
+impl Plugin for AudioTrackerPlugin {
+    fn build(&self, app: &mut App) {
+        app.add_systems(Update, on_update);
+    }
+}
 
 #[derive(Resource)]
 pub struct AudioTracker {
@@ -70,7 +90,7 @@ impl AudioTracker {
         }
     }
 
-    pub fn update_delayed(&self, now: Duration) {
+    fn update_delayed(&self, now: Duration) {
         let Ok(mut queue_delayed) = self.queue_delayed.lock() else {
             return;
         };
@@ -82,7 +102,7 @@ impl AudioTracker {
         }
     }
 
-    pub fn take_queue(&self) -> Vec<AudioPlay> {
+    fn take_queue(&self) -> Vec<AudioPlay> {
         if let Ok(mut queue) = self.queue.lock() {
             if queue.is_empty() {
                 return Vec::new();
@@ -96,5 +116,61 @@ impl AudioTracker {
 
     pub fn calc_spatial_volume(&self, source: Vec2, volume: f32) -> f32 {
         return f32::min(SOUND_DISTANCE_FACTOR / source.distance(self.listener), 1.0) * volume;
+    }
+}
+
+#[derive(Component)]
+struct Expiration(Duration);
+
+fn on_update(
+    mut tracker: ResMut<AudioTracker>,
+    mut storage: ResMut<AudioStorage>,
+    mut commands: Commands,
+    audio: Query<(Entity, &AudioSink, Option<&Expiration>)>,
+    listeners: Query<&Transform, With<CameraTarget>>,
+    time: Res<Time>,
+) {
+    let now = time.elapsed();
+
+    if let Some(listener) = listeners.iter().next() {
+        tracker.listener = listener.translation.truncate();
+    }
+
+    tracker.playing = 0;
+
+    for (entity, sink, expiration) in audio.iter() {
+        if sink.empty() || expiration.map_or(false, |e| now > e.0) {
+            sink.stop();
+            commands.entity(entity).despawn_recursive();
+        } else {
+            tracker.playing += 1;
+        }
+    }
+
+    tracker.update_delayed(now);
+
+    for audio in &tracker.take_queue() {
+        let Some(source) = storage.choose(audio.path.as_ref()) else {
+            continue;
+        };
+
+        let is_heartbeat = audio.path.as_ref() == Heartbeat::PATH;
+        let mut settings = audio.settings();
+
+        if is_heartbeat {
+            settings.volume = Volume::Relative(VolumeLevel::new(0.0));
+        }
+
+        let mut entity = commands.spawn(AudioBundle { source, settings });
+
+        if is_heartbeat {
+            entity.insert(Heartbeat);
+        }
+
+        if let Some(duration) = audio.duration() {
+            entity.insert(Expiration(now + duration));
+        }
+
+        tracker.playing += 1;
     }
 }

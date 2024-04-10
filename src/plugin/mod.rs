@@ -1,3 +1,4 @@
+mod audio;
 mod blood;
 mod bonus;
 pub mod bot;
@@ -16,7 +17,7 @@ mod tile_map;
 mod ui_notification;
 
 pub use self::{
-    blood::*, bonus::*, breath::*, camera_target::*, crosshair::*, debug::*, footsteps::*,
-    health::*, heartbeat::*, laser::*, particle::*, status_bar::*, terrain::*, tile_map::*,
-    ui_notification::*,
+    audio::*, blood::*, bonus::*, breath::*, camera_target::*, crosshair::*, debug::*,
+    footsteps::*, health::*, heartbeat::*, laser::*, particle::*, status_bar::*, terrain::*,
+    tile_map::*, ui_notification::*,
 };

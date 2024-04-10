@@ -1,8 +1,7 @@
 use crate::{
     component::Projectile,
     model::{geometry::GeometryProjection, AudioPlay},
-    plugin::CameraTarget,
-    resource::AudioTracker,
+    plugin::{AudioTracker, CameraTarget},
     util::GIZMOS,
 };
 use bevy::{

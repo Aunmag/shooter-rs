@@ -1,7 +1,7 @@
 use crate::{
     data::{FONT_PATH, FONT_PATH_BOLD},
     model::AudioPlay,
-    resource::AudioTracker,
+    plugin::AudioTracker,
     util::{Envelope, SmartString},
 };
 use bevy::{

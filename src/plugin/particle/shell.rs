@@ -3,9 +3,8 @@ use crate::{
     model::AudioPlay,
     plugin::{
         particle::{Particle, ParticleConfig},
-        TileBlend,
+        AudioTracker, TileBlend,
     },
-    resource::AudioTracker,
     util::ext::{RngExt, TransformExt, Vec2Ext},
 };
 use bevy::{

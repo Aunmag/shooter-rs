@@ -2,8 +2,7 @@ use crate::{
     component::{Actor, ActorWeaponSprite, Inertia, Weapon, WeaponConfig, WeaponGrip},
     data::PIXELS_PER_METER,
     model::AudioPlay,
-    plugin::CameraTarget,
-    resource::AudioTracker,
+    plugin::{AudioTracker, CameraTarget},
     util::ext::ImageExt,
 };
 use bevy::{

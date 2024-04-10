@@ -1,8 +1,7 @@
 use crate::{
     component::Actor,
     model::{AppState, AudioPlay},
-    plugin::{CameraTarget, Health},
-    resource::AudioTracker,
+    plugin::{AudioTracker, CameraTarget, Health},
     util::{ext::AppExt, math::interpolate, Timer},
 };
 use bevy::{

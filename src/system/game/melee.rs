@@ -1,7 +1,8 @@
 use crate::{
     component::{Actor, ActorConfig, Weapon},
     model::{ActorAction, ActorActionsExt, AudioPlay, TransformLite},
-    resource::{AudioTracker, HitResource},
+    plugin::AudioTracker,
+    resource::HitResource,
     util::{ext::Vec2Ext, math},
 };
 use bevy::{

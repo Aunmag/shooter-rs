@@ -3,8 +3,8 @@ use crate::{
     component::{Actor, Player},
     event::ActorDeathEvent,
     model::{AppState, AudioPlay},
-    plugin::{BloodSpawn, FleshParticleSpawn},
-    resource::{AudioTracker, GameMode, Settings},
+    plugin::{AudioTracker, BloodSpawn, FleshParticleSpawn},
+    resource::{GameMode, Settings},
     util::{ext::AppExt, Timer},
 };
 use bevy::{
