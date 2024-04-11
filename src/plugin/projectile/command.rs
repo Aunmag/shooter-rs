@@ -1,7 +1,7 @@
 use crate::{
-    component::{Projectile, ProjectileConfig, ProjectileMaterial},
     data::LAYER_PROJECTILE,
     model::TransformLite,
+    plugin::{projectile::material::ProjectileMaterial, Projectile, ProjectileConfig},
     resource::AssetStorage,
     util::ext::Vec2Ext,
 };

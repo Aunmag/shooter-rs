@@ -1,7 +1,6 @@
 use crate::{
-    component::Projectile,
     model::{geometry::GeometryProjection, AudioPlay},
-    plugin::{AudioTracker, CameraTarget},
+    plugin::{AudioTracker, CameraTarget, Projectile},
     util::GIZMOS,
 };
 use bevy::{
@@ -12,7 +11,7 @@ use bevy::{
 
 const DEBUG: bool = false;
 
-pub fn projectile_whiz(
+pub fn on_update(
     mut projectiles: Query<&Projectile>,
     listeners: Query<&Transform, With<CameraTarget>>,
     audio: Res<AudioTracker>,

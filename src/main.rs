@@ -10,7 +10,6 @@ mod system;
 mod util;
 
 use crate::{
-    component::ProjectileMaterial,
     data::APP_TITLE,
     event::ActorDeathEvent,
     model::AppState,
@@ -29,10 +28,9 @@ use bevy::{
     log::LogPlugin,
     prelude::{App, DefaultPlugins, IntoSystem, IntoSystemConfigs, PluginGroup},
     render::texture::ImagePlugin,
-    sprite::Material2dPlugin,
     window::{Window, WindowPlugin, WindowResolution},
 };
-use plugin::WeaponPlugin;
+use plugin::{ProjectilePlugin, WeaponPlugin};
 
 fn main() {
     // TODO: init logger earlier
@@ -93,12 +91,12 @@ fn main() {
         .add_plugins(HeartbeatPlugin)
         .add_plugins(LaserSightPlugin)
         .add_plugins(ParticlePlugin)
+        .add_plugins(ProjectilePlugin)
         .add_plugins(StatusBarPlugin)
         .add_plugins(TerrainPlugin)
         .add_plugins(TileMapPlugin)
         .add_plugins(UiNotificationPlugin)
         .add_plugins(WeaponPlugin)
-        .add_plugins(Material2dPlugin::<ProjectileMaterial>::default())
         .add_state::<AppState>()
         .add_event::<ActorDeathEvent>()
         .insert_resource(AssetStorage::default())
@@ -119,8 +117,6 @@ fn main() {
             s.add(inertia.after(actor));
             s.add(collision_find.pipe(collision_resolve).after(inertia));
             s.add(melee.after(collision_resolve));
-            s.add(projectile.after(collision_resolve));
-            s.add(projectile_whiz);
             s.add(ambience_fx());
             s.add(scenario);
         })

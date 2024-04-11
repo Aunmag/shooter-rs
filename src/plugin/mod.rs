@@ -11,6 +11,7 @@ mod health;
 mod heartbeat;
 mod laser;
 mod particle;
+mod projectile;
 mod status_bar;
 mod terrain;
 mod tile_map;
@@ -19,6 +20,6 @@ mod weapon;
 
 pub use self::{
     audio::*, blood::*, bonus::*, breath::*, camera_target::*, crosshair::*, debug::*,
-    footsteps::*, health::*, heartbeat::*, laser::*, particle::*, status_bar::*, terrain::*,
-    tile_map::*, ui_notification::*, weapon::*,
+    footsteps::*, health::*, heartbeat::*, laser::*, particle::*, projectile::*, status_bar::*,
+    terrain::*, tile_map::*, ui_notification::*, weapon::*,
 };

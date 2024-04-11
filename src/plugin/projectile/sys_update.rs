@@ -1,7 +1,7 @@
 use crate::{
-    component::{Actor, Collision, Projectile},
+    component::{Actor, Collision},
     model::{geometry::GeometryProjection, AudioPlay},
-    plugin::AudioTracker,
+    plugin::{AudioTracker, Projectile},
     resource::HitResource,
     util::{ext::Vec2Ext, math},
 };
@@ -17,7 +17,7 @@ use std::time::Duration;
 
 const TIME_DELTA_FOR_RENDER: Duration = Duration::from_millis(25); // 40 FPS
 
-pub fn projectile(
+pub fn on_update(
     mut projectiles: Query<(Entity, &mut Projectile, &mut Transform)>,
     obstacles: Query<(Entity, &Collision, &Transform, &Actor), Without<Projectile>>,
     mut hits: Deferred<HitResource>,
@@ -105,7 +105,6 @@ fn find_obstacle(
     return result;
 }
 
-// TODO: test
 fn find_contact_velocity(
     contact: Vec2,
     head: Vec2,

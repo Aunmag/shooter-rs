@@ -4,11 +4,10 @@ mod config;
 
 pub use self::{command::*, component::*, config::*};
 use crate::{
-    command::ProjectileSpawn,
     component::Actor,
     data::VIEW_DISTANCE,
     model::{ActorActionsExt, AppState, AudioPlay, TransformLite},
-    plugin::{AudioTracker, ShellParticleSpawn},
+    plugin::{AudioTracker, ProjectileSpawn, ShellParticleSpawn},
     resource::HitResource,
     system::game::collision_resolve,
     util::{
