@@ -1,86 +1,23 @@
+use super::wave::WaveSeries;
 use crate::{
     command::{ActorPlayerSet, ActorSet},
-    component::{Actor, ActorConfig, ActorKind, Player},
-    data::VIEW_DISTANCE,
+    component::{Actor, ActorConfig, ActorKind},
     event::ActorDeathEvent,
     model::TransformLite,
-    plugin::{bot::ActorBotSet, BonusSpawn, Health, Notify, WeaponConfig, WeaponSet},
+    plugin::{BonusSpawn, Health, Notify, WeaponConfig, WeaponSet},
     resource::{Scenario, ScenarioLogic},
-    util::ext::Vec2Ext,
 };
-use bevy::{
-    ecs::{query::With, system::Command},
-    math::{Vec2, Vec3Swizzles},
-    prelude::{Commands, World},
-    transform::components::Transform,
-};
-use rand::{seq::SliceRandom, Rng, SeedableRng};
+use bevy::prelude::{Commands, World};
+use rand::{Rng, SeedableRng};
 use rand_pcg::Pcg32;
-use std::{any::Any, f32::consts::PI, time::Duration};
+use std::{any::Any, time::Duration};
 
-const AGILE_CHANCE: f64 = 0.1;
-
-const WAVES: &[Wave] = &[
-    // melee zombies only
-    Wave {
-        size: 5,
-        pistol_chance: 0.0,
-        rifle_chance: 0.0,
-        agile_chance: 0.0,
-    },
-    Wave {
-        size: 25,
-        pistol_chance: 0.0,
-        rifle_chance: 0.0,
-        agile_chance: 0.0,
-    },
-    // agile zombies
-    Wave {
-        size: 50,
-        pistol_chance: 0.0,
-        rifle_chance: 0.0,
-        agile_chance: AGILE_CHANCE,
-    },
-    Wave {
-        size: 75,
-        pistol_chance: 0.0,
-        rifle_chance: 0.0,
-        agile_chance: 0.3,
-    },
-    // zombies with pistols
-    Wave {
-        size: 100,
-        pistol_chance: 0.2,
-        rifle_chance: 0.0,
-        agile_chance: AGILE_CHANCE,
-    },
-    Wave {
-        size: 125,
-        pistol_chance: 0.3,
-        rifle_chance: 0.0,
-        agile_chance: AGILE_CHANCE,
-    },
-    // zombies with rifles
-    Wave {
-        size: 150,
-        pistol_chance: 0.3,
-        rifle_chance: 0.1,
-        agile_chance: AGILE_CHANCE,
-    },
-];
-
-const WAVE_BONUS: Wave = Wave {
-    size: u16::MAX,
-    pistol_chance: 0.4,
-    rifle_chance: 0.2,
-    agile_chance: 0.0,
-};
-
-const ENEMY_SPAWN_DISTANCE: f32 = VIEW_DISTANCE * 0.5;
+const ENEMY_SPAWN_DISTANCE: f32 = 3.0; // TODO: reset
 const BONUSES_PER_WAVE: f32 = 3.0;
 const GAME_OVER_TEXT_DURATION: Duration = Duration::from_secs(8);
 const DEFAULT_INTERVAL: Duration = Duration::from_secs(2);
-const WAVE_BONUS_HUMANS: u8 = 16;
+
+// TODO: find center position
 
 enum Task {
     StartNextWave,
@@ -93,7 +30,7 @@ impl Task {
     fn get_timeout(&self) -> Duration {
         return match self {
             Self::StartNextWave => DEFAULT_INTERVAL,
-            Self::SpawnZombie => Duration::from_millis(800),
+            Self::SpawnZombie => Duration::from_millis(800), // TODO: don't wait if everybody is killed
             Self::CheckWaveCompletion => DEFAULT_INTERVAL,
             Self::CompleteWave => Duration::from_secs(4),
         };
@@ -101,20 +38,16 @@ impl Task {
 }
 
 pub struct WavesScenario {
+    waves: WaveSeries,
     task: Task,
-    wave_index: u8,
-    zombies_spawned: u16,
-    kills: u16,
     rng: Pcg32,
 }
 
 impl WavesScenario {
     pub fn new() -> Self {
         return Self {
+            waves: WaveSeries::new(),
             task: Task::StartNextWave,
-            wave_index: 0,
-            zombies_spawned: 0,
-            kills: 0,
             rng: Pcg32::seed_from_u64(32),
         };
     }
@@ -140,26 +73,33 @@ impl WavesScenario {
     }
 
     fn update(&mut self, commands: &mut Commands) -> Task {
-        let wave = self.wave();
+        let Some(wave) = self.waves.get_current() else {
+            return Task::CheckWaveCompletion;
+        };
 
         match self.task {
             Task::StartNextWave => {
-                self.zombies_spawned = 0;
-                self.kills = 0;
+                let wave_size = wave.size;
 
-                if self.is_wave_bonus() {
-                    commands.add(Notify {
-                        text: "Bonus wave".into(),
-                        text_small: "How long will you stay? Support is on the way...".into(),
-                        ..Default::default()
-                    });
-                } else {
-                    commands.add(Notify {
-                        text: format!("Wave {}/{}", self.wave_number(), WAVES.len()).into(),
-                        text_small: format!("Kill {} zombies", wave.size).into(),
-                        ..Default::default()
-                    });
-                }
+                // TODO: test
+                let tip = match self.waves.get_wave_number() {
+                    1 => "\nTip: Press [R] to reload",
+                    2 => "\nTip: Press [RMB] to aim",
+                    3 => "\nTip: Press [SHIFT] to sprint",
+                    4 => "\nTip: Use mouse wheel to change zoom",
+                    _ => "",
+                };
+
+                commands.add(Notify {
+                    text: format!(
+                        "Wave {}/{}",
+                        self.waves.get_wave_number(),
+                        self.waves.get_waves_count(),
+                    )
+                    .into(),
+                    text_small: format!("Kill {} zombies{}", wave_size, tip).into(),
+                    ..Default::default()
+                });
 
                 commands.add(heal_humans);
                 return Task::SpawnZombie;
@@ -167,28 +107,16 @@ impl WavesScenario {
             Task::SpawnZombie => {
                 log::debug!("Spawning a zombie");
 
-                let mut spawn = SpawnActor {
-                    direction: self.rng.gen_range(-PI..PI),
-                    distance: ENEMY_SPAWN_DISTANCE,
-                    config: &ActorConfig::ZOMBIE,
-                    weapon: None,
-                };
+                wave.spawn(
+                    TransformLite::default(), // TODO: change
+                    commands,
+                    &mut self.rng,
+                );
 
-                if self.rng.gen_bool(wave.agile_chance) {
-                    spawn.config = &ActorConfig::ZOMBIE_AGILE;
-                } else if self.rng.gen_bool(wave.rifle_chance) {
-                    spawn.weapon = Some(&WeaponConfig::AKS_74U);
-                } else if self.rng.gen_bool(wave.pistol_chance) {
-                    spawn.weapon = Some(&WeaponConfig::PM);
-                }
-
-                commands.add(spawn);
-                self.zombies_spawned += 1;
-
-                if self.zombies_spawned < wave.size {
-                    return Task::SpawnZombie;
-                } else {
+                if wave.is_complete() {
                     return Task::CheckWaveCompletion;
+                } else {
+                    return Task::SpawnZombie;
                 }
             }
             Task::CheckWaveCompletion => {
@@ -197,43 +125,28 @@ impl WavesScenario {
                 return Task::CheckWaveCompletion;
             }
             Task::CompleteWave => {
-                if self.is_wave_last() {
+                if self.waves.is_final() {
                     commands.add(Notify {
                         text: "Congratulations!".into(),
-                        text_small: format!("You've completed the all {} waves", WAVES.len())
-                            .into(),
+                        text_small: format!(
+                            "You've completed the all {} waves",
+                            self.waves.get_waves_count(),
+                        )
+                        .into(),
                         ..Default::default()
                     });
                 } else {
                     commands.add(Notify {
-                        text: format!("Wave {} completed!", self.wave_number()).into(),
+                        text: format!("Wave {} completed!", self.waves.get_wave_number()).into(),
                         text_small: "Prepare for the next".into(),
                         ..Default::default()
                     });
                 }
 
-                self.wave_index = self.wave_index.saturating_add(1);
+                self.waves.next();
                 return Task::StartNextWave;
             }
         }
-    }
-
-    fn wave(&self) -> &'static Wave {
-        return WAVES
-            .get(usize::from(self.wave_index))
-            .unwrap_or(&WAVE_BONUS);
-    }
-
-    fn wave_number(&self) -> u8 {
-        return self.wave_index.saturating_add(1);
-    }
-
-    fn is_wave_last(&self) -> bool {
-        return usize::from(self.wave_number()) == WAVES.len();
-    }
-
-    fn is_wave_bonus(&self) -> bool {
-        return usize::from(self.wave_index) == WAVES.len();
     }
 }
 
@@ -245,61 +158,20 @@ impl ScenarioLogic for WavesScenario {
 
     fn on_actor_death(&mut self, event: &ActorDeathEvent, commands: &mut Commands) {
         if let ActorKind::Zombie = event.kind {
-            self.kills += 1;
+            let wave_size = self.waves.get_current().map(|w| w.size).unwrap_or(0);
 
-            if self.kills == 1 {
-                match self.wave_index {
-                    0 => {
-                        commands.add(Notify {
-                            text_small: "Press [R] to reload".into(),
-                            ..Default::default()
-                        });
-                    }
-                    1 => {
-                        commands.add(Notify {
-                            text_small: "Press [RMB] to aim".into(),
-                            ..Default::default()
-                        });
-                    }
-                    2 => {
-                        commands.add(Notify {
-                            text_small: "Press [SHIFT] to sprint".into(),
-                            ..Default::default()
-                        });
-                    }
-                    3 => {
-                        commands.add(Notify {
-                            text_small: "Use mouse wheel to change zoom".into(),
-                            ..Default::default()
-                        });
-                    }
-                    _ => {}
+            if wave_size > 0 {
+                let wave = f32::from(self.waves.get_wave_number());
+
+                if self
+                    .rng
+                    .gen_bool(f32::min(BONUSES_PER_WAVE * wave / f32::from(wave_size), 1.0).into())
+                {
+                    commands.add(BonusSpawn::new(
+                        event.position,
+                        self.waves.get_wave_number(),
+                    ));
                 }
-
-                if self.is_wave_bonus() {
-                    let direction = self.rng.gen_range(-PI..PI);
-
-                    for _ in 0..WAVE_BONUS_HUMANS {
-                        let weapon = WeaponConfig::ALL.choose(&mut self.rng);
-
-                        commands.add(SpawnActor {
-                            direction,
-                            distance: ENEMY_SPAWN_DISTANCE * 2.0,
-                            config: &ActorConfig::HUMAN,
-                            weapon,
-                        });
-                    }
-                }
-            }
-
-            let wave = f32::from(self.wave_number());
-            let wave_size = f32::from(self.wave().size);
-
-            if self
-                .rng
-                .gen_bool(f32::min(BONUSES_PER_WAVE * wave / wave_size, 1.0).into())
-            {
-                commands.add(BonusSpawn::new(event.position, self.wave_number()));
             }
         }
     }
@@ -320,60 +192,6 @@ impl ScenarioLogic for WavesScenario {
 
     fn as_any_mut(&mut self) -> &mut dyn Any {
         return self;
-    }
-}
-
-struct Wave {
-    size: u16,
-    pistol_chance: f64,
-    rifle_chance: f64,
-    agile_chance: f64,
-}
-
-struct SpawnActor {
-    direction: f32,
-    distance: f32,
-    config: &'static ActorConfig,
-    weapon: Option<&'static WeaponConfig>,
-}
-
-impl Command for SpawnActor {
-    fn apply(self, world: &mut World) {
-        let mut center = Vec2::ZERO;
-        let mut players = 0.0;
-
-        for transform in world
-            .query_filtered::<&Transform, With<Player>>()
-            .iter(world)
-        {
-            center += transform.translation.xy();
-            players += 1.0;
-        }
-
-        if players > 0.0 {
-            center /= players;
-        }
-
-        let entity = world.spawn_empty().id();
-        let mut transform = TransformLite::new(center.x, center.y, self.direction);
-        transform.translation -= Vec2::from_length(self.distance, self.direction);
-
-        ActorSet {
-            entity,
-            config: self.config,
-            transform,
-        }
-        .apply(world);
-
-        ActorBotSet { entity }.apply(world);
-
-        if let Some(weapon) = self.weapon {
-            WeaponSet {
-                entity,
-                weapon: Some(weapon),
-            }
-            .apply(world);
-        }
     }
 }
 
