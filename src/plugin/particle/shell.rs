@@ -20,11 +20,12 @@ use bevy::{
 use rand::Rng;
 use std::{f32::consts::FRAC_PI_2, time::Duration};
 
+const ROTATION: f32 = 0.3;
 const VELOCITY: f32 = 0.5;
 const VELOCITY_SPIN: f32 = 2.0;
 const DURATION: Duration = Duration::from_millis(200);
 const AUDIO_INTERVAL: Duration = Duration::from_millis(220);
-const AUDIO_VOLUME: f32 = 0.4;
+const AUDIO_VOLUME: f32 = 0.3;
 
 const PARTICLE_CONFIG: &ParticleConfig = &ParticleConfig {
     jump_factor: 0.5,
@@ -38,7 +39,7 @@ impl Command for ShellParticleSpawn {
         let now = world.resource::<Time>().elapsed();
         let mut rng = rand::thread_rng();
 
-        let Some((mut position, direction)) = world
+        let Some((mut position, mut direction)) = world
             .get::<Transform>(self.0)
             .map(|t| (t.translation.truncate(), t.direction() - FRAC_PI_2))
         else {
@@ -60,6 +61,7 @@ impl Command for ShellParticleSpawn {
         };
 
         position += Vec2::from_length(Weapon::BARREL_LENGTH * 0.8, direction + FRAC_PI_2);
+        direction += rng.gen_range_safely(-ROTATION, ROTATION);
 
         let velocity = Vec2::from_length(rng.fuzz(VELOCITY), direction);
 
@@ -100,7 +102,7 @@ fn on_destroy(entity: Entity, point: Vec2, commands: &mut Commands) {
         let audio = world.resource::<AudioTracker>();
         let sound = AudioPlay {
             source: Some(point),
-            volume: AUDIO_VOLUME,
+            volume: rng.fuzz(AUDIO_VOLUME),
             speed: rng.fuzz(1.0),
             ..AudioPlay::DEFAULT
         };
