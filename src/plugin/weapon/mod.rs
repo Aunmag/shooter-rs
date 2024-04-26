@@ -7,13 +7,10 @@ use crate::{
     component::Actor,
     data::VIEW_DISTANCE,
     model::{ActorActionsExt, AppState, AudioPlay, TransformLite},
-    plugin::{AudioTracker, ProjectileSpawn, ShellParticleSpawn},
+    plugin::{debug::debug_line, AudioTracker, ProjectileSpawn, ShellParticleSpawn},
     resource::HitResource,
     system::game::collision_resolve,
-    util::{
-        ext::{AppExt, RngExt, TransformExt, Vec2Ext},
-        GIZMOS,
-    },
+    util::ext::{AppExt, RngExt, TransformExt, Vec2Ext},
 };
 use bevy::{
     ecs::system::{Deferred, Local, Query},
@@ -146,6 +143,6 @@ fn debug_deviation(transform: &Transform, deviation: f32) {
     let d = transform.direction();
     let l = VIEW_DISTANCE / 2.0;
     let color = Color::WHITE.with_a(0.5);
-    GIZMOS.ln(p, p + Vec2::from_length(l, d + deviation), color);
-    GIZMOS.ln(p, p + Vec2::from_length(l, d - deviation), color);
+    debug_line(p, p + Vec2::from_length(l, d + deviation), color);
+    debug_line(p, p + Vec2::from_length(l, d - deviation), color);
 }

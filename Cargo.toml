@@ -9,7 +9,6 @@ bevy = "0.12"
 chrono = "0.4"
 derive_more = "0.99"
 enumset = { version = "1.1", features = ["serde"] }
-lazy_static = "1.4"
 log = "0.4"
 rand = "0.8"
 rand_distr = "0.4"

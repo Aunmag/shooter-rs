@@ -1,6 +1,6 @@
-use super::TileBlend;
 use crate::{
     data::{LAYER_GROUND, PIXELS_PER_METER},
+    plugin::TileBlend,
     resource::AssetStorage,
     util::math::interpolate_unbounded,
 };

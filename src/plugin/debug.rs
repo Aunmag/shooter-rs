@@ -1,10 +1,11 @@
-use super::{bot::ActorBotSet, BonusSpawn, Crosshair, TileMap};
 use crate::{
     command::ActorSet,
     component::{ActorConfig, ActorKind},
     model::{AppState, TransformLite},
-    plugin::{AudioTracker, WeaponConfig, WeaponSet},
-    util::{ext::AppExt, Timer, GIZMOS},
+    plugin::{
+        bot::ActorBotSet, AudioTracker, BonusSpawn, Crosshair, TileMap, WeaponConfig, WeaponSet,
+    },
+    util::{ext::AppExt, Timer},
 };
 use bevy::{
     app::{App, Plugin},
@@ -18,21 +19,26 @@ use bevy::{
     gizmos::gizmos::Gizmos,
     input::Input,
     prelude::{
-        Commands, Component, IntoSystemConfigs, KeyCode, Query, Res, Startup, TextBundle, Update,
-        With,
+        Color, Commands, Component, IntoSystemConfigs, KeyCode, Query, Res, Startup, TextBundle,
+        Update, Vec2, With,
     },
     text::{Text, TextSection, TextStyle},
     time::Time,
     transform::components::Transform,
 };
 use rand::Rng;
-use std::time::Duration;
+use std::{
+    sync::{Mutex, OnceLock},
+    time::Duration,
+};
 
-const INTERVAL: Duration = Duration::from_millis(500);
+const UPDATE_TEXT_INTERVAL: Duration = Duration::from_millis(500);
 
 const ZOMBIE_PISTOL_CHANCE: f32 = 0.1;
 const ZOMBIE_RIFLE_CHANCE: f32 = 0.02;
 const HUMAN_RIFLE_CHANCE: f32 = 0.1;
+
+static DRAW_QUEUE: OnceLock<Mutex<Vec<Shape>>> = OnceLock::new();
 
 #[derive(Component)]
 struct DiagnosticsText;
@@ -58,7 +64,7 @@ impl Plugin for DebugPlugin {
             .add_systems(Startup, startup)
             .add_systems(Update, update_diagnostics_data)
             .add_systems(Update, update_diagnostics_text())
-            .add_systems(Update, render_gizmos_static)
+            .add_systems(Update, render_debug_shapes)
             .add_state_system(AppState::Game, update_input);
     }
 }
@@ -164,12 +170,25 @@ fn update_diagnostics_text() -> SystemConfigs {
     return update_diagnostics_text_inner
         .after(update_diagnostics_data)
         .run_if(|mut r: Local<Timer>, t: Res<Time>| {
-            return r.next_if_ready(t.elapsed(), || INTERVAL);
+            return r.next_if_ready(t.elapsed(), || UPDATE_TEXT_INTERVAL);
         });
 }
 
-fn render_gizmos_static(mut gizmos: Gizmos) {
-    GIZMOS.render(&mut gizmos);
+fn render_debug_shapes(mut gizmos: Gizmos) {
+    let Ok(mut queue) = get_draw_queue().lock() else {
+        return;
+    };
+
+    for shape in queue.drain(..) {
+        match shape {
+            Shape::Line(head, tail, color) => {
+                gizmos.line_2d(head, tail, color);
+            }
+            Shape::Circle(center, radius, color) => {
+                gizmos.circle_2d(center, radius, color).segments(24);
+            }
+        }
+    }
 }
 
 fn update_input(
@@ -263,4 +282,25 @@ enum Spawn {
     Bonus,
     Human,
     Zombie,
+}
+
+fn get_draw_queue() -> &'static Mutex<Vec<Shape>> {
+    return DRAW_QUEUE.get_or_init(|| Mutex::new(Vec::new()));
+}
+
+pub fn debug_line(head: Vec2, tail: Vec2, color: Color) {
+    if let Ok(queue) = get_draw_queue().lock().as_mut() {
+        queue.push(Shape::Line(head, tail, color));
+    }
+}
+
+pub fn debug_circle(center: Vec2, radius: f32, color: Color) {
+    if let Ok(queue) = get_draw_queue().lock().as_mut() {
+        queue.push(Shape::Circle(center, radius, color));
+    }
+}
+
+enum Shape {
+    Line(Vec2, Vec2, Color),
+    Circle(Vec2, f32, Color),
 }

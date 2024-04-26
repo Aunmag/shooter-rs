@@ -4,13 +4,13 @@ use crate::{
     model::ActorAction,
     plugin::{
         bot::{Bot, BotConfig},
+        debug::{debug_circle, debug_line},
         Weapon,
     },
     util::{
         ext::{TransformExt, Vec2Ext},
         math::angle_difference,
         traits::{WithPosition, WithPositionAndVelocity, WithVelocity},
-        GIZMOS,
     },
 };
 use bevy::{
@@ -182,7 +182,7 @@ impl<'a> BotHandler<'a> {
             }
 
             if DEBUG_AIM {
-                GIZMOS.ln(
+                debug_line(
                     self.position(),
                     self.position()
                         + Vec2::from_length(
@@ -257,7 +257,7 @@ impl<'a> BotHandler<'a> {
 
             while let Some(detour) = self.bot.detour.as_ref().and_then(|d| d.calc(p0, target)) {
                 let p1 = p0 + Vec2::from_length(0.05, detour);
-                GIZMOS.ln(p0, p1, color);
+                debug_line(p0, p1, color);
                 p0 = p1;
 
                 if !detour_sign.is_nan() && detour_sign != detour.signum() {
@@ -267,7 +267,7 @@ impl<'a> BotHandler<'a> {
                 detour_sign = detour.signum();
             }
 
-            GIZMOS.ln(p0, target, color.with_a(0.1));
+            debug_line(p0, target, color.with_a(0.1));
         }
     }
 
@@ -302,7 +302,7 @@ impl<'a> BotHandler<'a> {
         spread = f32::max(spread, self.actor.config.radius * 3.0);
 
         if DEBUG_SPREAD {
-            GIZMOS.circle(self.position(), spread, Color::ORANGE.with_a(0.3));
+            debug_circle(self.position(), spread, Color::ORANGE.with_a(0.3));
         }
 
         let mut teammates_position_sum = Vec2::ZERO;
@@ -329,7 +329,7 @@ impl<'a> BotHandler<'a> {
         let teammates_position = teammates_position_sum / teammates_position_sum_weight;
 
         if DEBUG_TEAMMATES {
-            GIZMOS.ln(self.position(), teammates_position, Color::GREEN);
+            debug_line(self.position(), teammates_position, Color::GREEN);
         }
 
         if self.is_close(&teammates_position, spread) {

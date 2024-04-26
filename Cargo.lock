@@ -3233,7 +3233,6 @@ dependencies = [
  "chrono",
  "derive_more",
  "enumset",
- "lazy_static",
  "log",
  "rand",
  "rand_distr",

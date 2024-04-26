@@ -7,10 +7,6 @@ use rand_pcg::Pcg32;
 use regex::Regex;
 use std::collections::{HashMap, HashSet};
 
-lazy_static::lazy_static! {
-    static ref RE: Regex = Regex::new(r"(_+\d+)?\.ogg$").expect("Failed to parse audio regex");
-}
-
 const SPARE_PATHS: &[(&str, &str)] = &[("actors/zombie_agile/", "actors/zombie/")];
 
 #[derive(Resource)]
@@ -33,6 +29,15 @@ impl Default for AudioStorage {
 impl AudioStorage {
     pub fn index(&mut self, assets: &Assets<AudioSource>, asset_server: &AssetServer) {
         log::debug!("Indexing");
+
+        let re = match Regex::new(r"(_+\d+)?\.ogg$") {
+            Ok(re) => re,
+            Err(error) => {
+                log::error!("Failed to update index: {:?}", error);
+                return;
+            }
+        };
+
         self.groups.clear();
         self.missing.clear();
 
@@ -40,7 +45,7 @@ impl AudioStorage {
             if let Some(handle) = asset_server.get_id_handle(asset_id) {
                 if let Some(path) = handle.path() {
                     let asset_path = path.path().display().to_string().replace('\\', "/");
-                    let group_path = RE.replace_all(&asset_path, "");
+                    let group_path = re.replace_all(&asset_path, "");
 
                     self.groups
                         .entry(group_path.into_owned())

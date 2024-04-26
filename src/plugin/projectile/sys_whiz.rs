@@ -1,7 +1,6 @@
 use crate::{
     model::{geometry::GeometryProjection, AudioPlay},
-    plugin::{AudioTracker, CameraTarget, Projectile},
-    util::GIZMOS,
+    plugin::{debug::debug_line, AudioTracker, CameraTarget, Projectile},
 };
 use bevy::{
     ecs::{query::With, system::Query},
@@ -33,7 +32,7 @@ pub fn on_update(
             let projection = listener.project_on(&(head, tail));
 
             if DEBUG {
-                GIZMOS.ln(listener, projection, Color::RED);
+                debug_line(listener, projection, Color::RED);
             }
 
             let to_head_distance = projection.distance_squared(head);

@@ -1,6 +1,7 @@
 use crate::{
     component::{Collision, CollisionSolution, Inertia},
-    util::{ext::HashMapExt, GIZMOS},
+    plugin::debug::debug_line,
+    util::ext::HashMapExt,
 };
 use bevy::{
     ecs::system::Local,
@@ -36,10 +37,10 @@ pub fn collision_find(
         for chunk_id in chunks.keys() {
             let v = |x: i32, y: i32| Vec2::new(x as f32, y as f32);
             let p = v(chunk_id.x, chunk_id.y);
-            GIZMOS.ln(p + v(0, 0), p + v(1, 0), Color::WHITE);
-            GIZMOS.ln(p + v(1, 0), p + v(1, 1), Color::WHITE);
-            GIZMOS.ln(p + v(1, 1), p + v(0, 1), Color::WHITE);
-            GIZMOS.ln(p + v(0, 1), p + v(0, 0), Color::WHITE);
+            debug_line(p + v(0, 0), p + v(1, 0), Color::WHITE);
+            debug_line(p + v(1, 0), p + v(1, 1), Color::WHITE);
+            debug_line(p + v(1, 1), p + v(0, 1), Color::WHITE);
+            debug_line(p + v(0, 1), p + v(0, 0), Color::WHITE);
         }
     }
 
