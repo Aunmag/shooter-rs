@@ -66,8 +66,8 @@ impl Command for ShellParticleSpawn {
         let velocity = Vec2::from_length(rng.fuzz(VELOCITY), direction);
 
         // TODO: fix
-        // if let Some(inertia) = world.get::<Inertia>(self.0) {
-        //     velocity += inertia.velocity / 2.0;
+        // if let Some(kinetics) = world.get::<Inertia>(self.0) {
+        //     velocity += kinetics.velocity / 2.0;
         // }
 
         world

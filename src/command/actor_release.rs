@@ -1,7 +1,7 @@
 use crate::{
-    component::{Actor, Inertia, Player},
+    component::{Actor, Player},
     model::ActorActions,
-    plugin::{bot::Bot, Breath, CameraTarget, StatusBar},
+    plugin::{bot::Bot, kinetics::Kinetics, Breath, CameraTarget, StatusBar},
     resource::Settings,
 };
 use bevy::{
@@ -34,8 +34,8 @@ impl Command for ActorRelease {
             world.entity_mut(crosshair.entity).despawn_recursive();
         }
 
-        if let Some(inertia) = world.get_mut::<Inertia>(self.0).as_mut() {
-            inertia.drag = Inertia::DRAG_DEFAULT;
+        if let Some(kinetics) = world.get_mut::<Kinetics>(self.0).as_mut() {
+            kinetics.drag = Kinetics::DRAG_DEFAULT;
         }
 
         let mut entity_mut = world.entity_mut(self.0);

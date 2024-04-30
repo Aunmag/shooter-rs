@@ -1,6 +1,6 @@
 use crate::{
-    component::Inertia,
     plugin::{
+        kinetics::Kinetics,
         particle::{Particle, ParticleConfig},
         BloodSpawn, TileBlend,
     },
@@ -57,8 +57,8 @@ impl Command for FleshParticleSpawn {
             rng.gen_range(0.0..TAU),
         );
 
-        if let Some(inertia) = world.get::<Inertia>(self.0) {
-            velocity += inertia.velocity / 2.0;
+        if let Some(kinetics) = world.get::<Kinetics>(self.0) {
+            velocity += kinetics.velocity / 2.0;
         }
 
         world

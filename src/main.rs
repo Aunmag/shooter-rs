@@ -14,10 +14,11 @@ use crate::{
     event::ActorDeathEvent,
     model::AppState,
     plugin::{
-        bot::BotPlugin, debug::DebugPlugin, AudioTracker, AudioTrackerPlugin, BloodPlugin,
-        BonusPlugin, BreathPlugin, CameraTargetPlugin, CrosshairPlugin, FootstepsPlugin,
-        HealthPlugin, HeartbeatPlugin, LaserSightPlugin, ParticlePlugin, StatusBarPlugin,
-        TerrainPlugin, TileMapPlugin, UiNotificationPlugin,
+        bot::BotPlugin, collision::CollisionPlugin, debug::DebugPlugin, kinetics::KineticsPlugin,
+        AudioTracker, AudioTrackerPlugin, BloodPlugin, BonusPlugin, BreathPlugin,
+        CameraTargetPlugin, CrosshairPlugin, FootstepsPlugin, HealthPlugin, HeartbeatPlugin,
+        LaserSightPlugin, ParticlePlugin, ProjectilePlugin, StatusBarPlugin, TerrainPlugin,
+        TileMapPlugin, UiNotificationPlugin, WeaponPlugin,
     },
     resource::{AssetStorage, AudioStorage, GameMode, Scenario, Settings},
     scenario::{BenchScenario, EmptyScenario, WavesScenario},
@@ -26,11 +27,10 @@ use crate::{
 use bevy::{
     gizmos::GizmoConfig,
     log::LogPlugin,
-    prelude::{App, DefaultPlugins, IntoSystem, IntoSystemConfigs, PluginGroup},
+    prelude::{App, DefaultPlugins, IntoSystemConfigs, PluginGroup},
     render::texture::ImagePlugin,
     window::{Window, WindowPlugin, WindowResolution},
 };
-use plugin::{ProjectilePlugin, WeaponPlugin};
 
 fn main() {
     // TODO: init logger earlier
@@ -85,10 +85,12 @@ fn main() {
         .add_plugins(BotPlugin)
         .add_plugins(BreathPlugin)
         .add_plugins(CameraTargetPlugin)
+        .add_plugins(CollisionPlugin)
         .add_plugins(CrosshairPlugin)
         .add_plugins(FootstepsPlugin)
         .add_plugins(HealthPlugin)
         .add_plugins(HeartbeatPlugin)
+        .add_plugins(KineticsPlugin)
         .add_plugins(LaserSightPlugin)
         .add_plugins(ParticlePlugin)
         .add_plugins(ProjectilePlugin)
@@ -114,9 +116,7 @@ fn main() {
             s.add(input);
             s.add(player);
             s.add(actor.after(player));
-            s.add(inertia.after(actor));
-            s.add(collision_find.pipe(collision_resolve).after(inertia));
-            s.add(melee.after(collision_resolve));
+            s.add(melee.after(crate::plugin::collision::on_update));
             s.add(ambience_fx());
             s.add(scenario);
         })

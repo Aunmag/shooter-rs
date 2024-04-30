@@ -1,6 +1,7 @@
 use crate::{
-    component::{Actor, Inertia},
+    component::Actor,
     model::ActorActionsExt,
+    plugin::kinetics::Kinetics,
     util::{
         ext::{TransformExt, Vec2Ext},
         math,
@@ -15,12 +16,12 @@ use bevy::{
 
 const TURN_EPSILON: f32 = 0.01;
 
-pub fn actor(mut query: Query<(&mut Actor, &mut Transform, &mut Inertia)>, time: Res<Time>) {
+pub fn actor(mut query: Query<(&mut Actor, &mut Transform, &mut Kinetics)>, time: Res<Time>) {
     let time_delta = time.delta_seconds();
 
-    for (mut actor, mut transform, mut inertia) in query.iter_mut() {
+    for (mut actor, mut transform, mut kinetics) in query.iter_mut() {
         actor.update_stamina(time_delta);
-        turn(&actor, &mut transform, &mut inertia, time_delta);
+        turn(&actor, &mut transform, &mut kinetics, time_delta);
 
         if actor.movement.is_zero() {
             continue;
@@ -36,11 +37,11 @@ pub fn actor(mut query: Query<(&mut Actor, &mut Transform, &mut Inertia)>, time:
             movement *= actor.config.sprint_factor;
         }
 
-        inertia.push(movement, 0.0, true);
+        kinetics.push(movement, 0.0, true);
     }
 }
 
-fn turn(actor: &Actor, transform: &mut Transform, inertia: &mut Inertia, time_delta: f32) {
+fn turn(actor: &Actor, transform: &mut Transform, kinetics: &mut Kinetics, time_delta: f32) {
     let Some(look_at) = actor.look_at else {
         return;
     };
@@ -61,14 +62,14 @@ fn turn(actor: &Actor, transform: &mut Transform, inertia: &mut Inertia, time_de
         velocity *= 2.0;
     }
 
-    let velocity_current = inertia.velocity_angular;
+    let velocity_current = kinetics.velocity_angular;
     let velocity_future = velocity + velocity_current;
-    let distance_future = velocity_future / inertia.drag();
+    let distance_future = velocity_future / kinetics.drag();
     let distance_excess = distance_future / distance;
 
     if distance_excess > 1.0 {
         velocity /= distance_excess;
     }
 
-    inertia.push(Vec2::ZERO, velocity, true);
+    kinetics.push(Vec2::ZERO, velocity, true);
 }

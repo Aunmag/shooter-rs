@@ -1,3 +1,4 @@
+pub mod chunk;
 mod envelope;
 pub mod ext;
 pub mod math;

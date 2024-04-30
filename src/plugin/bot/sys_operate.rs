@@ -1,10 +1,11 @@
 use super::component::BotShootingState;
 use crate::{
-    component::{Actor, Inertia},
+    component::Actor,
     model::ActorAction,
     plugin::{
         bot::{Bot, BotConfig},
         debug::{debug_circle, debug_line},
+        kinetics::Kinetics,
         Weapon,
     },
     util::{
@@ -31,13 +32,13 @@ const DEBUG_SPREAD: bool = false;
 const DEBUG_DETOUR: bool = false;
 
 pub fn on_update(
-    mut bots: Query<(&mut Bot, &mut Actor, &Transform, &Inertia, Option<&Weapon>)>,
-    actors: Query<(&Transform, &Inertia), With<Actor>>,
+    mut bots: Query<(&mut Bot, &mut Actor, &Transform, &Kinetics, Option<&Weapon>)>,
+    actors: Query<(&Transform, &Kinetics), With<Actor>>,
     time: Res<Time>,
 ) {
     let time = time.elapsed();
 
-    for (mut bot, mut actor, transform, inertia, weapon) in bots.iter_mut() {
+    for (mut bot, mut actor, transform, kinetics, weapon) in bots.iter_mut() {
         actor.reset_actions();
 
         let enemy = bot
@@ -60,7 +61,7 @@ pub fn on_update(
             bot: &mut bot,
             actor: &mut actor,
             transform,
-            velocity: inertia.velocity,
+            velocity: kinetics.velocity,
             weapon,
             spread_out: SpreadOut::Default,
             is_dodging: false,
@@ -279,7 +280,7 @@ impl<'a> BotHandler<'a> {
         }
     }
 
-    fn spread_out(&mut self, actors: &Query<(&Transform, &Inertia), With<Actor>>) {
+    fn spread_out(&mut self, actors: &Query<(&Transform, &Kinetics), With<Actor>>) {
         let mut spread = self.bot.config.spread;
         let is_full;
 

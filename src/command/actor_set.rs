@@ -1,8 +1,8 @@
 use crate::{
-    component::{Actor, ActorConfig, ActorKind, Collision, Inertia},
+    component::{Actor, ActorConfig, ActorKind},
     data::LAYER_ACTOR,
     model::TransformLite,
-    plugin::{Breath, Footsteps, Health},
+    plugin::{collision::Collision, kinetics::Kinetics, Breath, Footsteps, Health},
     resource::Settings,
 };
 use bevy::{
@@ -36,7 +36,7 @@ impl Command for ActorSet {
             .insert(Collision {
                 radius: self.config.radius,
             })
-            .insert(Inertia::new(self.config.mass))
+            .insert(Kinetics::new(self.config.mass))
             .insert(Actor::new(self.config, difficulty))
             .insert(Health::new(self.config.health))
             .insert(Footsteps::default());

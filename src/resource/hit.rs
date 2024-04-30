@@ -1,7 +1,4 @@
-use crate::{
-    component::Inertia,
-    plugin::{CameraTarget, Health},
-};
+use crate::plugin::{kinetics::Kinetics, CameraTarget, Health};
 use bevy::{
     ecs::{
         system::{Resource, SystemBuffer, SystemMeta},
@@ -35,10 +32,10 @@ impl SystemBuffer for HitResource {
             return;
         }
 
-        let mut targets = world.query::<(&mut Inertia, &mut Health, Option<&mut CameraTarget>)>();
+        let mut targets = world.query::<(&mut Kinetics, &mut Health, Option<&mut CameraTarget>)>();
 
         for hit in self.hits.drain(..) {
-            if let Ok((mut inertia, mut health, camera)) = targets.get_mut(world, hit.entity) {
+            if let Ok((mut kinetics, mut health, camera)) = targets.get_mut(world, hit.entity) {
                 let momentum_linear = hit.momentum.length();
                 let mut push = hit.momentum;
                 let mut spin = hit.spin * momentum_linear;
@@ -49,7 +46,7 @@ impl SystemBuffer for HitResource {
                     health.damage(momentum_linear);
                 }
 
-                inertia.push(push, spin, false);
+                kinetics.push(push, spin, false);
 
                 if let Some(mut camera) = camera {
                     camera.shake(push, spin);

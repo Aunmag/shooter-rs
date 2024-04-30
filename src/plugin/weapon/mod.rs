@@ -9,7 +9,6 @@ use crate::{
     model::{ActorActionsExt, AppState, AudioPlay, TransformLite},
     plugin::{debug::debug_line, AudioTracker, ProjectileSpawn, ShellParticleSpawn},
     resource::HitResource,
-    system::game::collision_resolve,
     util::ext::{AppExt, RngExt, TransformExt, Vec2Ext},
 };
 use bevy::{
@@ -27,7 +26,10 @@ pub struct WeaponPlugin;
 
 impl Plugin for WeaponPlugin {
     fn build(&self, app: &mut App) {
-        app.add_state_system(AppState::Game, on_update.after(collision_resolve));
+        app.add_state_system(
+            AppState::Game,
+            on_update.after(crate::plugin::collision::on_update),
+        );
     }
 }
 

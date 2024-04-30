@@ -1,7 +1,7 @@
 use crate::{
-    component::{Actor, Collision},
+    component::Actor,
     model::{geometry::GeometryProjection, AudioPlay},
-    plugin::{AudioTracker, Projectile},
+    plugin::{collision::Collision, AudioTracker, Projectile},
     resource::HitResource,
     util::{ext::Vec2Ext, math},
 };

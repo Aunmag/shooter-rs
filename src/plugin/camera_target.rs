@@ -1,7 +1,6 @@
 use crate::{
     data::VIEW_DISTANCE,
     model::AppState,
-    system::game::collision_resolve,
     util::ext::{AppExt, DurationExt, TransformExt},
 };
 use bevy::{
@@ -32,7 +31,10 @@ pub struct CameraTargetPlugin;
 
 impl Plugin for CameraTargetPlugin {
     fn build(&self, app: &mut App) {
-        app.add_state_system(AppState::Game, sys_camera_target.after(collision_resolve));
+        app.add_state_system(
+            AppState::Game,
+            sys_camera_target.after(crate::plugin::collision::on_update),
+        );
     }
 }
 

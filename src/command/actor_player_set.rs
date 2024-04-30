@@ -1,7 +1,7 @@
 use crate::{
-    component::{Actor, Inertia, Player},
+    component::{Actor, Player},
     data::LAYER_ACTOR_PLAYER,
-    plugin::{CameraTarget, Health, LaserSight, StatusBar},
+    plugin::{kinetics::Kinetics, CameraTarget, Health, LaserSight, StatusBar},
     resource::{GameMode, Settings},
 };
 use bevy::{
@@ -30,8 +30,8 @@ impl Command for ActorPlayerSet {
             transform.translation.z = LAYER_ACTOR_PLAYER;
         }
 
-        if let Some(mut inertia) = world.get_mut::<Inertia>(self.entity) {
-            inertia.drag = Inertia::DRAG_PLAYER;
+        if let Some(mut kinetics) = world.get_mut::<Kinetics>(self.entity) {
+            kinetics.drag = Kinetics::DRAG_PLAYER;
         }
 
         // TODO: don't insert player if it isn't controllable

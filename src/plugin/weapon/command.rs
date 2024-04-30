@@ -1,8 +1,8 @@
 use crate::{
-    component::{Actor, ActorWeaponSprite, Inertia},
+    component::{Actor, ActorWeaponSprite},
     data::PIXELS_PER_METER,
     model::AudioPlay,
-    plugin::{AudioTracker, CameraTarget, Weapon, WeaponConfig, WeaponGrip},
+    plugin::{kinetics::Kinetics, AudioTracker, CameraTarget, Weapon, WeaponConfig, WeaponGrip},
     util::ext::ImageExt,
 };
 use bevy::{
@@ -108,8 +108,8 @@ impl WeaponSet {
     }
 
     fn update_actor_mass(&self, world: &mut World, change: f32) {
-        if let Some(inertia) = world.get_mut::<Inertia>(self.entity).as_mut() {
-            inertia.mass += change * WEAPON_MASS_MULTIPLAYER;
+        if let Some(kinetics) = world.get_mut::<Kinetics>(self.entity).as_mut() {
+            kinetics.mass += change * WEAPON_MASS_MULTIPLAYER;
         }
     }
 
