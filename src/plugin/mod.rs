@@ -3,7 +3,7 @@ mod blood;
 mod bonus;
 pub mod bot;
 mod breath;
-mod camera_target;
+pub mod camera_target;
 pub mod collision;
 mod crosshair;
 pub mod debug;
@@ -11,7 +11,6 @@ mod footsteps;
 mod health;
 mod heartbeat;
 pub mod kinetics;
-mod laser;
 mod particle;
 mod projectile;
 mod status_bar;
@@ -21,7 +20,7 @@ mod ui_notification;
 mod weapon;
 
 pub use self::{
-    audio::*, blood::*, bonus::*, breath::*, camera_target::*, crosshair::*, footsteps::*,
-    health::*, heartbeat::*, laser::*, particle::*, projectile::*, status_bar::*, terrain::*,
-    tile_map::*, ui_notification::*, weapon::*,
+    audio::*, blood::*, bonus::*, breath::*, crosshair::*, footsteps::*, health::*, heartbeat::*,
+    particle::*, projectile::*, status_bar::*, terrain::*, tile_map::*, ui_notification::*,
+    weapon::*,
 };

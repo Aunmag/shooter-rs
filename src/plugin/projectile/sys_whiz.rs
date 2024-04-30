@@ -1,6 +1,6 @@
 use crate::{
     model::{geometry::GeometryProjection, AudioPlay},
-    plugin::{debug::debug_line, AudioTracker, CameraTarget, Projectile},
+    plugin::{camera_target::CameraTarget, debug::debug_line, AudioTracker, Projectile},
 };
 use bevy::{
     ecs::{query::With, system::Query},

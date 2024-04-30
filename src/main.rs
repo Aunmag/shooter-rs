@@ -14,10 +14,10 @@ use crate::{
     event::ActorDeathEvent,
     model::AppState,
     plugin::{
-        bot::BotPlugin, collision::CollisionPlugin, debug::DebugPlugin, kinetics::KineticsPlugin,
-        AudioTracker, AudioTrackerPlugin, BloodPlugin, BonusPlugin, BreathPlugin,
-        CameraTargetPlugin, CrosshairPlugin, FootstepsPlugin, HealthPlugin, HeartbeatPlugin,
-        LaserSightPlugin, ParticlePlugin, ProjectilePlugin, StatusBarPlugin, TerrainPlugin,
+        bot::BotPlugin, camera_target::CameraTargetPlugin, collision::CollisionPlugin,
+        debug::DebugPlugin, kinetics::KineticsPlugin, AudioTracker, AudioTrackerPlugin,
+        BloodPlugin, BonusPlugin, BreathPlugin, CrosshairPlugin, FootstepsPlugin, HealthPlugin,
+        HeartbeatPlugin, ParticlePlugin, ProjectilePlugin, StatusBarPlugin, TerrainPlugin,
         TileMapPlugin, UiNotificationPlugin, WeaponPlugin,
     },
     resource::{AssetStorage, AudioStorage, GameMode, Scenario, Settings},
@@ -72,7 +72,6 @@ fn main() {
             GameMode::Waves => {
                 scenario = Some(Scenario::new(WavesScenario::new()));
             }
-            GameMode::LaserSight => {}
         }
     }
 
@@ -91,7 +90,6 @@ fn main() {
         .add_plugins(HealthPlugin)
         .add_plugins(HeartbeatPlugin)
         .add_plugins(KineticsPlugin)
-        .add_plugins(LaserSightPlugin)
         .add_plugins(ParticlePlugin)
         .add_plugins(ProjectilePlugin)
         .add_plugins(StatusBarPlugin)

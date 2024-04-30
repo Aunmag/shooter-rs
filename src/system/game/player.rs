@@ -2,7 +2,7 @@ use crate::{
     component::{Actor, Player, PlayerCrosshair},
     data::WORLD_SIZE_HALF,
     model::{ActorAction, ActorActionsExt},
-    plugin::{CameraTarget, Crosshair},
+    plugin::{camera_target::CameraTarget, Crosshair},
     resource::Settings,
     util::ext::{TransformExt, Vec2Ext},
 };

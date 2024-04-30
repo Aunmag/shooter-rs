@@ -1,6 +1,6 @@
 use crate::{
     model::AudioPlay,
-    plugin::{CameraTarget, Heartbeat},
+    plugin::{camera_target::CameraTarget, Heartbeat},
     resource::AudioStorage,
 };
 use bevy::{

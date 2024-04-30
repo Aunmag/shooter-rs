@@ -1,4 +1,4 @@
-use crate::plugin::{kinetics::Kinetics, CameraTarget, Health};
+use crate::plugin::{camera_target::CameraTarget, kinetics::Kinetics, Health};
 use bevy::{
     ecs::{
         system::{Resource, SystemBuffer, SystemMeta},

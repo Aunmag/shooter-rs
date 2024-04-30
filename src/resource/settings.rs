@@ -38,7 +38,6 @@ pub enum GameMode {
     Waves,
     Debug,
     Bench,
-    LaserSight,
 }
 
 impl GameMode {
@@ -47,7 +46,6 @@ impl GameMode {
             Self::Waves => &[],
             Self::Debug => &[],
             Self::Bench => &[Self::Debug],
-            Self::LaserSight => &[],
         };
     }
 }

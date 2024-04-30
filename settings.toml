@@ -4,7 +4,6 @@ modes = [
     "waves",
     # "debug",
     # "bench",
-    # "laser_sight",
 ]
 
 [display]

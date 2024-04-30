@@ -1,7 +1,6 @@
 use crate::{
     data::{LAYER_BACKGROUND, PIXELS_PER_METER, TRANSFORM_SCALE, VIEW_DISTANCE},
     model::AppState,
-    plugin::sys_camera_target,
     util::{
         ext::{AppExt, ImageExt},
         math::round_by,
@@ -27,7 +26,10 @@ pub struct TerrainPlugin;
 impl Plugin for TerrainPlugin {
     fn build(&self, app: &mut App) {
         app.add_state_system_enter(AppState::Game, on_init);
-        app.add_state_system(AppState::Game, on_update.after(sys_camera_target));
+        app.add_state_system(
+            AppState::Game,
+            on_update.after(crate::plugin::camera_target::on_update),
+        );
     }
 }
 

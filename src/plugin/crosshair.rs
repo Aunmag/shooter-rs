@@ -2,7 +2,6 @@ use crate::{
     component::Player,
     data::{LAYER_CROSSHAIR, PIXELS_PER_METER},
     model::AppState,
-    plugin::sys_camera_target,
     resource::AssetStorage,
     util::{
         ext::{AppExt, Vec2Ext},
@@ -38,7 +37,10 @@ pub struct CrosshairPlugin;
 impl Plugin for CrosshairPlugin {
     fn build(&self, app: &mut App) {
         app.add_plugins(Material2dPlugin::<Crosshair>::default());
-        app.add_state_system(AppState::Game, on_update.after(sys_camera_target));
+        app.add_state_system(
+            AppState::Game,
+            on_update.after(crate::plugin::camera_target::on_update),
+        );
     }
 }
 

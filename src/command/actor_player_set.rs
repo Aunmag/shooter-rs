@@ -1,8 +1,8 @@
 use crate::{
     component::{Actor, Player},
     data::LAYER_ACTOR_PLAYER,
-    plugin::{kinetics::Kinetics, CameraTarget, Health, LaserSight, StatusBar},
-    resource::{GameMode, Settings},
+    plugin::{camera_target::CameraTarget, kinetics::Kinetics, Health, StatusBar},
+    resource::Settings,
 };
 use bevy::{
     ecs::system::Command,
@@ -41,14 +41,5 @@ impl Command for ActorPlayerSet {
             .insert(CameraTarget::default());
 
         StatusBar::spawn(world, self.entity);
-
-        if world
-            .resource::<Settings>()
-            .game
-            .modes
-            .contains(&GameMode::LaserSight)
-        {
-            LaserSight::spawn(world, self.entity);
-        }
     }
 }

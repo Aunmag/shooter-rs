@@ -33,7 +33,7 @@ impl Plugin for CameraTargetPlugin {
     fn build(&self, app: &mut App) {
         app.add_state_system(
             AppState::Game,
-            sys_camera_target.after(crate::plugin::collision::on_update),
+            on_update.after(crate::plugin::collision::on_update),
         );
     }
 }
@@ -69,7 +69,7 @@ impl CameraTarget {
     }
 }
 
-pub fn sys_camera_target(
+pub fn on_update(
     mut cameras: Query<(&mut Transform, &mut OrthographicProjection)>,
     mut targets: Query<(&Transform, &mut CameraTarget), Without<OrthographicProjection>>,
     windows: Query<&Window, With<PrimaryWindow>>,
