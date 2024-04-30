@@ -1,10 +1,14 @@
 use crate::{
-    command::{ActorPlayerSet, ActorSet},
-    component::{Actor, ActorConfig, ActorKind, Player},
+    command::ActorSet,
+    component::{Actor, ActorConfig, ActorKind},
     data::VIEW_DISTANCE,
     event::ActorDeathEvent,
     model::TransformLite,
-    plugin::{bot::ActorBotSet, BonusSpawn, Health, Notify, WeaponConfig, WeaponSet},
+    plugin::{
+        bot::ActorBotSet,
+        player::{Player, PlayerSet},
+        BonusSpawn, Health, Notify, WeaponConfig, WeaponSet,
+    },
     resource::{Scenario, ScenarioLogic},
     util::ext::Vec2Ext,
 };
@@ -128,7 +132,7 @@ impl WavesScenario {
             transform: TransformLite::default(),
         });
 
-        commands.add(ActorPlayerSet {
+        commands.add(PlayerSet {
             entity,
             is_controllable: true,
         });

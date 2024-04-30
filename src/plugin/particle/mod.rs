@@ -3,9 +3,9 @@ mod shell;
 
 pub use self::{flesh::*, shell::*};
 use crate::{
-    component::Player,
     data::{LAYER_GROUND, LAYER_PROJECTILE, TRANSFORM_SCALE},
     model::AppState,
+    plugin::player::Player,
     util::{
         ext::{AppExt, DurationExt},
         math::interpolate,

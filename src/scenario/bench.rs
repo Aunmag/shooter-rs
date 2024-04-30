@@ -1,8 +1,8 @@
 use crate::{
-    command::{ActorPlayerSet, ActorSet},
+    command::ActorSet,
     component::ActorConfig,
     model::TransformLite,
-    plugin::{bot::ActorBotSet, WeaponConfig, WeaponSet},
+    plugin::{bot::ActorBotSet, player::PlayerSet, WeaponConfig, WeaponSet},
     resource::ScenarioLogic,
 };
 use bevy::{app::AppExit, ecs::world::World, prelude::Commands};
@@ -38,7 +38,7 @@ impl BenchScenario {
             transform: TransformLite::default(),
         });
 
-        commands.add(ActorPlayerSet {
+        commands.add(PlayerSet {
             entity,
             is_controllable: false,
         });

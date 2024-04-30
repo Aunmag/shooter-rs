@@ -1,7 +1,10 @@
 use crate::{
-    component::{Actor, Player},
+    component::Actor,
     model::ActorActions,
-    plugin::{bot::Bot, camera_target::CameraTarget, kinetics::Kinetics, Breath, StatusBar},
+    plugin::{
+        bot::Bot, camera_target::CameraTarget, kinetics::Kinetics, player::Player, Breath,
+        StatusBar,
+    },
     resource::Settings,
 };
 use bevy::{

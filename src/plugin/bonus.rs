@@ -1,8 +1,8 @@
 use crate::{
-    component::{Actor, ActorKind, Player},
+    component::{Actor, ActorKind},
     data::{FONT_PATH, LAYER_BONUS, PIXELS_PER_METER, TRANSFORM_SCALE},
     model::AppState,
-    plugin::{collision::Collision, WeaponConfig, WeaponSet},
+    plugin::{collision::Collision, player::Player, WeaponConfig, WeaponSet},
     util::{
         ext::{AppExt, Vec2Ext},
         math::interpolate,

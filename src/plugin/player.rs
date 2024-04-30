@@ -1,28 +1,75 @@
 use crate::{
-    component::{Actor, Player, PlayerCrosshair},
-    data::WORLD_SIZE_HALF,
-    model::{ActorAction, ActorActionsExt},
-    plugin::{camera_target::CameraTarget, Crosshair},
+    component::Actor,
+    data::{LAYER_ACTOR_PLAYER, WORLD_SIZE_HALF},
+    model::{ActorAction, ActorActionsExt, AppState},
+    plugin::{camera_target::CameraTarget, kinetics::Kinetics, Crosshair, Health, StatusBar},
     resource::Settings,
-    util::ext::{TransformExt, Vec2Ext},
+    util::ext::{AppExt, TransformExt, Vec2Ext},
 };
 use bevy::{
     ecs::{
+        component::Component,
         entity::Entity,
         query::{With, Without},
-        system::{Commands, Query},
-        world::World,
+        system::{Command, Query},
     },
     hierarchy::DespawnRecursiveExt,
     input::mouse::MouseMotion,
     math::{Quat, Vec2},
-    prelude::{EventReader, Input, KeyCode, MouseButton, Res, Transform},
+    prelude::{
+        App, Commands, EventReader, Input, KeyCode, MouseButton, Plugin, Res, Transform, World,
+    },
     render::camera::Camera,
 };
 use std::f32::consts::FRAC_PI_2;
 
+pub struct PlayerPlugin;
+
+impl Plugin for PlayerPlugin {
+    fn build(&self, app: &mut App) {
+        app.add_state_system(AppState::Game, on_update);
+    }
+}
+
+#[derive(Component)]
+pub struct Player {
+    pub is_controllable: bool,
+    pub crosshair: Option<PlayerCrosshair>,
+    extra_rotation: f32,
+}
+
+impl Player {
+    pub const EXTRA_ROTATION_MULTIPLAYER: f32 = 0.1;
+    pub const EXTRA_ROTATION_MAX: f32 = 0.11;
+
+    pub fn new(is_controllable: bool) -> Self {
+        return Self {
+            is_controllable,
+            crosshair: None,
+            extra_rotation: 0.0,
+        };
+    }
+
+    pub fn add_extra_rotation(&mut self, value: f32) -> f32 {
+        let previous = self.extra_rotation;
+        let limit = Self::EXTRA_ROTATION_MAX;
+        self.extra_rotation = (self.extra_rotation + value).clamp(-limit, limit);
+        let added = self.extra_rotation - previous;
+        return added;
+    }
+
+    pub fn get_extra_rotation(&self) -> f32 {
+        return self.extra_rotation;
+    }
+}
+
+pub struct PlayerCrosshair {
+    pub entity: Entity,
+    pub distance: f32,
+}
+
 // TODO: separate aim?
-pub fn player(
+pub fn on_update(
     mut players: Query<
         (
             Entity,
@@ -101,7 +148,10 @@ pub fn player(
                     let crosshair = Crosshair::spawn(world);
 
                     if let Some(mut player) = world.get_mut::<Player>(entity) {
-                        player.crosshair = Some(PlayerCrosshair::new(crosshair));
+                        player.crosshair = Some(PlayerCrosshair {
+                            entity: crosshair,
+                            distance: 1.0,
+                        });
                     }
                 });
             }
@@ -133,5 +183,39 @@ pub fn player(
                 camera.sync_angle = Some(player.get_extra_rotation());
             }
         }
+    }
+}
+
+pub struct PlayerSet {
+    pub entity: Entity,
+    pub is_controllable: bool,
+}
+
+impl Command for PlayerSet {
+    fn apply(self, world: &mut World) {
+        let health_multiplier = 1.0 / world.resource::<Settings>().game.difficulty;
+
+        if let Some(mut actor) = world.get_mut::<Actor>(self.entity) {
+            actor.skill = 1.0; // to keep game balance well, player skill must always be 1.0
+        }
+
+        if let Some(mut health) = world.get_mut::<Health>(self.entity) {
+            health.multiply_resistance(health_multiplier);
+        }
+
+        if let Some(mut transform) = world.get_mut::<Transform>(self.entity) {
+            transform.translation.z = LAYER_ACTOR_PLAYER;
+        }
+
+        if let Some(mut kinetics) = world.get_mut::<Kinetics>(self.entity) {
+            kinetics.drag = Kinetics::DRAG_PLAYER;
+        }
+
+        world
+            .entity_mut(self.entity)
+            .insert(Player::new(self.is_controllable))
+            .insert(CameraTarget::default());
+
+        StatusBar::spawn(world, self.entity);
     }
 }

@@ -1,7 +1,7 @@
 use crate::{
-    component::Player,
     data::{LAYER_CROSSHAIR, PIXELS_PER_METER},
     model::AppState,
+    plugin::player::Player,
     resource::AssetStorage,
     util::{
         ext::{AppExt, Vec2Ext},

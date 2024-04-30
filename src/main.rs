@@ -15,10 +15,10 @@ use crate::{
     model::AppState,
     plugin::{
         bot::BotPlugin, camera_target::CameraTargetPlugin, collision::CollisionPlugin,
-        debug::DebugPlugin, kinetics::KineticsPlugin, AudioTracker, AudioTrackerPlugin,
-        BloodPlugin, BonusPlugin, BreathPlugin, CrosshairPlugin, FootstepsPlugin, HealthPlugin,
-        HeartbeatPlugin, ParticlePlugin, ProjectilePlugin, StatusBarPlugin, TerrainPlugin,
-        TileMapPlugin, UiNotificationPlugin, WeaponPlugin,
+        debug::DebugPlugin, kinetics::KineticsPlugin, player::PlayerPlugin, AudioTracker,
+        AudioTrackerPlugin, BloodPlugin, BonusPlugin, BreathPlugin, CrosshairPlugin,
+        FootstepsPlugin, HealthPlugin, HeartbeatPlugin, ParticlePlugin, ProjectilePlugin,
+        StatusBarPlugin, TerrainPlugin, TileMapPlugin, UiNotificationPlugin, WeaponPlugin,
     },
     resource::{AssetStorage, AudioStorage, GameMode, Scenario, Settings},
     scenario::{BenchScenario, EmptyScenario, WavesScenario},
@@ -91,6 +91,7 @@ fn main() {
         .add_plugins(HeartbeatPlugin)
         .add_plugins(KineticsPlugin)
         .add_plugins(ParticlePlugin)
+        .add_plugins(PlayerPlugin)
         .add_plugins(ProjectilePlugin)
         .add_plugins(StatusBarPlugin)
         .add_plugins(TerrainPlugin)
@@ -112,8 +113,7 @@ fn main() {
         .add_state_systems(AppState::Game, |s| {
             use crate::system::game::*;
             s.add(input);
-            s.add(player);
-            s.add(actor.after(player));
+            s.add(actor.after(crate::plugin::player::on_update));
             s.add(melee.after(crate::plugin::collision::on_update));
             s.add(ambience_fx());
             s.add(scenario);

@@ -1,8 +1,8 @@
 use crate::{
-    command::{ActorPlayerSet, ActorSet},
+    command::ActorSet,
     component::ActorConfig,
     model::TransformLite,
-    plugin::{WeaponConfig, WeaponSet},
+    plugin::{player::PlayerSet, WeaponConfig, WeaponSet},
     resource::ScenarioLogic,
 };
 use bevy::ecs::system::Commands;
@@ -20,7 +20,7 @@ impl ScenarioLogic for EmptyScenario {
             transform: TransformLite::default(),
         });
 
-        commands.add(ActorPlayerSet {
+        commands.add(PlayerSet {
             entity,
             is_controllable: true,
         });

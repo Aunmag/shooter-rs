@@ -1,9 +1,9 @@
 use crate::{
     command::ActorRelease,
-    component::{Actor, Player},
+    component::Actor,
     event::ActorDeathEvent,
     model::{AppState, AudioPlay},
-    plugin::{AudioTracker, BloodSpawn, FleshParticleSpawn},
+    plugin::{player::Player, AudioTracker, BloodSpawn, FleshParticleSpawn},
     resource::{GameMode, Settings},
     util::{ext::AppExt, Timer},
 };

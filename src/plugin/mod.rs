@@ -12,6 +12,7 @@ mod health;
 mod heartbeat;
 pub mod kinetics;
 mod particle;
+pub mod player;
 mod projectile;
 mod status_bar;
 mod terrain;
