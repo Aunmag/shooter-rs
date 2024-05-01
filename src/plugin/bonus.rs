@@ -2,7 +2,7 @@ use crate::{
     component::{Actor, ActorKind},
     data::{FONT_PATH, LAYER_BONUS, PIXELS_PER_METER, TRANSFORM_SCALE},
     model::AppState,
-    plugin::{collision::Collision, player::Player, WeaponConfig, WeaponSet},
+    plugin::{collision::Collision, player::Player, Weapon, WeaponConfig, WeaponSet},
     util::{
         ext::{AppExt, Vec2Ext},
         math::interpolate,
@@ -56,13 +56,11 @@ pub struct BonusSpawn {
 
 impl Command for BonusSpawn {
     fn apply(self, world: &mut World) {
-        let Some(weapon) = generate_weapon(self.level) else {
-            return;
-        };
-
-        let bonus = spawn_bonus(world, self.position, weapon);
-        spawn_image(world, bonus, weapon);
-        spawn_label(world, bonus, weapon);
+        if let Some(weapon) = choose_weapon(world, self.level) {
+            let bonus = spawn_bonus(world, self.position, weapon);
+            spawn_image(world, bonus, weapon);
+            spawn_label(world, bonus, weapon);
+        }
     }
 }
 
@@ -144,6 +142,45 @@ fn update_label(
     }
 }
 
+fn choose_weapon(world: &mut World, level: u8) -> Option<&'static WeaponConfig> {
+    let mut weapon_of_all_the_players = None;
+
+    for weapon in world
+        .query_filtered::<Option<&Weapon>, With<Player>>()
+        .iter(world)
+    {
+        let weapon_name = weapon.map(|w| w.config.name).unwrap_or("");
+
+        match weapon_of_all_the_players.map(|w| weapon_name == w) {
+            None => {
+                // remember the weapon of first encountered player
+                weapon_of_all_the_players = Some(weapon_name);
+            }
+            Some(true) => {
+                // one more player has same weapon
+                continue;
+            }
+            Some(false) => {
+                // one player has a different weapon
+                weapon_of_all_the_players = None;
+                break;
+            }
+        }
+    }
+
+    return WeaponConfig::ALL
+        .choose_weighted(&mut rand::thread_rng(), |w| {
+            if w.level > level || Some(w.name) == weapon_of_all_the_players {
+                return 0.0;
+            } else if w.level == 1 {
+                return 0.1; // less pistols, they usually get in the way
+            } else {
+                return 1.0;
+            }
+        })
+        .ok();
+}
+
 fn spawn_bonus(world: &mut World, position: Vec2, weapon: &'static WeaponConfig) -> Entity {
     let time = world.resource::<Time>().elapsed();
 
@@ -199,18 +236,4 @@ fn spawn_label(world: &mut World, bonus: Entity, weapon: &'static WeaponConfig) 
         })
         .insert(BonusLabel)
         .set_parent(bonus);
-}
-
-fn generate_weapon(level: u8) -> Option<&'static WeaponConfig> {
-    return WeaponConfig::ALL
-        .choose_weighted(&mut rand::thread_rng(), |weapon| {
-            if weapon.level > level {
-                return 0.0;
-            } else if weapon.level == 1 {
-                return 0.5; // less pistols, they usually get in the way
-            } else {
-                return 1.0;
-            }
-        })
-        .ok();
 }
