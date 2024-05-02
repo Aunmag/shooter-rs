@@ -13,8 +13,4 @@ pub trait GeometryProjection<T: Geometry> {
 
 pub trait GeometryDistance<T: Geometry> {
     fn distance_squared(&self, g: &T) -> f32;
-
-    fn distance(&self, g: &T) -> f32 {
-        return self.distance_squared(g).sqrt();
-    }
 }

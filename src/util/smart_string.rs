@@ -37,6 +37,7 @@ impl PartialEq for SmartString<'_> {
     }
 }
 
+#[allow(clippy::to_string_trait_impl)]
 impl ToString for SmartString<'_> {
     fn to_string(&self) -> String {
         return match self {

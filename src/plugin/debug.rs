@@ -260,9 +260,9 @@ fn spawn_actors(
             }
             ActorKind::Zombie => {
                 if weapon_chance < ZOMBIE_RIFLE_CHANCE {
-                    Some(&WeaponConfig::AKS_74U)
+                    Some(&WeaponConfig::AKS_74U_BROKEN)
                 } else if weapon_chance < ZOMBIE_PISTOL_CHANCE {
-                    Some(&WeaponConfig::PM)
+                    Some(&WeaponConfig::PM_BROKEN)
                 } else {
                     None
                 }

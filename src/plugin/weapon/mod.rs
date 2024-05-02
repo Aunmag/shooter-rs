@@ -5,22 +5,18 @@ mod config;
 pub use self::{command::*, component::*, config::*};
 use crate::{
     component::Actor,
-    data::VIEW_DISTANCE,
     model::{ActorActionsExt, AppState, AudioPlay, TransformLite},
-    plugin::{debug::debug_line, AudioTracker, ProjectileSpawn, ShellParticleSpawn},
+    plugin::{AudioTracker, ProjectileSpawn, ShellParticleSpawn},
     resource::HitResource,
-    util::ext::{AppExt, RngExt, TransformExt, Vec2Ext},
+    util::ext::{AppExt, Vec2Ext},
 };
 use bevy::{
     ecs::system::{Deferred, Local, Query},
     math::{Vec2, Vec3, Vec3Swizzles},
     prelude::{App, Commands, Entity, IntoSystemConfigs, Plugin, Res, Time, Transform},
-    render::color::Color,
 };
 use rand::{Rng, SeedableRng};
 use rand_pcg::Pcg32;
-
-const DEBUG_DEVIATION: bool = false;
 
 pub struct WeaponPlugin;
 
@@ -70,13 +66,6 @@ fn on_update(
             }
         }
 
-        // get deviation before shoot, because it will increase after
-        let deviation = weapon.get_deviation(now);
-
-        if DEBUG_DEVIATION {
-            debug_deviation(transform, deviation);
-        }
-
         if actor.actions.is_attacking() && weapon.try_fire(now) {
             let mut position = TransformLite::from(transform);
             position.translation += Vec2::from_length(Weapon::BARREL_LENGTH, position.direction);
@@ -93,7 +82,7 @@ fn on_update(
             }
 
             for _ in 0..weapon.config.projectile.fragments {
-                let deviation = data.rng.gen_range_safely(-deviation, deviation);
+                let deviation = weapon.config.generate_deviation(&mut data.rng);
                 let velocity = weapon.config.generate_velocity(&mut data.rng);
 
                 commands.add(ProjectileSpawn {
@@ -138,13 +127,4 @@ fn on_update(
             continue;
         }
     }
-}
-
-fn debug_deviation(transform: &Transform, deviation: f32) {
-    let p = transform.translation.truncate();
-    let d = transform.direction();
-    let l = VIEW_DISTANCE / 2.0;
-    let color = Color::WHITE.with_a(0.5);
-    debug_line(p, p + Vec2::from_length(l, d + deviation), color);
-    debug_line(p, p + Vec2::from_length(l, d - deviation), color);
 }

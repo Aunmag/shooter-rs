@@ -21,23 +21,21 @@ pub struct WeaponConfig {
 
 impl WeaponConfig {
     pub const VELOCITY_DEVIATION: f32 = 0.06;
-    pub const FIRE_RATE_SHOTGUN: f32 = 85.0;
-    pub const DEVIATION_COOL_DOWN: Duration = Duration::from_millis(800);
 
     pub const RELOADING_TIME_PISTOL: Duration = Duration::from_millis(800);
-    pub const RELOADING_TIME_SHOTGUN_LIGHT: Duration = Duration::from_millis(900);
-    pub const RELOADING_TIME_SHOTGUN: Duration = Duration::from_millis(1100);
+    pub const RELOADING_TIME_SHOTGUN_LIGHT: Duration = Duration::from_millis(1200);
+    pub const RELOADING_TIME_SHOTGUN: Duration = Duration::from_millis(1400);
     pub const RELOADING_TIME_SMG: Duration = Duration::from_millis(1000);
     pub const RELOADING_TIME_CARBINE: Duration = Duration::from_millis(1200);
     pub const RELOADING_TIME_RIFLE: Duration = Duration::from_millis(1400);
     pub const RELOADING_TIME_RIFLE_HEAVY: Duration = Duration::from_millis(1600);
-    pub const RELOADING_TIME_MACHINE_GUN: Duration = Duration::from_millis(3500);
+    pub const RELOADING_TIME_MACHINE_GUN: Duration = Duration::from_millis(5000);
 
     pub const RECOIL_MASS_POW: f32 = 0.25;
     pub const RECOIL_POW: f32 = 0.5;
     pub const RECOIL_MUL: f32 = 13.0;
 
-    pub const ALL: [Self; 12] = [
+    pub const ALL: &'static [Self] = &[
         Self::PM,
         Self::TT,
         Self::MP_43_SAWED_OFF,
@@ -57,7 +55,7 @@ impl WeaponConfig {
         level: 1,
         mass: 0.73,
         muzzle_velocity: 315.0,
-        deviation: 0.015,
+        deviation: 0.03,
         fire_rate: 120.0,
         is_automatic: false,
         projectile: &ProjectileConfig::_9X18,
@@ -69,12 +67,17 @@ impl WeaponConfig {
         image_offset: 2.0,
     };
 
+    pub const PM_BROKEN: Self = Self {
+        muzzle_velocity: 280.0,
+        ..Self::PM
+    };
+
     pub const TT: Self = Self {
         name: "TT",
         level: 1,
         mass: 0.85,
         muzzle_velocity: 430.0,
-        deviation: 0.013,
+        deviation: 0.025,
         fire_rate: 110.0,
         is_automatic: false,
         projectile: &ProjectileConfig::_7_62X25,
@@ -91,8 +94,8 @@ impl WeaponConfig {
         level: 2,
         mass: 2.2,
         muzzle_velocity: 260.0,
-        deviation: 0.06,
-        fire_rate: Self::FIRE_RATE_SHOTGUN,
+        deviation: 0.1,
+        fire_rate: 100.0,
         is_automatic: false,
         projectile: &ProjectileConfig::_12X76,
         ammo_capacity: 2,
@@ -108,7 +111,7 @@ impl WeaponConfig {
         level: 2,
         mass: 1.6,
         muzzle_velocity: 310.0,
-        deviation: 0.01,
+        deviation: 0.035,
         fire_rate: 900.0,
         is_automatic: true,
         projectile: &ProjectileConfig::_9X18,
@@ -125,8 +128,8 @@ impl WeaponConfig {
         level: 3,
         mass: 3.2,
         muzzle_velocity: 410.0,
-        deviation: 0.03,
-        fire_rate: Self::FIRE_RATE_SHOTGUN,
+        deviation: 0.022,
+        fire_rate: 85.0,
         is_automatic: false,
         projectile: &ProjectileConfig::_12X76,
         ammo_capacity: 2,
@@ -142,7 +145,7 @@ impl WeaponConfig {
         level: 3,
         mass: 2.7,
         muzzle_velocity: 330.0,
-        deviation: 0.008,
+        deviation: 0.025,
         fire_rate: 680.0,
         is_automatic: true,
         projectile: &ProjectileConfig::_9X18,
@@ -159,7 +162,7 @@ impl WeaponConfig {
         level: 4,
         mass: 2.9,
         muzzle_velocity: 735.0,
-        deviation: 0.008,
+        deviation: 0.02,
         fire_rate: 675.0,
         is_automatic: true,
         projectile: &ProjectileConfig::_5_45X39,
@@ -171,12 +174,17 @@ impl WeaponConfig {
         image_offset: 8.0,
     };
 
+    pub const AKS_74U_BROKEN: Self = Self {
+        muzzle_velocity: 500.0,
+        ..Self::AKS_74U
+    };
+
     pub const AK_74M: Self = Self {
         name: "AK-74M",
         level: 4,
         mass: 3.83,
         muzzle_velocity: 910.0,
-        deviation: 0.007,
+        deviation: 0.015,
         fire_rate: 600.0,
         is_automatic: true,
         projectile: &ProjectileConfig::_5_45X39,
@@ -193,7 +201,7 @@ impl WeaponConfig {
         level: 5,
         mass: 5.24,
         muzzle_velocity: 960.0,
-        deviation: 0.0065,
+        deviation: 0.012,
         fire_rate: 600.0,
         is_automatic: true,
         projectile: &ProjectileConfig::_5_45X39,
@@ -210,11 +218,11 @@ impl WeaponConfig {
         level: 6,
         mass: 3.3,
         muzzle_velocity: 410.0,
-        deviation: 0.035,
-        fire_rate: Self::FIRE_RATE_SHOTGUN,
+        deviation: 0.03,
+        fire_rate: 220.0,
         is_automatic: false,
         projectile: &ProjectileConfig::_12X76,
-        ammo_capacity: 8,
+        ammo_capacity: 10,
         reloading_time: Self::RELOADING_TIME_RIFLE,
         has_bolt: true,
         is_shotgun: true,
@@ -227,7 +235,7 @@ impl WeaponConfig {
         level: 7,
         mass: 7.5,
         muzzle_velocity: 825.0,
-        deviation: 0.006,
+        deviation: 0.011,
         fire_rate: 650.0,
         is_automatic: true,
         projectile: &ProjectileConfig::_7_62X54,
@@ -244,7 +252,7 @@ impl WeaponConfig {
         level: 7,
         mass: 8.2,
         muzzle_velocity: 825.0,
-        deviation: 0.0055,
+        deviation: 0.01,
         fire_rate: 650.0,
         is_automatic: true,
         projectile: &ProjectileConfig::_7_62X54,
@@ -255,6 +263,10 @@ impl WeaponConfig {
         grip: WeaponGrip::TwoHandsWithButt,
         image_offset: 10.0,
     };
+
+    pub fn generate_deviation(&self, rng: &mut Pcg32) -> f32 {
+        return rng.gen_normal(self.deviation);
+    }
 
     pub fn generate_velocity(&self, rng: &mut Pcg32) -> f32 {
         let deviation = rng.gen_normal(self.muzzle_velocity * Self::VELOCITY_DEVIATION);

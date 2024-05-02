@@ -181,9 +181,9 @@ impl WavesScenario {
                 if self.rng.gen_bool(wave.agile_chance) {
                     spawn.config = &ActorConfig::ZOMBIE_AGILE;
                 } else if self.rng.gen_bool(wave.rifle_chance) {
-                    spawn.weapon = Some(&WeaponConfig::AKS_74U);
+                    spawn.weapon = Some(&WeaponConfig::AKS_74U_BROKEN);
                 } else if self.rng.gen_bool(wave.pistol_chance) {
-                    spawn.weapon = Some(&WeaponConfig::PM);
+                    spawn.weapon = Some(&WeaponConfig::PM_BROKEN);
                 }
 
                 commands.add(spawn);
