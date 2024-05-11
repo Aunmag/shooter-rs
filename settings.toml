@@ -1,9 +1,9 @@
 [game]
-difficulty = 1.0 # 0.8 - easy, 1.0 - medium, 1.2 - hard
+difficulty = 1.0
 modes = [
-    "waves",
-    # "debug",
-    # "bench",
+    # "waves",
+    "debug",
+    # "test_bot_spread",
 ]
 
 [display]
@@ -13,7 +13,7 @@ window_size_y = 800
 v_sync = false
 
 [audio]
-sources = 32
+sources = 0
 
 [controls]
-mouse_sensitivity = 0.003
+mouse_sensitivity = 0.003000000026077032

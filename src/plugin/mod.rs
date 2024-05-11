@@ -19,6 +19,7 @@ mod terrain;
 mod tile_map;
 mod ui_notification;
 mod weapon;
+pub mod scenario;
 
 pub use self::{
     audio::*, blood::*, bonus::*, breath::*, crosshair::*, footsteps::*, health::*, heartbeat::*,

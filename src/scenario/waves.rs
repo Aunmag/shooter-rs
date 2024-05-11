@@ -97,7 +97,7 @@ impl Task {
     fn get_timeout(&self) -> Duration {
         return match self {
             Self::StartNextWave => DEFAULT_INTERVAL,
-            Self::SpawnZombie => Duration::from_millis(800),
+            Self::SpawnZombie => Duration::from_millis(500),
             Self::CheckWaveCompletion => DEFAULT_INTERVAL,
             Self::CompleteWave => Duration::from_secs(4),
         };

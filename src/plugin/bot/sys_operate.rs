@@ -26,9 +26,11 @@ use std::{
     time::Duration,
 };
 
+const SPREAD_OUT_MIN: f32 = 0.2;
+
 const DEBUG_TEAMMATES: bool = false;
 const DEBUG_AIM: bool = false;
-const DEBUG_SPREAD: bool = false;
+const DEBUG_SPREAD: bool = true;
 const DEBUG_DETOUR: bool = false;
 
 pub fn on_update(
@@ -69,14 +71,14 @@ pub fn on_update(
 
         if let Some(enemy) = enemy {
             if handler.bot.config.is_agile {
-                handler.dodge_enemy(&enemy);
+                // handler.dodge_enemy(&enemy);
             }
 
             if !handler.is_dodging {
                 handler.attack_enemy(&enemy, time);
             }
         } else {
-            handler.idle();
+            // handler.idle();
         }
 
         handler.spread_out(&actors);
@@ -138,8 +140,6 @@ impl<'a> BotHandler<'a> {
         }
 
         if self.can_aim_at(target.position) {
-            self.spread_out.set(SpreadOut::Simplified);
-
             if self.bot.config.is_silly
                 && self.is_far(&target.position, self.bot.config.shoot_distance_min * 1.25)
             {
@@ -233,15 +233,15 @@ impl<'a> BotHandler<'a> {
                 .and_then(|d| d.calc(self.position(), target));
         }
 
-        if let Some(detour) = detour {
-            if self.can_sprint() && self.is_aimed_at_angle(detour) {
-                self.actor.actions |= ActorAction::Sprint;
-            }
+        // if let Some(detour) = detour {
+        //     if self.can_sprint() && self.is_aimed_at_angle(detour) {
+        //         self.actor.actions |= ActorAction::Sprint;
+        //     }
 
-            self.spread_out.set(SpreadOut::Compact);
-            self.look_at_direction(detour);
-            self.actor.movement += Vec2::FRONT;
-        } else {
+        //     self.spread_out.set(SpreadOut::Compact);
+        //     self.look_at_direction(detour);
+        //     self.actor.movement += Vec2::FRONT;
+        // } else {
             if self.can_sprint() && self.is_far(&target, self.bot.config.sprint_distance) {
                 // enemy is far, sprint
                 self.actor.actions |= ActorAction::Sprint;
@@ -249,7 +249,7 @@ impl<'a> BotHandler<'a> {
 
             self.look_at_position(meet);
             self.actor.movement += Vec2::FRONT;
-        }
+        // }
 
         if DEBUG_DETOUR {
             let color = Color::WHITE.with_a(0.4);
@@ -286,10 +286,11 @@ impl<'a> BotHandler<'a> {
 
         match self.spread_out {
             SpreadOut::Default => {
+                spread = self.bot.config.spread;
                 is_full = true;
             }
             SpreadOut::Compact => {
-                spread = 0.0;
+                spread = f32::min(SPREAD_OUT_MIN, self.bot.config.spread);
                 is_full = true;
             }
             SpreadOut::Simplified => {
@@ -300,59 +301,61 @@ impl<'a> BotHandler<'a> {
             }
         }
 
-        spread = f32::max(spread, self.actor.config.radius * 3.0);
+        spread += self.actor.config.radius;
 
         if DEBUG_SPREAD {
             debug_circle(self.position(), spread, Color::ORANGE.with_a(0.3));
         }
 
-        let mut teammates_position_sum = Vec2::ZERO;
-        let mut teammates_position_sum_weight = 0.0;
+        spread += self.actor.config.radius; // FIXME: add teammate body radius here, it may differ
+
+        let mut spread_vector = Vec2::ZERO;
+        let mut should_spread = false;
 
         for teammate in &self.bot.teammates {
-            let Ok(teammate_position) = actors.get(*teammate).map(|a| a.0.translation.xy()) else {
+            let Ok(teammate_position) = actors.get(*teammate).map(|a| a.0.translation.truncate()) else {
                 continue;
             };
 
-            let teammate_distance = self.distance_squared(&teammate_position);
+            let relative = self.position() - teammate_position;
+            let distance = relative.length_squared();
 
-            if teammate_distance < spread * spread {
-                let weight = 1.0 - teammate_distance.sqrt() / spread;
-                teammates_position_sum += teammate_position * weight;
-                teammates_position_sum_weight += weight;
+            if distance > 0.0 && distance < spread * spread {
+                spread_vector += relative / distance;
+                should_spread = true;
             }
         }
 
-        if teammates_position_sum_weight == 0.0 {
+        if !should_spread {
             return;
         }
 
-        let teammates_position = teammates_position_sum / teammates_position_sum_weight;
-
-        if DEBUG_TEAMMATES {
-            debug_line(self.position(), teammates_position, Color::GREEN);
+        if DEBUG_SPREAD {
+            debug_line(
+                self.position(),
+                self.position() - spread_vector,
+                Color::RED, // TODO: change
+            );
         }
 
-        if self.is_close(&teammates_position, spread) {
-            if is_full {
-                let angle_look = self.get_look_at();
-                let angle_to_group = self.angle_to(&teammates_position);
-                let angle_distance = angle_difference(angle_look, angle_to_group);
+        if is_full {
+            let angle_look = self.get_look_at();
+            let angle_to_group = spread_vector.angle(); // TODO: rename
+            let angle_distance = angle_difference(angle_look, angle_to_group);
 
-                self.look_at_direction(angle_look - FRAC_PI_2 * angle_distance.signum());
+            self.look_at_direction(angle_to_group); // TODO: make more smooth
 
-                if angle_distance.abs() > FRAC_PI_6 {
-                    self.actor.movement += Vec2::FRONT;
-                } else {
-                    self.actor.actions -= ActorAction::Sprint;
-                }
-            } else {
-                // find subjective direction to teammates, and go in opposite direction
-                self.actor.movement -= (teammates_position - self.position())
-                    .normalize_or_zero()
-                    .rotate_by(-self.transform.direction())
-                    .div(2.0);
-            }
+            // TODO: rework
+            // if angle_distance.abs() > FRAC_PI_6 {
+                self.actor.movement += Vec2::FRONT;
+            // } else {
+            //     self.actor.actions -= ActorAction::Sprint;
+            // }
+        } else {
+            self.actor.movement += spread_vector
+                .normalize_or_zero()
+                .rotate_by(-self.transform.direction())
+                .div(2.0);
         }
     }
 

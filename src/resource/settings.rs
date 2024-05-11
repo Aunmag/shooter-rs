@@ -38,6 +38,7 @@ pub enum GameMode {
     Waves,
     Debug,
     Bench,
+    TestBotSpread,
 }
 
 impl GameMode {
@@ -46,6 +47,7 @@ impl GameMode {
             Self::Waves => &[],
             Self::Debug => &[],
             Self::Bench => &[Self::Debug],
+            Self::TestBotSpread => &[],
         };
     }
 }

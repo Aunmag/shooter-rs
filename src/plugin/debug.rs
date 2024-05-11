@@ -34,9 +34,9 @@ use std::{
 
 const UPDATE_TEXT_INTERVAL: Duration = Duration::from_millis(500);
 
-const ZOMBIE_PISTOL_CHANCE: f32 = 0.1;
-const ZOMBIE_RIFLE_CHANCE: f32 = 0.02;
-const HUMAN_RIFLE_CHANCE: f32 = 0.1;
+const ZOMBIE_PISTOL_CHANCE: f32 = 0.0;
+const ZOMBIE_RIFLE_CHANCE: f32 = 0.0;
+const HUMAN_RIFLE_CHANCE: f32 = 0.5;
 
 static DRAW_QUEUE: OnceLock<Mutex<Vec<Shape>>> = OnceLock::new();
 
