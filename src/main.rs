@@ -14,14 +14,10 @@ use crate::{
     event::ActorDeathEvent,
     model::AppState,
     plugin::{
-        bot::BotPlugin, camera_target::CameraTargetPlugin, collision::CollisionPlugin,
-        debug::DebugPlugin, kinetics::KineticsPlugin, player::PlayerPlugin, AudioTracker,
-        AudioTrackerPlugin, BloodPlugin, BonusPlugin, BreathPlugin, CrosshairPlugin,
-        FootstepsPlugin, HealthPlugin, HeartbeatPlugin, ParticlePlugin, ProjectilePlugin,
-        StatusBarPlugin, TerrainPlugin, TileMapPlugin, UiNotificationPlugin, WeaponPlugin,
+        bot::BotPlugin, camera_target::CameraTargetPlugin, collision::CollisionPlugin, debug::DebugPlugin, kinetics::KineticsPlugin, player::PlayerPlugin, scenario::WavesScenarioPlugin, AudioTracker, AudioTrackerPlugin, BloodPlugin, BonusPlugin, BreathPlugin, CrosshairPlugin, FootstepsPlugin, HealthPlugin, HeartbeatPlugin, ParticlePlugin, ProjectilePlugin, StatusBarPlugin, TerrainPlugin, TileMapPlugin, UiNotificationPlugin, WeaponPlugin
     },
     resource::{AssetStorage, AudioStorage, GameMode, Scenario, Settings},
-    scenario::{BenchScenario, EmptyScenario, WavesScenario},
+    scenario::{BenchScenario, WavesScenario},
     util::ext::AppExt,
 };
 use bevy::{
@@ -31,6 +27,7 @@ use bevy::{
     render::texture::ImagePlugin,
     window::{Window, WindowPlugin, WindowResolution},
 };
+use plugin::{command_scheduler::CommandSchedulerPlugin, scenario::BaseScenarioPlugin};
 
 fn main() {
     // TODO: init logger earlier
@@ -56,8 +53,7 @@ fn main() {
             }),
     );
 
-    let mut scenario = None;
-
+    // TODO: do later
     for mode in &settings.game.modes {
         log::info!("Starting with game mode: {:?}", mode);
 
@@ -67,24 +63,25 @@ fn main() {
                 application.add_plugins(DebugPlugin);
             }
             GameMode::Bench => {
-                scenario = Some(Scenario::new(BenchScenario::default()));
+                application.insert_resource(Scenario::new(BenchScenario::default()));
             }
             GameMode::Waves => {
-                scenario = Some(Scenario::new(WavesScenario::new()));
+                application.add_plugins(WavesScenarioPlugin);
+                application.insert_resource(Scenario::new(WavesScenario::new()));
             }
         }
     }
 
-    application.insert_resource(scenario.unwrap_or_else(|| Scenario::new(EmptyScenario)));
-
     application
         .add_plugins(AudioTrackerPlugin)
+        .add_plugins(BaseScenarioPlugin)
         .add_plugins(BloodPlugin)
         .add_plugins(BonusPlugin)
         .add_plugins(BotPlugin)
         .add_plugins(BreathPlugin)
         .add_plugins(CameraTargetPlugin)
         .add_plugins(CollisionPlugin)
+        .add_plugins(CommandSchedulerPlugin)
         .add_plugins(CrosshairPlugin)
         .add_plugins(FootstepsPlugin)
         .add_plugins(HealthPlugin)

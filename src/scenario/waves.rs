@@ -22,6 +22,9 @@ use rand::{seq::SliceRandom, Rng, SeedableRng};
 use rand_pcg::Pcg32;
 use std::{any::Any, f32::consts::PI, time::Duration};
 
+// TODO: interval spawn
+// TODO: interval zombies check
+
 const AGILE_CHANCE: f64 = 0.1;
 
 const WAVES: &[Wave] = &[
@@ -121,26 +124,6 @@ impl WavesScenario {
             kills: 0,
             rng: Pcg32::seed_from_u64(32),
         };
-    }
-
-    fn spawn_player(commands: &mut Commands) {
-        let entity = commands.spawn_empty().id();
-
-        commands.add(ActorSet {
-            entity,
-            config: &ActorConfig::HUMAN,
-            transform: TransformLite::default(),
-        });
-
-        commands.add(PlayerSet {
-            entity,
-            is_controllable: true,
-        });
-
-        commands.add(WeaponSet {
-            entity,
-            weapon: Some(&WeaponConfig::PM),
-        });
     }
 
     fn update(&mut self, commands: &mut Commands) -> Task {
@@ -243,7 +226,6 @@ impl WavesScenario {
 
 impl ScenarioLogic for WavesScenario {
     fn on_start(&mut self, commands: &mut Commands) -> Duration {
-        Self::spawn_player(commands);
         return DEFAULT_INTERVAL;
     }
 

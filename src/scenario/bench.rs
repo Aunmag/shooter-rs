@@ -29,28 +29,6 @@ pub struct BenchScenario {
 }
 
 impl BenchScenario {
-    fn spawn_player(&mut self, commands: &mut Commands) {
-        let entity = commands.spawn_empty().id();
-
-        commands.add(ActorSet {
-            entity,
-            config: &ActorConfig::HUMAN,
-            transform: TransformLite::default(),
-        });
-
-        commands.add(PlayerSet {
-            entity,
-            is_controllable: false,
-        });
-
-        commands.add(WeaponSet {
-            entity,
-            weapon: Some(&WeaponConfig::PM),
-        });
-
-        self.spawned += 1;
-    }
-
     fn spawn_batch(&mut self, commands: &mut Commands) {
         for _ in 0..SPAWN_BATCH {
             let entity = commands.spawn_empty().id();
@@ -93,7 +71,6 @@ impl BenchScenario {
 
 impl ScenarioLogic for BenchScenario {
     fn on_start(&mut self, commands: &mut Commands) -> Duration {
-        self.spawn_player(commands);
         return INTERVAL;
     }
 
