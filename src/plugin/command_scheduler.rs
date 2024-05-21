@@ -1,9 +1,7 @@
 use crate::{model::AppState, util::ext::AppExt};
-use bevy::{
-    ecs::system::{ResMut, Resource},
-    prelude::{App, Commands, Plugin, Res, Time},
-};
-use std::time::Duration;
+use bevy::prelude::{App, Commands, Plugin, Res, ResMut, Resource, Time, World};
+use std::{any::TypeId, time::Duration};
+use std::any::Any;
 
 pub struct CommandSchedulerPlugin;
 
@@ -13,59 +11,71 @@ impl Plugin for CommandSchedulerPlugin {
     }
 }
 
-// TODO: just accept static fn?
-type Foo = Box<dyn ScheduledCommand + 'static + Send + Sync>; // TODO: rename
+type Command = fn(&mut World);
 
 #[derive(Resource)]
 pub struct CommandScheduler {
-    tasks: Vec<Task>,
-    next: Duration,
+    commands: Vec<ScheduledCommand>,
+    next_run: Duration,
 }
 
 impl CommandScheduler {
-    pub fn add(&mut self, task: Foo, start: Duration, interval: Duration) {
-        self.tasks.push(Task {
-            imp: task,
+    pub fn add(&mut self, interval: Duration, command: Command) {
+        let next_run = Duration::ZERO;
+
+        self.commands.push(ScheduledCommand {
+            command,
             interval,
-            next: start,
+            next_run,
         });
 
-        if self.next > start {
-            self.next = start;
+        if self.next_run > next_run {
+            self.next_run = next_run;
         }
+    }
+
+    pub fn reschedule(&mut self, id: TypeId, interval: Duration) {
+        for command in &mut self.commands {
+            if command.command.type_id() == id {
+                if !command.next_run.is_zero() {
+                    let last_run = command.next_run.saturating_sub(command.interval);
+                    command.next_run = last_run + interval;
+                }
+
+                command.interval = interval;
+                break;
+            }
+        }
+
+        debug_assert!(false, "Scheduled command not found");
     }
 }
 
-struct Task {
-    imp: Foo, // TODO: rename
+struct ScheduledCommand {
+    command: Command,
     interval: Duration,
-    next: Duration,
+    next_run: Duration,
 }
 
 fn on_update(mut scheduler: ResMut<CommandScheduler>, mut commands: Commands, time: Res<Time>) {
-    let time = time.elapsed();
+    let now = time.elapsed();
 
-    if time > scheduler.next {
+    if now < scheduler.next_run {
         return;
     }
 
-    let mut new_next = Duration::MAX;
+    let mut next_run = Duration::MAX;
 
-    for task in &mut scheduler.tasks {
-        if task.next <= time {
-            task.imp.apply(&mut commands);
-            task.next = time + task.interval;
+    for command in &mut scheduler.commands {
+        if command.next_run <= now {
+            commands.add(command.command);
+            command.next_run = now + command.interval;
         }
 
-        if task.next < new_next {
-            new_next = task.next;
+        if next_run > command.next_run {
+            next_run = command.next_run;
         }
     }
 
-    scheduler.next = new_next;
-}
-
-pub trait ScheduledCommand {
-    // TODO: pass time?
-    fn apply(&self, commands: &mut Commands); // TODO: simplify
+    scheduler.next_run = next_run;
 }

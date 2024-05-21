@@ -21,6 +21,7 @@ mod terrain;
 mod tile_map;
 mod ui_notification;
 mod weapon;
+pub mod event_watcher;
 
 pub use self::{
     audio::*, blood::*, bonus::*, breath::*, crosshair::*, footsteps::*, health::*, heartbeat::*,

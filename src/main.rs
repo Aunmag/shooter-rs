@@ -14,7 +14,12 @@ use crate::{
     event::ActorDeathEvent,
     model::AppState,
     plugin::{
-        bot::BotPlugin, camera_target::CameraTargetPlugin, collision::CollisionPlugin, debug::DebugPlugin, kinetics::KineticsPlugin, player::PlayerPlugin, scenario::WavesScenarioPlugin, AudioTracker, AudioTrackerPlugin, BloodPlugin, BonusPlugin, BreathPlugin, CrosshairPlugin, FootstepsPlugin, HealthPlugin, HeartbeatPlugin, ParticlePlugin, ProjectilePlugin, StatusBarPlugin, TerrainPlugin, TileMapPlugin, UiNotificationPlugin, WeaponPlugin
+        bot::BotPlugin, camera_target::CameraTargetPlugin, collision::CollisionPlugin,
+        debug::DebugPlugin, kinetics::KineticsPlugin, player::PlayerPlugin,
+        scenario::WavesScenarioPlugin, AudioTracker, AudioTrackerPlugin, BloodPlugin, BonusPlugin,
+        BreathPlugin, CrosshairPlugin, FootstepsPlugin, HealthPlugin, HeartbeatPlugin,
+        ParticlePlugin, ProjectilePlugin, StatusBarPlugin, TerrainPlugin, TileMapPlugin,
+        UiNotificationPlugin, WeaponPlugin,
     },
     resource::{AssetStorage, AudioStorage, GameMode, Scenario, Settings},
     scenario::{BenchScenario, WavesScenario},
