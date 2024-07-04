@@ -102,28 +102,28 @@ impl<'a> WorldGenerator<'a> {
 
         let groups = [
             ImageGroup(4.0, vec![Image::new("decor/crater.png", 48, 6.0)]),
-            ImageGroup(
-                8.0,
-                vec![
-                    Image::new("decor/puddle_0.png", 56, 2.5),
-                    Image::new("decor/puddle_1.png", 56, 2.5),
-                    Image::new("decor/puddle_2.png", 56, 2.5),
-                ],
-            ),
-            ImageGroup(
-                1.0,
-                vec![
-                    Image::new("decor/campfire_0.png", 32, 1.0),
-                    Image::new("decor/campfire_1.png", 32, 1.0),
-                ],
-            ),
-            ImageGroup(
-                3.0,
-                vec![
-                    Image::new("decor/stump_0.png", 48, 1.5),
-                    Image::new("decor/stump_1.png", 40, 1.2),
-                ],
-            ),
+            // ImageGroup(
+            //     8.0,
+            //     vec![
+            //         Image::new("decor/puddle_0.png", 56, 2.5),
+            //         Image::new("decor/puddle_1.png", 56, 2.5),
+            //         Image::new("decor/puddle_2.png", 56, 2.5),
+            //     ],
+            // ),
+            // ImageGroup(
+            //     1.0,
+            //     vec![
+            //         Image::new("decor/campfire_0.png", 32, 1.0),
+            //         Image::new("decor/campfire_1.png", 32, 1.0),
+            //     ],
+            // ),
+            // ImageGroup(
+            //     3.0,
+            //     vec![
+            //         Image::new("decor/stump_0.png", 48, 1.5),
+            //         Image::new("decor/stump_1.png", 40, 1.2),
+            //     ],
+            // ),
             ImageGroup(
                 1.0,
                 vec![
@@ -134,15 +134,15 @@ impl<'a> WorldGenerator<'a> {
                     Image::new("decor/dead_4.png", 50, 1.0),
                 ],
             ),
-            ImageGroup(
-                4.0,
-                vec![
-                    Image::new("decor/rock_0.png", 32, 2.0),
-                    Image::new("decor/rock_1.png", 32, 2.0),
-                    Image::new("decor/rock_2.png", 32, 2.0),
-                    Image::new("decor/rock_3.png", 32, 2.0),
-                ],
-            ),
+            // ImageGroup(
+            //     4.0,
+            //     vec![
+            //         Image::new("decor/rock_0.png", 32, 2.0),
+            //         Image::new("decor/rock_1.png", 32, 2.0),
+            //         Image::new("decor/rock_2.png", 32, 2.0),
+            //         Image::new("decor/rock_3.png", 32, 2.0),
+            //     ],
+            // ),
             ImageGroup(
                 0.5,
                 vec![
@@ -163,7 +163,14 @@ impl<'a> WorldGenerator<'a> {
         log::debug!("Spawning {} trees...", TREES_QUANTITY);
         let groups = [ImageGroup(
             1.0,
-            vec![Image::new("decor/tree.png", 96, 1.33)],
+            vec![
+                // Image::new("decor/tree.png", 96, 1.33),
+                // Image::new("decor/tree_0.png", 96, 1.33),
+                // Image::new("decor/tree_1.png", 96, 1.33),
+                // Image::new("decor/tree_2.png", 96, 1.33),
+                Image::new("decor/tree_0.png", 96, 1.33),
+                Image::new("decor/tree_9.png", 96, 1.33),
+            ],
         )];
         self.spawn_decor_layer(LAYER_TREE, TREES_QUANTITY, &groups);
     }

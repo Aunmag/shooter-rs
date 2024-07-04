@@ -1,11 +1,6 @@
 [game]
-difficulty = 1.0 # 0.8 - easy, 1.0 - medium, 1.2 - hard
-modes = [
-    # "waves",
-    "debug",
-    # "bench",
-    # "laser_sight",
-]
+difficulty = 1.0
+modes = ["debug"]
 
 [display]
 full_screen = true
@@ -17,4 +12,4 @@ v_sync = false
 sources = 0
 
 [controls]
-mouse_sensitivity = 0.003
+mouse_sensitivity = 0.003000000026077032
