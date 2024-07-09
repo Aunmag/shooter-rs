@@ -3,6 +3,9 @@ name = "shooter"
 edition = "2021"
 authors = ["Aunmag <aunmag@gmail.com>"]
 
+[workspace]
+members = ["world-generator"]
+
 [dependencies]
 anyhow = "1.0"
 bevy = "0.12"

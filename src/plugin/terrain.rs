@@ -13,8 +13,9 @@ use bevy::{
         texture::{Image, ImageAddressMode, ImageSampler, ImageSamplerDescriptor},
     }, sprite::{ColorMaterial, ColorMesh2dBundle}
 };
+use rand::seq::SliceRandom;
 
-const PATH: &str = "terrain/1.png";
+const PATH: &str = "terrain/grass_513473301.png";
 const DEBUG: bool = true; // TODO: disable by default
 
 pub struct TerrainPlugin;
@@ -103,7 +104,34 @@ fn on_debug_update(
     keyboard: Res<Input<KeyCode>>,
     mut commands: Commands,
 ) {
-    let id = if keyboard.just_pressed(KeyCode::Key0) {
+    let images = [
+        "terrain/dead_3174437271.png",
+        "terrain/dead_330027463.png",
+        "terrain/dead_980120234.png",
+        "terrain/desert_0.png",
+        "terrain/desert_1.png",
+        "terrain/desert_1552516878.png",
+        "terrain/desert_1552516880.png",
+        "terrain/desert_1552516885.png",
+        "terrain/desert_1552516897.png",
+        "terrain/desert_1552516899.png",
+        "terrain/desert_4243541191.png",
+        "terrain/desert_4243541200.png",
+        "terrain/desert_4243541201.png",
+        "terrain/dirt_moss_pebble_330027463.png",
+        "terrain/dirt_moss_pebble_980120234.png",
+        "terrain/dry_2952353678.png",
+        "terrain/dry_3792346351.png",
+        "terrain/grass_3174437271.png",
+        "terrain/grass_513473301.png",
+        "terrain/grass_533163216.png",
+        "terrain/grass_533163253.png",
+        "terrain/hell_3849968848.png",
+        "terrain/hell_3849968862.png",
+        "terrain/hell_992658657.png",
+    ];
+
+    let index = if keyboard.just_pressed(KeyCode::Key0) {
         0
     } else if keyboard.just_pressed(KeyCode::Key1) {
         1
@@ -117,14 +145,31 @@ fn on_debug_update(
         5
     } else if keyboard.just_pressed(KeyCode::Key6) {
         6
+    } else if keyboard.just_pressed(KeyCode::Key7) {
+        7
+    } else if keyboard.just_pressed(KeyCode::Key8) {
+        8
+    } else if keyboard.just_pressed(KeyCode::Key9) {
+        9
+    } else if keyboard.just_pressed(KeyCode::Equals) {
+        usize::MAX
     } else {
         return;
     };
 
-    let image = format!("terrain/{}.png", id);
+    let image = if index == usize::MAX {
+        let mut rng = rand::thread_rng();
+        images.choose(&mut rng)
+    } else {
+        images.get(index)
+    };
+
+    let Some(&image) = image else {
+        return;
+    };
 
     commands.add(move |w: &mut World| {
-        let Some(image_handle) = w.resource::<AssetServer>().get_handle::<Image>(&image) else {
+        let Some(image_handle) = w.resource::<AssetServer>().get_handle::<Image>(image) else {
             return;
         };
 

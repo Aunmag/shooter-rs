@@ -67,7 +67,7 @@ impl<'a> WorldGenerator<'a> {
     pub fn generate(&mut self) {
         self.spawn_bluffs();
         self.spawn_ground_decor();
-        self.spawn_trees();
+        // self.spawn_trees();
     }
 
     fn spawn_bluffs(&mut self) {
@@ -110,20 +110,13 @@ impl<'a> WorldGenerator<'a> {
             //         Image::new("decor/puddle_2.png", 56, 2.5),
             //     ],
             // ),
-            // ImageGroup(
-            //     1.0,
-            //     vec![
-            //         Image::new("decor/campfire_0.png", 32, 1.0),
-            //         Image::new("decor/campfire_1.png", 32, 1.0),
-            //     ],
-            // ),
-            // ImageGroup(
-            //     3.0,
-            //     vec![
-            //         Image::new("decor/stump_0.png", 48, 1.5),
-            //         Image::new("decor/stump_1.png", 40, 1.2),
-            //     ],
-            // ),
+            ImageGroup(
+                3.0,
+                vec![
+                    Image::new("decor/stump_0.png", 48, 1.5),
+                    Image::new("decor/stump_1.png", 40, 1.2),
+                ],
+            ),
             ImageGroup(
                 1.0,
                 vec![
@@ -131,7 +124,6 @@ impl<'a> WorldGenerator<'a> {
                     Image::new("decor/dead_1.png", 50, 1.0),
                     Image::new("decor/dead_2.png", 50, 1.0),
                     Image::new("decor/dead_3.png", 50, 1.0),
-                    Image::new("decor/dead_4.png", 50, 1.0),
                 ],
             ),
             // ImageGroup(
@@ -168,7 +160,14 @@ impl<'a> WorldGenerator<'a> {
                 // Image::new("decor/tree_0.png", 96, 1.33),
                 // Image::new("decor/tree_1.png", 96, 1.33),
                 // Image::new("decor/tree_2.png", 96, 1.33),
-                Image::new("decor/tree_0.png", 96, 1.33),
+                // Image::new("decor/tree_0.png", 96, 1.33),
+                // Image::new("decor/tree_9.png", 96, 1.33),
+                // Image::new("decor/tree_8.png", 96, 1.33),
+                // Image::new("decor/tree_5.png", 96, 1.33),
+                // Image::new("decor/tree_1.png", 96, 1.33),
+                // Image::new("decor/tree_1.png", 64, 1.33),
+                // Image::new("decor/tree_2.png", 64, 1.33),
+                Image::new("decor/tree_1.png", 96, 1.33),
                 Image::new("decor/tree_9.png", 96, 1.33),
             ],
         )];
