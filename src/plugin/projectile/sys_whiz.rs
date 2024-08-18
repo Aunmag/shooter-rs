@@ -3,9 +3,9 @@ use crate::{
     plugin::{camera_target::CameraTarget, debug::debug_line, AudioTracker, Projectile},
 };
 use bevy::{
+    color::palettes::css::RED,
     ecs::{query::With, system::Query},
     prelude::{Res, Time, Transform},
-    render::color::Color,
 };
 
 const DEBUG: bool = false;
@@ -32,7 +32,7 @@ pub fn on_update(
             let projection = listener.project_on(&(head, tail));
 
             if DEBUG {
-                debug_line(listener, projection, Color::RED);
+                debug_line(listener, projection, RED);
             }
 
             let to_head_distance = projection.distance_squared(head);

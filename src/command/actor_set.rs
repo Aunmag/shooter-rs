@@ -6,7 +6,7 @@ use crate::{
     resource::Settings,
 };
 use bevy::{
-    ecs::system::Command,
+    ecs::world::Command,
     prelude::{AssetServer, Entity, SpriteBundle, World},
 };
 

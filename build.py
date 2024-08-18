@@ -1,5 +1,5 @@
-from datetime import datetime
 from pathlib import Path
+import datetime
 import shutil
 import subprocess
 
@@ -12,7 +12,7 @@ GIT_TAG = False
 
 def main():
     print("Preparing...")
-    date = datetime.utcnow().strftime("%Y%m%d")
+    date = datetime.datetime.now(datetime.UTC).strftime("%Y%m%d")
     name = "A Zombie Shooter Game (build {})".format(date)
     name_zip = "shooter_rs-{}-win64".format(date)
     root = Path(__file__).parent.resolve()

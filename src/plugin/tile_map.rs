@@ -8,30 +8,24 @@ use crate::{
 };
 use bevy::{
     app::{App, Plugin},
-    core_pipeline::{
-        clear_color::ClearColorConfig,
-        core_2d::{Camera2d, Camera2dBundle},
-    },
+    core_pipeline::core_2d::Camera2dBundle,
     ecs::{
         entity::Entity,
         schedule::IntoSystemConfigs,
-        system::{Command, Commands, Res, ResMut},
-        world::Mut,
+        system::{Commands, Res, ResMut},
+        world::{Command, Mut},
     },
     hierarchy::DespawnRecursiveExt,
     math::{Quat, Vec3},
-    prelude::{Assets, Handle, Image, Resource, SpriteBundle, Transform, World},
+    prelude::{Assets, ClearColorConfig, Handle, Image, Resource, SpriteBundle, Transform, World},
     render::{
         camera::{Camera, CameraOutputMode, RenderTarget},
-        render_resource::{BlendState, LoadOp, TextureUsages},
+        render_resource::{BlendState, TextureUsages},
         view::RenderLayers,
     },
     sprite::{Anchor, Sprite},
-    ui::camera_config::UiCameraConfig,
 };
 use std::collections::HashMap;
-
-// TODO: fix. strange white pixels
 
 const TILE_SIZE: f32 = 16.0;
 const TILE_SIZE_PX: u32 = (TILE_SIZE * PIXELS_PER_METER) as u32;
@@ -54,7 +48,7 @@ pub struct TileMap {
     tiles: HashMap<Index, Handle<Image>>,
     to_blend: HashMap<Index, Vec<Entity>>,
     to_remove: Vec<Entity>,
-    wait_frames: u8,
+    frames_passed: u8,
 }
 
 impl TileMap {
@@ -108,9 +102,9 @@ fn on_update(mut tile_map: ResMut<TileMap>, mut commands: Commands) {
         commands.entity(entity).despawn_recursive();
     }
 
-    tile_map.wait_frames = tile_map.wait_frames.saturating_sub(1);
-
-    if tile_map.wait_frames != 0 {
+    // I don't know why we have to wait exactly 3 frames before render next layer
+    if tile_map.frames_passed < 2 {
+        tile_map.frames_passed += 1;
         return;
     }
 
@@ -140,7 +134,7 @@ fn on_update(mut tile_map: ResMut<TileMap>, mut commands: Commands) {
 
     let camera = spawn_camera(&mut commands, index, target);
     tile_map.to_remove.push(camera);
-    tile_map.wait_frames = 3; // I don't know why we have to wait exactly 3 frames
+    tile_map.frames_passed = 0;
 }
 
 pub enum TileBlend {
@@ -250,7 +244,7 @@ struct Index {
 
 impl Index {
     fn render_layers(&self) -> RenderLayers {
-        return RenderLayers::layer(self.layer + 1);
+        return RenderLayers::layer(self.layer as usize + 1);
     }
 }
 
@@ -292,14 +286,12 @@ fn spawn_camera(commands: &mut Commands, index: Index, target: Handle<Image>) ->
         .spawn(Camera2dBundle {
             camera: Camera {
                 target: RenderTarget::Image(target),
+                clear_color: ClearColorConfig::None,
                 output_mode: CameraOutputMode::Write {
                     blend_state: Some(BlendState::PREMULTIPLIED_ALPHA_BLENDING),
-                    color_attachment_load_op: LoadOp::Load,
+                    clear_color: ClearColorConfig::None,
                 },
                 ..Default::default()
-            },
-            camera_2d: Camera2d {
-                clear_color: ClearColorConfig::None,
             },
             transform: Transform {
                 translation,
@@ -309,7 +301,6 @@ fn spawn_camera(commands: &mut Commands, index: Index, target: Handle<Image>) ->
             ..Default::default()
         })
         .insert(index.render_layers())
-        .insert(UiCameraConfig { show_ui: false }) // TODO: remove later. issue: https://github.com/bevyengine/bevy/issues/6069
         .id();
 }
 

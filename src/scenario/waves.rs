@@ -13,7 +13,7 @@ use crate::{
     util::ext::Vec2Ext,
 };
 use bevy::{
-    ecs::{query::With, system::Command},
+    ecs::{query::With, world::Command},
     math::{Vec2, Vec3Swizzles},
     prelude::{Commands, World},
     transform::components::Transform,

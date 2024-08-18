@@ -19,7 +19,7 @@ use bevy::{
         query::With,
         system::{Commands, Query},
     },
-    input::{keyboard::KeyCode, Input},
+    input::{keyboard::KeyCode, ButtonInput},
     math::{Quat, Vec2, Vec3},
     prelude::{Res, Time, Transform},
 };
@@ -95,7 +95,7 @@ fn on_update(
 
 fn on_update_debug(
     players: Query<Entity, With<Player>>,
-    input: Res<Input<KeyCode>>,
+    input: Res<ButtonInput<KeyCode>>,
     mut commands: Commands,
 ) {
     if !input.just_pressed(KeyCode::Space) {

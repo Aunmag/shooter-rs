@@ -110,7 +110,9 @@ impl ScenarioLogic for BenchScenario {
             }
 
             log::info!("Benchmark completed");
-            commands.add(|w: &mut World| w.send_event(AppExit));
+            commands.add(|w: &mut World| {
+                w.send_event(AppExit::Success);
+            });
         }
 
         return INTERVAL;

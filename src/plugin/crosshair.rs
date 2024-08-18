@@ -1,7 +1,7 @@
 use crate::{
     data::{LAYER_CROSSHAIR, PIXELS_PER_METER},
     model::AppState,
-    plugin::player::Player,
+    plugin::{camera::MainCamera, player::Player},
     resource::AssetStorage,
     util::{
         ext::{AppExt, Vec2Ext},
@@ -83,7 +83,7 @@ impl Material2d for Crosshair {
 #[allow(clippy::unwrap_used)]
 fn on_update(
     mut crosshairs: Query<&mut Transform, (With<Handle<Crosshair>>, Without<Player>)>,
-    cameras: Query<(&Camera, &GlobalTransform, &OrthographicProjection)>,
+    cameras: Query<(&Camera, &GlobalTransform, &OrthographicProjection), With<MainCamera>>,
     mut players: Query<(&mut Player, &mut Transform)>,
     mut mouse_motion: EventReader<MouseMotion>,
 ) {
@@ -113,9 +113,10 @@ fn on_update(
         let on_world = player_position
             + Vec2::new(crosshair.distance, 0.0).rotate_by_quat(player_transform.rotation);
 
-        let on_screen_old = camera
-            .world_to_viewport(camera_transform, on_world.extend(0.0))
-            .unwrap();
+        let Some(on_screen_old) = camera.world_to_viewport(camera_transform, on_world.extend(0.0))
+        else {
+            continue;
+        };
 
         let mut on_screen_new = on_screen_old + cursor_delta;
 

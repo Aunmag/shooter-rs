@@ -5,9 +5,8 @@ authors = ["Aunmag <aunmag@gmail.com>"]
 
 [dependencies]
 anyhow = "1.0"
-bevy = "0.12"
+bevy = "0.14"
 chrono = "0.4"
-derive_more = "0.99"
 enumset = { version = "1.1", features = ["serde"] }
 log = "0.4"
 rand = "0.8"
@@ -18,7 +17,7 @@ serde = { version = "1.0", features = ["derive"] }
 toml = "0.8"
 
 [dev-dependencies]
-bevy = { version = "0.12", features = ["dynamic_linking"] }
+bevy = { version = "0.14", features = ["dynamic_linking"] }
 approx = "0.5"
 
 # Enable more optimizations for dependencies in debug mode but not the project code itself

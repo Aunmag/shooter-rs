@@ -1,8 +1,8 @@
 use crate::model::AppState;
 use bevy::{
     app::App,
-    ecs::schedule::OnEnter,
-    prelude::{in_state, IntoSystemConfigs, Update},
+    prelude::{IntoSystemConfigs, Update},
+    state::{condition::in_state, state::OnEnter},
 };
 
 pub trait AppExt {

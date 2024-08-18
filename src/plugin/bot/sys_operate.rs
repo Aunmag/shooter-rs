@@ -15,9 +15,13 @@ use crate::{
     },
 };
 use bevy::{
+    color::{
+        palettes::css::{GREEN, ORANGE, RED, WHITE, YELLOW},
+        Alpha,
+    },
     ecs::system::Res,
     math::{Vec2, Vec3Swizzles},
-    prelude::{Color, Query, Transform, With},
+    prelude::{Query, Transform, With},
     time::Time,
 };
 use std::{
@@ -159,7 +163,7 @@ impl<'a> BotHandler<'a> {
             if shooting_state == BotShootingState::Shoot && (is_aimed || self.bot.was_burst_fire) {
                 self.actor.actions |= ActorAction::Attack;
                 self.bot.was_burst_fire = weapon.config.is_automatic;
-                debug_color = Color::RED;
+                debug_color = RED;
             } else {
                 // keep aim ony while not attacking, otherwise recoil won't work
                 // don't turn further if is already aimed, otherwise it would be too precise
@@ -171,13 +175,13 @@ impl<'a> BotHandler<'a> {
 
                 match shooting_state {
                     BotShootingState::Prepare => {
-                        debug_color = Color::GREEN;
+                        debug_color = GREEN;
                     }
                     BotShootingState::Shoot => {
-                        debug_color = Color::ORANGE;
+                        debug_color = ORANGE;
                     }
                     BotShootingState::Pause => {
-                        debug_color = Color::YELLOW;
+                        debug_color = YELLOW;
                     }
                 }
             }
@@ -252,7 +256,7 @@ impl<'a> BotHandler<'a> {
         }
 
         if DEBUG_DETOUR {
-            let color = Color::WHITE.with_a(0.4);
+            let color = WHITE.with_alpha(0.4);
             let mut p0 = self.position();
             let mut detour_sign = f32::NAN;
 
@@ -268,7 +272,7 @@ impl<'a> BotHandler<'a> {
                 detour_sign = detour.signum();
             }
 
-            debug_line(p0, target, color.with_a(0.1));
+            debug_line(p0, target, color.with_alpha(0.1));
         }
     }
 
@@ -303,7 +307,7 @@ impl<'a> BotHandler<'a> {
         spread = f32::max(spread, self.actor.config.radius * 3.0);
 
         if DEBUG_SPREAD {
-            debug_circle(self.position(), spread, Color::ORANGE.with_a(0.3));
+            debug_circle(self.position(), spread, ORANGE.with_alpha(0.3));
         }
 
         let mut teammates_position_sum = Vec2::ZERO;
@@ -330,7 +334,7 @@ impl<'a> BotHandler<'a> {
         let teammates_position = teammates_position_sum / teammates_position_sum_weight;
 
         if DEBUG_TEAMMATES {
-            debug_line(self.position(), teammates_position, Color::GREEN);
+            debug_line(self.position(), teammates_position, GREEN);
         }
 
         if self.is_close(&teammates_position, spread) {

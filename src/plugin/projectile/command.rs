@@ -7,7 +7,7 @@ use crate::{
 };
 use bevy::{
     asset::Assets,
-    ecs::system::Command,
+    ecs::world::Command,
     math::Vec3,
     prelude::{Entity, Time, Transform, Vec2, World},
     sprite::MaterialMesh2dBundle,

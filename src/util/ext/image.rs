@@ -8,7 +8,7 @@ pub trait ImageExt {
 
 impl ImageExt for Image {
     fn blank(size_x: u32, size_y: u32) -> Self {
-        let mut image = Self::default();
+        let mut image = Self::transparent();
 
         image.resize(Extent3d {
             width: size_x,

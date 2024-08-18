@@ -16,13 +16,13 @@ struct Uniform {
     size: f32,
 };
 
-@group(1) @binding(0)
+@group(2) @binding(0)
 var<uniform> uniform: Uniform;
 
-@group(1) @binding(0)
+@group(2) @binding(0)
 var texture: texture_2d<f32>;
 
-@group(1) @binding(1)
+@group(2) @binding(1)
 var oputput: sampler;
 
 fn g(p: vec2<f32>) -> vec2<f32> {

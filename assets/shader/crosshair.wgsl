@@ -3,10 +3,10 @@
 const ALPHA = 0.9;
 const THICKNESS = 0.125;
 
-@group(1) @binding(1)
+@group(2) @binding(1)
 var texture: texture_2d<f32>;
 
-@group(1) @binding(2)
+@group(2) @binding(2)
 var oputput: sampler;
 
 fn ddxy(v: f32, c: f32) -> f32 {

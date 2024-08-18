@@ -1,6 +1,7 @@
 use crate::{
     data::{LAYER_BACKGROUND, PIXELS_PER_METER, TRANSFORM_SCALE, VIEW_DISTANCE},
     model::AppState,
+    plugin::camera::MainCamera,
     util::{
         ext::{AppExt, ImageExt},
         math::round_by,
@@ -11,9 +12,9 @@ use bevy::{
     asset::{AssetServer, Assets},
     ecs::{component::Component, schedule::IntoSystemConfigs, system::Query, world::World},
     math::Vec3,
-    prelude::{Camera, Transform, With, Without},
+    prelude::{Rectangle, Transform, With, Without},
     render::{
-        mesh::{shape::Quad, Mesh, VertexAttributeValues},
+        mesh::{Mesh, VertexAttributeValues},
         texture::{Image, ImageAddressMode, ImageSampler, ImageSamplerDescriptor},
     },
     sprite::{ColorMaterial, ColorMesh2dBundle},
@@ -60,7 +61,7 @@ fn on_init(world: &mut World) {
 
     let count = calc_count(block_size);
 
-    let mut mesh = Mesh::from(Quad::default());
+    let mut mesh = Mesh::from(Rectangle::default());
     if let Some(VertexAttributeValues::Float32x2(uvs)) = mesh.attribute_mut(Mesh::ATTRIBUTE_UV_0) {
         for uv in uvs {
             uv[0] *= count;
@@ -72,7 +73,7 @@ fn on_init(world: &mut World) {
 
     let material_handle = world
         .resource_mut::<Assets<ColorMaterial>>()
-        .add(image_handle.clone().into());
+        .add(image_handle.clone());
 
     world
         .spawn(ColorMesh2dBundle {
@@ -89,8 +90,8 @@ fn on_init(world: &mut World) {
 }
 
 fn on_update(
-    mut terrains: Query<(&Terrain, &mut Transform), Without<Camera>>,
-    cameras: Query<&Transform, With<Camera>>,
+    mut terrains: Query<(&Terrain, &mut Transform), Without<MainCamera>>,
+    cameras: Query<&Transform, With<MainCamera>>,
 ) {
     let Some(center) = cameras.iter().next().map(|c| c.translation.truncate()) else {
         return;

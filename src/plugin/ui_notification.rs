@@ -6,11 +6,14 @@ use crate::{
 };
 use bevy::{
     app::{App, Plugin, Update},
-    ecs::{component::Component, query::With, system::Command, world::World},
-    prelude::{
-        AssetServer, Color, Commands, DespawnRecursiveExt, Entity, PositionType, Query, Res,
+    color::{palettes::css::WHITE, Alpha},
+    ecs::{
+        component::Component,
+        query::With,
+        world::{Command, World},
     },
-    text::{Text, TextAlignment, TextSection, TextStyle},
+    prelude::{AssetServer, Commands, DespawnRecursiveExt, Entity, PositionType, Query, Res},
+    text::{JustifyText, Text, TextSection, TextStyle},
     time::Time,
     ui::{node_bundles::TextBundle, Style, UiRect, Val},
     window::{PrimaryWindow, Window},
@@ -68,7 +71,7 @@ fn on_update(
             let alpha = notification.alpha(time);
 
             for section in text.sections.iter_mut() {
-                section.style.color.set_a(alpha);
+                section.style.color.with_alpha(alpha);
             }
         }
     }
@@ -105,7 +108,7 @@ impl Command for Notify {
                         TextStyle {
                             font: asset_server.get_handle(FONT_PATH_BOLD).unwrap_or_default(),
                             font_size: window_width * FONT_SCALE,
-                            color: Color::WHITE,
+                            color: WHITE.into(),
                         },
                     ),
                     TextSection::new(
@@ -113,11 +116,11 @@ impl Command for Notify {
                         TextStyle {
                             font: asset_server.get_handle(FONT_PATH).unwrap_or_default(),
                             font_size: window_width * FONT_SCALE / 2.0,
-                            color: Color::WHITE,
+                            color: WHITE.into(),
                         },
                     ),
                 ])
-                .with_text_alignment(TextAlignment::Center)
+                .with_text_justify(JustifyText::Center)
                 .with_style(Style {
                     position_type: PositionType::Absolute,
                     top: Val::Percent(POSITION * 100.0),

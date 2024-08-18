@@ -59,7 +59,7 @@ impl Actor {
             skill,
             stamina: 1.0,
             movement: Vec2::ZERO,
-            actions: ActorActions::EMPTY,
+            actions: ActorActions::empty(),
             look_at: None,
             melee_next: Duration::ZERO,
         };
@@ -67,7 +67,7 @@ impl Actor {
 
     pub fn reset_actions(&mut self) {
         self.movement = Vec2::ZERO;
-        self.actions = ActorActions::EMPTY;
+        self.actions = ActorActions::empty();
         self.look_at = None;
     }
 

@@ -2,12 +2,12 @@ use crate::{
     command::CursorGrab,
     data::{LAYER_GROUND, LAYER_TREE, WORLD_SIZE, WORLD_SIZE_HALF, WORLD_SIZE_VISUAL},
     model::AudioPlay,
-    plugin::{AudioTracker, TileBlend},
+    plugin::{AudioTracker, MainCamera, TileBlend},
     util::ext::Vec2Ext,
 };
 use bevy::{
     asset::AssetServer,
-    ecs::{system::Command, world::World},
+    ecs::world::{Command, World},
     math::{Vec2, Vec3},
     prelude::Camera2dBundle,
 };
@@ -23,7 +23,7 @@ const BLUFF_SPRITE_SIZE: f32 = 4.0;
 
 pub fn on_enter(world: &mut World) {
     CursorGrab(true).apply(world);
-    world.spawn(Camera2dBundle::default());
+    world.spawn(Camera2dBundle::default()).insert(MainCamera);
     spawn_bluffs(world);
     spawn_trees(world);
     play_audio(world);

@@ -1,9 +1,5 @@
 use crate::util::{ext::Vec2Ext, SmartString};
-use bevy::{
-    audio::{Volume, VolumeLevel},
-    math::Vec2,
-    prelude::PlaybackSettings,
-};
+use bevy::{audio::Volume, math::Vec2, prelude::PlaybackSettings};
 use std::time::Duration;
 
 #[derive(Clone)]
@@ -37,7 +33,7 @@ impl AudioPlay {
         };
 
         return settings
-            .with_volume(Volume::Relative(VolumeLevel::new(self.volume)))
+            .with_volume(Volume::new(self.volume))
             .with_speed(self.speed);
     }
 

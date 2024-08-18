@@ -9,7 +9,7 @@ use crate::{
 };
 use bevy::{
     asset::Handle,
-    ecs::system::Command,
+    ecs::world::Command,
     hierarchy::{Children, DespawnRecursiveExt},
     math::Vec2,
     prelude::{Entity, World},
@@ -25,7 +25,7 @@ impl Command for ActorRelease {
         // TODO: find a way to stop all sounds
         if let Some(actor) = world.get_mut::<Actor>(self.0).as_mut() {
             actor.movement = Vec2::ZERO;
-            actor.actions = ActorActions::EMPTY;
+            actor.actions = ActorActions::empty();
             actor.look_at = None;
             actor.skill = difficulty;
         }

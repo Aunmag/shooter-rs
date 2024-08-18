@@ -1,4 +1,4 @@
-from datetime import datetime
+import datetime
 import matplotlib.pyplot as plt
 import os
 import subprocess
@@ -22,7 +22,7 @@ def main():
             # TODO: pass output dir
             subprocess.run(["cargo", "run", "--release"])
 
-        output_name = datetime.utcnow().strftime("%Y-%m-%d %H-%M-%S")
+        output_name = datetime.datetime.now(datetime.UTC).strftime("%Y-%m-%d %H-%M-%S")
 
         if LABEL:
             output_name = "{} {}".format(output_name, LABEL)

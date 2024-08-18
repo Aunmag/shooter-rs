@@ -2,13 +2,16 @@ use crate::{command::CursorGrab, resource::Settings};
 use bevy::{
     app::AppExit,
     ecs::{query::With, world::World},
-    prelude::{Commands, Input, KeyCode, Res},
+    input::ButtonInput,
+    prelude::{Commands, KeyCode, Res},
     window::{PrimaryWindow, Window},
 };
 
-pub fn input(mut commands: Commands, keyboard: Res<Input<KeyCode>>) {
+pub fn input(mut commands: Commands, keyboard: Res<ButtonInput<KeyCode>>) {
     if keyboard.just_pressed(KeyCode::Escape) {
-        commands.add(|w: &mut World| w.send_event(AppExit));
+        commands.add(|w: &mut World| {
+            w.send_event(AppExit::Success);
+        });
     }
 
     if keyboard.just_pressed(KeyCode::Tab) {

@@ -18,16 +18,16 @@ use crate::{
         debug::DebugPlugin, kinetics::KineticsPlugin, player::PlayerPlugin, AudioTracker,
         AudioTrackerPlugin, BloodPlugin, BonusPlugin, BreathPlugin, CrosshairPlugin,
         FootstepsPlugin, HealthPlugin, HeartbeatPlugin, ParticlePlugin, ProjectilePlugin,
-        StatusBarPlugin, TerrainPlugin, TileMapPlugin, UiNotificationPlugin, WeaponPlugin,
+        SkipLoaderPlugin, StatusBarPlugin, TerrainPlugin, TileMapPlugin, UiNotificationPlugin,
+        WeaponPlugin,
     },
     resource::{AssetStorage, AudioStorage, GameMode, Scenario, Settings},
     scenario::{BenchScenario, EmptyScenario, WavesScenario},
     util::ext::AppExt,
 };
 use bevy::{
-    gizmos::GizmoConfig,
     log::LogPlugin,
-    prelude::{App, DefaultPlugins, IntoSystemConfigs, PluginGroup},
+    prelude::{App, AppExtStates, DefaultPlugins, IntoSystemConfigs, PluginGroup},
     render::texture::ImagePlugin,
     window::{Window, WindowPlugin, WindowResolution},
 };
@@ -93,21 +93,18 @@ fn main() {
         .add_plugins(ParticlePlugin)
         .add_plugins(PlayerPlugin)
         .add_plugins(ProjectilePlugin)
+        .add_plugins(SkipLoaderPlugin)
         .add_plugins(StatusBarPlugin)
         .add_plugins(TerrainPlugin)
         .add_plugins(TileMapPlugin)
         .add_plugins(UiNotificationPlugin)
         .add_plugins(WeaponPlugin)
-        .add_state::<AppState>()
         .add_event::<ActorDeathEvent>()
+        .init_state::<AppState>()
         .insert_resource(AssetStorage::default())
         .insert_resource(AudioStorage::default())
         .insert_resource(AudioTracker::new(settings.audio.sources))
         .insert_resource(settings)
-        .insert_resource(GizmoConfig {
-            line_width: 3.0,
-            ..Default::default()
-        })
         .add_state_system(AppState::Loading, system::loading::on_update())
         .add_state_system_enter(AppState::Game, system::game::on_enter)
         .add_state_systems(AppState::Game, |s| {

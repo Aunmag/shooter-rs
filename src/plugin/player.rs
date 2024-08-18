@@ -2,7 +2,10 @@ use crate::{
     component::Actor,
     data::{LAYER_ACTOR_PLAYER, WORLD_SIZE_HALF},
     model::{ActorAction, ActorActionsExt, AppState},
-    plugin::{camera_target::CameraTarget, kinetics::Kinetics, Crosshair, Health, StatusBar},
+    plugin::{
+        camera::MainCamera, camera_target::CameraTarget, kinetics::Kinetics, Crosshair, Health,
+        StatusBar,
+    },
     resource::Settings,
     util::ext::{AppExt, TransformExt, Vec2Ext},
 };
@@ -11,15 +14,13 @@ use bevy::{
         component::Component,
         entity::Entity,
         query::{With, Without},
-        system::{Command, Query},
+        system::Query,
+        world::Command,
     },
     hierarchy::DespawnRecursiveExt,
-    input::mouse::MouseMotion,
+    input::{mouse::MouseMotion, ButtonInput},
     math::{Quat, Vec2},
-    prelude::{
-        App, Commands, EventReader, Input, KeyCode, MouseButton, Plugin, Res, Transform, World,
-    },
-    render::camera::Camera,
+    prelude::{App, Commands, EventReader, KeyCode, MouseButton, Plugin, Res, Transform, World},
 };
 use std::f32::consts::FRAC_PI_2;
 
@@ -78,11 +79,11 @@ pub fn on_update(
             &mut Transform,
             Option<&mut CameraTarget>,
         ),
-        Without<Camera>,
+        Without<MainCamera>,
     >,
-    cameras: Query<&Transform, With<Camera>>,
-    keyboard: Res<Input<KeyCode>>,
-    mouse: Res<Input<MouseButton>>,
+    cameras: Query<&Transform, With<MainCamera>>,
+    keyboard: Res<ButtonInput<KeyCode>>,
+    mouse: Res<ButtonInput<MouseButton>>,
     mut mouse_motion: EventReader<MouseMotion>,
     mut commands: Commands,
     settings: Res<Settings>,
@@ -100,19 +101,19 @@ pub fn on_update(
 
         actor.movement = Vec2::ZERO;
 
-        if keyboard.pressed(KeyCode::W) {
+        if keyboard.pressed(KeyCode::KeyW) {
             actor.movement.x += 1.0;
         }
 
-        if keyboard.pressed(KeyCode::S) {
+        if keyboard.pressed(KeyCode::KeyS) {
             actor.movement.x -= 1.0;
         }
 
-        if keyboard.pressed(KeyCode::A) {
+        if keyboard.pressed(KeyCode::KeyA) {
             actor.movement.y += 1.0;
         }
 
-        if keyboard.pressed(KeyCode::D) {
+        if keyboard.pressed(KeyCode::KeyD) {
             actor.movement.y -= 1.0;
         }
 
@@ -126,7 +127,7 @@ pub fn on_update(
 
         actor
             .actions
-            .set(ActorAction::Reload, keyboard.pressed(KeyCode::R));
+            .set(ActorAction::Reload, keyboard.pressed(KeyCode::KeyR));
 
         let direction = transform.direction() - FRAC_PI_2;
 
@@ -137,7 +138,7 @@ pub fn on_update(
                 // reset player direction
                 commands.add(move |world: &mut World| {
                     for mut camera in world
-                        .query_filtered::<&mut Transform, With<Camera>>()
+                        .query_filtered::<&mut Transform, With<MainCamera>>()
                         .iter_mut(world)
                     {
                         camera.rotation = Quat::from_rotation_z(direction);

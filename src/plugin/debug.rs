@@ -10,6 +10,7 @@ use crate::{
 use bevy::{
     app::{App, Plugin},
     asset::Handle,
+    color::Srgba,
     diagnostic::{DiagnosticsStore, EntityCountDiagnosticsPlugin, FrameTimeDiagnosticsPlugin},
     ecs::{
         schedule::SystemConfigs,
@@ -17,10 +18,10 @@ use bevy::{
         world::World,
     },
     gizmos::gizmos::Gizmos,
-    input::Input,
+    input::ButtonInput,
     prelude::{
-        Color, Commands, Component, IntoSystemConfigs, KeyCode, Query, Res, Startup, TextBundle,
-        Update, Vec2, With,
+        Commands, Component, DefaultGizmoConfigGroup, GizmoConfigStore, IntoSystemConfigs, KeyCode,
+        Query, Res, TextBundle, Update, Vec2, With,
     },
     text::{Text, TextSection, TextStyle},
     time::Time,
@@ -61,7 +62,7 @@ impl Plugin for DebugPlugin {
             .insert_resource(DiagnosticsData::default())
             .add_plugins(FrameTimeDiagnosticsPlugin)
             .add_plugins(EntityCountDiagnosticsPlugin)
-            .add_systems(Startup, startup)
+            .add_state_system_enter(AppState::Game, on_init)
             .add_systems(Update, update_diagnostics_data)
             .add_systems(Update, update_diagnostics_text())
             .add_systems(Update, render_debug_shapes)
@@ -69,7 +70,13 @@ impl Plugin for DebugPlugin {
     }
 }
 
-fn startup(world: &mut World) {
+fn on_init(world: &mut World) {
+    world
+        .resource_mut::<GizmoConfigStore>()
+        .config_mut::<DefaultGizmoConfigGroup>()
+        .0
+        .line_width = 3.0;
+
     let style = TextStyle {
         font_size: 30.0,
         ..Default::default()
@@ -109,7 +116,7 @@ fn update_diagnostics_data(
     mut data: ResMut<DiagnosticsData>,
 ) {
     if let Some(value) = diagnostics
-        .get(FrameTimeDiagnosticsPlugin::FPS)
+        .get(&FrameTimeDiagnosticsPlugin::FPS)
         .and_then(|d| d.value())
     {
         let value = value as i32;
@@ -117,7 +124,7 @@ fn update_diagnostics_data(
     }
 
     if let Some(value) = diagnostics
-        .get(EntityCountDiagnosticsPlugin::ENTITY_COUNT)
+        .get(&EntityCountDiagnosticsPlugin::ENTITY_COUNT)
         .and_then(|d| d.value())
     {
         let value = value as i32;
@@ -185,7 +192,7 @@ fn render_debug_shapes(mut gizmos: Gizmos) {
                 gizmos.line_2d(head, tail, color);
             }
             Shape::Circle(center, radius, color) => {
-                gizmos.circle_2d(center, radius, color).segments(24);
+                gizmos.circle_2d(center, radius, color).resolution(24);
             }
         }
     }
@@ -193,14 +200,14 @@ fn render_debug_shapes(mut gizmos: Gizmos) {
 
 fn update_input(
     crosshairs: Query<&Transform, With<Handle<Crosshair>>>,
-    keyboard: Res<Input<KeyCode>>,
+    keyboard: Res<ButtonInput<KeyCode>>,
     mut commands: Commands,
 ) {
-    let spawn = if keyboard.just_pressed(KeyCode::G) {
+    let spawn = if keyboard.just_pressed(KeyCode::KeyG) {
         Spawn::Bonus
-    } else if keyboard.just_pressed(KeyCode::H) {
+    } else if keyboard.just_pressed(KeyCode::KeyH) {
         Spawn::Human
-    } else if keyboard.just_pressed(KeyCode::J) {
+    } else if keyboard.just_pressed(KeyCode::KeyJ) {
         Spawn::Zombie
     } else {
         return;
@@ -288,19 +295,19 @@ fn get_draw_queue() -> &'static Mutex<Vec<Shape>> {
     return DRAW_QUEUE.get_or_init(|| Mutex::new(Vec::new()));
 }
 
-pub fn debug_line(head: Vec2, tail: Vec2, color: Color) {
+pub fn debug_line(head: Vec2, tail: Vec2, color: Srgba) {
     if let Ok(queue) = get_draw_queue().lock().as_mut() {
         queue.push(Shape::Line(head, tail, color));
     }
 }
 
-pub fn debug_circle(center: Vec2, radius: f32, color: Color) {
+pub fn debug_circle(center: Vec2, radius: f32, color: Srgba) {
     if let Ok(queue) = get_draw_queue().lock().as_mut() {
         queue.push(Shape::Circle(center, radius, color));
     }
 }
 
 enum Shape {
-    Line(Vec2, Vec2, Color),
-    Circle(Vec2, f32, Color),
+    Line(Vec2, Vec2, Srgba),
+    Circle(Vec2, f32, Srgba),
 }

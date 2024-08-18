@@ -1,5 +1,5 @@
 use bevy::{
-    ecs::system::Command,
+    ecs::world::Command,
     prelude::{With, World},
     window::{CursorGrabMode, PrimaryWindow, Window},
 };

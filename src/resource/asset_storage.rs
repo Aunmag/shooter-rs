@@ -1,11 +1,8 @@
-use crate::util::ext::ImageExt;
 use bevy::{
     asset::{AssetServer, Assets, Handle, LoadedFolder},
     ecs::system::Resource,
-    render::{
-        mesh::{shape::Quad, Mesh},
-        texture::Image,
-    },
+    prelude::Rectangle,
+    render::{mesh::Mesh, texture::Image},
 };
 
 #[derive(Default, Resource)]
@@ -23,8 +20,8 @@ impl AssetStorage {
         meshes: &mut Assets<Mesh>,
     ) {
         self.assets = Some(asset_server.load_folder("."));
-        self.dummy_image = images.add(Image::blank(1, 1));
-        self.dummy_mesh = meshes.add(Mesh::from(Quad::default()));
+        self.dummy_image = images.add(Image::transparent());
+        self.dummy_mesh = meshes.add(Mesh::from(Rectangle::default()));
     }
 
     pub fn is_lading_started(&self) -> bool {

@@ -5,7 +5,7 @@ use crate::{
 };
 use bevy::{
     app::Update,
-    audio::{AudioBundle, AudioSink, Volume, VolumeLevel},
+    audio::{AudioBundle, AudioSink, Volume},
     ecs::{component::Component, entity::Entity},
     prelude::{
         App, AudioSinkPlayback, Commands, DespawnRecursiveExt, Plugin, Query, Res, ResMut,
@@ -158,7 +158,7 @@ fn on_update(
         let mut settings = audio.settings();
 
         if is_heartbeat {
-            settings.volume = Volume::Relative(VolumeLevel::new(0.0));
+            settings.volume = Volume::new(0.0);
         }
 
         let mut entity = commands.spawn(AudioBundle { source, settings });

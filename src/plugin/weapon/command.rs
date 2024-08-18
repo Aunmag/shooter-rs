@@ -10,7 +10,7 @@ use crate::{
 };
 use bevy::{
     asset::{AssetServer, Assets, Handle},
-    ecs::system::Command,
+    ecs::world::Command,
     math::Vec3Swizzles,
     prelude::{BuildWorldChildren, Children, DespawnRecursiveExt, Entity, Transform, Vec2, World},
     render::texture::Image,

@@ -1,6 +1,6 @@
 use crate::{component::Actor, plugin::bot::Bot, util::ext::RngExt};
 use bevy::{
-    ecs::query::BatchingStrategy,
+    ecs::batching::BatchingStrategy,
     math::Vec3Swizzles,
     prelude::{Entity, Query, Res, Transform},
     time::Time,

@@ -7,7 +7,7 @@ use crate::{
 use bevy::{
     app::{App, Plugin},
     asset::Asset,
-    ecs::system::Command,
+    ecs::world::Command,
     prelude::{Assets, Handle, Image, Transform, Vec2, Vec3, World},
     reflect::TypePath,
     render::render_resource::{AsBindGroup, ShaderRef},

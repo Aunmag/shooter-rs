@@ -1,6 +1,7 @@
 use crate::{
     data::VIEW_DISTANCE,
     model::AppState,
+    plugin::camera::MainCamera,
     util::ext::{AppExt, DurationExt, TransformExt},
 };
 use bevy::{
@@ -70,8 +71,8 @@ impl CameraTarget {
 }
 
 pub fn on_update(
-    mut cameras: Query<(&mut Transform, &mut OrthographicProjection)>,
-    mut targets: Query<(&Transform, &mut CameraTarget), Without<OrthographicProjection>>,
+    mut cameras: Query<(&mut Transform, &mut OrthographicProjection), With<MainCamera>>,
+    mut targets: Query<(&Transform, &mut CameraTarget), Without<MainCamera>>,
     windows: Query<&Window, With<PrimaryWindow>>,
     mut mouse_scroll: EventReader<MouseWheel>,
     time: Res<Time>,

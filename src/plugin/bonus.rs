@@ -2,7 +2,9 @@ use crate::{
     component::{Actor, ActorKind},
     data::{FONT_PATH, LAYER_BONUS, PIXELS_PER_METER, TRANSFORM_SCALE},
     model::AppState,
-    plugin::{collision::Collision, player::Player, Weapon, WeaponConfig, WeaponSet},
+    plugin::{
+        camera::MainCamera, collision::Collision, player::Player, Weapon, WeaponConfig, WeaponSet,
+    },
     util::{
         ext::{AppExt, Vec2Ext},
         math::interpolate,
@@ -10,22 +12,17 @@ use crate::{
 };
 use bevy::{
     app::{App, Plugin},
-    ecs::{
-        component::Component,
-        entity::Entity,
-        system::{Command, Res},
-    },
+    color::palettes::css::WHITE,
+    ecs::{component::Component, entity::Entity, system::Res, world::Command},
     math::Vec3Swizzles,
     prelude::{
-        AssetServer, BuildWorldChildren, Color, Commands, DespawnRecursiveExt, IntoSystemConfigs,
-        OrthographicProjection, Quat, Query, SpatialBundle, SpriteBundle, Vec2, Vec3, With,
-        Without, World,
+        AssetServer, BuildWorldChildren, Commands, DespawnRecursiveExt, IntoSystemConfigs, Quat,
+        Query, SpatialBundle, SpriteBundle, Vec2, Vec3, With, Without, World,
     },
-    text::{Text, Text2dBundle, TextAlignment, TextStyle},
+    text::{JustifyText, Text, Text2dBundle, TextStyle},
     time::Time,
     transform::components::Transform,
 };
-use derive_more::Constructor;
 use rand::seq::SliceRandom;
 use std::{f32::consts::TAU, time::Duration};
 
@@ -48,10 +45,15 @@ impl Plugin for BonusPlugin {
     }
 }
 
-#[derive(Constructor)]
 pub struct BonusSpawn {
     position: Vec2,
     level: u8,
+}
+
+impl BonusSpawn {
+    pub fn new(position: Vec2, level: u8) -> Self {
+        return Self { position, level };
+    }
 }
 
 impl Command for BonusSpawn {
@@ -121,7 +123,7 @@ fn update_image(mut query: Query<&mut Transform, With<BonusImage>>, time: Res<Ti
 
 fn update_label(
     mut query: Query<&mut Transform, With<BonusLabel>>,
-    cameras: Query<&Transform, (With<OrthographicProjection>, Without<BonusLabel>)>,
+    cameras: Query<&Transform, (With<MainCamera>, Without<BonusLabel>)>,
     time: Res<Time>,
 ) {
     let scale = interpolate(
@@ -223,10 +225,10 @@ fn spawn_label(world: &mut World, bonus: Entity, weapon: &'static WeaponConfig) 
         TextStyle {
             font,
             font_size: PIXELS_PER_METER,
-            color: Color::WHITE,
+            color: WHITE.into(),
         },
     )
-    .with_alignment(TextAlignment::Center);
+    .with_justify(JustifyText::Center);
 
     world
         .spawn(Text2dBundle {
