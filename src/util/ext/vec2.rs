@@ -9,26 +9,17 @@ pub trait Vec2Ext {
     const BACK: Vec2 = Vec2::new(-1.0, 0.0);
 
     fn from_length(length: f32, angle: f32) -> Self;
-
     fn rotate_by_quat(self, quat: Quat) -> Self;
-
     fn rotate_by(self, angle: f32) -> Self;
-
     fn angle(&self) -> f32;
-
     fn angle_to(self, target: Self) -> f32;
-
     fn distance_squared(self, target: Self) -> f32;
-
     fn is_zero(self) -> bool;
-
     fn is_close(self, target: Self, threshold: f32) -> bool;
-
     fn is_far(self, target: Self, threshold: f32) -> bool;
-
     fn is_long(self, threshold: f32) -> bool;
-
     fn is_short(self, threshold: f32) -> bool;
+    fn as_quat(self) -> Quat;
 }
 
 impl Vec2Ext for Vec2 {
@@ -69,11 +60,16 @@ impl Vec2Ext for Vec2 {
     }
 
     fn is_long(self, threshold: f32) -> bool {
-        return self.length_squared() > threshold * threshold;
+        return self.length_squared() >= threshold * threshold;
     }
 
     fn is_short(self, threshold: f32) -> bool {
         return !self.is_long(threshold);
+    }
+
+    // TODO: try to optimize
+    fn as_quat(self) -> Quat {
+        return Quat::from_rotation_z(self.angle());
     }
 }
 

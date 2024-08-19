@@ -3,10 +3,7 @@ use crate::{
     model::AppState,
     plugin::{camera::MainCamera, player::Player},
     resource::AssetStorage,
-    util::{
-        ext::{AppExt, Vec2Ext},
-        math::angle_difference,
-    },
+    util::ext::{AppExt, Vec2Ext},
 };
 use bevy::{
     app::{App, Plugin},
@@ -108,12 +105,13 @@ fn on_update(
 
         let player_position = player_transform.translation.truncate();
 
-        // crosshair must in sync with player while it moves, also player direction can be
-        // changed because of weapon recoil, so crosshair shod be affected too
-        let on_world = player_position
+        // crosshair must in sync with player while it moves, also player direction can be changed
+        // because of weapon recoil, so crosshair should be affected too
+        let on_world_old = player_position
             + Vec2::new(crosshair.distance, 0.0).rotate_by_quat(player_transform.rotation);
 
-        let Some(on_screen_old) = camera.world_to_viewport(camera_transform, on_world.extend(0.0))
+        let Some(on_screen_old) =
+            camera.world_to_viewport(camera_transform, on_world_old.extend(0.0))
         else {
             continue;
         };
@@ -139,15 +137,10 @@ fn on_update(
         transform.translation.x = on_world_new.x;
         transform.translation.y = on_world_new.y;
 
-        if on_screen_new != on_screen_old {
-            // update crosshair distance only when it'd moved. otherwise distance error may grow
+        // update only when cursor moved more than 1px actually, otherwise errors may grow
+        if (on_screen_new - on_screen_old).is_long(1.0) {
             crosshair.distance = player_position.distance(on_world_new);
-
-            // if crosshair had rotated, i.e. by input, then rote the player too
-            player_transform.rotate_local_z(angle_difference(
-                player_position.angle_to(on_world),
-                player_position.angle_to(on_world_new),
-            ));
+            player_transform.rotation = (on_world_new - player_position).as_quat();
         }
 
         transform.rotation = player_transform.rotation;
