@@ -3,7 +3,6 @@ use crate::{
     component::{Actor, ActorConfig, ActorKind},
     data::VIEW_DISTANCE,
     event::ActorDeathEvent,
-    model::TransformLite,
     plugin::{
         bot::ActorBotSet,
         player::{Player, PlayerSet},
@@ -129,7 +128,8 @@ impl WavesScenario {
         commands.add(ActorSet {
             entity,
             config: &ActorConfig::HUMAN,
-            transform: TransformLite::default(),
+            position: Vec2::ZERO,
+            rotation: 0.0,
         });
 
         commands.add(PlayerSet {
@@ -359,13 +359,12 @@ impl Command for SpawnActor {
         }
 
         let entity = world.spawn_empty().id();
-        let mut transform = TransformLite::new(center.x, center.y, self.direction);
-        transform.translation -= Vec2::from_length(self.distance, self.direction);
 
         ActorSet {
             entity,
             config: self.config,
-            transform,
+            position: center - Vec2::from_length(self.distance, self.direction),
+            rotation: self.direction,
         }
         .apply(world);
 

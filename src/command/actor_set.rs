@@ -1,19 +1,20 @@
 use crate::{
     component::{Actor, ActorConfig, ActorKind},
-    data::LAYER_ACTOR,
-    model::TransformLite,
+    data::{LAYER_ACTOR, TRANSFORM_SCALE},
     plugin::{collision::Collision, kinetics::Kinetics, Breath, Footsteps, Health},
     resource::Settings,
 };
 use bevy::{
     ecs::world::Command,
-    prelude::{AssetServer, Entity, SpriteBundle, World},
+    math::{Quat, Vec2},
+    prelude::{AssetServer, Entity, SpriteBundle, Transform, World},
 };
 
 pub struct ActorSet {
     pub entity: Entity,
     pub config: &'static ActorConfig,
-    pub transform: TransformLite,
+    pub position: Vec2,
+    pub rotation: f32,
 }
 
 impl Command for ActorSet {
@@ -29,7 +30,11 @@ impl Command for ActorSet {
 
         entity_mut
             .insert(SpriteBundle {
-                transform: self.transform.as_transform(LAYER_ACTOR),
+                transform: Transform {
+                    translation: self.position.extend(LAYER_ACTOR),
+                    rotation: Quat::from_rotation_z(self.rotation),
+                    scale: TRANSFORM_SCALE,
+                },
                 texture,
                 ..Default::default()
             })

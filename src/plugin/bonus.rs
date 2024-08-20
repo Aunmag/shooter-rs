@@ -137,8 +137,11 @@ fn update_label(
         .next()
         .map_or_else(Default::default, |c| c.rotation);
 
+    let position = Vec2::new(0.0, -5.0).rotate_by_quat(rotation);
+
     for mut label in query.iter_mut() {
-        label.translation = rotation * Vec3::new(0.0, -5.0, 1.5);
+        label.translation.x = position.x;
+        label.translation.y = position.y;
         label.rotation = rotation;
         label.scale = Vec3::splat(scale);
     }
@@ -232,7 +235,7 @@ fn spawn_label(world: &mut World, bonus: Entity, weapon: &'static WeaponConfig) 
 
     world
         .spawn(Text2dBundle {
-            transform: Transform::from_scale(Vec3::ZERO),
+            transform: Transform::from_scale(Vec3::new(0.0, 0.0, 1.5)),
             text,
             ..Default::default()
         })

@@ -29,8 +29,8 @@ impl Command for ProjectileSpawn {
         let projectile = Projectile::new(
             self.config,
             world.resource::<Time>().elapsed(),
-            self.transform.translation,
-            Vec2::from_length(self.velocity, self.transform.direction),
+            self.transform.position,
+            Vec2::from_length(self.velocity, self.transform.rotation),
             self.shooter,
         );
 
@@ -41,9 +41,9 @@ impl Command for ProjectileSpawn {
         world
             .spawn(MaterialMesh2dBundle {
                 transform: Transform {
-                    translation: self.transform.translation.extend(LAYER_PROJECTILE),
+                    translation: self.transform.position.extend(LAYER_PROJECTILE),
+                    rotation: projectile.initial_velocity.as_quat(),
                     scale: Vec3::new(0.0, 0.0, 1.0),
-                    ..Transform::default()
                 },
                 mesh: mesh.into(),
                 material,

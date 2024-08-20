@@ -10,7 +10,7 @@ use bevy::{
         entity::Entity,
         system::{Deferred, Query},
     },
-    math::{Quat, Vec3Swizzles},
+    math::Vec3Swizzles,
     prelude::{Commands, DespawnRecursiveExt, Res, Time, Transform, Vec2, Without},
 };
 use std::time::Duration;
@@ -121,7 +121,6 @@ fn update_transform(projectile: &Projectile, head: Vec2, tail: Vec2, transform: 
     let center = (head + tail) / 2.0;
     transform.translation.x = center.x;
     transform.translation.y = center.y;
-    transform.rotation = Quat::from_rotation_z(projectile.initial_velocity.angle());
     transform.scale.x = (head - tail).length();
     transform.scale.y = projectile.config.size;
 }

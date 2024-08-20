@@ -1,11 +1,10 @@
 use crate::{
     command::ActorSet,
     component::ActorConfig,
-    model::TransformLite,
     plugin::{bot::ActorBotSet, player::PlayerSet, WeaponConfig, WeaponSet},
     resource::ScenarioLogic,
 };
-use bevy::{app::AppExit, ecs::world::World, prelude::Commands};
+use bevy::{app::AppExit, ecs::world::World, math::Vec2, prelude::Commands};
 use chrono::Local;
 use std::{
     any::Any,
@@ -35,7 +34,8 @@ impl BenchScenario {
         commands.add(ActorSet {
             entity,
             config: &ActorConfig::HUMAN,
-            transform: TransformLite::default(),
+            position: Vec2::ZERO,
+            rotation: 0.0,
         });
 
         commands.add(PlayerSet {
@@ -58,7 +58,8 @@ impl BenchScenario {
             commands.add(ActorSet {
                 entity,
                 config: &ActorConfig::ZOMBIE,
-                transform: TransformLite::default(),
+                position: Vec2::ZERO,
+                rotation: 0.0,
             });
 
             commands.add(ActorBotSet { entity });

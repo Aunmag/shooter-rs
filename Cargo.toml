@@ -17,8 +17,9 @@ serde = { version = "1.0", features = ["derive"] }
 toml = "0.8"
 
 [dev-dependencies]
-bevy = { version = "0.14", features = ["dynamic_linking"] }
 approx = "0.5"
+bevy = { version = "0.14", features = ["dynamic_linking"] }
+criterion = { version = "0.5", features = ["html_reports"] }
 
 # Enable more optimizations for dependencies in debug mode but not the project code itself
 # See: https://bevyengine.org/learn/quick-start/getting-started/setup/#compile-with-performance-optimizations
@@ -57,3 +58,11 @@ unused_self = "warn"
 unwrap_in_result = "warn"
 unwrap_used = "warn"
 verbose_file_reads = "warn"
+
+[[bench]]
+name = "quat_angle"
+harness = false
+
+[[bench]]
+name = "quat_rotation"
+harness = false

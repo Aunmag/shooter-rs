@@ -4,7 +4,7 @@ use crate::{
         particle::{Particle, ParticleConfig},
         AudioTracker, TileBlend, Weapon,
     },
-    util::ext::{RngExt, TransformExt, Vec2Ext},
+    util::ext::{QuatExt, RngExt, Vec2Ext},
 };
 use bevy::{
     asset::AssetServer,
@@ -41,7 +41,7 @@ impl Command for ShellParticleSpawn {
 
         let Some((mut position, mut direction)) = world
             .get::<Transform>(self.0)
-            .map(|t| (t.translation.truncate(), t.direction() - FRAC_PI_2))
+            .map(|t| (t.translation.truncate(), t.rotation.angle_z() - FRAC_PI_2))
         else {
             return;
         };

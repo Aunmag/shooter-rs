@@ -1,11 +1,10 @@
 use crate::{
     command::ActorSet,
     component::ActorConfig,
-    model::TransformLite,
     plugin::{player::PlayerSet, WeaponConfig, WeaponSet},
     resource::ScenarioLogic,
 };
-use bevy::ecs::system::Commands;
+use bevy::{ecs::system::Commands, math::Vec2};
 use std::{any::Any, time::Duration};
 
 pub struct EmptyScenario;
@@ -17,7 +16,8 @@ impl ScenarioLogic for EmptyScenario {
         commands.add(ActorSet {
             entity,
             config: &ActorConfig::HUMAN,
-            transform: TransformLite::default(),
+            position: Vec2::ZERO,
+            rotation: 0.0,
         });
 
         commands.add(PlayerSet {

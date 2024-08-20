@@ -227,7 +227,7 @@ fn update_input(
 
     match spawn {
         Spawn::Bonus => {
-            commands.add(BonusSpawn::new(position.translation, u8::MAX));
+            commands.add(BonusSpawn::new(position.position, u8::MAX));
         }
         Spawn::Human => {
             spawn_actors(&mut commands, position, &ActorConfig::HUMAN, group);
@@ -250,7 +250,8 @@ fn spawn_actors(
         commands.add(ActorSet {
             entity,
             config,
-            transform,
+            position: transform.position,
+            rotation: transform.rotation,
         });
 
         commands.add(ActorBotSet { entity });

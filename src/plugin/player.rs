@@ -7,7 +7,7 @@ use crate::{
         StatusBar,
     },
     resource::Settings,
-    util::ext::{AppExt, TransformExt, Vec2Ext},
+    util::ext::{AppExt, Vec2Ext},
 };
 use bevy::{
     ecs::{
@@ -19,10 +19,9 @@ use bevy::{
     },
     hierarchy::DespawnRecursiveExt,
     input::{mouse::MouseMotion, ButtonInput},
-    math::{Quat, Vec2},
+    math::Vec2,
     prelude::{App, Commands, EventReader, KeyCode, MouseButton, Plugin, Res, Transform, World},
 };
-use std::f32::consts::FRAC_PI_2;
 
 pub struct PlayerPlugin;
 
@@ -129,19 +128,18 @@ pub fn on_update(
             .actions
             .set(ActorAction::Reload, keyboard.pressed(KeyCode::KeyR));
 
-        let direction = transform.direction() - FRAC_PI_2;
-
         if mouse.just_pressed(MouseButton::Right) {
             if let Some(crosshair) = player.crosshair.take() {
                 commands.entity(crosshair.entity).despawn_recursive();
 
                 // reset player direction
+                let rotation = transform.rotation;
                 commands.add(move |world: &mut World| {
                     for mut camera in world
                         .query_filtered::<&mut Transform, With<MainCamera>>()
                         .iter_mut(world)
                     {
-                        camera.rotation = Quat::from_rotation_z(direction);
+                        camera.rotation = rotation;
                     }
                 });
             } else {
@@ -163,10 +161,12 @@ pub fn on_update(
         transform.translation.y = transform.translation.y.clamp(-limit, limit);
 
         if player.crosshair.is_some() {
-            // TODO: optimize and simplify
-            actor.movement = actor
-                .movement
-                .rotate_by_quat(Quat::from_rotation_z(-direction));
+            // TODO: simplify
+            actor.movement.y = -actor.movement.y;
+            actor.movement = actor.movement.rotate_by_quat(transform.rotation);
+            let x_copy = actor.movement.x;
+            actor.movement.x = actor.movement.y;
+            actor.movement.y = x_copy;
 
             if let Some(camera) = cameras.iter().next() {
                 actor.movement = actor.movement.rotate_by_quat(camera.rotation);

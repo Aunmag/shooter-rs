@@ -1,13 +1,14 @@
 use crate::{
     component::Actor,
     model::ActorActionsExt,
-    plugin::kinetics::Kinetics,
+    plugin::{debug::debug_line, kinetics::Kinetics},
     util::{
-        ext::{TransformExt, Vec2Ext},
+        ext::{QuatExt, Vec2Ext},
         math,
     },
 };
 use bevy::{
+    color::palettes::css::RED,
     ecs::system::Query,
     math::Vec2,
     prelude::{Res, Time},
@@ -15,6 +16,7 @@ use bevy::{
 };
 
 const TURN_EPSILON: f32 = 0.01;
+const DEBUG_MOVEMENT: bool = false;
 
 pub fn actor(mut query: Query<(&mut Actor, &mut Transform, &mut Kinetics)>, time: Res<Time>) {
     let time_delta = time.delta_seconds();
@@ -38,6 +40,16 @@ pub fn actor(mut query: Query<(&mut Actor, &mut Transform, &mut Kinetics)>, time
         }
 
         kinetics.push(movement, 0.0, true);
+
+        if DEBUG_MOVEMENT {
+            let p = transform.translation.truncate();
+            let m = actor
+                .movement
+                .normalize()
+                .rotate_by_quat(transform.rotation);
+
+            debug_line(p, p + m, RED);
+        }
     }
 }
 
@@ -46,7 +58,7 @@ fn turn(actor: &Actor, transform: &mut Transform, kinetics: &mut Kinetics, time_
         return;
     };
 
-    let distance = math::angle_difference(transform.direction(), look_at);
+    let distance = math::angle_difference(transform.rotation.angle_z(), look_at);
 
     if distance.abs() < TURN_EPSILON {
         return;

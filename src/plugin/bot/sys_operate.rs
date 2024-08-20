@@ -9,7 +9,7 @@ use crate::{
         Weapon,
     },
     util::{
-        ext::{TransformExt, Vec2Ext},
+        ext::{QuatExt, Vec2Ext},
         math::angle_difference,
         traits::{WithPosition, WithPositionAndVelocity, WithVelocity},
     },
@@ -51,7 +51,7 @@ pub fn on_update(
             .map(|e| BotTarget {
                 position: e.0.translation.xy(),
                 velocity: e.1.velocity,
-                direction: e.0.direction(),
+                direction: e.0.rotation.angle_z(),
             });
 
         if bot.enemy.is_some() && enemy.is_none() {
@@ -192,7 +192,7 @@ impl<'a> BotHandler<'a> {
                     self.position()
                         + Vec2::from_length(
                             self.bot.config.shoot_distance_max,
-                            self.transform.direction(),
+                            self.transform.rotation.angle_z(),
                         ),
                     debug_color,
                 );
@@ -352,9 +352,9 @@ impl<'a> BotHandler<'a> {
                 }
             } else {
                 // find subjective direction to teammates, and go in opposite direction
-                self.actor.movement -= (teammates_position - self.position())
+                self.actor.movement += (self.position() - teammates_position)
                     .normalize_or_zero()
-                    .rotate_by(-self.transform.direction())
+                    .rotate_by_quat(self.transform.rotation.inverse())
                     .div(2.0);
             }
         }
@@ -372,7 +372,7 @@ impl<'a> BotHandler<'a> {
         return self
             .actor
             .look_at
-            .unwrap_or_else(|| self.transform.direction());
+            .unwrap_or_else(|| self.transform.rotation.angle_z());
     }
 
     fn is_aimed_at_point(&self, point: Vec2) -> bool {
@@ -380,7 +380,7 @@ impl<'a> BotHandler<'a> {
     }
 
     fn is_aimed_at_angle(&self, angle: f32) -> bool {
-        return angle_difference(self.transform.direction(), angle).abs()
+        return angle_difference(self.transform.rotation.angle_z(), angle).abs()
             < self.bot.config.angular_deviation;
     }
 

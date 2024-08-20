@@ -1,7 +1,4 @@
-use bevy::{
-    math::{Quat, Vec2},
-    prelude::Vec3Swizzles,
-};
+use bevy::math::{Quat, Vec2};
 
 #[allow(clippy::wrong_self_convention)]
 pub trait Vec2Ext {
@@ -10,7 +7,6 @@ pub trait Vec2Ext {
 
     fn from_length(length: f32, angle: f32) -> Self;
     fn rotate_by_quat(self, quat: Quat) -> Self;
-    fn rotate_by(self, angle: f32) -> Self;
     fn angle(&self) -> f32;
     fn angle_to(self, target: Self) -> f32;
     fn distance_squared(self, target: Self) -> f32;
@@ -27,12 +23,11 @@ impl Vec2Ext for Vec2 {
         return Self::from_angle(angle) * length;
     }
 
-    fn rotate_by_quat(self, quat: Quat) -> Self {
-        return (quat * self.extend(0.0)).xy();
-    }
-
-    fn rotate_by(self, angle: f32) -> Self {
-        return (Quat::from_rotation_z(angle) * self.extend(0.0)).xy();
+    fn rotate_by_quat(self, q: Quat) -> Self {
+        let v = self;
+        let v = Vec2::new((v.x * q.w) - (v.y * q.z), (v.x * q.z) + (v.y * q.w));
+        let v = Vec2::new((v.x * q.w) - (v.y * q.z), (v.x * q.z) + (v.y * q.w));
+        return v;
     }
 
     fn angle(&self) -> f32 {
@@ -67,7 +62,6 @@ impl Vec2Ext for Vec2 {
         return !self.is_long(threshold);
     }
 
-    // TODO: try to optimize
     fn as_quat(self) -> Quat {
         return Quat::from_rotation_z(self.angle());
     }

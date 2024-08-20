@@ -2,7 +2,7 @@ use crate::{
     data::VIEW_DISTANCE,
     model::AppState,
     plugin::camera::MainCamera,
-    util::ext::{AppExt, DurationExt, TransformExt},
+    util::ext::{AppExt, DurationExt, QuatExt, Vec2Ext},
 };
 use bevy::{
     app::{App, Plugin},
@@ -13,7 +13,7 @@ use bevy::{
         system::{Query, Res},
     },
     input::mouse::MouseWheel,
-    math::{Quat, Vec2, Vec3},
+    math::{Quat, Vec2},
     prelude::{OrthographicProjection, Transform, With, Without},
     time::Time,
     window::{PrimaryWindow, Window},
@@ -98,15 +98,15 @@ pub fn on_update(
             / (target.zoom.get() - target.shake_push.get().length() * SHAKE_Z * target.zoom.get());
 
         if let Some(offset_r) = target.sync_angle {
-            target.direction = target_transform.direction() - FRAC_PI_2 - offset_r;
+            target.direction = target_transform.rotation.angle_z() - FRAC_PI_2 - offset_r;
         };
 
         let rotation = Quat::from_rotation_z(target.direction + target.shake_spin.get() * SHAKE_R);
 
-        let mut offset = Vec3::ZERO;
+        let mut offset = Vec2::ZERO;
         offset.y += window_size.y / 2.0 * scale * target.offset_y();
-        offset = rotation * offset;
-        offset += target.shake_push.get().extend(0.0) * SHAKE_Y;
+        offset = offset.rotate_by_quat(rotation);
+        offset += target.shake_push.get() * SHAKE_Y;
 
         if let Some((mut camera_transform, mut camera_projection)) = cameras.iter_mut().next() {
             camera_transform.translation.x = target_transform.translation.x + offset.x;

@@ -7,7 +7,6 @@ use crate::{
 };
 use bevy::{
     ecs::{entity::Entity, system::Deferred, world::World},
-    math::Vec2Swizzles,
     prelude::{Commands, Query, Res, Transform, Vec2, Without},
     time::Time,
 };
@@ -63,7 +62,7 @@ pub fn melee(
             audio.queue(AudioPlay {
                 path: "sounds/melee".into(),
                 volume: 0.6,
-                source: Some(attacker_transform.translation.xy()),
+                source: Some(attacker_transform.position),
                 ..AudioPlay::DEFAULT
             });
 
@@ -91,7 +90,7 @@ fn calc_target_data(
     target_transform: &TransformLite,
     target_entity: Entity,
 ) -> Option<TargetData> {
-    let relative = target_transform.translation - attacker_transform.translation;
+    let relative = target_transform.position - attacker_transform.position;
     let distance_to_hit = attacker.melee_distance + target.radius;
 
     if relative.is_long(distance_to_hit) {
@@ -99,7 +98,7 @@ fn calc_target_data(
     }
 
     let angle_objective = relative.angle();
-    let angle_subjective = math::angle_difference(angle_objective, attacker_transform.direction);
+    let angle_subjective = math::angle_difference(angle_objective, attacker_transform.rotation);
     let distance_angular = angle_subjective.abs() / (attacker.melee_distance_angular / 2.0);
 
     if distance_angular > 1.0 {
