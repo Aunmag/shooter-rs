@@ -38,9 +38,9 @@ impl WeaponConfig {
     pub const ALL: &'static [Self] = &[
         Self::PM,
         Self::TT,
-        Self::MP_43_SAWED_OFF,
+        Self::IZH_43_SAWED_OFF,
         Self::PP_91_KEDR,
-        Self::MP_27,
+        Self::IZH_27,
         Self::PP_19_BIZON,
         Self::AKS_74U,
         Self::AK_74M,
@@ -88,8 +88,8 @@ impl WeaponConfig {
         image_offset: 2.0,
     };
 
-    pub const MP_43_SAWED_OFF: Self = Self {
-        name: "MP-43 sawed-off",
+    pub const IZH_43_SAWED_OFF: Self = Self {
+        name: "IZh-43 sawed-off",
         level: 2,
         mass: 2.2,
         muzzle_velocity: 260.0,
@@ -122,8 +122,8 @@ impl WeaponConfig {
         image_offset: 3.5,
     };
 
-    pub const MP_27: Self = Self {
-        name: "MP-27",
+    pub const IZH_27: Self = Self {
+        name: "IZh-27",
         level: 3,
         mass: 3.2,
         muzzle_velocity: 410.0,
