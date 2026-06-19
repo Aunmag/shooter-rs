@@ -37,6 +37,7 @@ impl Default for GameSettings {
 pub enum GameMode {
     Waves,
     Debug,
+    DebugTweaks,
     Bench,
 }
 
@@ -45,6 +46,7 @@ impl GameMode {
         return match self {
             Self::Waves => &[],
             Self::Debug => &[],
+            Self::DebugTweaks => &[],
             Self::Bench => &[Self::Debug],
         };
     }

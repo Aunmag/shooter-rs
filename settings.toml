@@ -3,6 +3,7 @@ difficulty = 1.0 # 0.8 - easy, 1.0 - medium, 1.2 - hard
 modes = [
     "waves",
     # "debug",
+    # "debug_tweaks",
     # "bench",
 ]
 

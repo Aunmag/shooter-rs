@@ -8,6 +8,7 @@ pub mod camera_target;
 pub mod collision;
 mod crosshair;
 pub mod debug;
+mod debug_tweaks;
 mod footsteps;
 mod health;
 mod heartbeat;
@@ -23,7 +24,7 @@ mod ui_notification;
 mod weapon;
 
 pub use self::{
-    audio::*, blood::*, bonus::*, breath::*, camera::*, crosshair::*, footsteps::*, health::*,
-    heartbeat::*, particle::*, projectile::*, skip_loader::*, status_bar::*, terrain::*,
-    tile_map::*, ui_notification::*, weapon::*,
+    audio::*, blood::*, bonus::*, breath::*, camera::*, crosshair::*, debug_tweaks::*,
+    footsteps::*, health::*, heartbeat::*, particle::*, projectile::*, skip_loader::*,
+    status_bar::*, terrain::*, tile_map::*, ui_notification::*, weapon::*,
 };

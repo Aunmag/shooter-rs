@@ -17,9 +17,9 @@ use crate::{
         bot::BotPlugin, camera_target::CameraTargetPlugin, collision::CollisionPlugin,
         debug::DebugPlugin, kinetics::KineticsPlugin, player::PlayerPlugin, AudioTracker,
         AudioTrackerPlugin, BloodPlugin, BonusPlugin, BreathPlugin, CrosshairPlugin,
-        FootstepsPlugin, HealthPlugin, HeartbeatPlugin, ParticlePlugin, ProjectilePlugin,
-        SkipLoaderPlugin, StatusBarPlugin, TerrainPlugin, TileMapPlugin, UiNotificationPlugin,
-        WeaponPlugin,
+        DebugTweaksPlugin, FootstepsPlugin, HealthPlugin, HeartbeatPlugin, ParticlePlugin,
+        ProjectilePlugin, SkipLoaderPlugin, StatusBarPlugin, TerrainPlugin, TileMapPlugin,
+        UiNotificationPlugin, WeaponPlugin,
     },
     resource::{AssetStorage, AudioStorage, GameMode, Scenario, Settings},
     scenario::{BenchScenario, EmptyScenario, WavesScenario},
@@ -65,6 +65,9 @@ fn main() {
             GameMode::Debug => {
                 std::env::set_var("RUST_BACKTRACE", "1");
                 application.add_plugins(DebugPlugin);
+            }
+            GameMode::DebugTweaks => {
+                application.add_plugins(DebugTweaksPlugin);
             }
             GameMode::Bench => {
                 scenario = Some(Scenario::new(BenchScenario::default()));
