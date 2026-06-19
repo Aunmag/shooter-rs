@@ -47,7 +47,6 @@ impl WeaponConfig {
         Self::RPK_74,
         Self::SAIGA_12K,
         Self::PKM,
-        Self::PKP_PECHENEG,
     ];
 
     pub const PM: Self = Self {
@@ -233,26 +232,9 @@ impl WeaponConfig {
     pub const PKM: Self = Self {
         name: "PKM",
         level: 7,
-        mass: 7.5,
-        muzzle_velocity: 825.0,
-        deviation: 0.011,
-        fire_rate: 650.0,
-        is_automatic: true,
-        projectile: &ProjectileConfig::_7_62X54,
-        ammo_capacity: 100,
-        reloading_time: Self::RELOADING_TIME_MACHINE_GUN,
-        has_bolt: true,
-        is_shotgun: false,
-        grip: WeaponGrip::TwoHandsWithButt,
-        image_offset: 10.0,
-    };
-
-    pub const PKP_PECHENEG: Self = Self {
-        name: "PKP Pecheneg",
-        level: 7,
         mass: 8.2,
         muzzle_velocity: 825.0,
-        deviation: 0.01,
+        deviation: 0.011,
         fire_rate: 650.0,
         is_automatic: true,
         projectile: &ProjectileConfig::_7_62X54,
