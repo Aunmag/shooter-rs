@@ -72,7 +72,7 @@ fn on_update(
             let position = transform.translation.truncate() + offset;
 
             audio.queue(AudioPlay {
-                path: "sounds/shot".into(),
+                path: format!("weapons/{}/shot", weapon.config.name).into(),
                 volume: 1.0,
                 source: Some(position),
                 ..AudioPlay::DEFAULT
