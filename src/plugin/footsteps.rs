@@ -58,6 +58,7 @@ fn on_update(
             path: "sounds/footstep".into(),
             volume: calc_stride_volume(intensity),
             source: Some(translation),
+            falloff: AudioPlay::FALLOFF_FOOTSTEPS,
             ..AudioPlay::DEFAULT
         });
 

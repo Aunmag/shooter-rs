@@ -15,7 +15,6 @@ use bevy::{
 use std::{sync::Mutex, time::Duration};
 
 const VOLUME_MIN: f32 = 0.01;
-const SOUND_DISTANCE_FACTOR: f32 = 2.0;
 
 pub struct AudioTrackerPlugin;
 
@@ -47,7 +46,7 @@ impl AudioTracker {
 
     pub fn queue(&self, mut audio: AudioPlay) {
         if let Some(source) = audio.source {
-            audio.volume = self.calc_spatial_volume(source, audio.volume);
+            audio.volume = self.calc_spatial_volume(source, audio.volume, audio.falloff);
         }
 
         if audio.volume < VOLUME_MIN {
@@ -114,8 +113,8 @@ impl AudioTracker {
         }
     }
 
-    pub fn calc_spatial_volume(&self, source: Vec2, volume: f32) -> f32 {
-        return f32::min(SOUND_DISTANCE_FACTOR / source.distance(self.listener), 1.0) * volume;
+    pub fn calc_spatial_volume(&self, source: Vec2, volume: f32, falloff: f32) -> f32 {
+        return volume * (-source.distance(self.listener) * falloff).exp();
     }
 }
 

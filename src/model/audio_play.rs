@@ -6,6 +6,8 @@ use std::time::Duration;
 pub struct AudioPlay {
     pub path: SmartString<'static>,
     pub volume: f32,
+    /// How quickly the sound fades with distance. Higher values make the sound fade out faster
+    pub falloff: f32,
     pub speed: f32,
     pub source: Option<Vec2>,
     pub duration: Duration,
@@ -14,12 +16,14 @@ pub struct AudioPlay {
 impl AudioPlay {
     pub const DURATION_ONCE: Duration = Duration::ZERO;
     pub const DURATION_FOREVER: Duration = Duration::MAX;
-
+    pub const FALLOFF_DEFAULT: f32 = 0.15;
+    pub const FALLOFF_FOOTSTEPS: f32 = 0.2;
     const CLOSE_DISTANCE: f32 = 0.5;
 
     pub const DEFAULT: Self = Self {
         path: SmartString::Ref("sound/default"),
         volume: 1.0,
+        falloff: Self::FALLOFF_DEFAULT,
         speed: 1.0,
         source: None,
         duration: Self::DURATION_ONCE,
