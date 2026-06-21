@@ -28,17 +28,13 @@ use bevy::{
     time::Time,
     transform::components::Transform,
 };
-use rand::Rng;
+use rand::seq::SliceRandom;
 use std::{
     sync::{Mutex, OnceLock},
     time::Duration,
 };
 
 const UPDATE_TEXT_INTERVAL: Duration = Duration::from_millis(500);
-
-const ZOMBIE_PISTOL_CHANCE: f32 = 0.1;
-const ZOMBIE_RIFLE_CHANCE: f32 = 0.02;
-const HUMAN_RIFLE_CHANCE: f32 = 0.1;
 
 static DRAW_QUEUE: OnceLock<Mutex<Vec<Shape>>> = OnceLock::new();
 
@@ -258,38 +254,17 @@ fn spawn_actors(
             entity,
             config,
             position: transform.position,
-            rotation: transform.rotation,
+            rotation: -transform.rotation,
         });
 
         commands.add(ActorBotSet { entity });
 
-        let weapon_chance = rand::thread_rng().gen::<f32>();
-
         let weapon = match config.kind {
-            ActorKind::Human => {
-                if weapon_chance < HUMAN_RIFLE_CHANCE {
-                    Some(&WeaponConfig::AKS_74U)
-                } else {
-                    Some(&WeaponConfig::PM)
-                }
-            }
-            ActorKind::Zombie => {
-                if weapon_chance < ZOMBIE_RIFLE_CHANCE {
-                    Some(&WeaponConfig::AKS_74U_BROKEN)
-                } else if weapon_chance < ZOMBIE_PISTOL_CHANCE {
-                    Some(&WeaponConfig::PM_BROKEN)
-                } else {
-                    None
-                }
-            }
+            ActorKind::Human => WeaponConfig::ALL.choose(&mut rand::thread_rng()),
+            ActorKind::Zombie => None,
         };
 
-        if let Some(weapon) = weapon {
-            commands.add(WeaponSet {
-                entity,
-                weapon: Some(weapon),
-            });
-        }
+        commands.add(WeaponSet { entity, weapon });
     }
 }
 

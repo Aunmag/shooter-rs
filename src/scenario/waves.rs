@@ -170,6 +170,16 @@ impl WavesScenario {
                         text_small: "How long will you stay? Support is on the way...".into(),
                         ..Default::default()
                     });
+
+                    let direction = self.rng.gen_range(-PI..PI);
+                    for _ in 0..WAVE_BONUS_HUMANS {
+                        commands.add(SpawnActor {
+                            direction,
+                            distance: ENEMY_SPAWN_DISTANCE,
+                            config: &ActorConfig::HUMAN,
+                            weapon: WeaponConfig::ALL.choose(&mut self.rng),
+                        });
+                    }
                 } else {
                     commands.add(Notify {
                         text: format!("Wave {}/{}", self.wave_number(), WAVES.len()).into(),
@@ -291,21 +301,6 @@ impl ScenarioLogic for WavesScenario {
                         });
                     }
                     _ => {}
-                }
-
-                if self.is_wave_bonus() {
-                    let direction = self.rng.gen_range(-PI..PI);
-
-                    for _ in 0..WAVE_BONUS_HUMANS {
-                        let weapon = WeaponConfig::ALL.choose(&mut self.rng);
-
-                        commands.add(SpawnActor {
-                            direction,
-                            distance: ENEMY_SPAWN_DISTANCE * 2.0,
-                            config: &ActorConfig::HUMAN,
-                            weapon,
-                        });
-                    }
                 }
             }
 

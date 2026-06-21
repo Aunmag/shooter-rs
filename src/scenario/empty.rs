@@ -27,7 +27,7 @@ impl ScenarioLogic for EmptyScenario {
 
         commands.add(WeaponSet {
             entity,
-            weapon: Some(&WeaponConfig::PM),
+            weapon: Some(&WeaponConfig::AKS_74U),
         });
 
         return Duration::ZERO;
