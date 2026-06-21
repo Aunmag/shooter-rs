@@ -1,6 +1,6 @@
 [game]
 difficulty = 1.0 # 0.8 - easy, 1.0 - medium, 1.2 - hard
-map = "test" # available maps: forest, test
+map = "forest" # available maps: forest, test
 level = 1 # starting level
 modes = [
     "waves",
