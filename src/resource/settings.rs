@@ -20,6 +20,7 @@ pub struct Settings {
 pub struct GameSettings {
     /// 0.8 - easy, 1.0 - medium, 1.2 - hard
     pub difficulty: f32,
+    pub level: u8,
     pub modes: Vec<GameMode>,
 }
 
@@ -27,6 +28,7 @@ impl Default for GameSettings {
     fn default() -> Self {
         return Self {
             difficulty: 1.0,
+            level: 1,
             modes: vec![GameMode::Waves],
         };
     }

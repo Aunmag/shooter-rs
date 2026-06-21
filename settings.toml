@@ -1,5 +1,6 @@
 [game]
 difficulty = 1.0 # 0.8 - easy, 1.0 - medium, 1.2 - hard
+level = 1 # starting level
 modes = [
     "waves",
     # "debug",

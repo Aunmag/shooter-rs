@@ -112,17 +112,17 @@ pub struct WavesScenario {
 }
 
 impl WavesScenario {
-    pub fn new() -> Self {
+    pub fn new(level: u8) -> Self {
         return Self {
             task: Task::StartNextWave,
-            wave_index: 0,
+            wave_index: level.saturating_sub(1),
             zombies_spawned: 0,
             kills: 0,
             rng: Pcg32::seed_from_u64(32),
         };
     }
 
-    fn spawn_player(commands: &mut Commands) {
+    fn spawn_player(&self, commands: &mut Commands) {
         let entity = commands.spawn_empty().id();
 
         commands.add(ActorSet {
@@ -137,9 +137,22 @@ impl WavesScenario {
             is_controllable: true,
         });
 
+        let weapon = WeaponConfig::ALL
+            .iter()
+            .find(|w| {
+                let wave = self.wave_number();
+
+                if wave == 1 {
+                    return w.level == wave;
+                } else {
+                    return w.level == wave.saturating_sub(1); // give weapon of previous level
+                }
+            })
+            .unwrap_or(&WeaponConfig::IZH_27);
+
         commands.add(WeaponSet {
             entity,
-            weapon: Some(&WeaponConfig::PM),
+            weapon: Some(weapon),
         });
     }
 
@@ -243,7 +256,7 @@ impl WavesScenario {
 
 impl ScenarioLogic for WavesScenario {
     fn on_start(&mut self, commands: &mut Commands) -> Duration {
-        Self::spawn_player(commands);
+        self.spawn_player(commands);
         return DEFAULT_INTERVAL;
     }
 

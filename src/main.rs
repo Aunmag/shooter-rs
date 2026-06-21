@@ -73,7 +73,7 @@ fn main() {
                 scenario = Some(Scenario::new(BenchScenario::default()));
             }
             GameMode::Waves => {
-                scenario = Some(Scenario::new(WavesScenario::new()));
+                scenario = Some(Scenario::new(WavesScenario::new(settings.game.level)));
             }
         }
     }
