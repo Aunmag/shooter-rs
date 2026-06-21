@@ -16,15 +16,19 @@ pub struct AudioPlay {
 impl AudioPlay {
     pub const DURATION_ONCE: Duration = Duration::ZERO;
     pub const DURATION_FOREVER: Duration = Duration::MAX;
-    pub const FALLOFF_DEFAULT: f32 = 0.15;
-    pub const FALLOFF_FOOTSTEPS: f32 = 0.2;
-    pub const FALLOFF_EXPLOSION: f32 = 0.045;
+
+    pub const FALLOFF_SHORTEST: f32 = 0.2;
+    pub const FALLOFF_SHORTER: f32 = (Self::FALLOFF_MEDIUM + Self::FALLOFF_SHORTEST) / 2.0;
+    pub const FALLOFF_MEDIUM: f32 = 0.15;
+    pub const FALLOFF_LONGER: f32 = (Self::FALLOFF_MEDIUM + Self::FALLOFF_LONGEST) / 2.0;
+    pub const FALLOFF_LONGEST: f32 = 0.045;
+
     const CLOSE_DISTANCE: f32 = 0.5;
 
     pub const DEFAULT: Self = Self {
         path: SmartString::Ref("sound/default"),
         volume: 1.0,
-        falloff: Self::FALLOFF_DEFAULT,
+        falloff: Self::FALLOFF_MEDIUM,
         speed: 1.0,
         source: None,
         duration: Self::DURATION_ONCE,

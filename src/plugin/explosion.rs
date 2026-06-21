@@ -98,7 +98,7 @@ impl Command for Explode {
             path: "sounds/explosion".into(),
             volume: 1.2,
             source: Some(self.position),
-            falloff: AudioPlay::FALLOFF_EXPLOSION,
+            falloff: AudioPlay::FALLOFF_LONGEST,
             ..AudioPlay::DEFAULT
         });
 

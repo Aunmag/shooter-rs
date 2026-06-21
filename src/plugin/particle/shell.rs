@@ -103,6 +103,7 @@ fn on_destroy(entity: Entity, point: Vec2, commands: &mut Commands) {
         let sound = AudioPlay {
             source: Some(point),
             volume: rng.fuzz(AUDIO_VOLUME),
+            falloff: AudioPlay::FALLOFF_SHORTEST,
             speed: rng.fuzz(1.0),
             ..AudioPlay::DEFAULT
         };

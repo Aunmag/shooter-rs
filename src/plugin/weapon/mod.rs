@@ -60,6 +60,7 @@ fn on_update(
                 audio.queue(AudioPlay {
                     path: "sounds/reloaded".into(),
                     volume: 0.8,
+                    falloff: AudioPlay::FALLOFF_SHORTER,
                     source: Some(transform.translation.xy()),
                     ..AudioPlay::DEFAULT
                 });
@@ -74,6 +75,7 @@ fn on_update(
             audio.queue(AudioPlay {
                 path: format!("weapons/{}/shot", weapon.config.name).into(),
                 volume: 1.0,
+                falloff: AudioPlay::FALLOFF_LONGER,
                 source: Some(position),
                 ..AudioPlay::DEFAULT
             });
@@ -114,6 +116,7 @@ fn on_update(
             audio.queue(AudioPlay {
                 path: "sounds/reloading".into(),
                 volume: 0.4,
+                falloff: AudioPlay::FALLOFF_SHORTER,
                 source: Some(transform.translation.xy()),
                 duration: reloading_duration, // TODO: stop if weapon will be changed earlier
                 ..AudioPlay::DEFAULT

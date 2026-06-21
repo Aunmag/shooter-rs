@@ -42,6 +42,7 @@ fn on_update(
             audio.queue(AudioPlay {
                 path: "sounds/breath".into(),
                 volume: 0.26 * intensity,
+                falloff: AudioPlay::FALLOFF_SHORTEST,
                 source: Some(transform.translation.xy()),
                 ..AudioPlay::DEFAULT
             });

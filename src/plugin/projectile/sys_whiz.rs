@@ -59,6 +59,7 @@ pub fn on_update(
             audio.queue(AudioPlay {
                 path: "sounds/bullet_whiz".into(),
                 volume: 0.8,
+                falloff: AudioPlay::FALLOFF_SHORTEST,
                 source: Some(source),
                 ..AudioPlay::DEFAULT
             });
