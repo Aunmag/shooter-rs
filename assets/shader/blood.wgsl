@@ -1,6 +1,6 @@
 #import bevy_sprite::mesh2d_vertex_output::VertexOutput
 
-const ALPHA = 0.8;
+const ALPHA = 0.6;
 const SCALE = 8.0;
 const NOISE_ROUGHNESS_1 = 0.5;
 const NOISE_ROUGHNESS_2 = 2.5;

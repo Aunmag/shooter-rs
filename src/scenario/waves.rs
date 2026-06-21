@@ -21,7 +21,9 @@ use rand::{seq::SliceRandom, Rng, SeedableRng};
 use rand_pcg::Pcg32;
 use std::{any::Any, f32::consts::PI, time::Duration};
 
-const AGILE_CHANCE: f64 = 0.1;
+const SPAWN_CHANCE_LOW: f64 = 0.02;
+const SPAWN_CHANCE_MILD: f64 = 0.1;
+const SPAWN_CHANCE_HIGH: f64 = 0.3;
 
 const WAVES: &[Wave] = &[
     // melee zombies only
@@ -42,33 +44,33 @@ const WAVES: &[Wave] = &[
         size: 50,
         pistol_chance: 0.0,
         rifle_chance: 0.0,
-        agile_chance: AGILE_CHANCE,
+        agile_chance: SPAWN_CHANCE_MILD,
     },
     Wave {
         size: 75,
         pistol_chance: 0.0,
         rifle_chance: 0.0,
-        agile_chance: 0.3,
+        agile_chance: SPAWN_CHANCE_HIGH,
     },
     // zombies with pistols
     Wave {
         size: 100,
-        pistol_chance: 0.2,
+        pistol_chance: SPAWN_CHANCE_MILD,
         rifle_chance: 0.0,
-        agile_chance: AGILE_CHANCE,
+        agile_chance: SPAWN_CHANCE_LOW,
     },
     Wave {
         size: 125,
-        pistol_chance: 0.3,
+        pistol_chance: SPAWN_CHANCE_HIGH,
         rifle_chance: 0.0,
-        agile_chance: AGILE_CHANCE,
+        agile_chance: SPAWN_CHANCE_LOW,
     },
     // zombies with rifles
     Wave {
         size: 150,
-        pistol_chance: 0.3,
-        rifle_chance: 0.1,
-        agile_chance: AGILE_CHANCE,
+        pistol_chance: SPAWN_CHANCE_HIGH,
+        rifle_chance: SPAWN_CHANCE_MILD,
+        agile_chance: SPAWN_CHANCE_LOW,
     },
 ];
 
