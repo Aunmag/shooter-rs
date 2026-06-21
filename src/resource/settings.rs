@@ -50,6 +50,7 @@ pub enum GameMode {
     Debug,
     DebugTweaks,
     Bench,
+    TestBotSpread,
 }
 
 impl GameMode {
@@ -59,6 +60,7 @@ impl GameMode {
             Self::Debug => &[],
             Self::DebugTweaks => &[],
             Self::Bench => &[Self::Debug],
+            Self::TestBotSpread => &[Self::Debug],
         };
     }
 }

@@ -304,6 +304,7 @@ impl<'a> BotHandler<'a> {
             }
         }
 
+        // at least keep an interval of half a body
         spread = f32::max(spread, self.actor.config.radius * 3.0);
 
         if DEBUG_SPREAD {

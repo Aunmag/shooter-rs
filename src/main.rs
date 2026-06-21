@@ -25,7 +25,7 @@ use crate::{
         TerrainPlugin, TileMapPlugin, UiNotificationPlugin, WeaponPlugin,
     },
     resource::{AssetStorage, AudioStorage, GameMode, MapSettings, Scenario, Settings},
-    scenario::{BenchScenario, EmptyScenario, WavesScenario},
+    scenario::{BenchScenario, EmptyScenario, TestBotSpreadScenario, WavesScenario},
     util::ext::AppExt,
 };
 use bevy::{
@@ -78,6 +78,9 @@ fn main() {
             }
             GameMode::Waves => {
                 scenario = Some(Scenario::new(WavesScenario::new(settings.game.level)));
+            }
+            GameMode::TestBotSpread => {
+                scenario = Some(Scenario::new(TestBotSpreadScenario));
             }
         }
     }

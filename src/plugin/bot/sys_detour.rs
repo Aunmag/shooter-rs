@@ -24,7 +24,7 @@ const UPDATE_INTERVAL: Duration = Duration::from_secs(8);
 const DIRECTIONS: usize = 6;
 const DIRECTION_STEP: f32 = TAU / DIRECTIONS as f32;
 const DISTANCE_MIN: f32 = 5.0;
-const DISTANCE_MAX: f32 = 20.0;
+const DISTANCE_MAX: f32 = 15.0;
 const TURN_SMOOTH: f32 = 1.2;
 
 pub struct Detour {
@@ -41,7 +41,7 @@ impl Detour {
             // detour is reached, no need to detour anymore
             return None;
         } else if source.is_close(target, self.distance) {
-            // target it quite close to start detour
+            // target is in range to start detour
             return Some(angle_from_target + FRAC_PI_2 * TURN_SMOOTH * angular_distance.signum());
         } else {
             // target is too far, go towards it

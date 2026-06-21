@@ -7,6 +7,7 @@ modes = [
     # "debug",
     # "debug_tweaks",
     # "bench",
+    # "test_bot_spread",
 ]
 
 [display]

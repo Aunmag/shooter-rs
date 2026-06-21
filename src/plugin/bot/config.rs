@@ -42,7 +42,7 @@ impl BotConfig {
         is_silly: true,
         is_agile: false,
         reaction: Duration::from_millis(500),
-        spread: 1.5,
+        spread: 1.0,
         spread_force: 0.4,
         sprint_distance: Self::HUMAN.sprint_distance,
         shoot_distance_min: 3.0,
