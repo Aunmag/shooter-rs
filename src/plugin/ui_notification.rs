@@ -23,7 +23,7 @@ use std::time::Duration;
 const POSITION: f32 = 0.3;
 const FONT_SCALE: f32 = 0.04;
 const FADE_IN: Duration = Duration::from_millis(150);
-const FADE_OUT: Duration = Duration::from_millis(150);
+const FADE_OUT: Duration = Duration::from_millis(300);
 const DURATION_DEFAULT: Duration = Duration::from_millis(2500);
 
 pub struct UiNotificationPlugin;
@@ -71,7 +71,7 @@ fn on_update(
             let alpha = notification.alpha(time);
 
             for section in text.sections.iter_mut() {
-                section.style.color.with_alpha(alpha);
+                section.style.color.set_alpha(alpha);
             }
         }
     }
