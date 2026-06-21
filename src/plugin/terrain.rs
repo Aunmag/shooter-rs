@@ -10,7 +10,12 @@ use crate::{
 use bevy::{
     app::{App, Plugin},
     asset::{AssetServer, Assets},
-    ecs::{component::Component, schedule::IntoSystemConfigs, system::Query, world::World},
+    ecs::{
+        component::Component,
+        schedule::IntoSystemConfigs,
+        system::Query,
+        world::{Command, World},
+    },
     math::Vec3,
     prelude::{Rectangle, Transform, With, Without},
     render::{
@@ -20,13 +25,10 @@ use bevy::{
     sprite::{ColorMaterial, ColorMesh2dBundle},
 };
 
-const PATH: &str = "terrain/grass.png";
-
 pub struct TerrainPlugin;
 
 impl Plugin for TerrainPlugin {
     fn build(&self, app: &mut App) {
-        app.add_state_system_enter(AppState::Game, on_init);
         app.add_state_system(
             AppState::Game,
             on_update.after(crate::plugin::camera_target::on_update),
@@ -34,59 +36,71 @@ impl Plugin for TerrainPlugin {
     }
 }
 
+pub struct TerrainSpawn {
+    pub image: &'static str,
+}
+
+impl Command for TerrainSpawn {
+    fn apply(self, world: &mut World) {
+        let Some(image_handle) = world
+            .resource::<AssetServer>()
+            .get_handle(self.image)
+            .clone()
+        else {
+            log::warn!("Image {} not found", self.image);
+            return;
+        };
+
+        let block_size;
+
+        if let Some(image) = world.resource_mut::<Assets<Image>>().get_mut(&image_handle) {
+            image.sampler = ImageSampler::Descriptor(ImageSamplerDescriptor {
+                address_mode_u: ImageAddressMode::Repeat,
+                address_mode_v: ImageAddressMode::Repeat,
+                ..Default::default()
+            });
+
+            block_size = u32::min(image.size_x(), image.size_y()) as f32 / PIXELS_PER_METER;
+        } else {
+            return;
+        }
+
+        let count = calc_count(block_size);
+
+        let mut mesh = Mesh::from(Rectangle::default());
+        if let Some(VertexAttributeValues::Float32x2(uvs)) =
+            mesh.attribute_mut(Mesh::ATTRIBUTE_UV_0)
+        {
+            for uv in uvs {
+                uv[0] *= count;
+                uv[1] *= count;
+            }
+        }
+
+        let mesh_handle = world.resource_mut::<Assets<Mesh>>().add(mesh);
+
+        let material_handle = world
+            .resource_mut::<Assets<ColorMaterial>>()
+            .add(image_handle.clone());
+
+        world
+            .spawn(ColorMesh2dBundle {
+                transform: Transform {
+                    translation: Vec3::new(0.0, 0.0, LAYER_BACKGROUND),
+                    scale: TRANSFORM_SCALE * count * block_size * PIXELS_PER_METER,
+                    ..Default::default()
+                },
+                mesh: mesh_handle.into(),
+                material: material_handle,
+                ..Default::default()
+            })
+            .insert(Terrain { block_size });
+    }
+}
+
 #[derive(Component)]
 struct Terrain {
     block_size: f32,
-}
-
-fn on_init(world: &mut World) {
-    let Some(image_handle) = world.resource::<AssetServer>().get_handle(PATH).clone() else {
-        log::warn!("Image {} not found", PATH);
-        return;
-    };
-
-    let block_size;
-
-    if let Some(image) = world.resource_mut::<Assets<Image>>().get_mut(&image_handle) {
-        image.sampler = ImageSampler::Descriptor(ImageSamplerDescriptor {
-            address_mode_u: ImageAddressMode::Repeat,
-            address_mode_v: ImageAddressMode::Repeat,
-            ..Default::default()
-        });
-
-        block_size = u32::min(image.size_x(), image.size_y()) as f32 / PIXELS_PER_METER;
-    } else {
-        return;
-    }
-
-    let count = calc_count(block_size);
-
-    let mut mesh = Mesh::from(Rectangle::default());
-    if let Some(VertexAttributeValues::Float32x2(uvs)) = mesh.attribute_mut(Mesh::ATTRIBUTE_UV_0) {
-        for uv in uvs {
-            uv[0] *= count;
-            uv[1] *= count;
-        }
-    }
-
-    let mesh_handle = world.resource_mut::<Assets<Mesh>>().add(mesh);
-
-    let material_handle = world
-        .resource_mut::<Assets<ColorMaterial>>()
-        .add(image_handle.clone());
-
-    world
-        .spawn(ColorMesh2dBundle {
-            transform: Transform {
-                translation: Vec3::new(0.0, 0.0, LAYER_BACKGROUND),
-                scale: TRANSFORM_SCALE * count * block_size * PIXELS_PER_METER,
-                ..Default::default()
-            },
-            mesh: mesh_handle.into(),
-            material: material_handle,
-            ..Default::default()
-        })
-        .insert(Terrain { block_size });
 }
 
 fn on_update(

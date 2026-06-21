@@ -2,6 +2,7 @@ mod command;
 mod component;
 mod data;
 mod event;
+mod map;
 mod model;
 mod plugin;
 mod resource;
@@ -10,22 +11,26 @@ mod system;
 mod util;
 
 use crate::{
+    command::CursorGrab,
     data::APP_TITLE,
     event::ActorDeathEvent,
+    map::{ForestMap, Map, TestMap},
     model::AppState,
     plugin::{
         bot::BotPlugin, camera_target::CameraTargetPlugin, collision::CollisionPlugin,
         debug::DebugPlugin, kinetics::KineticsPlugin, player::PlayerPlugin, AudioTracker,
         AudioTrackerPlugin, BloodPlugin, BonusPlugin, BreathPlugin, CrosshairPlugin,
         DebugTweaksPlugin, ExplosionPlugin, FootstepsPlugin, HealthPlugin, HeartbeatPlugin,
-        ParticlePlugin, ProjectilePlugin, SkipLoaderPlugin, StatusBarPlugin, TerrainPlugin,
-        TileMapPlugin, UiNotificationPlugin, WeaponPlugin,
+        MainCamera, ParticlePlugin, ProjectilePlugin, SkipLoaderPlugin, StatusBarPlugin,
+        TerrainPlugin, TileMapPlugin, UiNotificationPlugin, WeaponPlugin,
     },
-    resource::{AssetStorage, AudioStorage, GameMode, Scenario, Settings},
+    resource::{AssetStorage, AudioStorage, GameMode, MapSettings, Scenario, Settings},
     scenario::{BenchScenario, EmptyScenario, WavesScenario},
     util::ext::AppExt,
 };
 use bevy::{
+    core_pipeline::core_2d::Camera2dBundle,
+    ecs::world::{Command, World},
     log::LogPlugin,
     prelude::{App, AppExtStates, DefaultPlugins, IntoSystemConfigs, PluginGroup},
     render::texture::ImagePlugin,
@@ -57,7 +62,6 @@ fn main() {
     );
 
     let mut scenario = None;
-
     for mode in &settings.game.modes {
         log::info!("Starting with game mode: {:?}", mode);
 
@@ -110,7 +114,7 @@ fn main() {
         .insert_resource(AudioTracker::new(settings.audio.sources))
         .insert_resource(settings)
         .add_state_system(AppState::Loading, system::loading::on_update())
-        .add_state_system_enter(AppState::Game, system::game::on_enter)
+        .add_state_system_enter(AppState::Game, init_game)
         .add_state_systems(AppState::Game, |s| {
             use crate::system::game::*;
             s.add(input);
@@ -135,4 +139,16 @@ fn init_log_plugin(settings: &Settings) -> LogPlugin {
     }
 
     return log_plugin;
+}
+
+fn init_game(world: &mut World) {
+    CursorGrab(true).apply(world);
+    world.spawn(Camera2dBundle::default()).insert(MainCamera);
+
+    let map: Box<dyn Map> = match world.resource::<Settings>().game.map {
+        MapSettings::Forest => Box::new(ForestMap),
+        MapSettings::Test => Box::new(TestMap),
+    };
+
+    map.generate(world);
 }

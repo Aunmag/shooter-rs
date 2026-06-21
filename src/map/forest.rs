@@ -1,15 +1,14 @@
 use crate::{
-    command::CursorGrab,
     data::{LAYER_GROUND, LAYER_TREE, WORLD_SIZE, WORLD_SIZE_HALF, WORLD_SIZE_VISUAL},
+    map::Map,
     model::AudioPlay,
-    plugin::{AudioTracker, MainCamera, TileBlend},
+    plugin::{AudioTracker, TerrainSpawn, TileBlend},
     util::ext::Vec2Ext,
 };
 use bevy::{
     asset::AssetServer,
     ecs::world::{Command, World},
     math::{Vec2, Vec3},
-    prelude::Camera2dBundle,
 };
 use rand::{seq::SliceRandom, Rng, SeedableRng};
 use rand_pcg::Pcg32;
@@ -21,12 +20,18 @@ const TREE_BUFFER_ZONE: f32 = 3.2;
 const TREE_FIND_POSITION_ATTEMPTS: usize = 32;
 const BLUFF_SPRITE_SIZE: f32 = 4.0;
 
-pub fn on_enter(world: &mut World) {
-    CursorGrab(true).apply(world);
-    world.spawn(Camera2dBundle::default()).insert(MainCamera);
-    spawn_bluffs(world);
-    spawn_trees(world);
-    play_audio(world);
+pub struct ForestMap;
+
+impl Map for ForestMap {
+    fn generate(&self, world: &mut World) {
+        world.commands().add(TerrainSpawn {
+            image: "terrain/grass.png",
+        });
+
+        spawn_bluffs(world);
+        spawn_trees(world);
+        play_audio(world);
+    }
 }
 
 fn spawn_bluffs(world: &mut World) {
