@@ -3,7 +3,8 @@ use crate::{
     component::{ActorConfig, ActorKind},
     model::{AppState, TransformLite},
     plugin::{
-        bot::ActorBotSet, AudioTracker, BonusSpawn, Crosshair, TileMap, WeaponConfig, WeaponSet,
+        bot::ActorBotSet, AudioTracker, BonusSpawn, Crosshair, Explode, TileMap, WeaponConfig,
+        WeaponSet,
     },
     util::{ext::AppExt, Timer},
 };
@@ -101,6 +102,7 @@ fn on_init(world: &mut World) {
                 \nSpawn weapon: [G]\
                 \nSpawn human : [H] group: [+SHIFT]\
                 \nSpawn zombie: [J] group: [+SHIFT]\
+                \nExplode: [T]\
                 ",
                 style,
             ),
@@ -209,11 +211,13 @@ fn update_input(
         Spawn::Human
     } else if keyboard.just_pressed(KeyCode::KeyJ) {
         Spawn::Zombie
+    } else if keyboard.just_pressed(KeyCode::KeyT) {
+        Spawn::Explosion
     } else {
         return;
     };
 
-    let group = if keyboard.any_pressed([KeyCode::ShiftLeft, KeyCode::ShiftRight].into_iter()) {
+    let group = if keyboard.any_pressed([KeyCode::ShiftLeft, KeyCode::ShiftRight]) {
         10
     } else {
         1
@@ -234,6 +238,9 @@ fn update_input(
         }
         Spawn::Zombie => {
             spawn_actors(&mut commands, position, &ActorConfig::ZOMBIE, group);
+        }
+        Spawn::Explosion => {
+            commands.add(Explode::new(position.position, None));
         }
     }
 }
@@ -290,6 +297,7 @@ enum Spawn {
     Bonus,
     Human,
     Zombie,
+    Explosion,
 }
 
 fn get_draw_queue() -> &'static Mutex<Vec<Shape>> {

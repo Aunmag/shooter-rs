@@ -18,6 +18,7 @@ impl AudioPlay {
     pub const DURATION_FOREVER: Duration = Duration::MAX;
     pub const FALLOFF_DEFAULT: f32 = 0.15;
     pub const FALLOFF_FOOTSTEPS: f32 = 0.2;
+    pub const FALLOFF_EXPLOSION: f32 = 0.045;
     const CLOSE_DISTANCE: f32 = 0.5;
 
     pub const DEFAULT: Self = Self {

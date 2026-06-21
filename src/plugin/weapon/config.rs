@@ -47,6 +47,7 @@ impl WeaponConfig {
         Self::RPK_74,
         Self::SAIGA_12K,
         Self::PKM,
+        Self::RPG_7,
     ];
 
     pub const PM: Self = Self {
@@ -244,6 +245,23 @@ impl WeaponConfig {
         is_shotgun: false,
         grip: WeaponGrip::TwoHandsWithButt,
         image_offset: 10.0,
+    };
+
+    pub const RPG_7: Self = Self {
+        name: "RPG-7",
+        level: 7,
+        mass: 10.8, // NOTE: mass with loaded rocket, since `ammo_capacity` is zero
+        muzzle_velocity: 115.0,
+        deviation: 0.0, // make perfect precision since each shoot from RPG-7 takes a very long time
+        fire_rate: 50.0,
+        is_automatic: false,
+        projectile: &ProjectileConfig::TBG_7V,
+        ammo_capacity: 0,
+        reloading_time: Self::RELOADING_TIME_MACHINE_GUN,
+        has_bolt: false,
+        is_shotgun: false,
+        grip: WeaponGrip::TwoHandsWithButt,
+        image_offset: 21.0,
     };
 
     pub fn generate_deviation(&self, rng: &mut Pcg32) -> f32 {

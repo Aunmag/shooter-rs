@@ -96,7 +96,7 @@ fn blend_sprite(world: &mut World, position: Vec3, direction: f32, path: &'stati
         return;
     };
 
-    TileBlend::image(image, position, direction).apply(world);
+    TileBlend::image(image, position, direction, None).apply(world);
 }
 
 fn play_audio(world: &mut World) {

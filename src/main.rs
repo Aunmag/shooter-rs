@@ -17,9 +17,9 @@ use crate::{
         bot::BotPlugin, camera_target::CameraTargetPlugin, collision::CollisionPlugin,
         debug::DebugPlugin, kinetics::KineticsPlugin, player::PlayerPlugin, AudioTracker,
         AudioTrackerPlugin, BloodPlugin, BonusPlugin, BreathPlugin, CrosshairPlugin,
-        DebugTweaksPlugin, FootstepsPlugin, HealthPlugin, HeartbeatPlugin, ParticlePlugin,
-        ProjectilePlugin, SkipLoaderPlugin, StatusBarPlugin, TerrainPlugin, TileMapPlugin,
-        UiNotificationPlugin, WeaponPlugin,
+        DebugTweaksPlugin, ExplosionPlugin, FootstepsPlugin, HealthPlugin, HeartbeatPlugin,
+        ParticlePlugin, ProjectilePlugin, SkipLoaderPlugin, StatusBarPlugin, TerrainPlugin,
+        TileMapPlugin, UiNotificationPlugin, WeaponPlugin,
     },
     resource::{AssetStorage, AudioStorage, GameMode, Scenario, Settings},
     scenario::{BenchScenario, EmptyScenario, WavesScenario},
@@ -89,6 +89,7 @@ fn main() {
         .add_plugins(CameraTargetPlugin)
         .add_plugins(CollisionPlugin)
         .add_plugins(CrosshairPlugin)
+        .add_plugins(ExplosionPlugin)
         .add_plugins(FootstepsPlugin)
         .add_plugins(HealthPlugin)
         .add_plugins(HeartbeatPlugin)

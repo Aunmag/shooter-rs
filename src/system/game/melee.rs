@@ -47,7 +47,7 @@ pub fn melee(
             ) {
                 if victim
                     .as_ref()
-                    .map_or(true, |v| v.distance > target_data.distance)
+                    .is_none_or(|v| v.distance > target_data.distance)
                 {
                     victim = Some(target_data);
                 }

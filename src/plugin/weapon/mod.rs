@@ -119,7 +119,7 @@ fn on_update(
                 ..AudioPlay::DEFAULT
             });
 
-            if !weapon.config.has_bolt {
+            if !weapon.config.has_bolt && !weapon.config.projectile.is_rocket {
                 for _ in 0..weapon.config.ammo_capacity {
                     commands.add(ShellParticleSpawn(entity));
                 }

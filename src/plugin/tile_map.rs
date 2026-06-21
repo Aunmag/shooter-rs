@@ -143,15 +143,17 @@ pub enum TileBlend {
         image: Handle<Image>,
         position: Vec3,
         direction: f32,
+        scale: Option<f32>,
     },
 }
 
 impl TileBlend {
-    pub fn image(image: Handle<Image>, position: Vec3, direction: f32) -> Self {
+    pub fn image(image: Handle<Image>, position: Vec3, direction: f32, scale: Option<f32>) -> Self {
         return Self::Image {
             image,
             position,
             direction,
+            scale,
         };
     }
 
@@ -175,13 +177,20 @@ impl TileBlend {
                 position,
                 direction,
                 image,
+                scale,
             } => {
+                let mut scale_ = TRANSFORM_SCALE;
+
+                if let Some(scale) = scale {
+                    scale_ *= scale;
+                }
+
                 return world
                     .spawn(SpriteBundle {
                         transform: Transform {
                             translation: position,
                             rotation: Quat::from_rotation_z(direction),
-                            scale: TRANSFORM_SCALE,
+                            scale: scale_,
                         },
                         texture: image,
                         ..Default::default()

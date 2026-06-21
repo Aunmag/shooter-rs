@@ -68,7 +68,7 @@ impl AudioTracker {
 
             if is_overflow
                 && other.volume < audio.volume
-                && replacement.map_or(true, |(_, v)| other.volume > v)
+                && replacement.is_none_or(|(_, v)| other.volume > v)
             {
                 replacement = Some((i, other.volume));
             }
@@ -138,7 +138,7 @@ fn on_update(
     tracker.playing = 0;
 
     for (entity, sink, expiration) in audio.iter() {
-        if sink.empty() || expiration.map_or(false, |e| now > e.0) {
+        if sink.empty() || expiration.is_some_and(|e| now > e.0) {
             sink.stop();
             commands.entity(entity).despawn_recursive();
         } else {
