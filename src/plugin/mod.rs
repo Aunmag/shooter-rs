@@ -9,6 +9,7 @@ pub mod collision;
 mod crosshair;
 pub mod debug;
 mod debug_tweaks;
+pub mod editor;
 mod explosion;
 mod footsteps;
 mod health;

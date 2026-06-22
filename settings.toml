@@ -2,18 +2,19 @@
 difficulty = 1.0 # 0.8 - easy, 1.0 - medium, 1.2 - hard
 level = 1 # starting level
 modes = [
-    "waves",
+    # "waves",
     # "debug",
     # "debug_tweaks",
     # "bench",
     # "test",
     # "test_bot_spread",
+    "editor",
 ]
 
 [display]
-full_screen = true
-window_size_x = 800
-window_size_y = 800
+full_screen = false
+window_size_x = 1024
+window_size_y = 1024
 v_sync = false
 
 [audio]

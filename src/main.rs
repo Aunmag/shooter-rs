@@ -19,6 +19,7 @@ use crate::{
         camera_target::CameraTargetPlugin,
         collision::CollisionPlugin,
         debug::DebugPlugin,
+        editor::EditorPlugin,
         kinetics::KineticsPlugin,
         player::PlayerPlugin,
         scenario::{
@@ -89,6 +90,9 @@ fn main() {
             }
             GameMode::TestBotSpread => {
                 scenario = Some(Scenario::new(TestBotSpreadScenario));
+            }
+            GameMode::Editor => {
+                application.add_plugins(EditorPlugin);
             }
         }
     }
