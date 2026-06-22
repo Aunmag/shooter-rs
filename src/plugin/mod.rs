@@ -17,6 +17,7 @@ pub mod kinetics;
 mod particle;
 pub mod player;
 mod projectile;
+pub mod scenario;
 mod skip_loader;
 mod status_bar;
 mod terrain;

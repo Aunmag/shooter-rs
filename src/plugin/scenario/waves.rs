@@ -3,12 +3,13 @@ use crate::{
     component::{Actor, ActorConfig, ActorKind},
     data::VIEW_DISTANCE,
     event::ActorDeathEvent,
+    map::{ForestMap, Map},
     plugin::{
         bot::ActorBotSet,
-        player::{Player, PlayerSet},
+        player::{Player, PlayerSpawn},
+        scenario::{Scenario, ScenarioLogic},
         BonusSpawn, Health, Notify, WeaponConfig, WeaponSet,
     },
-    resource::{Scenario, ScenarioLogic},
     util::ext::Vec2Ext,
 };
 use bevy::{
@@ -124,40 +125,6 @@ impl WavesScenario {
         };
     }
 
-    fn spawn_player(&self, commands: &mut Commands) {
-        let entity = commands.spawn_empty().id();
-
-        commands.add(ActorSet {
-            entity,
-            config: &ActorConfig::HUMAN,
-            position: Vec2::ZERO,
-            rotation: 0.0,
-        });
-
-        commands.add(PlayerSet {
-            entity,
-            is_controllable: true,
-        });
-
-        let weapon = WeaponConfig::ALL
-            .iter()
-            .find(|w| {
-                let wave = self.wave_number();
-
-                if wave == 1 {
-                    return w.level == wave;
-                } else {
-                    return w.level == wave.saturating_sub(1); // give weapon of previous level
-                }
-            })
-            .unwrap_or(&WeaponConfig::IZH_27);
-
-        commands.add(WeaponSet {
-            entity,
-            weapon: Some(weapon),
-        });
-    }
-
     fn update(&mut self, commands: &mut Commands) -> Task {
         let wave = self.wave();
 
@@ -267,8 +234,29 @@ impl WavesScenario {
 }
 
 impl ScenarioLogic for WavesScenario {
-    fn on_start(&mut self, commands: &mut Commands) -> Duration {
-        self.spawn_player(commands);
+    fn on_enter(&mut self, world: &mut World) -> Duration {
+        ForestMap.generate(world);
+
+        let weapon = WeaponConfig::ALL
+            .iter()
+            .find(|w| {
+                let wave = self.wave_number();
+
+                if wave == 1 {
+                    return w.level == wave;
+                } else {
+                    return w.level == wave.saturating_sub(1); // give weapon of previous level
+                }
+            })
+            .unwrap_or(&WeaponConfig::IZH_27);
+
+        PlayerSpawn {
+            config: &ActorConfig::HUMAN,
+            weapon,
+            is_controllable: true,
+        }
+        .apply(world);
+
         return DEFAULT_INTERVAL;
     }
 

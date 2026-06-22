@@ -1,32 +1,39 @@
 use crate::{
     command::ActorSet,
     component::ActorConfig,
-    plugin::{bot::ActorBotSet, camera_target::CameraTarget},
-    resource::ScenarioLogic,
+    map::{Map, TestMap},
+    plugin::{bot::ActorBotSet, camera_target::CameraTarget, scenario::ScenarioLogic},
 };
-use bevy::{ecs::system::Commands, math::Vec2, transform::components::Transform};
+use bevy::{
+    ecs::world::{Command, World},
+    math::Vec2,
+    transform::components::Transform,
+};
 use std::{any::Any, time::Duration};
 
 pub struct TestBotSpreadScenario;
 
 impl ScenarioLogic for TestBotSpreadScenario {
-    fn on_start(&mut self, commands: &mut Commands) -> Duration {
-        commands
+    fn on_enter(&mut self, world: &mut World) -> Duration {
+        TestMap.generate(world);
+
+        world
             .spawn_empty()
             .insert(Transform::default())
             .insert(CameraTarget::default());
 
         for _ in 0..128 {
-            let entity = commands.spawn_empty().id();
+            let entity = world.spawn_empty().id();
 
-            commands.add(ActorSet {
+            ActorSet {
                 entity,
                 config: &ActorConfig::ZOMBIE,
                 position: Vec2::ZERO,
                 rotation: 0.0,
-            });
+            }
+            .apply(world);
 
-            commands.add(ActorBotSet { entity }); // TODO: disable idle
+            ActorBotSet { entity }.apply(world); // TODO: disable idle
         }
 
         return Duration::ZERO;

@@ -1,10 +1,15 @@
 use crate::{
     command::ActorSet,
     component::ActorConfig,
-    plugin::{bot::ActorBotSet, player::PlayerSet, WeaponConfig, WeaponSet},
-    resource::ScenarioLogic,
+    map::{ForestMap, Map},
+    plugin::{bot::ActorBotSet, player::PlayerSpawn, scenario::ScenarioLogic, WeaponConfig},
 };
-use bevy::{app::AppExit, ecs::world::World, math::Vec2, prelude::Commands};
+use bevy::{
+    app::AppExit,
+    ecs::world::{Command, World},
+    math::Vec2,
+    prelude::Commands,
+};
 use chrono::Local;
 use std::{
     any::Any,
@@ -28,29 +33,6 @@ pub struct BenchScenario {
 }
 
 impl BenchScenario {
-    fn spawn_player(&mut self, commands: &mut Commands) {
-        let entity = commands.spawn_empty().id();
-
-        commands.add(ActorSet {
-            entity,
-            config: &ActorConfig::HUMAN,
-            position: Vec2::ZERO,
-            rotation: 0.0,
-        });
-
-        commands.add(PlayerSet {
-            entity,
-            is_controllable: false,
-        });
-
-        commands.add(WeaponSet {
-            entity,
-            weapon: Some(&WeaponConfig::PM),
-        });
-
-        self.spawned += 1;
-    }
-
     fn spawn_batch(&mut self, commands: &mut Commands) {
         for _ in 0..SPAWN_BATCH {
             let entity = commands.spawn_empty().id();
@@ -93,8 +75,17 @@ impl BenchScenario {
 }
 
 impl ScenarioLogic for BenchScenario {
-    fn on_start(&mut self, commands: &mut Commands) -> Duration {
-        self.spawn_player(commands);
+    fn on_enter(&mut self, world: &mut World) -> Duration {
+        ForestMap.generate(world);
+
+        // TODO: just spawn spectator
+        PlayerSpawn {
+            config: &ActorConfig::HUMAN,
+            weapon: &WeaponConfig::AKS_74U,
+            is_controllable: false,
+        }
+        .apply(world);
+
         return INTERVAL;
     }
 

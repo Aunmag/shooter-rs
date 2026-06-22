@@ -23,7 +23,6 @@ pub fn input(mut commands: Commands, keyboard: Res<ButtonInput<KeyCode>>) {
         commands.add(|world: &mut World| {
             let mut settings = world.resource_mut::<Settings>();
             settings.display.full_screen = !settings.display.full_screen;
-            settings.clone().save_in_background();
             let display = settings.display.clone();
 
             for mut window in world

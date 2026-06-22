@@ -1,10 +1,11 @@
 use crate::{
-    component::Actor,
+    command::ActorSet,
+    component::{Actor, ActorConfig},
     data::{LAYER_ACTOR_PLAYER, WORLD_SIZE_HALF},
     model::{ActorAction, ActorActionsExt, AppState},
     plugin::{
         camera::MainCamera, camera_target::CameraTarget, kinetics::Kinetics, Crosshair, Health,
-        StatusBar,
+        StatusBar, WeaponConfig, WeaponSet,
     },
     resource::Settings,
     util::ext::{AppExt, Vec2Ext},
@@ -33,7 +34,7 @@ impl Plugin for PlayerPlugin {
 
 #[derive(Component)]
 pub struct Player {
-    pub is_controllable: bool,
+    pub is_controllable: bool, // TODO: avoid
     pub crosshair: Option<PlayerCrosshair>,
     extra_rotation: f32,
 }
@@ -218,5 +219,37 @@ impl Command for PlayerSet {
             .insert(CameraTarget::default());
 
         StatusBar::spawn(world, self.entity);
+    }
+}
+
+pub struct PlayerSpawn {
+    pub config: &'static ActorConfig,
+    pub weapon: &'static WeaponConfig,
+    pub is_controllable: bool,
+}
+
+impl Command for PlayerSpawn {
+    fn apply(self, world: &mut World) {
+        let entity = world.spawn_empty().id();
+
+        ActorSet {
+            entity,
+            config: self.config,
+            position: Vec2::ZERO,
+            rotation: 0.0,
+        }
+        .apply(world);
+
+        PlayerSet {
+            entity,
+            is_controllable: self.is_controllable,
+        }
+        .apply(world);
+
+        WeaponSet {
+            entity,
+            weapon: Some(self.weapon),
+        }
+        .apply(world);
     }
 }

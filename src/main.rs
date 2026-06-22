@@ -6,7 +6,6 @@ mod map;
 mod model;
 mod plugin;
 mod resource;
-mod scenario;
 mod system;
 mod util;
 
@@ -14,18 +13,24 @@ use crate::{
     command::CursorGrab,
     data::APP_TITLE,
     event::ActorDeathEvent,
-    map::{ForestMap, Map, TestMap},
     model::AppState,
     plugin::{
-        bot::BotPlugin, camera_target::CameraTargetPlugin, collision::CollisionPlugin,
-        debug::DebugPlugin, kinetics::KineticsPlugin, player::PlayerPlugin, AudioTracker,
-        AudioTrackerPlugin, BloodPlugin, BonusPlugin, BreathPlugin, CrosshairPlugin,
+        bot::BotPlugin,
+        camera_target::CameraTargetPlugin,
+        collision::CollisionPlugin,
+        debug::DebugPlugin,
+        kinetics::KineticsPlugin,
+        player::PlayerPlugin,
+        scenario::{
+            BenchScenario, Scenario, ScenarioPlugin, TestBotSpreadScenario, TestScenario,
+            WavesScenario,
+        },
+        AudioTracker, AudioTrackerPlugin, BloodPlugin, BonusPlugin, BreathPlugin, CrosshairPlugin,
         DebugTweaksPlugin, ExplosionPlugin, FootstepsPlugin, HealthPlugin, HeartbeatPlugin,
         MainCamera, ParticlePlugin, ProjectilePlugin, SkipLoaderPlugin, StatusBarPlugin,
         TerrainPlugin, TileMapPlugin, UiNotificationPlugin, WeaponPlugin,
     },
-    resource::{AssetStorage, AudioStorage, GameMode, MapSettings, Scenario, Settings},
-    scenario::{BenchScenario, EmptyScenario, TestBotSpreadScenario, WavesScenario},
+    resource::{AssetStorage, AudioStorage, GameMode, Settings},
     util::ext::AppExt,
 };
 use bevy::{
@@ -79,13 +84,16 @@ fn main() {
             GameMode::Waves => {
                 scenario = Some(Scenario::new(WavesScenario::new(settings.game.level)));
             }
+            GameMode::Test => {
+                scenario = Some(Scenario::new(TestScenario));
+            }
             GameMode::TestBotSpread => {
                 scenario = Some(Scenario::new(TestBotSpreadScenario));
             }
         }
     }
 
-    application.insert_resource(scenario.unwrap_or_else(|| Scenario::new(EmptyScenario)));
+    application.insert_resource(scenario.unwrap_or_else(|| Scenario::new(TestScenario)));
 
     application
         .add_plugins(AudioTrackerPlugin)
@@ -104,6 +112,7 @@ fn main() {
         .add_plugins(ParticlePlugin)
         .add_plugins(PlayerPlugin)
         .add_plugins(ProjectilePlugin)
+        .add_plugins(ScenarioPlugin)
         .add_plugins(SkipLoaderPlugin)
         .add_plugins(StatusBarPlugin)
         .add_plugins(TerrainPlugin)
@@ -124,7 +133,6 @@ fn main() {
             s.add(actor.after(crate::plugin::player::on_update));
             s.add(melee.after(crate::plugin::collision::on_update));
             s.add(ambience_fx());
-            s.add(scenario);
         })
         .run();
 }
@@ -147,11 +155,4 @@ fn init_log_plugin(settings: &Settings) -> LogPlugin {
 fn init_game(world: &mut World) {
     CursorGrab(true).apply(world);
     world.spawn(Camera2dBundle::default()).insert(MainCamera);
-
-    let map: Box<dyn Map> = match world.resource::<Settings>().game.map {
-        MapSettings::Forest => Box::new(ForestMap),
-        MapSettings::Test => Box::new(TestMap),
-    };
-
-    map.generate(world);
 }

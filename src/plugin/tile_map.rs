@@ -224,7 +224,7 @@ impl Command for TileBlend {
                 }
             }
 
-            world.resource_scope(|world: &mut World, mut tile_map: Mut<TileMap>| {
+            world.resource_scope(|world, mut tile_map: Mut<TileMap>| {
                 for index in indexes {
                     tile_map
                         .tiles
