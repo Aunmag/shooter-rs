@@ -1,4 +1,7 @@
-use crate::{command::CursorGrab, resource::Settings};
+use crate::{
+    command::CursorGrab,
+    resource::{Settings, WindowModeSettings},
+};
 use bevy::{
     app::AppExit,
     ecs::{query::With, world::World},
@@ -22,7 +25,13 @@ pub fn input(mut commands: Commands, keyboard: Res<ButtonInput<KeyCode>>) {
     if keyboard.just_pressed(KeyCode::F11) {
         commands.add(|world: &mut World| {
             let mut settings = world.resource_mut::<Settings>();
-            settings.display.full_screen = !settings.display.full_screen;
+
+            settings.display.mode = match settings.display.mode {
+                WindowModeSettings::Fullscreen => WindowModeSettings::Windowed,
+                WindowModeSettings::Borderless => WindowModeSettings::Windowed,
+                WindowModeSettings::Windowed => WindowModeSettings::Borderless,
+            };
+
             let display = settings.display.clone();
 
             for mut window in world
@@ -31,11 +40,10 @@ pub fn input(mut commands: Commands, keyboard: Res<ButtonInput<KeyCode>>) {
             {
                 window.mode = display.mode();
 
-                if !display.full_screen {
-                    window.resolution.set(
-                        f32::from(display.window_size_x),
-                        f32::from(display.window_size_y),
-                    );
+                if display.mode == WindowModeSettings::Windowed {
+                    window
+                        .resolution
+                        .set(f32::from(display.window_w), f32::from(display.window_h));
                 }
             }
         });

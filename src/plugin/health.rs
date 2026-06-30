@@ -4,7 +4,7 @@ use crate::{
     event::ActorDeathEvent,
     model::{AppState, AudioPlay},
     plugin::{player::Player, AudioTracker, BloodSpawn, FleshParticleSpawn},
-    resource::{GameMode, Settings},
+    resource::{ScenarioSettings, Settings},
     util::{ext::AppExt, Timer},
 };
 use bevy::{
@@ -124,7 +124,7 @@ fn on_update(
         spawn_blood(&health, &mut commands, point);
         spawn_flesh(&health, &mut commands, entity);
 
-        if settings.game.modes.contains(&GameMode::Bench) {
+        if settings.game.scenario == ScenarioSettings::BenchZombies {
             health.health = 1.0;
             health.just_died = false;
         }

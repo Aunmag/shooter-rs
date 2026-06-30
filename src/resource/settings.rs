@@ -18,63 +18,58 @@ pub struct Settings {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct GameSettings {
+    pub scenario: ScenarioSettings,
     /// 0.8 - easy, 1.0 - medium, 1.2 - hard
     pub difficulty: f32,
     pub level: u8,
-    pub modes: Vec<GameMode>,
+    pub debug: bool,
 }
 
 impl Default for GameSettings {
     fn default() -> Self {
         return Self {
+            scenario: ScenarioSettings::Waves,
             difficulty: 1.0,
             level: 1,
-            modes: vec![GameMode::Waves],
+            debug: false,
         };
     }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
-pub enum GameMode {
-    Waves,
-    Debug,
-    DebugTweaks,
-    Bench,
+pub enum ScenarioSettings {
+    BenchZombies,
     Test,
     TestBotSpread,
-}
-
-impl GameMode {
-    pub fn dependencies(&self) -> &'static [GameMode] {
-        return match self {
-            Self::Waves => &[],
-            Self::Debug => &[],
-            Self::DebugTweaks => &[],
-            Self::Bench => &[Self::Debug],
-            Self::Test => &[Self::Debug],
-            Self::TestBotSpread => &[Self::Debug],
-        };
-    }
+    Waves,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct DisplaySettings {
-    pub full_screen: bool,
-    pub window_size_x: u16,
-    pub window_size_y: u16,
+    pub mode: WindowModeSettings,
+    pub window_w: u16,
+    pub window_h: u16,
     pub v_sync: bool,
 }
 
 impl Default for DisplaySettings {
     fn default() -> Self {
         return Self {
-            full_screen: true,
-            window_size_x: 800,
-            window_size_y: 800,
+            mode: WindowModeSettings::Borderless,
+            window_w: 800,
+            window_h: 800,
             v_sync: false,
         };
     }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum WindowModeSettings {
+    Fullscreen,
+    Borderless,
+    Windowed,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -84,7 +79,7 @@ pub struct AudioSettings {
 
 impl Default for AudioSettings {
     fn default() -> Self {
-        return Self { sources: 32 };
+        return Self { sources: 48 };
     }
 }
 
@@ -106,8 +101,7 @@ impl Settings {
         log::info!("Loading settings...");
         let context = "Failed to load settings";
         let encoded = std::fs::read_to_string(FILE).context(context)?;
-        let mut settings: Self = toml::from_str(&encoded).context(context)?;
-        settings.normalize();
+        let settings = toml::from_str(&encoded).context(context)?;
         log::info!("Settings loaded: {:?}", settings);
         return Ok(settings);
     }
@@ -138,40 +132,20 @@ impl Settings {
             }
         });
     }
-
-    pub fn normalize(&mut self) {
-        self.game.modes.dedup();
-
-        if self.game.modes.contains(&GameMode::Bench) {
-            self.game.modes = vec![GameMode::Bench];
-        }
-
-        loop {
-            let mut modes_with_dependencies = self.game.modes.clone();
-
-            for mode in &self.game.modes {
-                for dependency in mode.dependencies() {
-                    if !modes_with_dependencies.contains(dependency) {
-                        modes_with_dependencies.push(*dependency);
-                    }
-                }
-            }
-
-            if modes_with_dependencies.len() == self.game.modes.len() {
-                break;
-            } else {
-                self.game.modes = modes_with_dependencies;
-            }
-        }
-    }
 }
 
 impl DisplaySettings {
     pub fn mode(&self) -> WindowMode {
-        if self.full_screen {
-            return WindowMode::BorderlessFullscreen;
-        } else {
-            return WindowMode::Windowed;
+        match self.mode {
+            WindowModeSettings::Fullscreen => {
+                return WindowMode::Fullscreen;
+            }
+            WindowModeSettings::Borderless => {
+                return WindowMode::BorderlessFullscreen;
+            }
+            WindowModeSettings::Windowed => {
+                return WindowMode::Windowed;
+            }
         }
     }
 
@@ -187,17 +161,6 @@ impl DisplaySettings {
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    #[test]
-    fn test_default_is_normalized() {
-        let mut normalized = Settings::default();
-        normalized.normalize();
-
-        assert_eq!(
-            format!("{:?}", normalized),
-            format!("{:?}", Settings::default()),
-        );
-    }
 
     #[test]
     #[allow(clippy::unwrap_used)]

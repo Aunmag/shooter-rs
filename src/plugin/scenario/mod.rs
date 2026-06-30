@@ -1,9 +1,9 @@
-mod bench;
+mod bench_zombies;
 mod test;
 mod test_bot_spread;
 mod waves;
 
-pub use self::{bench::*, test::*, test_bot_spread::*, waves::*};
+pub use self::{bench_zombies::*, test::*, test_bot_spread::*, waves::*};
 use crate::{event::ActorDeathEvent, model::AppState, util::ext::AppExt};
 use bevy::{
     ecs::{

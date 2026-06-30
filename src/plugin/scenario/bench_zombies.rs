@@ -25,14 +25,14 @@ const INTERVAL: Duration = Duration::from_secs(1);
 const REPORTS_DIRECTORY: &str = "./bench/temp";
 
 #[derive(Default)]
-pub struct BenchScenario {
+pub struct BenchZombiesScenario {
     spawned: usize,
     updates: usize,
     updates_per_second: Vec<(usize, i32)>,
     is_complete: bool,
 }
 
-impl BenchScenario {
+impl BenchZombiesScenario {
     fn spawn_batch(&mut self, commands: &mut Commands) {
         for _ in 0..SPAWN_BATCH {
             let entity = commands.spawn_empty().id();
@@ -74,7 +74,7 @@ impl BenchScenario {
     }
 }
 
-impl ScenarioLogic for BenchScenario {
+impl ScenarioLogic for BenchZombiesScenario {
     fn on_enter(&mut self, world: &mut World) -> Duration {
         ForestMap.generate(world);
 

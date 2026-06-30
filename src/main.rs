@@ -22,7 +22,7 @@ use crate::{
         kinetics::KineticsPlugin,
         player::PlayerPlugin,
         scenario::{
-            BenchScenario, Scenario, ScenarioPlugin, TestBotSpreadScenario, TestScenario,
+            BenchZombiesScenario, Scenario, ScenarioPlugin, TestBotSpreadScenario, TestScenario,
             WavesScenario,
         },
         AudioTracker, AudioTrackerPlugin, BloodPlugin, BonusPlugin, BreathPlugin, CrosshairPlugin,
@@ -30,7 +30,7 @@ use crate::{
         MainCamera, ParticlePlugin, ProjectilePlugin, SkipLoaderPlugin, StatusBarPlugin,
         TerrainPlugin, TileMapPlugin, UiNotificationPlugin, WeaponPlugin,
     },
-    resource::{AssetStorage, AudioStorage, GameMode, Settings},
+    resource::{AssetStorage, AudioStorage, ScenarioSettings, Settings},
     util::ext::AppExt,
 };
 use bevy::{
@@ -56,8 +56,8 @@ fn main() {
                     title: APP_TITLE.to_string(),
                     mode: settings.display.mode(),
                     resolution: WindowResolution::new(
-                        f32::from(settings.display.window_size_x),
-                        f32::from(settings.display.window_size_y),
+                        f32::from(settings.display.window_w),
+                        f32::from(settings.display.window_h),
                     ),
                     present_mode: settings.display.present_mode(),
                     ..Default::default()
@@ -66,34 +66,18 @@ fn main() {
             }),
     );
 
-    let mut scenario = None;
-    for mode in &settings.game.modes {
-        log::info!("Starting with game mode: {:?}", mode);
+    let scenario = match settings.game.scenario {
+        ScenarioSettings::BenchZombies => Scenario::new(BenchZombiesScenario::default()),
+        ScenarioSettings::Test => Scenario::new(TestScenario),
+        ScenarioSettings::TestBotSpread => Scenario::new(TestBotSpreadScenario),
+        ScenarioSettings::Waves => Scenario::new(WavesScenario::new(settings.game.level)),
+    };
 
-        match &mode {
-            GameMode::Debug => {
-                std::env::set_var("RUST_BACKTRACE", "1");
-                application.add_plugins(DebugPlugin);
-            }
-            GameMode::DebugTweaks => {
-                application.add_plugins(DebugTweaksPlugin);
-            }
-            GameMode::Bench => {
-                scenario = Some(Scenario::new(BenchScenario::default()));
-            }
-            GameMode::Waves => {
-                scenario = Some(Scenario::new(WavesScenario::new(settings.game.level)));
-            }
-            GameMode::Test => {
-                scenario = Some(Scenario::new(TestScenario));
-            }
-            GameMode::TestBotSpread => {
-                scenario = Some(Scenario::new(TestBotSpreadScenario));
-            }
-        }
+    if settings.game.debug {
+        std::env::set_var("RUST_BACKTRACE", "1");
+        application.add_plugins(DebugPlugin);
+        application.add_plugins(DebugTweaksPlugin);
     }
-
-    application.insert_resource(scenario.unwrap_or_else(|| Scenario::new(TestScenario)));
 
     application
         .add_plugins(AudioTrackerPlugin)
@@ -124,6 +108,7 @@ fn main() {
         .insert_resource(AssetStorage::default())
         .insert_resource(AudioStorage::default())
         .insert_resource(AudioTracker::new(settings.audio.sources))
+        .insert_resource(scenario)
         .insert_resource(settings)
         .add_state_system(AppState::Loading, system::loading::on_update())
         .add_state_system_enter(AppState::Game, init_game)
@@ -140,7 +125,7 @@ fn main() {
 fn init_log_plugin(settings: &Settings) -> LogPlugin {
     let mut log_plugin = LogPlugin::default();
 
-    if settings.game.modes.contains(&GameMode::Debug) {
+    if settings.game.debug {
         if !log_plugin.filter.is_empty() {
             log_plugin.filter.push(',');
         }
