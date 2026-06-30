@@ -1,4 +1,7 @@
-use crate::plugin::{camera_target::CameraTarget, kinetics::Kinetics, Health};
+use crate::{
+    plugin::{camera_target::CameraTarget, kinetics::Kinetics, Health},
+    util::ext::Vec2Ext,
+};
 use bevy::{
     ecs::{
         system::{Resource, SystemBuffer, SystemMeta},
@@ -17,6 +20,11 @@ pub struct HitResource {
 
 impl HitResource {
     pub fn add(&mut self, entity: Entity, momentum: Vec2, spin: f32, is_recoil: bool) {
+        // TODO: find out why NaN might happen
+        if momentum.is_zero() || !momentum.is_finite() {
+            return;
+        }
+
         self.hits.push(Hit {
             entity,
             momentum,
