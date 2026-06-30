@@ -39,6 +39,6 @@ fn on_update_inner(
 
 pub fn on_update() -> SystemConfigs {
     return on_update_inner.run_if(|mut r: Local<Timer>, t: Res<Time>| {
-        return r.next_if_ready(t.elapsed(), || INTERVAL);
+        return r.try_next_set(t.elapsed(), || INTERVAL);
     });
 }

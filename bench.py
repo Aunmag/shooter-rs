@@ -5,7 +5,7 @@ import subprocess
 import time
 
 
-DIRECTORY = "./bench"
+DIRECTORY = "./target/bench"
 PASSES = 0  # 0 - to view only
 LABEL = ""
 

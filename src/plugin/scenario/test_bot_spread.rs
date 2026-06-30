@@ -14,7 +14,7 @@ use std::{any::Any, time::Duration};
 pub struct TestBotSpreadScenario;
 
 impl ScenarioLogic for TestBotSpreadScenario {
-    fn on_enter(&mut self, world: &mut World) -> Duration {
+    fn on_enter(&mut self, _time: Duration, world: &mut World) -> Duration {
         TestMap.generate(world);
 
         world

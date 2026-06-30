@@ -234,7 +234,7 @@ impl WavesScenario {
 }
 
 impl ScenarioLogic for WavesScenario {
-    fn on_enter(&mut self, world: &mut World) -> Duration {
+    fn on_enter(&mut self, _time: Duration, world: &mut World) -> Duration {
         ForestMap.generate(world);
 
         let weapon = WeaponConfig::ALL
@@ -314,7 +314,7 @@ impl ScenarioLogic for WavesScenario {
         });
     }
 
-    fn on_interval_update(&mut self, commands: &mut Commands) -> Duration {
+    fn on_interval_update(&mut self, _time: Duration, commands: &mut Commands) -> Duration {
         let timeout = self.task.get_timeout();
         self.task = WavesScenario::update(self, commands);
         return timeout;

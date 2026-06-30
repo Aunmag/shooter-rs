@@ -21,6 +21,6 @@ fn ambience_fx_inner(audio: Res<AudioTracker>) {
 
 pub fn ambience_fx() -> SystemConfigs {
     return ambience_fx_inner.run_if(|mut r: Local<Timer>, t: Res<Time>| {
-        return r.next_if_ready(t.elapsed(), || rand::thread_rng().gen_range(INTERVAL));
+        return r.try_next_set(t.elapsed(), || rand::thread_rng().gen_range(INTERVAL));
     });
 }

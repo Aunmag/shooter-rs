@@ -56,7 +56,7 @@ impl Bot {
         is_weapon_automatic: bool,
         time: Duration,
     ) -> BotShootingState {
-        if self.shooting_timer.is_ready_and_enabled(time) {
+        if self.shooting_timer.is_ready(time) {
             let next_state = match self.shooting_state {
                 BotShootingState::Prepare => BotShootingState::Shoot,
                 BotShootingState::Shoot => BotShootingState::Pause,

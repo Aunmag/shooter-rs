@@ -22,8 +22,8 @@ use crate::{
         kinetics::KineticsPlugin,
         player::PlayerPlugin,
         scenario::{
-            BenchZombiesScenario, Scenario, ScenarioPlugin, TestBotSpreadScenario, TestScenario,
-            WavesScenario,
+            BenchProjectilesScenario, BenchZombiesScenario, Scenario, ScenarioPlugin,
+            TestBotSpreadScenario, TestScenario, WavesScenario,
         },
         AudioTracker, AudioTrackerPlugin, BloodPlugin, BonusPlugin, BreathPlugin, CrosshairPlugin,
         DebugTweaksPlugin, ExplosionPlugin, FootstepsPlugin, HealthPlugin, HeartbeatPlugin,
@@ -67,6 +67,7 @@ fn main() {
     );
 
     let scenario = match settings.game.scenario {
+        ScenarioSettings::BenchProjectiles => Scenario::new(BenchProjectilesScenario::default()),
         ScenarioSettings::BenchZombies => Scenario::new(BenchZombiesScenario::default()),
         ScenarioSettings::Test => Scenario::new(TestScenario),
         ScenarioSettings::TestBotSpread => Scenario::new(TestBotSpreadScenario),

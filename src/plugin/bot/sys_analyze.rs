@@ -20,7 +20,7 @@ pub fn on_update(
     bots.par_iter_mut()
         .batching_strategy(BatchingStrategy::fixed(32))
         .for_each(|(mut bot, e1, a1, t1)| {
-            if !bot.update_timer.is_ready_or_disabled(time) {
+            if bot.update_timer.is_enabled() && !bot.update_timer.is_ready(time) {
                 return;
             }
 

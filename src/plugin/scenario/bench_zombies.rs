@@ -2,34 +2,26 @@ use crate::{
     command::ActorSet,
     component::ActorConfig,
     map::{ForestMap, Map},
-    plugin::{bot::ActorBotSet, player::PlayerSpawn, scenario::ScenarioLogic, WeaponConfig},
+    plugin::{
+        bot::ActorBotSet,
+        player::PlayerSpawn,
+        scenario::{bench_utils::Bench, ScenarioLogic},
+        WeaponConfig,
+    },
 };
 use bevy::{
-    app::AppExit,
     ecs::world::{Command, World},
     math::Vec2,
     prelude::Commands,
 };
-use chrono::Local;
-use std::{
-    any::Any,
-    fs::File,
-    io::{Result, Write},
-    path::Path,
-    time::Duration,
-};
+use std::{any::Any, time::Duration};
 
 const SPAWN_BATCH: usize = 100;
 const SPAWN_MAX: usize = 3000;
-const INTERVAL: Duration = Duration::from_secs(1);
-const REPORTS_DIRECTORY: &str = "./bench/temp";
 
 #[derive(Default)]
 pub struct BenchZombiesScenario {
-    spawned: usize,
-    updates: usize,
-    updates_per_second: Vec<(usize, i32)>,
-    is_complete: bool,
+    inner: Bench,
 }
 
 impl BenchZombiesScenario {
@@ -46,36 +38,13 @@ impl BenchZombiesScenario {
 
             commands.add(ActorBotSet { entity });
 
-            self.spawned += 1;
+            self.inner.spawned += 1;
         }
-    }
-
-    fn calc_updates(&mut self) {
-        let fps = (self.updates as f64 / INTERVAL.as_secs_f64()) as i32;
-        log::debug!("Spawned {} actors, FPS: {}", self.spawned, fps);
-        self.updates_per_second.push((self.spawned, fps));
-        self.updates = 0;
-    }
-
-    fn save_report(&self) -> Result<()> {
-        let directory_path = Path::new(REPORTS_DIRECTORY);
-        let file_name = Local::now().format("%Y-%m-%d %H-%M-%S").to_string();
-        let file_path = directory_path.join(file_name);
-
-        std::fs::create_dir_all(directory_path)?;
-        let mut file = File::create(&file_path)?;
-
-        for (spawned, fps) in &self.updates_per_second {
-            file.write_all(format!("{},{}\n", spawned, fps).as_bytes())?;
-        }
-
-        log::info!("Report saved to file: {}", file_path.display());
-        return Ok(());
     }
 }
 
 impl ScenarioLogic for BenchZombiesScenario {
-    fn on_enter(&mut self, world: &mut World) -> Duration {
+    fn on_enter(&mut self, _time: Duration, world: &mut World) -> Duration {
         ForestMap.generate(world);
 
         // TODO: just spawn spectator
@@ -86,32 +55,17 @@ impl ScenarioLogic for BenchZombiesScenario {
         }
         .apply(world);
 
-        return INTERVAL;
+        return Duration::ZERO;
     }
 
-    fn on_interval_update(&mut self, commands: &mut Commands) -> Duration {
-        self.calc_updates();
-
-        if self.spawned < SPAWN_MAX {
+    fn on_constant_update(&mut self, time: Duration, commands: &mut Commands) {
+        if self.inner.try_next(time) {
             self.spawn_batch(commands);
-        } else if !self.is_complete {
-            self.is_complete = true;
-
-            if let Err(error) = self.save_report() {
-                log::error!("Failed to save report: {:?}", error);
-            }
-
-            log::info!("Benchmark completed");
-            commands.add(|w: &mut World| {
-                w.send_event(AppExit::Success);
-            });
         }
 
-        return INTERVAL;
-    }
-
-    fn on_constant_update(&mut self, _: &mut Commands) {
-        self.updates += 1;
+        if self.inner.spawned >= SPAWN_MAX {
+            self.inner.finish(commands);
+        }
     }
 
     fn as_any_mut(&mut self) -> &mut dyn Any {

@@ -1,9 +1,11 @@
+mod bench_projectiles;
+mod bench_utils;
 mod bench_zombies;
 mod test;
 mod test_bot_spread;
 mod waves;
 
-pub use self::{bench_zombies::*, test::*, test_bot_spread::*, waves::*};
+pub use self::{bench_projectiles::*, bench_zombies::*, test::*, test_bot_spread::*, waves::*};
 use crate::{event::ActorDeathEvent, model::AppState, util::ext::AppExt};
 use bevy::{
     ecs::{
@@ -45,7 +47,7 @@ impl Scenario {
 }
 
 pub trait ScenarioLogic {
-    fn on_enter(&mut self, _world: &mut World) -> Duration {
+    fn on_enter(&mut self, _time: Duration, _world: &mut World) -> Duration {
         return Duration::ZERO;
     }
 
@@ -53,11 +55,11 @@ pub trait ScenarioLogic {
 
     fn on_player_death(&mut self, _event: &ActorDeathEvent, _commands: &mut Commands) {}
 
-    fn on_interval_update(&mut self, _commands: &mut Commands) -> Duration {
+    fn on_interval_update(&mut self, _time: Duration, _commands: &mut Commands) -> Duration {
         return Duration::from_secs(60);
     }
 
-    fn on_constant_update(&mut self, _commands: &mut Commands) {}
+    fn on_constant_update(&mut self, _time: Duration, _commands: &mut Commands) {}
 
     fn as_any_mut(&mut self) -> &mut dyn Any;
 }
@@ -65,7 +67,7 @@ pub trait ScenarioLogic {
 fn on_enter(world: &mut World) {
     world.resource_scope(|world, mut scenario: Mut<Scenario>| {
         let time = world.resource::<Time>().elapsed();
-        let timeout = scenario.logic.on_enter(world);
+        let timeout = scenario.logic.on_enter(time, world);
         scenario.timer = time + timeout;
     });
 }
@@ -90,8 +92,8 @@ fn on_update(
     }
 
     if scenario.timer <= time {
-        scenario.timer = time + scenario.logic.on_interval_update(&mut commands);
+        scenario.timer = time + scenario.logic.on_interval_update(time, &mut commands);
     }
 
-    scenario.logic.on_constant_update(&mut commands);
+    scenario.logic.on_constant_update(time, &mut commands);
 }

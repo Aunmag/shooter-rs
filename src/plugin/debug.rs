@@ -175,7 +175,7 @@ fn update_diagnostics_text() -> SystemConfigs {
     return update_diagnostics_text_inner
         .after(update_diagnostics_data)
         .run_if(|mut r: Local<Timer>, t: Res<Time>| {
-            return r.next_if_ready(t.elapsed(), || UPDATE_TEXT_INTERVAL);
+            return r.try_next_set(t.elapsed(), || UPDATE_TEXT_INTERVAL);
         });
 }
 

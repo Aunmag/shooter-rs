@@ -1,5 +1,5 @@
 [game]
-scenario = "waves" # bench_zombies, test, test_bot_spread, waves
+scenario = "waves" # bench_projectiles, bench_zombies, test, test_bot_spread, waves
 difficulty = 1.0 # 0.8 - easy, 1.0 - medium, 1.2 - hard
 level = 1 # starting level
 debug = false

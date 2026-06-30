@@ -9,7 +9,7 @@ use std::{any::Any, time::Duration};
 pub struct TestScenario;
 
 impl ScenarioLogic for TestScenario {
-    fn on_enter(&mut self, world: &mut World) -> Duration {
+    fn on_enter(&mut self, _time: Duration, world: &mut World) -> Duration {
         TestMap.generate(world);
 
         PlayerSpawn {

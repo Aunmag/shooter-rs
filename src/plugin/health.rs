@@ -34,7 +34,7 @@ impl Plugin for HealthPlugin {
         app.add_state_system(
             AppState::Game,
             on_update.run_if(|mut r: Local<Timer>, t: Res<Time>| {
-                r.next_if_ready(t.elapsed(), || BUFFERING)
+                r.try_next_set(t.elapsed(), || BUFFERING)
             }),
         );
     }
@@ -108,6 +108,10 @@ fn on_update(
     settings: Res<Settings>,
     audio: Res<AudioTracker>,
 ) {
+    if settings.game.scenario == ScenarioSettings::BenchProjectiles {
+        return;
+    }
+
     for (entity, actor, mut health, transform, is_player) in query.iter_mut() {
         let actor = actor.config;
         let point = transform.translation.xy();

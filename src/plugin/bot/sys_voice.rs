@@ -28,7 +28,7 @@ pub fn on_update(
 
         if !bot
             .voice_timer
-            .next_if_ready(time, || rand::thread_rng().gen_range(INTERVAL))
+            .try_next_set(time, || rand::thread_rng().gen_range(INTERVAL))
         {
             continue;
         }

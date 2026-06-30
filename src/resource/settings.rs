@@ -39,6 +39,7 @@ impl Default for GameSettings {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum ScenarioSettings {
+    BenchProjectiles,
     BenchZombies,
     Test,
     TestBotSpread,
