@@ -2,6 +2,7 @@ mod command;
 mod component;
 mod config;
 mod material;
+mod state;
 mod sys_update;
 mod sys_whiz;
 

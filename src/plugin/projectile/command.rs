@@ -31,6 +31,7 @@ impl Command for ProjectileSpawn {
             world.resource::<Time>().elapsed(),
             self.position,
             self.velocity,
+            f32::INFINITY,
             self.shooter,
         );
 

@@ -1,3 +1,4 @@
+use crate::data::DISTANCE_1MM;
 use bevy::prelude::Vec2;
 use std::{
     f32::consts::{PI, TAU},
@@ -18,6 +19,29 @@ pub fn interpolate(min: f32, max: f32, blend: f32) -> f32 {
 
 pub fn interpolate_unbounded(min: f32, max: f32, blend: f32) -> f32 {
     return min + (max - min) * blend;
+}
+
+/// - `0.0`- 180-degree straight line
+/// - `1.0`- 0-degree hairpin turn
+/// - `0.5`- 90-degree right turn
+/// - `-0.5`- 90-degree left turn
+pub fn angle_factor_signed(a: Vec2, b: Vec2, c: Vec2) -> f32 {
+    let u = a - b;
+    let v = c - b;
+    let len_sq = u.length_squared() * v.length_squared();
+
+    if len_sq <= DISTANCE_1MM * DISTANCE_1MM {
+        return 0.0;
+    }
+
+    let cross = u.x * v.y - u.y * v.x;
+    let factor = 0.5 * (1.0 + u.dot(v) / len_sq.sqrt());
+
+    if cross.abs() < 1e-8 {
+        return factor; // protect against floating-point noise
+    } else {
+        return factor * cross.signum();
+    }
 }
 
 pub fn angle_difference(a: f32, b: f32) -> f32 {
@@ -58,6 +82,16 @@ pub fn find_meet_point(
 mod tests {
     use super::*;
     use std::f32::consts::FRAC_PI_2;
+
+    #[test]
+    fn test_angle_factor_signed() {
+        let v = |x: i32, y: i32| Vec2::new(x as f32, y as f32);
+        assert_eq!(angle_factor_signed(v(0, 0), v(0, 1), v(0, 1)), 0.0); // straight
+        assert_eq!(angle_factor_signed(v(0, 0), v(0, 1), v(1, 1)), 0.5); // 90 degrees right
+        assert_eq!(angle_factor_signed(v(0, 0), v(0, 1), v(-1, 1)), -0.5); // 90 degrees left
+        assert_eq!(angle_factor_signed(v(0, 0), v(0, 1), v(0, 0)), 1.0); // opposite
+        assert_eq!(angle_factor_signed(v(0, 0), v(0, 0), v(0, 0)), 0.0); // zero length
+    }
 
     #[test]
     fn test_normalize_radians() {

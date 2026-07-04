@@ -1,9 +1,11 @@
 use crate::{
     data::{LAYER_GROUND, LAYER_PROJECTILE},
-    plugin::{collision::Collision, Actor, ActorKind, AudioPlay, AudioTracker, TileBlend},
+    plugin::{
+        collision::Collision, Actor, AudioPlay, AudioTracker, ProjectileExplosion, TileBlend,
+    },
     resource::{AssetStorage, HitResource},
     state::AppState,
-    util::ext::{AppExt, Vec2Ext},
+    util::ext::{AppExt, Fuzz, Vec2Ext},
 };
 use bevy::{
     app::{App, Plugin},
@@ -31,13 +33,8 @@ use rand::Rng;
 use std::{f32::consts::TAU, time::Duration};
 
 const PUSH_MULTIPLIER: f32 = 20.0;
-const RADIUS_MAX: f32 = 3.2;
 const DURATION: Duration = Duration::from_millis(500);
-const ENERGY: f32 = 6.0;
 const FORCE_MIN: f32 = 0.01;
-
-const CRATER_DIAMETER_MIN: f32 = 0.8;
-const CRATER_DIAMETER_MAX: f32 = 1.2;
 
 pub struct ExplosionPlugin;
 
@@ -52,25 +49,18 @@ impl Plugin for ExplosionPlugin {
 }
 
 pub struct Explode {
-    position: Vec2,
-    friendlies: Option<ActorKind>,
-}
-
-impl Explode {
-    pub fn new(position: Vec2, friendlies: Option<ActorKind>) -> Self {
-        return Self {
-            position,
-            friendlies,
-        };
-    }
+    pub config: &'static ProjectileExplosion,
+    pub position: Vec2,
+    pub shooter: Option<Entity>,
 }
 
 impl Command for Explode {
     fn apply(self, world: &mut World) {
         let explosion = Explosion {
+            config: self.config,
             spawned: world.resource::<Time>().elapsed(),
             damaged: Vec::new(),
-            friendlies: self.friendlies,
+            shooter: self.shooter,
         };
 
         let assets = world.resource::<AssetStorage>();
@@ -103,8 +93,10 @@ impl Command for Explode {
 
         let image_path = "terrain/crater.png";
         if let Some(image) = world.resource::<AssetServer>().get_handle(image_path) {
-            let direction = rand::thread_rng().gen_range(0.0..TAU);
-            let diameter = rand::thread_rng().gen_range(CRATER_DIAMETER_MIN..CRATER_DIAMETER_MAX);
+            let mut rng = rand::thread_rng();
+            let direction = rng.gen_range(0.0..TAU);
+            let diameter = (self.config.radius * 2.0 / 6.0).fuzz_with(&mut rng, 0.2); // 6 times smaller that the explosion wave
+
             TileBlend::image(
                 image,
                 self.position.extend(LAYER_GROUND),
@@ -120,10 +112,10 @@ impl Command for Explode {
 
 #[derive(Component)]
 struct Explosion {
+    config: &'static ProjectileExplosion,
     spawned: Duration,
     damaged: Vec<Entity>,
-    friendlies: Option<ActorKind>,
-    // TODO: store shooter?
+    shooter: Option<Entity>,
 }
 
 #[derive(Debug, Clone, Asset, TypePath, AsBindGroup)]
@@ -170,7 +162,7 @@ fn on_update(
         }
 
         let force_factor = 1.0 - radius_factor;
-        let radius = RADIUS_MAX * radius_factor;
+        let radius = explosion.config.radius * radius_factor;
         let explosion_position = explosion_transform.translation.xy();
         explosion_transform.scale.x = radius * 2.0;
         explosion_transform.scale.y = radius * 2.0;
@@ -183,8 +175,17 @@ fn on_update(
             continue;
         }
 
+        let shooter_kind = explosion
+            .shooter
+            .and_then(|e| actors.get(e).ok())
+            .map(|a| a.1.config.kind);
+
         for (actor_entity, actor, actor_transform, actor_body) in actors.iter() {
-            if explosion.friendlies == Some(actor.config.kind) {
+            if explosion.shooter == Some(actor_entity) {
+                continue;
+            }
+
+            if shooter_kind == Some(actor.config.kind) {
                 continue;
             }
 
@@ -195,8 +196,10 @@ fn on_update(
                     continue;
                 }
 
-                let energy =
-                    (actor_position - explosion_position).normalize() * force_factor * ENERGY;
+                let energy = (actor_position - explosion_position).normalize()
+                    * explosion.config.energy
+                    * force_factor;
+
                 hits.add(actor_entity, energy, 0.0, false);
                 hits.add(actor_entity, energy * PUSH_MULTIPLIER, 0.0, true); // extra push without damage
                 explosion.damaged.push(actor_entity);

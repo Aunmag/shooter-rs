@@ -1,5 +1,8 @@
 use crate::{
-    plugin::{camera_target::CameraTarget, debug::debug_line, AudioPlay, AudioTracker, Projectile},
+    plugin::{
+        camera_target::CameraTarget, debug::debug_line, projectile::state::ProjectileState,
+        AudioPlay, AudioTracker, Projectile, ProjectilePhysics,
+    },
     util::geometry::GeometryProjection,
 };
 use bevy::{
@@ -25,8 +28,12 @@ pub fn on_update(
         let mut closest_distance = f32::INFINITY;
 
         for projectile in projectiles.iter_mut() {
-            let head = projectile.calc_data(t0).0;
-            let tail = projectile.calc_data(t1).0;
+            if projectile.config.physics != ProjectilePhysics::Bullet {
+                continue;
+            }
+
+            let head = ProjectileState::calc(projectile, t0).position();
+            let tail = ProjectileState::calc(projectile, t1).position();
             let length = head.distance_squared(tail);
 
             let projection = listener.project_on(&(head, tail));

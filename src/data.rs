@@ -4,6 +4,7 @@ pub const APP_TITLE: &str = "A Zombie Shooter Game";
 
 pub const PIXELS_PER_METER: f32 = 32.0;
 pub const VIEW_DISTANCE: f32 = 37.5;
+pub const DISTANCE_1MM: f32 = 0.001;
 
 pub const WORLD_SIZE: f32 = 52.0;
 pub const WORLD_SIZE_HALF: f32 = WORLD_SIZE / 2.0;

@@ -40,6 +40,8 @@ impl SystemBuffer for HitResource {
             return;
         }
 
+        // TODO: first sum all hits by entity, then skip too small, but do not cancel out linear momentum?
+
         let mut targets = world.query::<(&mut Kinetics, &mut Health, Option<&mut CameraTarget>)>();
 
         for hit in self.hits.drain(..) {

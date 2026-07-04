@@ -1,7 +1,7 @@
 use crate::{
     plugin::{
         bot::ActorBotSet, ActorConfig, ActorKind, ActorSet, AudioTracker, BonusSpawn, Crosshair,
-        Explode, TileMap, WeaponConfig, WeaponSet,
+        Explode, ProjectileConfig, TileMap, WeaponConfig, WeaponSet,
     },
     state::AppState,
     util::{ext::AppExt, Timer, Transform2D},
@@ -234,7 +234,13 @@ fn update_input(
             spawn_actors(&mut commands, position, &ActorConfig::ZOMBIE, group);
         }
         Spawn::Explosion => {
-            commands.add(Explode::new(position.position, None));
+            if let Some(explosion) = &ProjectileConfig::TBG_7V.explosion {
+                commands.add(Explode {
+                    config: explosion,
+                    position: position.position,
+                    shooter: None,
+                });
+            }
         }
     }
 }

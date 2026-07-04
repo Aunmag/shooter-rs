@@ -5,7 +5,8 @@ mod config;
 pub use self::{command::*, component::*, config::*};
 use crate::{
     plugin::{
-        Actor, ActorActionsExt, AudioPlay, AudioTracker, ProjectileSpawn, ShellParticleSpawn,
+        Actor, ActorActionsExt, AudioPlay, AudioTracker, ProjectilePhysics, ProjectileSpawn,
+        ShellParticleSpawn,
     },
     resource::HitResource,
     state::AppState,
@@ -81,7 +82,7 @@ fn on_update(
                 ..AudioPlay::DEFAULT
             });
 
-            if weapon.config.has_bolt {
+            if has_shells(&weapon) && weapon.config.has_bolt {
                 commands.add(ShellParticleSpawn(entity));
             }
 
@@ -119,11 +120,15 @@ fn on_update(
                 ..AudioPlay::DEFAULT
             });
 
-            if !weapon.config.has_bolt && !weapon.config.projectile.is_rocket {
+            if has_shells(&weapon) && !weapon.config.has_bolt {
                 for _ in 0..weapon.config.ammo_capacity {
                     commands.add(ShellParticleSpawn(entity));
                 }
             }
         }
     }
+}
+
+fn has_shells(weapon: &Weapon) -> bool {
+    return weapon.config.projectile.physics == ProjectilePhysics::Bullet;
 }
