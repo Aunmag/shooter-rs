@@ -3,7 +3,7 @@ use crate::{
     plugin::{camera::MainCamera, player::Player},
     resource::AssetStorage,
     state::AppState,
-    util::ext::{AppExt, Vec2Ext},
+    util::ext::{AppExt, QuatExt, Vec2Ext},
 };
 use bevy::{
     app::{App, Plugin},
@@ -106,8 +106,8 @@ fn on_update(
 
         // crosshair must in sync with player while it moves, also player direction can be changed
         // because of weapon recoil, so crosshair should be affected too
-        let on_world_old = player_position
-            + Vec2::new(crosshair.distance, 0.0).rotate_by_quat(player_transform.rotation);
+        let on_world_old =
+            player_position + player_transform.rotation.as_vec() * crosshair.distance;
 
         let Some(on_screen_old) =
             camera.world_to_viewport(camera_transform, on_world_old.extend(0.0))

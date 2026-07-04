@@ -110,7 +110,7 @@ fn calc_target_data(
         return None;
     }
 
-    let angle_objective = relative.angle();
+    let angle_objective = relative.to_angle();
     let angle_subjective = math::angle_difference(angle_objective, attacker_transform.rotation);
     let distance_angular = angle_subjective.abs() / (attacker.melee_distance_angular / 2.0);
 

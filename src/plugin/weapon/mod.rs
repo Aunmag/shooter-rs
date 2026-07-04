@@ -97,8 +97,7 @@ fn on_update(
                 });
             }
 
-            let recoil = weapon.get_recoil();
-            let recoil_push = Vec2::new(-recoil, 0.0).rotate_by_quat(transform.rotation);
+            let recoil_push = transform.rotation.as_vec() * -weapon.get_recoil();
             let recoil_spin = if data.rng.gen::<bool>() {
                 actor.config.recoil_factor / actor.skill
             } else {

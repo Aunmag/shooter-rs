@@ -11,7 +11,7 @@ fn angle_custom(q: Quat) -> f32 {
 }
 
 fn bench(c: &mut Criterion) {
-    let mut group = c.benchmark_group("Quat Angle");
+    let mut group = c.benchmark_group("quat_angle");
 
     for r in [0.0, PI / 3.0, PI] {
         let q = Quat::from_rotation_z(r);

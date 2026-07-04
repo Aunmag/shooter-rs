@@ -2,7 +2,7 @@ use crate::{
     data::VIEW_DISTANCE,
     plugin::camera::MainCamera,
     state::AppState,
-    util::ext::{AppExt, DurationExt, QuatExt, Vec2Ext},
+    util::ext::{AppExt, DurationExt, QuatExt},
 };
 use bevy::{
     app::{App, Plugin},
@@ -103,9 +103,8 @@ pub fn on_update(
 
         let rotation = Quat::from_rotation_z(target.direction + target.shake_spin.get() * SHAKE_R);
 
-        let mut offset = Vec2::ZERO;
-        offset.y += window_size.y / 2.0 * scale * target.offset_y();
-        offset = offset.rotate_by_quat(rotation);
+        let mut offset = rotation.as_vec().perp();
+        offset *= window_size.y / 2.0 * scale * target.offset_y();
         offset += target.shake_push.get() * SHAKE_Y;
 
         if let Some((mut camera_transform, mut camera_projection)) = cameras.iter_mut().next() {

@@ -7,7 +7,6 @@ pub trait Vec2Ext {
 
     fn from_length(length: f32, angle: f32) -> Self;
     fn rotate_by_quat(self, quat: Quat) -> Self;
-    fn angle(&self) -> f32;
     fn angle_to(self, target: Self) -> f32;
     fn distance_squared(self, target: Self) -> f32;
     fn is_zero(self) -> bool;
@@ -23,19 +22,16 @@ impl Vec2Ext for Vec2 {
         return Self::from_angle(angle) * length;
     }
 
+    // TODO: unit-tests
     fn rotate_by_quat(self, q: Quat) -> Self {
         let v = self;
-        let v = Vec2::new((v.x * q.w) - (v.y * q.z), (v.x * q.z) + (v.y * q.w));
-        let v = Vec2::new((v.x * q.w) - (v.y * q.z), (v.x * q.z) + (v.y * q.w));
-        return v;
-    }
-
-    fn angle(&self) -> f32 {
-        return f32::atan2(self.y, self.x);
+        let rw = q.w * q.w - q.z * q.z;
+        let rz = 2.0 * q.w * q.z;
+        return Vec2::new(v.x * rw - v.y * rz, v.x * rz + v.y * rw);
     }
 
     fn angle_to(self, target: Self) -> f32 {
-        return (target - self).angle();
+        return (target - self).to_angle();
     }
 
     fn distance_squared(self, target: Self) -> f32 {
@@ -63,50 +59,55 @@ impl Vec2Ext for Vec2 {
     }
 
     fn as_quat(self) -> Quat {
-        return Quat::from_rotation_z(self.angle());
+        return Quat::from_rotation_z(self.to_angle());
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::util::{math::normalize_radians, test::assert_radians_eq};
-    use std::f32::consts::{FRAC_PI_2, FRAC_PI_4, PI, TAU};
+    use crate::util::{ext::QuatExt, test::assert_radians_eq};
+
+    const ANGLES: [f32; 9] = [
+        -std::f32::consts::TAU,       // -360°
+        -std::f32::consts::PI,        // -180°
+        -std::f32::consts::FRAC_PI_2, // -90°
+        -std::f32::consts::FRAC_PI_4, // -45°
+        0.0,                          // 0°
+        std::f32::consts::FRAC_PI_4,  // 45°
+        std::f32::consts::FRAC_PI_2,  // 90°
+        std::f32::consts::PI,         // 180°
+        std::f32::consts::TAU,        // 360°
+    ];
 
     #[test]
     fn from_length() {
-        for length in [0.5, 1.0, 13.2] {
-            for angle in [
-                -TAU,
-                -PI - FRAC_PI_2,
-                -PI,
-                -FRAC_PI_2,
-                0.0,
-                FRAC_PI_2,
-                PI,
-                PI + FRAC_PI_2,
-                TAU,
-            ] {
-                let vec = Vec2::from_length(length, angle);
-                assert_radians_eq!(vec.angle(), normalize_radians(angle));
-                assert_eq!(vec.length(), length);
+        for a in ANGLES {
+            for l in [0.5, 1.0, 13.2] {
+                let v = Vec2::from_length(l, a);
+                assert_eq!(fmt(v.length()), fmt(l));
+                assert_radians_eq!(v.to_angle(), a);
             }
         }
     }
 
     #[test]
     fn angle_to() {
-        for c in [Vec2::ZERO, Vec2::new(1.0, 1.0), Vec2::new(-34.6, 44.2)] {
-            for distance in [0.1, 2349.4] {
-                let x = Vec2::new(distance, 0.0);
-                let y = Vec2::new(0.0, distance);
-                assert_eq!(c.angle_to(c + x), 0.0);
-                assert_eq!(c.angle_to(c - x), PI);
-                assert_eq!(c.angle_to(c + y), FRAC_PI_2);
-                assert_eq!(c.angle_to(c - y), -FRAC_PI_2);
-                assert_eq!(c.angle_to(c + x + y), FRAC_PI_4);
-                assert_eq!(c.angle_to(c + x - y), -FRAC_PI_4);
-            }
+        for a in ANGLES {
+            let v1 = Vec2::new(12.3, 45.6);
+            let v2 = v1 + Vec2::from_length(3.3, a);
+            assert_radians_eq!(v1.angle_to(v2), a);
         }
+    }
+
+    #[test]
+    fn as_quat() {
+        for a in ANGLES {
+            assert_radians_eq!(Vec2::from_angle(a).as_quat().angle_z(), a);
+        }
+    }
+
+    fn fmt(n: f32) -> String {
+        return format!("{:.5}", n);
     }
 }

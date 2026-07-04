@@ -6,7 +6,7 @@ use crate::{
     },
     state::AppState,
     util::{
-        ext::{AppExt, Vec2Ext},
+        ext::{AppExt, QuatExt, Vec2Ext},
         math::interpolate,
     },
 };
@@ -137,7 +137,7 @@ fn update_label(
         .next()
         .map_or_else(Default::default, |c| c.rotation);
 
-    let position = Vec2::new(0.0, -5.0).rotate_by_quat(rotation);
+    let position = rotation.as_vec().perp() * -5.0;
 
     for mut label in query.iter_mut() {
         label.translation.x = position.x;

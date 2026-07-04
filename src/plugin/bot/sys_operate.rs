@@ -185,13 +185,11 @@ impl BotHandler<'_> {
             }
 
             if DEBUG_AIM {
+                let p = self.position();
+
                 debug_line(
-                    self.position(),
-                    self.position()
-                        + Vec2::from_length(
-                            self.bot.config.shoot_distance_max,
-                            self.transform.rotation.angle_z(),
-                        ),
+                    p,
+                    p + self.transform.rotation.as_vec() * self.bot.config.shoot_distance_max,
                     debug_color,
                 );
             }
