@@ -181,8 +181,6 @@ fn choose_weapon(world: &mut World, level: u8) -> Option<&'static WeaponConfig> 
         .choose_weighted(&mut rand::thread_rng(), |w| {
             if w.level > level || Some(w.name) == weapon_of_all_the_players {
                 return 0.0;
-            } else if w.level == 0 {
-                return 0.1; // less pistols, they are useless
             } else {
                 return (w.level as f32 / level as f32).powi(2); // more chance for newer weapons
             }
