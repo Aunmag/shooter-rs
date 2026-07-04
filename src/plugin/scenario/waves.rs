@@ -77,9 +77,9 @@ const WAVES: &[Wave] = &[
 
 const WAVE_BONUS: Wave = Wave {
     size: u16::MAX,
-    pistol_chance: 0.4,
-    rifle_chance: 0.2,
-    agile_chance: 0.0,
+    pistol_chance: SPAWN_CHANCE_LOW,
+    rifle_chance: 0.0,
+    agile_chance: SPAWN_CHANCE_MILD,
 };
 
 const ENEMY_SPAWN_DISTANCE: f32 = VIEW_DISTANCE * 0.5;
@@ -87,6 +87,7 @@ const BONUSES_PER_WAVE: f32 = 3.0;
 const GAME_OVER_TEXT_DURATION: Duration = Duration::from_secs(8);
 const DEFAULT_INTERVAL: Duration = Duration::from_secs(2);
 const WAVE_BONUS_HUMANS: u8 = 16;
+const SPAWN_INTERVAL: Duration = Duration::from_millis(700);
 
 enum Task {
     StartNextWave,
@@ -99,7 +100,7 @@ impl Task {
     fn get_timeout(&self) -> Duration {
         return match self {
             Self::StartNextWave => DEFAULT_INTERVAL,
-            Self::SpawnZombie => Duration::from_millis(800),
+            Self::SpawnZombie => SPAWN_INTERVAL,
             Self::CheckWaveCompletion => DEFAULT_INTERVAL,
             Self::CompleteWave => Duration::from_secs(4),
         };
