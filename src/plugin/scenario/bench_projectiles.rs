@@ -1,13 +1,12 @@
 use crate::{
     command::ActorSet,
     component::{Actor, ActorConfig},
-    model::TransformLite,
     plugin::{
         camera_target::CameraTarget,
         scenario::{bench_utils::Bench, ScenarioLogic},
         ProjectileSpawn, WeaponConfig,
     },
-    util::{ext::Vec2Ext, Timer},
+    util::{ext::QuatExt, Timer},
 };
 use bevy::{
     ecs::{
@@ -15,7 +14,7 @@ use bevy::{
         world::{Command, World},
     },
     math::Vec2,
-    prelude::Commands,
+    prelude::{Commands, Vec3Swizzles},
     transform::components::Transform,
 };
 use rand::{Rng, SeedableRng};
@@ -91,17 +90,17 @@ impl ScenarioLogic for BenchProjectilesScenario {
                     .query_filtered::<&Transform, With<Actor>>()
                     .iter(world)
                     .map(|t| {
-                        let mut t = TransformLite::from(t);
-                        t.position += Vec2::from_length(0.5, t.rotation);
-                        return t;
+                        let r = Vec2::from_angle(t.rotation.angle_z());
+                        let p = t.translation.xy() + r * 0.5;
+                        return (p, r);
                     })
                     .collect::<Vec<_>>();
 
-                for transform in transforms {
+                for (position, rotation) in transforms {
                     ProjectileSpawn {
                         config: WEAPON.projectile,
-                        transform,
-                        velocity: WEAPON.muzzle_velocity,
+                        position,
+                        velocity: rotation * WEAPON.muzzle_velocity,
                         shooter: None,
                     }
                     .apply(world);

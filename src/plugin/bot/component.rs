@@ -1,7 +1,7 @@
 use super::sys_detour::Detour;
 use crate::{
     plugin::bot::BotConfig,
-    util::{ext::RngExt, Timer},
+    util::{ext::Fuzz, Timer},
 };
 use bevy::{ecs::component::Component, prelude::Entity};
 use rand::{Rng, SeedableRng};
@@ -94,8 +94,7 @@ impl Bot {
         };
 
         self.shooting_state = state;
-        self.shooting_timer
-            .set(time + self.rng.fuzz_duration(duration));
+        self.shooting_timer.set(time + duration.fuzz(&mut self.rng));
     }
 
     pub fn set_shooting_target(&mut self, has_target: bool, time: Duration) {

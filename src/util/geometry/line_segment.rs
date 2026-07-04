@@ -1,4 +1,4 @@
-use crate::model::geometry::{Geometry, GeometryDistance};
+use crate::util::geometry::Geometry;
 use bevy::math::Vec2;
 
 pub type LineSegment = (Vec2, Vec2);
@@ -14,9 +14,3 @@ impl LineSegmentTrait for LineSegment {
 }
 
 impl Geometry for LineSegment {}
-
-impl GeometryDistance<Vec2> for LineSegment {
-    fn distance_squared(&self, p: &Vec2) -> f32 {
-        return p.distance_squared(self);
-    }
-}

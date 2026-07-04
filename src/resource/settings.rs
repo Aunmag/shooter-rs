@@ -113,7 +113,7 @@ impl Settings {
             log::warn!("Default settings will be used");
             let settings = Settings::default();
             settings.clone().save_in_background();
-            settings
+            return settings;
         });
     }
 
@@ -160,12 +160,12 @@ impl DisplaySettings {
 }
 
 #[cfg(test)]
+#[expect(clippy::unwrap_used, reason = "allow unwraps in unit-tests")]
 mod tests {
     use super::*;
 
     #[test]
-    #[allow(clippy::unwrap_used)]
-    fn test_default_and_actual() {
+    fn default_and_actual() {
         let default = format!("{:?}", Settings::default());
         let actual = format!("{:?}", Settings::load().unwrap());
         assert_eq!(default, actual);

@@ -3832,7 +3832,6 @@ name = "shooter"
 version = "0.0.0"
 dependencies = [
  "anyhow",
- "approx",
  "bevy",
  "chrono",
  "criterion",

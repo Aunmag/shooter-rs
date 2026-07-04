@@ -1,6 +1,6 @@
 use bevy::math::{Quat, Vec2};
 
-#[allow(clippy::wrong_self_convention)]
+#[expect(clippy::wrong_self_convention, reason = "it is a copy type")]
 pub trait Vec2Ext {
     const FRONT: Vec2 = Vec2::new(1.0, 0.0);
     const BACK: Vec2 = Vec2::new(-1.0, 0.0);
@@ -74,7 +74,7 @@ mod tests {
     use std::f32::consts::{FRAC_PI_2, FRAC_PI_4, PI, TAU};
 
     #[test]
-    fn test_from_length() {
+    fn from_length() {
         for length in [0.5, 1.0, 13.2] {
             for angle in [
                 -TAU,
@@ -95,7 +95,7 @@ mod tests {
     }
 
     #[test]
-    fn test_angle_to() {
+    fn angle_to() {
         for c in [Vec2::ZERO, Vec2::new(1.0, 1.0), Vec2::new(-34.6, 44.2)] {
             for distance in [0.1, 2349.4] {
                 let x = Vec2::new(distance, 0.0);

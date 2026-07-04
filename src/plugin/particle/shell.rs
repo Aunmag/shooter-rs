@@ -4,7 +4,7 @@ use crate::{
         particle::{Particle, ParticleConfig},
         AudioTracker, TileBlend, Weapon,
     },
-    util::ext::{QuatExt, RngExt, Vec2Ext},
+    util::ext::{Fuzz, QuatExt, RngExt, Vec2Ext},
 };
 use bevy::{
     asset::AssetServer,
@@ -48,8 +48,7 @@ impl Command for ShellParticleSpawn {
 
         let image = if world
             .get::<Weapon>(self.0)
-            .map(|w| w.config.is_shotgun)
-            .unwrap_or(false)
+            .is_some_and(|w| w.config.is_shotgun)
         {
             "particle/shell_shotgun.png"
         } else {
@@ -63,7 +62,7 @@ impl Command for ShellParticleSpawn {
         position += Vec2::from_length(Weapon::BARREL_LENGTH * 0.8, direction + FRAC_PI_2);
         direction += rng.gen_range_safely(-ROTATION, ROTATION);
 
-        let velocity = Vec2::from_length(rng.fuzz(VELOCITY), direction);
+        let velocity = Vec2::from_length(VELOCITY.fuzz(&mut rng), direction);
 
         // TODO: fix
         // if let Some(kinetics) = world.get::<Inertia>(self.0) {
@@ -86,7 +85,7 @@ impl Command for ShellParticleSpawn {
                 velocity,
                 velocity_spin: Vec3::new(0.0, 0.0, rng.gen_range(-VELOCITY_SPIN..VELOCITY_SPIN)),
                 since: now,
-                until: now + rng.fuzz_duration(DURATION),
+                until: now + DURATION.fuzz(&mut rng),
                 scale: 1.0,
             });
     }
@@ -98,13 +97,13 @@ fn on_destroy(entity: Entity, point: Vec2, commands: &mut Commands) {
     commands.add(move |world: &mut World| {
         let mut time = world.resource::<Time>().elapsed();
         let mut rng = rand::thread_rng();
-        let interval = rng.fuzz_duration(AUDIO_INTERVAL);
+        let interval = AUDIO_INTERVAL.fuzz(&mut rng);
         let audio = world.resource::<AudioTracker>();
         let sound = AudioPlay {
             source: Some(point),
-            volume: rng.fuzz(AUDIO_VOLUME),
+            volume: AUDIO_VOLUME.fuzz(&mut rng),
             falloff: AudioPlay::FALLOFF_SHORTEST,
-            speed: rng.fuzz(1.0),
+            speed: 1.0.fuzz(&mut rng),
             ..AudioPlay::DEFAULT
         };
 

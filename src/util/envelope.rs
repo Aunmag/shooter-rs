@@ -40,7 +40,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_get() {
+    fn get() {
         let e = Envelope::new(
             Duration::from_secs(3), // 0 - 3
             Duration::from_secs(3), // 3 - 6

@@ -77,7 +77,6 @@ impl Material2d for Crosshair {
     }
 }
 
-#[allow(clippy::unwrap_used)]
 fn on_update(
     mut crosshairs: Query<&mut Transform, (With<Handle<Crosshair>>, Without<Player>)>,
     cameras: Query<(&Camera, &GlobalTransform, &OrthographicProjection), With<MainCamera>>,
@@ -128,21 +127,20 @@ fn on_update(
         transform.scale.y = SIZE * camera_projection.scale;
 
         // put crosshair to it's updated position
-        let on_world_new = camera
+        if let Some(on_world_new) = camera
             .viewport_to_world(camera_transform, on_screen_new)
-            .unwrap()
-            .origin
-            .truncate();
+            .map(|v| v.origin.truncate())
+        {
+            transform.translation.x = on_world_new.x;
+            transform.translation.y = on_world_new.y;
 
-        transform.translation.x = on_world_new.x;
-        transform.translation.y = on_world_new.y;
+            // update only when cursor moved more than 1px actually, otherwise errors may grow
+            if (on_screen_new - on_screen_old).is_long(1.0) {
+                crosshair.distance = player_position.distance(on_world_new);
+                player_transform.rotation = (on_world_new - player_position).as_quat();
+            }
 
-        // update only when cursor moved more than 1px actually, otherwise errors may grow
-        if (on_screen_new - on_screen_old).is_long(1.0) {
-            crosshair.distance = player_position.distance(on_world_new);
-            player_transform.rotation = (on_world_new - player_position).as_quat();
+            transform.rotation = player_transform.rotation;
         }
-
-        transform.rotation = player_transform.rotation;
     }
 }

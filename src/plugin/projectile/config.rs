@@ -49,11 +49,11 @@ impl ProjectileConfig {
         is_rocket: true,
     };
 
-    pub fn acceleration(&self) -> f32 {
+    pub const fn acceleration(&self) -> f32 {
         return -1.0 / self.fragment_mass() * 0.006 - 4.2;
     }
 
-    pub fn fragment_mass(&self) -> f32 {
-        return self.mass / f32::from(self.fragments);
+    pub const fn fragment_mass(&self) -> f32 {
+        return self.mass / self.fragments as f32;
     }
 }

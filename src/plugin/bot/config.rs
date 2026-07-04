@@ -1,4 +1,4 @@
-use crate::util::ext::RngExt;
+use crate::util::ext::Fuzz;
 use rand::Rng;
 use std::{f32::consts::FRAC_PI_4, time::Duration};
 
@@ -65,12 +65,12 @@ impl BotConfig {
         return Self {
             is_silly: self.is_silly,
             is_agile: self.is_agile,
-            reaction: r.fuzz_duration(self.reaction).div_f32(skill),
-            spread: r.fuzz(self.spread),
-            spread_force: f32::min(r.fuzz(self.spread_force), 1.0),
-            sprint_distance: r.fuzz(self.sprint_distance),
-            shoot_distance_min: r.fuzz(self.shoot_distance_min),
-            shoot_distance_max: r.fuzz(self.shoot_distance_max) * skill,
+            reaction: self.reaction.fuzz(r).div_f32(skill),
+            spread: self.spread.fuzz(r),
+            spread_force: f32::min(self.spread_force.fuzz(r), 1.0),
+            sprint_distance: self.sprint_distance.fuzz(r),
+            shoot_distance_min: self.shoot_distance_min.fuzz(r),
+            shoot_distance_max: self.shoot_distance_max.fuzz(r) * skill,
             angular_deviation: self.angular_deviation / skill,
             shoot_prepare_duration: self.shoot_prepare_duration.div_f32(skill),
             shoot_burst_duration: self.shoot_burst_duration,

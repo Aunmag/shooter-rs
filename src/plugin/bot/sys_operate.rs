@@ -97,7 +97,7 @@ struct BotHandler<'a> {
     is_dodging: bool,
 }
 
-impl<'a> BotHandler<'a> {
+impl BotHandler<'_> {
     fn dodge_enemy(&mut self, enemy: &BotTarget) {
         let bot_to_enemy = self.angle_to(enemy);
         let enemy_to_bot = angle_difference(enemy.direction, enemy.angle_to(self));
@@ -219,7 +219,7 @@ impl<'a> BotHandler<'a> {
         }
     }
 
-    #[allow(clippy::needless_late_init)]
+    #[expect(clippy::needless_late_init, reason = "I like that more here")]
     fn chase(&mut self, target: &BotTarget) {
         let meet = self.find_meet(target);
         let target = target.position;
@@ -402,13 +402,13 @@ impl<'a> BotHandler<'a> {
     }
 }
 
-impl<'a> WithPosition for BotHandler<'a> {
+impl WithPosition for BotHandler<'_> {
     fn position(&self) -> Vec2 {
         return self.transform.translation.truncate();
     }
 }
 
-impl<'a> WithVelocity for BotHandler<'a> {
+impl WithVelocity for BotHandler<'_> {
     fn velocity(&self) -> Vec2 {
         return self.velocity;
     }

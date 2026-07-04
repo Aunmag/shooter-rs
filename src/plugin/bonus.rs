@@ -167,7 +167,6 @@ fn choose_weapon(world: &mut World, level: u8) -> Option<&'static WeaponConfig> 
             }
             Some(true) => {
                 // one more player has same weapon
-                continue;
             }
             Some(false) => {
                 // one player has a different weapon
@@ -204,7 +203,7 @@ fn spawn_bonus(world: &mut World, position: Vec2, weapon: &'static WeaponConfig)
         .id();
 }
 
-fn spawn_image(world: &mut World, bonus: Entity, weapon: &'static WeaponConfig) {
+fn spawn_image(world: &mut World, bonus: Entity, weapon: &WeaponConfig) {
     let texture = world
         .resource::<AssetServer>()
         .get_handle(weapon.get_image_path())
@@ -219,7 +218,7 @@ fn spawn_image(world: &mut World, bonus: Entity, weapon: &'static WeaponConfig) 
         .set_parent(bonus);
 }
 
-fn spawn_label(world: &mut World, bonus: Entity, weapon: &'static WeaponConfig) {
+fn spawn_label(world: &mut World, bonus: Entity, weapon: &WeaponConfig) {
     let font = world
         .resource::<AssetServer>()
         .get_handle(FONT_PATH)

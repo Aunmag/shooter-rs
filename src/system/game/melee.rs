@@ -1,9 +1,9 @@
 use crate::{
     component::{Actor, ActorConfig},
-    model::{ActorAction, ActorActionsExt, AudioPlay, TransformLite},
+    model::{ActorAction, ActorActionsExt, AudioPlay},
     plugin::{AudioTracker, Weapon},
     resource::HitResource,
-    util::{ext::Vec2Ext, math},
+    util::{ext::Vec2Ext, math, Transform2D},
 };
 use bevy::{
     ecs::{entity::Entity, system::Deferred, world::World},
@@ -30,7 +30,7 @@ pub fn melee(
             continue;
         }
 
-        let attacker_transform = TransformLite::from(attacker_transform);
+        let attacker_transform = Transform2D::from(attacker_transform);
         let mut victim: Option<TargetData> = None;
 
         for (target_entity, target_actor, target_transform) in targets.iter() {
@@ -42,7 +42,7 @@ pub fn melee(
                 attacker_actor.config,
                 &attacker_transform,
                 target_actor.config,
-                &TransformLite::from(target_transform),
+                &Transform2D::from(target_transform),
                 target_entity,
             ) {
                 if victim
@@ -85,9 +85,9 @@ struct TargetData {
 
 fn calc_target_data(
     attacker: &ActorConfig,
-    attacker_transform: &TransformLite,
+    attacker_transform: &Transform2D,
     target: &ActorConfig,
-    target_transform: &TransformLite,
+    target_transform: &Transform2D,
     target_entity: Entity,
 ) -> Option<TargetData> {
     let relative = target_transform.position - attacker_transform.position;

@@ -18,9 +18,9 @@ impl AudioPlay {
     pub const DURATION_FOREVER: Duration = Duration::MAX;
 
     pub const FALLOFF_SHORTEST: f32 = 0.2;
-    pub const FALLOFF_SHORTER: f32 = (Self::FALLOFF_MEDIUM + Self::FALLOFF_SHORTEST) / 2.0;
+    pub const FALLOFF_SHORTER: f32 = f32::midpoint(Self::FALLOFF_MEDIUM, Self::FALLOFF_SHORTEST);
     pub const FALLOFF_MEDIUM: f32 = 0.15;
-    pub const FALLOFF_LONGER: f32 = (Self::FALLOFF_MEDIUM + Self::FALLOFF_LONGEST) / 2.0;
+    pub const FALLOFF_LONGER: f32 = f32::midpoint(Self::FALLOFF_MEDIUM, Self::FALLOFF_LONGEST);
     pub const FALLOFF_LONGEST: f32 = 0.045;
 
     const CLOSE_DISTANCE: f32 = 0.5;

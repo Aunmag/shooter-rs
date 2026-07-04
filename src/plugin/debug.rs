@@ -1,12 +1,12 @@
 use crate::{
     command::ActorSet,
     component::{ActorConfig, ActorKind},
-    model::{AppState, TransformLite},
+    model::AppState,
     plugin::{
         bot::ActorBotSet, AudioTracker, BonusSpawn, Crosshair, Explode, TileMap, WeaponConfig,
         WeaponSet,
     },
-    util::{ext::AppExt, Timer},
+    util::{ext::AppExt, Timer, Transform2D},
 };
 use bevy::{
     app::{App, Plugin},
@@ -222,7 +222,7 @@ fn update_input(
     let position = crosshairs
         .iter()
         .next()
-        .map(TransformLite::from)
+        .map(Transform2D::from)
         .unwrap_or_default();
 
     match spawn {
@@ -243,7 +243,7 @@ fn update_input(
 
 fn spawn_actors(
     commands: &mut Commands,
-    transform: TransformLite,
+    transform: Transform2D,
     config: &'static ActorConfig,
     group: u8,
 ) {

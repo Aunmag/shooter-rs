@@ -34,7 +34,7 @@ impl Plugin for HealthPlugin {
         app.add_state_system(
             AppState::Game,
             on_update.run_if(|mut r: Local<Timer>, t: Res<Time>| {
-                r.try_next_set(t.elapsed(), || BUFFERING)
+                return r.try_next_set(t.elapsed(), || BUFFERING);
             }),
         );
     }
@@ -44,7 +44,7 @@ impl Plugin for HealthPlugin {
 #[derive(Component)]
 pub struct Health {
     resistance: f32,
-    /// In range of `0.0`` and `1.0`
+    /// In range of `0.0` and `1.0`
     health: f32,
     /// In range of `0.0` and `INFINITY`
     damage: f32,

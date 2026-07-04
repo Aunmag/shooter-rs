@@ -99,7 +99,7 @@ pub fn on_update(
 
         if let Some(offset_r) = target.sync_angle {
             target.direction = target_transform.rotation.angle_z() - FRAC_PI_2 - offset_r;
-        };
+        }
 
         let rotation = Quat::from_rotation_z(target.direction + target.shake_spin.get() * SHAKE_R);
 

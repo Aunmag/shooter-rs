@@ -29,7 +29,7 @@ impl Plugin for HeartbeatPlugin {
         app.add_state_system(
             AppState::Game,
             on_update.run_if(|mut r: Local<Timer>, t: Res<Time>| {
-                r.try_next_set(t.elapsed(), || UPDATE_INTERVAL)
+                return r.try_next_set(t.elapsed(), || UPDATE_INTERVAL);
             }),
         );
     }

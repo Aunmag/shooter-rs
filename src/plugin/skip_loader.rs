@@ -35,6 +35,6 @@ impl AssetLoader for SkipLoader {
     }
 
     fn extensions(&self) -> &[&str] {
-        &["txt"]
+        return &["txt"];
     }
 }

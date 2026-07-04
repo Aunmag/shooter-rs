@@ -1,6 +1,7 @@
 use crate::{
-    model::{geometry::GeometryProjection, AudioPlay},
+    model::AudioPlay,
     plugin::{camera_target::CameraTarget, debug::debug_line, AudioTracker, Projectile},
+    util::geometry::GeometryProjection,
 };
 use bevy::{
     color::palettes::css::RED,

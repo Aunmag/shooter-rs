@@ -1,4 +1,4 @@
-use crate::{component::Actor, plugin::bot::Bot, util::ext::RngExt};
+use crate::{component::Actor, plugin::bot::Bot, util::ext::Fuzz};
 use bevy::{
     ecs::batching::BatchingStrategy,
     math::Vec3Swizzles,
@@ -24,7 +24,7 @@ pub fn on_update(
                 return;
             }
 
-            let update_interval_fuzzed = bot.rng.fuzz_duration(UPDATE_INTERVAL);
+            let update_interval_fuzzed = UPDATE_INTERVAL.fuzz(&mut bot.rng);
             bot.update_timer.set(time + update_interval_fuzzed);
             bot.update_idle();
             bot.enemy = None;

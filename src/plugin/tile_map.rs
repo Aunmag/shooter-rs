@@ -63,7 +63,10 @@ impl TileMap {
             }
         }
 
-        return biggest.and_then(|(i, _)| self.to_blend.remove(&i).map(|q| (i, q)));
+        let index = biggest?.0;
+        let queue = self.to_blend.remove(&index)?;
+
+        return Some((index, queue));
     }
 
     pub fn count_layers(&self) -> usize {
@@ -259,16 +262,10 @@ impl Index {
 
 impl From<Vec3> for Index {
     fn from(v: Vec3) -> Self {
-        let layer = if v.z < LAYER_TREE {
-            0
-        } else {
-            1
-        };
-
         return Self {
             x: floor_by(v.x, TILE_SIZE) as i32,
             y: floor_by(v.y, TILE_SIZE) as i32,
-            layer,
+            layer: u8::from(LAYER_TREE <= v.z),
         };
     }
 }
@@ -341,7 +338,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_tile_size_px() {
+    fn tile_size_px() {
         assert_eq!(TILE_SIZE_PX, 512);
     }
 }

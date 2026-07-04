@@ -5,7 +5,7 @@ mod config;
 pub use self::{command::*, component::*, config::*};
 use crate::{
     component::Actor,
-    model::{ActorActionsExt, AppState, AudioPlay, TransformLite},
+    model::{ActorActionsExt, AppState, AudioPlay},
     plugin::{AudioTracker, ProjectileSpawn, ShellParticleSpawn},
     resource::HitResource,
     util::ext::{AppExt, QuatExt, Vec2Ext},
@@ -90,11 +90,8 @@ fn on_update(
 
                 commands.add(ProjectileSpawn {
                     config: weapon.config.projectile,
-                    transform: TransformLite {
-                        position,
-                        rotation: rotation + deviation,
-                    },
-                    velocity,
+                    position,
+                    velocity: Vec2::from_angle(rotation + deviation) * velocity,
                     shooter: Some(entity),
                 });
             }
@@ -127,8 +124,6 @@ fn on_update(
                     commands.add(ShellParticleSpawn(entity));
                 }
             }
-
-            continue;
         }
     }
 }

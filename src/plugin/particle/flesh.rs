@@ -4,7 +4,7 @@ use crate::{
         particle::{Particle, ParticleConfig},
         BloodSpawn, TileBlend,
     },
-    util::ext::{RngExt, Vec2Ext},
+    util::ext::{Fuzz, Vec2Ext},
 };
 use bevy::{
     asset::AssetServer,
@@ -89,8 +89,8 @@ impl Command for FleshParticleSpawn {
                     rng.gen_range(-VELOCITY_SPIN..VELOCITY_SPIN),
                 ),
                 since: now,
-                until: now + rng.fuzz_duration(DURATION),
-                scale: rng.fuzz(1.0),
+                until: now + DURATION.fuzz(&mut rng),
+                scale: 1.0.fuzz(&mut rng),
             });
     }
 }

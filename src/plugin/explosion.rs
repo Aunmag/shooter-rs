@@ -160,7 +160,8 @@ fn on_update(
     for (explosion_entity, mut explosion, mut explosion_transform, material) in
         explosions.iter_mut()
     {
-        let radius_factor = ((now - explosion.spawned).as_secs_f32() / DURATION.as_secs_f32())
+        let elapsed = now.saturating_sub(explosion.spawned);
+        let radius_factor = (elapsed.as_secs_f32() / DURATION.as_secs_f32())
             .clamp(0.0, 1.0)
             .powf(0.7);
 

@@ -9,7 +9,7 @@ pub enum ActorAction {
 
 pub type ActorActions = EnumSet<ActorAction>;
 
-#[allow(clippy::wrong_self_convention)]
+#[expect(clippy::wrong_self_convention, reason = "it is a copy type")]
 pub trait ActorActionsExt {
     fn set(&mut self, value: ActorAction, state: bool);
     fn is_sprinting(self) -> bool;

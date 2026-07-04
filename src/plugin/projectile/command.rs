@@ -1,6 +1,5 @@
 use crate::{
     data::LAYER_PROJECTILE,
-    model::TransformLite,
     plugin::{projectile::material::ProjectileMaterial, Projectile, ProjectileConfig},
     resource::AssetStorage,
     util::ext::Vec2Ext,
@@ -15,8 +14,9 @@ use bevy::{
 
 pub struct ProjectileSpawn {
     pub config: &'static ProjectileConfig,
-    pub transform: TransformLite,
-    pub velocity: f32,
+    // TODO: store spawn time here for better accuracy?
+    pub position: Vec2,
+    pub velocity: Vec2,
     pub shooter: Option<Entity>,
 }
 
@@ -29,8 +29,8 @@ impl Command for ProjectileSpawn {
         let projectile = Projectile::new(
             self.config,
             world.resource::<Time>().elapsed(),
-            self.transform.position,
-            Vec2::from_length(self.velocity, self.transform.rotation),
+            self.position,
+            self.velocity,
             self.shooter,
         );
 
@@ -41,8 +41,8 @@ impl Command for ProjectileSpawn {
         world
             .spawn(MaterialMesh2dBundle {
                 transform: Transform {
-                    translation: self.transform.position.extend(LAYER_PROJECTILE),
-                    rotation: projectile.initial_velocity.as_quat(),
+                    translation: self.position.extend(LAYER_PROJECTILE),
+                    rotation: self.velocity.as_quat(),
                     scale: Vec3::new(0.0, 0.0, 1.0),
                 },
                 mesh: mesh.into(),

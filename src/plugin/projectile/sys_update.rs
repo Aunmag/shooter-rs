@@ -1,9 +1,9 @@
 use crate::{
     component::Actor,
-    model::{geometry::GeometryProjection, AudioPlay},
+    model::AudioPlay,
     plugin::{collision::Collision, AudioTracker, Explode, Projectile},
     resource::HitResource,
-    util::{ext::Vec2Ext, math},
+    util::{ext::Vec2Ext, geometry::GeometryProjection, math},
 };
 use bevy::{
     ecs::{
@@ -90,10 +90,8 @@ pub fn on_update(
             if head_velocity.is_zero() {
                 projectile.stopped = true;
             }
-        } else {
-            if head_velocity.is_short(Projectile::VELOCITY_MIN) {
-                projectile.stopped = true;
-            }
+        } else if head_velocity.is_short(Projectile::VELOCITY_MIN) {
+            projectile.stopped = true;
         }
     }
 }

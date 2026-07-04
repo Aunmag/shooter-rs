@@ -32,8 +32,7 @@ impl AssetStorage {
         return self
             .assets
             .as_ref()
-            .map(|h| asset_server.is_loaded_with_dependencies(h.id()))
-            .unwrap_or(false);
+            .is_some_and(|h| asset_server.is_loaded_with_dependencies(h.id()));
     }
 
     pub fn dummy_image(&self) -> &Handle<Image> {

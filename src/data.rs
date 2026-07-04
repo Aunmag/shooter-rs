@@ -28,7 +28,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_world_size() {
+    fn world_size() {
         assert_eq!(
             WORLD_SIZE % 4.0,
             0.0,

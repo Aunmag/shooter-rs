@@ -52,7 +52,7 @@ impl Detour {
 
 pub fn on_update() -> SystemConfigs {
     return on_update_inner.run_if(|mut r: Local<Timer>, t: Res<Time>| {
-        r.try_next_set(t.elapsed(), || UPDATE_INTERVAL)
+        return r.try_next_set(t.elapsed(), || UPDATE_INTERVAL);
     });
 }
 

@@ -4,15 +4,6 @@ pub enum SmartString<'a> {
     Dyn(String),
 }
 
-impl SmartString<'_> {
-    pub fn as_ref(&self) -> &str {
-        return match self {
-            Self::Ref(value) => value,
-            Self::Dyn(value) => value.as_ref(),
-        };
-    }
-}
-
 impl Default for SmartString<'static> {
     fn default() -> Self {
         return Self::Ref("");
@@ -37,12 +28,11 @@ impl PartialEq for SmartString<'_> {
     }
 }
 
-#[allow(clippy::to_string_trait_impl)]
-impl ToString for SmartString<'_> {
-    fn to_string(&self) -> String {
+impl AsRef<str> for SmartString<'_> {
+    fn as_ref(&self) -> &str {
         return match self {
-            Self::Ref(value) => value.to_string(),
-            Self::Dyn(value) => value.clone(),
+            Self::Ref(value) => value,
+            Self::Dyn(value) => value.as_str(),
         };
     }
 }

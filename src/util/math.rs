@@ -57,49 +57,55 @@ pub fn find_meet_point(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use approx::assert_abs_diff_eq;
     use std::f32::consts::FRAC_PI_2;
 
     #[test]
     fn test_normalize_radians() {
-        assert_abs_diff_eq!(normalize_radians(-TAU), 0.0);
-        assert_abs_diff_eq!(normalize_radians(-PI - FRAC_PI_2), FRAC_PI_2);
-        assert_abs_diff_eq!(normalize_radians(-PI), -PI);
-        assert_abs_diff_eq!(normalize_radians(-FRAC_PI_2), -FRAC_PI_2);
-        assert_abs_diff_eq!(normalize_radians(0.0), 0.0);
-        assert_abs_diff_eq!(normalize_radians(FRAC_PI_2), FRAC_PI_2);
-        assert_abs_diff_eq!(normalize_radians(PI), PI);
-        assert_abs_diff_eq!(normalize_radians(PI + FRAC_PI_2), -FRAC_PI_2);
-        assert_abs_diff_eq!(normalize_radians(TAU), 0.0);
+        let test = |n: f32| fmt(normalize_radians(n));
+        assert_eq!(test(-TAU), fmt(-0.0));
+        assert_eq!(test(-PI - FRAC_PI_2), fmt(FRAC_PI_2));
+        assert_eq!(test(-PI), fmt(-PI));
+        assert_eq!(test(-FRAC_PI_2), fmt(-FRAC_PI_2));
+        assert_eq!(test(0.0), fmt(0.0));
+        assert_eq!(test(FRAC_PI_2), fmt(FRAC_PI_2));
+        assert_eq!(test(PI), fmt(PI));
+        assert_eq!(test(PI + FRAC_PI_2), fmt(-FRAC_PI_2));
+        assert_eq!(test(TAU), fmt(0.0));
     }
 
     #[test]
     fn test_angle_difference() {
+        let test = |a: f32, b: f32| fmt(angle_difference(a, b));
+
         // no difference, same values
-        assert_abs_diff_eq!(0.0, angle_difference(0.0, 0.0));
-        assert_abs_diff_eq!(0.0, angle_difference(1.0, 1.0));
-        assert_abs_diff_eq!(0.0, angle_difference(-1.0, -1.0));
-        assert_abs_diff_eq!(0.0, angle_difference(7.0, 7.0));
-        assert_abs_diff_eq!(0.0, angle_difference(-7.0, -7.0));
+        assert_eq!(fmt(0.0), test(0.0, 0.0));
+        assert_eq!(fmt(0.0), test(1.0, 1.0));
+        assert_eq!(fmt(0.0), test(-1.0, -1.0));
+        assert_eq!(fmt(0.0), test(7.0, 7.0));
+        assert_eq!(fmt(0.0), test(-7.0, -7.0));
 
         // no difference, different values
-        assert_abs_diff_eq!(0.0, angle_difference(0.0, TAU));
-        assert_abs_diff_eq!(0.0, angle_difference(0.0, -TAU));
-        assert_abs_diff_eq!(0.0, angle_difference(TAU, 0.0));
-        assert_abs_diff_eq!(0.0, angle_difference(-TAU, 0.0));
+        assert_eq!(fmt(0.0), test(0.0, TAU));
+        assert_eq!(fmt(-0.0), test(0.0, -TAU));
+        assert_eq!(fmt(-0.0), test(TAU, 0.0));
+        assert_eq!(fmt(0.0), test(-TAU, 0.0));
 
         // simple difference
-        assert_abs_diff_eq!(PI, angle_difference(0.0, PI));
-        assert_abs_diff_eq!(-PI, angle_difference(PI, 0.0));
-        assert_abs_diff_eq!(-PI, angle_difference(0.0, -PI));
-        assert_abs_diff_eq!(PI, angle_difference(-PI, 0.0));
+        assert_eq!(fmt(PI), test(0.0, PI));
+        assert_eq!(fmt(-PI), test(PI, 0.0));
+        assert_eq!(fmt(-PI), test(0.0, -PI));
+        assert_eq!(fmt(PI), test(-PI, 0.0));
 
         // more complex difference
         let third = TAU / 3.0;
-        assert_abs_diff_eq!(-third, angle_difference(-third, third));
-        assert_abs_diff_eq!(third, angle_difference(third, -third));
+        assert_eq!(fmt(-third), test(-third, third));
+        assert_eq!(fmt(third), test(third, -third));
         let third_doubled = third * 2.0;
-        assert_abs_diff_eq!(third, angle_difference(-third_doubled, third_doubled));
-        assert_abs_diff_eq!(-third, angle_difference(third_doubled, -third_doubled));
+        assert_eq!(fmt(third), test(-third_doubled, third_doubled));
+        assert_eq!(fmt(-third), test(third_doubled, -third_doubled));
+    }
+
+    fn fmt(n: f32) -> String {
+        return format!("{:.6}", n);
     }
 }

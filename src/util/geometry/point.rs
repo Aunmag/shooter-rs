@@ -1,6 +1,4 @@
-use crate::model::geometry::{
-    Geometry, GeometryDistance, GeometryProjection, Line, LineSegment, LineSegmentTrait,
-};
+use crate::util::geometry::{Geometry, GeometryProjection, Line, LineSegment, LineSegmentTrait};
 use bevy::math::Vec2;
 
 impl Geometry for Vec2 {}
@@ -58,24 +56,12 @@ impl GeometryProjection<LineSegment> for Vec2 {
     }
 }
 
-impl GeometryDistance<Line> for Vec2 {
-    fn distance_squared(&self, l: &Line) -> f32 {
-        return Vec2::distance_squared(*self, self.project_on_clamped(l));
-    }
-}
-
-impl GeometryDistance<LineSegment> for Vec2 {
-    fn distance_squared(&self, l: &LineSegment) -> f32 {
-        return Vec2::distance_squared(*self, self.project_on_clamped(l));
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
 
     #[test]
-    fn test_project_on_line_segment() {
+    fn project_on_line_segment() {
         let line = (Vec2::new(37.0, 84.0), Vec2::new(63.0, 24.0));
         assert_eq!(Vec2::new(38.0, 93.0).project_on_clamped(&line), line.0);
         assert_eq!(Vec2::new(53.0, 11.0).project_on_clamped(&line), line.1);
