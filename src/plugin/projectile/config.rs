@@ -63,12 +63,12 @@ impl ProjectileConfig {
 
     pub const TBG_7V: Self = Self {
         fragments: 1,
-        mass: 4.1,
+        mass: 4.3,
         size: 5.0,
         physics: ProjectilePhysics::Rocket,
         explosion: Some(ProjectileExplosion {
-            radius: 3.2,
-            energy: 6.0,
+            radius: 4.0,
+            energy: 8.0,
         }),
     };
 
