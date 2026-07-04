@@ -1,7 +1,6 @@
 use crate::{
-    command::ActorSet,
-    component::{Actor, ActorConfig},
     plugin::{
+        actor::{Actor, ActorConfig, ActorSet},
         camera_target::CameraTarget,
         scenario::{bench_utils::Bench, ScenarioLogic},
         ProjectileSpawn, WeaponConfig,

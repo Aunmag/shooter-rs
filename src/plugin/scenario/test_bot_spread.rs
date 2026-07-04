@@ -1,8 +1,11 @@
 use crate::{
-    command::ActorSet,
-    component::ActorConfig,
     map::{Map, TestMap},
-    plugin::{bot::ActorBotSet, camera_target::CameraTarget, scenario::ScenarioLogic},
+    plugin::{
+        actor::{ActorConfig, ActorSet},
+        bot::ActorBotSet,
+        camera_target::CameraTarget,
+        scenario::ScenarioLogic,
+    },
 };
 use bevy::{
     ecs::world::{Command, World},

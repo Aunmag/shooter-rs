@@ -1,10 +1,11 @@
 use crate::{
-    component::{Actor, ActorWeaponSprite},
     data::PIXELS_PER_METER,
     model::AudioPlay,
     plugin::{
-        camera_target::CameraTarget, kinetics::Kinetics, AudioTracker, Weapon, WeaponConfig,
-        WeaponGrip,
+        actor::{Actor, ActorWeaponSprite},
+        camera_target::CameraTarget,
+        kinetics::Kinetics,
+        AudioTracker, Weapon, WeaponConfig, WeaponGrip,
     },
     util::ext::ImageExt,
 };

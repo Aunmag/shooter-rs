@@ -1,7 +1,6 @@
 use crate::{
-    component::Actor,
     model::{AppState, AudioPlay},
-    plugin::AudioTracker,
+    plugin::{actor::Actor, AudioTracker},
     util::{ext::AppExt, math::interpolate},
 };
 use bevy::{

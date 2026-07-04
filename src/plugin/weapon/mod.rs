@@ -4,9 +4,11 @@ mod config;
 
 pub use self::{command::*, component::*, config::*};
 use crate::{
-    component::Actor,
-    model::{ActorActionsExt, AppState, AudioPlay},
-    plugin::{AudioTracker, ProjectileSpawn, ShellParticleSpawn},
+    model::{AppState, AudioPlay},
+    plugin::{
+        actor::{Actor, ActorActionsExt},
+        AudioTracker, ProjectileSpawn, ShellParticleSpawn,
+    },
     resource::HitResource,
     util::ext::{AppExt, QuatExt, Vec2Ext},
 };

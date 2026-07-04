@@ -1,7 +1,10 @@
 use crate::{
-    component::{Actor, ActorKind},
     model::AudioPlay,
-    plugin::{bot::Bot, AudioTracker},
+    plugin::{
+        actor::{Actor, ActorKind},
+        bot::Bot,
+        AudioTracker,
+    },
 };
 use bevy::{
     ecs::system::Res,

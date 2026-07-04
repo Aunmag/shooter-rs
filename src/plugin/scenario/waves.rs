@@ -1,10 +1,8 @@
 use crate::{
-    command::ActorSet,
-    component::{Actor, ActorConfig, ActorKind},
     data::VIEW_DISTANCE,
-    event::ActorDeathEvent,
     map::{ForestMap, Map},
     plugin::{
+        actor::{Actor, ActorConfig, ActorDeathEvent, ActorKind, ActorSet},
         bot::ActorBotSet,
         player::{Player, PlayerSpawn},
         scenario::{Scenario, ScenarioLogic},

@@ -1,9 +1,15 @@
+mod action;
+mod command;
+mod component;
+mod config;
+mod event;
+
+pub use self::{action::*, command::*, component::*, config::*, event::*};
 use crate::{
-    component::Actor,
-    model::ActorActionsExt,
+    model::AppState,
     plugin::{debug::debug_line, kinetics::Kinetics},
     util::{
-        ext::{QuatExt, Vec2Ext},
+        ext::{AppExt, QuatExt, Vec2Ext},
         math,
     },
 };
@@ -11,14 +17,22 @@ use bevy::{
     color::palettes::css::RED,
     ecs::system::Query,
     math::Vec2,
-    prelude::{Res, Time},
+    prelude::{App, Plugin, Res, Time},
     transform::components::Transform,
 };
 
 const TURN_EPSILON: f32 = 0.01;
 const DEBUG_MOVEMENT: bool = false;
 
-pub fn actor(mut query: Query<(&mut Actor, &mut Transform, &mut Kinetics)>, time: Res<Time>) {
+pub struct ActorPlugin;
+
+impl Plugin for ActorPlugin {
+    fn build(&self, app: &mut App) {
+        app.add_state_system(AppState::Game, on_update);
+    }
+}
+
+pub fn on_update(mut query: Query<(&mut Actor, &mut Transform, &mut Kinetics)>, time: Res<Time>) {
     let time_delta = time.delta_seconds();
 
     for (mut actor, mut transform, mut kinetics) in query.iter_mut() {

@@ -1,5 +1,5 @@
 use super::Bot;
-use crate::component::Actor;
+use crate::plugin::actor::Actor;
 use bevy::{
     ecs::world::Command,
     prelude::{Entity, World},

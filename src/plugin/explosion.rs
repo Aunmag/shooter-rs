@@ -1,8 +1,11 @@
 use crate::{
-    component::{Actor, ActorKind},
     data::{LAYER_GROUND, LAYER_PROJECTILE},
     model::{AppState, AudioPlay},
-    plugin::{collision::Collision, AudioTracker, TileBlend},
+    plugin::{
+        actor::{Actor, ActorKind},
+        collision::Collision,
+        AudioTracker, TileBlend,
+    },
     resource::{AssetStorage, HitResource},
     util::ext::{AppExt, Vec2Ext},
 };

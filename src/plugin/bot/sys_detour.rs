@@ -1,6 +1,5 @@
 use crate::{
-    component::Actor,
-    plugin::bot::Bot,
+    plugin::{actor::Actor, bot::Bot},
     util::{ext::Vec2Ext, math::angle_difference, Timer},
 };
 use bevy::{

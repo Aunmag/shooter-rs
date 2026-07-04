@@ -1,7 +1,5 @@
 mod command;
-mod component;
 mod data;
-mod event;
 mod map;
 mod model;
 mod plugin;
@@ -12,9 +10,9 @@ mod util;
 use crate::{
     command::CursorGrab,
     data::APP_TITLE,
-    event::ActorDeathEvent,
     model::AppState,
     plugin::{
+        actor::{ActorDeathEvent, ActorPlugin},
         bot::BotPlugin,
         camera_target::CameraTargetPlugin,
         collision::CollisionPlugin,
@@ -81,6 +79,7 @@ fn main() {
     }
 
     application
+        .add_plugins(ActorPlugin)
         .add_plugins(AudioTrackerPlugin)
         .add_plugins(BloodPlugin)
         .add_plugins(BonusPlugin)
@@ -116,7 +115,7 @@ fn main() {
         .add_state_systems(AppState::Game, |s| {
             use crate::system::game::*;
             s.add(input);
-            s.add(actor.after(crate::plugin::player::on_update));
+            s.add(crate::plugin::actor::on_update.after(crate::plugin::player::on_update));
             s.add(melee.after(crate::plugin::collision::on_update));
             s.add(ambience_fx());
         })

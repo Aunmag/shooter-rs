@@ -1,3 +1,4 @@
+pub mod actor;
 mod audio;
 mod blood;
 mod bonus;

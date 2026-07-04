@@ -1,11 +1,12 @@
 use crate::{
-    command::ActorSet,
-    component::{Actor, ActorConfig},
     data::{LAYER_ACTOR_PLAYER, WORLD_SIZE_HALF},
-    model::{ActorAction, ActorActionsExt, AppState},
+    model::AppState,
     plugin::{
-        camera::MainCamera, camera_target::CameraTarget, kinetics::Kinetics, Crosshair, Health,
-        StatusBar, WeaponConfig, WeaponSet,
+        actor::{Actor, ActorAction, ActorActionsExt, ActorConfig, ActorSet},
+        camera::MainCamera,
+        camera_target::CameraTarget,
+        kinetics::Kinetics,
+        Crosshair, Health, StatusBar, WeaponConfig, WeaponSet,
     },
     resource::Settings,
     util::ext::{AppExt, Vec2Ext},

@@ -6,7 +6,7 @@ mod test_bot_spread;
 mod waves;
 
 pub use self::{bench_projectiles::*, bench_zombies::*, test::*, test_bot_spread::*, waves::*};
-use crate::{event::ActorDeathEvent, model::AppState, util::ext::AppExt};
+use crate::{model::AppState, plugin::actor::ActorDeathEvent, util::ext::AppExt};
 use bevy::{
     ecs::{
         event::EventReader,

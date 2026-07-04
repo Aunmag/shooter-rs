@@ -1,9 +1,10 @@
 use crate::{
-    command::ActorRelease,
-    component::Actor,
-    event::ActorDeathEvent,
     model::{AppState, AudioPlay},
-    plugin::{player::Player, AudioTracker, BloodSpawn, FleshParticleSpawn},
+    plugin::{
+        actor::{Actor, ActorDeathEvent, ActorRelease},
+        player::Player,
+        AudioTracker, BloodSpawn, FleshParticleSpawn,
+    },
     resource::{ScenarioSettings, Settings},
     util::{ext::AppExt, Timer},
 };

@@ -1,9 +1,12 @@
 use crate::{
-    component::{Actor, ActorKind},
     data::{FONT_PATH, LAYER_BONUS, PIXELS_PER_METER, TRANSFORM_SCALE},
     model::AppState,
     plugin::{
-        camera::MainCamera, collision::Collision, player::Player, Weapon, WeaponConfig, WeaponSet,
+        actor::{Actor, ActorKind},
+        camera::MainCamera,
+        collision::Collision,
+        player::Player,
+        Weapon, WeaponConfig, WeaponSet,
     },
     util::{
         ext::{AppExt, Vec2Ext},

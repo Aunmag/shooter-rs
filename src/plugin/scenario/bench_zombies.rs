@@ -1,8 +1,7 @@
 use crate::{
-    command::ActorSet,
-    component::ActorConfig,
     map::{ForestMap, Map},
     plugin::{
+        actor::{ActorConfig, ActorSet},
         bot::ActorBotSet,
         player::PlayerSpawn,
         scenario::{bench_utils::Bench, ScenarioLogic},

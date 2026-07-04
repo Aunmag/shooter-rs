@@ -1,4 +1,7 @@
-use crate::{component::Actor, plugin::bot::Bot, util::ext::Fuzz};
+use crate::{
+    plugin::{actor::Actor, bot::Bot},
+    util::ext::Fuzz,
+};
 use bevy::{
     ecs::batching::BatchingStrategy,
     math::Vec3Swizzles,

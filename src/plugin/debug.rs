@@ -1,10 +1,9 @@
 use crate::{
-    command::ActorSet,
-    component::{ActorConfig, ActorKind},
     model::AppState,
     plugin::{
-        bot::ActorBotSet, AudioTracker, BonusSpawn, Crosshair, Explode, TileMap, WeaponConfig,
-        WeaponSet,
+        actor::{ActorConfig, ActorKind, ActorSet},
+        bot::ActorBotSet,
+        AudioTracker, BonusSpawn, Crosshair, Explode, TileMap, WeaponConfig, WeaponSet,
     },
     util::{ext::AppExt, Timer, Transform2D},
 };

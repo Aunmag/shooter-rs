@@ -1,4 +1,4 @@
-use crate::component::ActorKind;
+use crate::plugin::actor::ActorKind;
 use bevy::{math::Vec2, prelude::Event};
 
 #[derive(Event)]
