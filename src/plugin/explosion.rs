@@ -1,12 +1,8 @@
 use crate::{
     data::{LAYER_GROUND, LAYER_PROJECTILE},
-    model::{AppState, AudioPlay},
-    plugin::{
-        actor::{Actor, ActorKind},
-        collision::Collision,
-        AudioTracker, TileBlend,
-    },
+    plugin::{collision::Collision, Actor, ActorKind, AudioPlay, AudioTracker, TileBlend},
     resource::{AssetStorage, HitResource},
+    state::AppState,
     util::ext::{AppExt, Vec2Ext},
 };
 use bevy::{

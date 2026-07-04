@@ -1,7 +1,7 @@
 use crate::{
     data::{LAYER_BACKGROUND, PIXELS_PER_METER, TRANSFORM_SCALE, VIEW_DISTANCE},
-    model::AppState,
     plugin::camera::MainCamera,
+    state::AppState,
     util::{
         ext::{AppExt, ImageExt},
         math::round_by,

@@ -1,11 +1,10 @@
 use crate::{
-    model::{AppState, AudioPlay},
     plugin::{
-        actor::{Actor, ActorDeathEvent, ActorRelease},
-        player::Player,
-        AudioTracker, BloodSpawn, FleshParticleSpawn,
+        player::Player, Actor, ActorDeathEvent, ActorRelease, AudioPlay, AudioTracker, BloodSpawn,
+        FleshParticleSpawn,
     },
     resource::{ScenarioSettings, Settings},
+    state::AppState,
     util::{ext::AppExt, Timer},
 };
 use bevy::{

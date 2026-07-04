@@ -1,6 +1,5 @@
 use crate::{
-    model::AudioPlay,
-    plugin::{actor::Actor, collision::Collision, AudioTracker, Explode, Projectile},
+    plugin::{collision::Collision, Actor, AudioPlay, AudioTracker, Explode, Projectile},
     resource::HitResource,
     util::{ext::Vec2Ext, geometry::GeometryProjection, math},
 };

@@ -4,12 +4,11 @@ mod config;
 
 pub use self::{command::*, component::*, config::*};
 use crate::{
-    model::{AppState, AudioPlay},
     plugin::{
-        actor::{Actor, ActorActionsExt},
-        AudioTracker, ProjectileSpawn, ShellParticleSpawn,
+        Actor, ActorActionsExt, AudioPlay, AudioTracker, ProjectileSpawn, ShellParticleSpawn,
     },
     resource::HitResource,
+    state::AppState,
     util::ext::{AppExt, QuatExt, Vec2Ext},
 };
 use bevy::{

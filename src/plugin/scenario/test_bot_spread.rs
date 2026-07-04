@@ -1,10 +1,8 @@
 use crate::{
     map::{Map, TestMap},
     plugin::{
-        actor::{ActorConfig, ActorSet},
-        bot::ActorBotSet,
-        camera_target::CameraTarget,
-        scenario::ScenarioLogic,
+        bot::ActorBotSet, camera_target::CameraTarget, scenario::ScenarioLogic, ActorConfig,
+        ActorSet,
     },
 };
 use bevy::{

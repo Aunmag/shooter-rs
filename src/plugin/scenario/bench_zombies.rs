@@ -1,11 +1,10 @@
 use crate::{
     map::{ForestMap, Map},
     plugin::{
-        actor::{ActorConfig, ActorSet},
         bot::ActorBotSet,
         player::PlayerSpawn,
         scenario::{bench_utils::Bench, ScenarioLogic},
-        WeaponConfig,
+        ActorConfig, ActorSet, WeaponConfig,
     },
 };
 use bevy::{

@@ -1,9 +1,9 @@
 use crate::{
-    model::AppState,
     plugin::{
         debug::debug_line,
         kinetics::{self, Kinetics},
     },
+    state::AppState,
     util::{
         chunk::ChunkMap,
         ext::{AppExt, Vec2Ext},

@@ -1,8 +1,8 @@
 use crate::{
     data::{LAYER_CROSSHAIR, PIXELS_PER_METER},
-    model::AppState,
     plugin::{camera::MainCamera, player::Player},
     resource::AssetStorage,
+    state::AppState,
     util::ext::{AppExt, Vec2Ext},
 };
 use bevy::{

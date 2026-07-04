@@ -1,9 +1,8 @@
 use crate::{
     plugin::{
-        actor::{Actor, ActorConfig, ActorSet},
         camera_target::CameraTarget,
         scenario::{bench_utils::Bench, ScenarioLogic},
-        ProjectileSpawn, WeaponConfig,
+        Actor, ActorConfig, ActorSet, ProjectileSpawn, WeaponConfig,
     },
     util::{ext::QuatExt, Timer},
 };

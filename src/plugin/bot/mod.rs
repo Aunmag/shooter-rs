@@ -7,7 +7,7 @@ mod sys_operate;
 mod sys_voice;
 
 pub use self::{command::*, component::Bot, config::*};
-use crate::{model::AppState, util::ext::AppExt};
+use crate::{util::ext::AppExt, AppState};
 use bevy::app::{App, Plugin};
 
 pub struct BotPlugin;

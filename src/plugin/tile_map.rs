@@ -1,6 +1,6 @@
 use crate::{
     data::{LAYER_GROUND, LAYER_TREE, PIXELS_PER_METER, TRANSFORM_SCALE},
-    model::AppState,
+    state::AppState,
     util::{
         ext::{AppExt, ImageExt},
         math::floor_by,

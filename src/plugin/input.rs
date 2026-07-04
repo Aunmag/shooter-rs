@@ -1,16 +1,24 @@
-use crate::{
-    command::CursorGrab,
-    resource::{Settings, WindowModeSettings},
-};
+use crate::resource::{Settings, WindowModeSettings};
 use bevy::{
-    app::AppExit,
-    ecs::{query::With, world::World},
+    app::{AppExit, Update},
+    ecs::{
+        query::With,
+        world::{Command, World},
+    },
     input::ButtonInput,
-    prelude::{Commands, KeyCode, Res},
-    window::{PrimaryWindow, Window},
+    prelude::{App, Commands, KeyCode, Plugin, Res},
+    window::{CursorGrabMode, PrimaryWindow, Window},
 };
 
-pub fn input(mut commands: Commands, keyboard: Res<ButtonInput<KeyCode>>) {
+pub struct InputPlugin;
+
+impl Plugin for InputPlugin {
+    fn build(&self, app: &mut App) {
+        app.add_systems(Update, on_update);
+    }
+}
+
+fn on_update(mut commands: Commands, keyboard: Res<ButtonInput<KeyCode>>) {
     if keyboard.just_pressed(KeyCode::Escape) {
         commands.add(|w: &mut World| {
             w.send_event(AppExit::Success);
@@ -47,5 +55,24 @@ pub fn input(mut commands: Commands, keyboard: Res<ButtonInput<KeyCode>>) {
                 }
             }
         });
+    }
+}
+
+pub struct CursorGrab(pub bool);
+
+impl Command for CursorGrab {
+    fn apply(self, world: &mut World) {
+        for mut window in world
+            .query_filtered::<&mut Window, With<PrimaryWindow>>()
+            .iter_mut(world)
+        {
+            window.cursor.grab_mode = if self.0 {
+                CursorGrabMode::Confined
+            } else {
+                CursorGrabMode::None
+            };
+
+            window.cursor.visible = !self.0;
+        }
     }
 }

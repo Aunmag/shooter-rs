@@ -1,11 +1,10 @@
 use super::component::BotShootingState;
 use crate::{
     plugin::{
-        actor::{Actor, ActorAction},
         bot::{Bot, BotConfig},
         debug::{debug_circle, debug_line},
         kinetics::Kinetics,
-        Weapon,
+        Actor, ActorAction, Weapon,
     },
     util::{
         ext::{QuatExt, Vec2Ext},

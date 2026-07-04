@@ -1,8 +1,8 @@
-use crate::{
-    model::AudioPlay,
-    plugin::{camera_target::CameraTarget, Heartbeat},
-    resource::AudioStorage,
-};
+mod audio_play;
+mod audio_storage;
+
+pub use self::{audio_play::*, audio_storage::*};
+use crate::plugin::{camera_target::CameraTarget, Heartbeat};
 use bevy::{
     app::Update,
     audio::{AudioBundle, AudioSink, Volume},
@@ -16,34 +16,43 @@ use std::{sync::Mutex, time::Duration};
 
 const VOLUME_MIN: f32 = 0.01;
 
-pub struct AudioTrackerPlugin;
+pub struct AudioPlugin {
+    limit: usize,
+}
 
-impl Plugin for AudioTrackerPlugin {
+impl AudioPlugin {
+    pub fn new(limit: usize) -> Self {
+        return Self { limit };
+    }
+}
+
+impl Plugin for AudioPlugin {
     fn build(&self, app: &mut App) {
+        app.insert_resource(AudioStorage::default());
+        app.insert_resource(AudioTracker {
+            queue: Mutex::new(Vec::with_capacity(self.limit)),
+            queue_delayed: Mutex::new(Vec::new()),
+            playing: 0,
+            limit: self.limit,
+            listener: Vec2::ZERO,
+        });
+
         app.add_systems(Update, on_update);
     }
 }
 
+// TODO: find a better name
 #[derive(Resource)]
 pub struct AudioTracker {
     queue: Mutex<Vec<AudioPlay>>,
     queue_delayed: Mutex<Vec<(AudioPlay, Duration)>>,
-    limit: usize,
+    limit: usize, // TODO: autoupdate from settings
     pub playing: usize,
     pub listener: Vec2,
 }
 
 impl AudioTracker {
-    pub fn new(sources_limit: usize) -> Self {
-        return Self {
-            queue: Mutex::new(Vec::with_capacity(sources_limit)),
-            queue_delayed: Mutex::new(Vec::new()),
-            playing: 0,
-            limit: sources_limit,
-            listener: Vec2::ZERO,
-        };
-    }
-
+    // TODO: ability to queue with command?
     pub fn queue(&self, mut audio: AudioPlay) {
         if let Some(source) = audio.source {
             audio.volume = self.calc_spatial_volume(source, audio.volume, audio.falloff);
@@ -61,6 +70,7 @@ impl AudioTracker {
         let is_overflow = self.playing + queue.len() >= self.limit;
         let mut replacement = None;
 
+        // TODO: to separate method
         for (i, other) in queue.iter().enumerate() {
             if audio.is_similar_to(other) {
                 return;

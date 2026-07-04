@@ -1,6 +1,6 @@
 use crate::{
-    model::{AppState, AudioPlay},
-    plugin::{actor::Actor, AudioTracker},
+    plugin::{Actor, AudioPlay, AudioTracker},
+    state::AppState,
     util::{ext::AppExt, math::interpolate},
 };
 use bevy::{

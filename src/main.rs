@@ -1,18 +1,13 @@
-mod command;
 mod data;
 mod map;
-mod model;
 mod plugin;
 mod resource;
-mod system;
+mod state;
 mod util;
 
 use crate::{
-    command::CursorGrab,
     data::APP_TITLE,
-    model::AppState,
     plugin::{
-        actor::{ActorDeathEvent, ActorPlugin},
         bot::BotPlugin,
         camera_target::CameraTargetPlugin,
         collision::CollisionPlugin,
@@ -23,19 +18,21 @@ use crate::{
             BenchProjectilesScenario, BenchZombiesScenario, Scenario, ScenarioPlugin,
             TestBotSpreadScenario, TestScenario, WavesScenario,
         },
-        AudioTracker, AudioTrackerPlugin, BloodPlugin, BonusPlugin, BreathPlugin, CrosshairPlugin,
-        DebugTweaksPlugin, ExplosionPlugin, FootstepsPlugin, HealthPlugin, HeartbeatPlugin,
-        MainCamera, ParticlePlugin, ProjectilePlugin, SkipLoaderPlugin, StatusBarPlugin,
-        TerrainPlugin, TileMapPlugin, UiNotificationPlugin, WeaponPlugin,
+        ActorPlugin, AmbienceFxPlugin, AudioPlugin, BloodPlugin, BonusPlugin, BreathPlugin,
+        CrosshairPlugin, CursorGrab, DebugTweaksPlugin, ExplosionPlugin, FootstepsPlugin,
+        HealthPlugin, HeartbeatPlugin, InputPlugin, LoadingPlugin, MainCamera, MeleePlugin,
+        ParticlePlugin, ProjectilePlugin, SkipLoaderPlugin, StatusBarPlugin, TerrainPlugin,
+        TileMapPlugin, UiNotificationPlugin, WeaponPlugin,
     },
-    resource::{AssetStorage, AudioStorage, ScenarioSettings, Settings},
+    resource::{AssetStorage, ScenarioSettings, Settings},
+    state::AppState,
     util::ext::AppExt,
 };
 use bevy::{
     core_pipeline::core_2d::Camera2dBundle,
     ecs::world::{Command, World},
     log::LogPlugin,
-    prelude::{App, AppExtStates, DefaultPlugins, IntoSystemConfigs, PluginGroup},
+    prelude::{App, AppExtStates, DefaultPlugins, PluginGroup},
     render::texture::ImagePlugin,
     window::{Window, WindowPlugin, WindowResolution},
 };
@@ -80,7 +77,8 @@ fn main() {
 
     application
         .add_plugins(ActorPlugin)
-        .add_plugins(AudioTrackerPlugin)
+        .add_plugins(AmbienceFxPlugin)
+        .add_plugins(AudioPlugin::new(settings.audio.sources))
         .add_plugins(BloodPlugin)
         .add_plugins(BonusPlugin)
         .add_plugins(BotPlugin)
@@ -92,7 +90,10 @@ fn main() {
         .add_plugins(FootstepsPlugin)
         .add_plugins(HealthPlugin)
         .add_plugins(HeartbeatPlugin)
+        .add_plugins(InputPlugin)
         .add_plugins(KineticsPlugin)
+        .add_plugins(LoadingPlugin)
+        .add_plugins(MeleePlugin)
         .add_plugins(ParticlePlugin)
         .add_plugins(PlayerPlugin)
         .add_plugins(ProjectilePlugin)
@@ -103,22 +104,11 @@ fn main() {
         .add_plugins(TileMapPlugin)
         .add_plugins(UiNotificationPlugin)
         .add_plugins(WeaponPlugin)
-        .add_event::<ActorDeathEvent>()
         .init_state::<AppState>()
         .insert_resource(AssetStorage::default())
-        .insert_resource(AudioStorage::default())
-        .insert_resource(AudioTracker::new(settings.audio.sources))
         .insert_resource(scenario)
         .insert_resource(settings)
-        .add_state_system(AppState::Loading, system::loading::on_update())
         .add_state_system_enter(AppState::Game, init_game)
-        .add_state_systems(AppState::Game, |s| {
-            use crate::system::game::*;
-            s.add(input);
-            s.add(crate::plugin::actor::on_update.after(crate::plugin::player::on_update));
-            s.add(melee.after(crate::plugin::collision::on_update));
-            s.add(ambience_fx());
-        })
         .run();
 }
 

@@ -1,13 +1,10 @@
 use crate::{
     data::{FONT_PATH, LAYER_BONUS, PIXELS_PER_METER, TRANSFORM_SCALE},
-    model::AppState,
     plugin::{
-        actor::{Actor, ActorKind},
-        camera::MainCamera,
-        collision::Collision,
-        player::Player,
-        Weapon, WeaponConfig, WeaponSet,
+        camera::MainCamera, collision::Collision, player::Player, Actor, ActorKind, Weapon,
+        WeaponConfig, WeaponSet,
     },
+    state::AppState,
     util::{
         ext::{AppExt, Vec2Ext},
         math::interpolate,

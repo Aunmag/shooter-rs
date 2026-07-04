@@ -1,19 +1,30 @@
 use crate::{
-    model::AudioPlay,
-    plugin::{
-        actor::{Actor, ActorAction, ActorActionsExt, ActorConfig},
-        AudioTracker, Weapon,
-    },
+    plugin::{Actor, ActorAction, ActorActionsExt, ActorConfig, AudioPlay, AudioTracker, Weapon},
     resource::HitResource,
-    util::{ext::Vec2Ext, math, Transform2D},
+    state::AppState,
+    util::{
+        ext::{AppExt, Vec2Ext},
+        math, Transform2D,
+    },
 };
 use bevy::{
     ecs::{entity::Entity, system::Deferred, world::World},
-    prelude::{Commands, Query, Res, Transform, Vec2, Without},
+    prelude::{App, Commands, IntoSystemConfigs, Plugin, Query, Res, Transform, Vec2, Without},
     time::Time,
 };
 
-pub fn melee(
+pub struct MeleePlugin;
+
+impl Plugin for MeleePlugin {
+    fn build(&self, app: &mut App) {
+        app.add_state_system(
+            AppState::Game,
+            on_update.after(crate::plugin::collision::on_update),
+        );
+    }
+}
+
+fn on_update(
     attackers: Query<(Entity, &Actor, &Transform), Without<Weapon>>,
     targets: Query<(Entity, &Actor, &Transform)>,
     mut hits: Deferred<HitResource>,

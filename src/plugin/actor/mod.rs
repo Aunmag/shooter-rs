@@ -6,8 +6,8 @@ mod event;
 
 pub use self::{action::*, command::*, component::*, config::*, event::*};
 use crate::{
-    model::AppState,
     plugin::{debug::debug_line, kinetics::Kinetics},
+    state::AppState,
     util::{
         ext::{AppExt, QuatExt, Vec2Ext},
         math,
@@ -17,7 +17,7 @@ use bevy::{
     color::palettes::css::RED,
     ecs::system::Query,
     math::Vec2,
-    prelude::{App, Plugin, Res, Time},
+    prelude::{App, IntoSystemConfigs, Plugin, Res, Time},
     transform::components::Transform,
 };
 
@@ -28,11 +28,15 @@ pub struct ActorPlugin;
 
 impl Plugin for ActorPlugin {
     fn build(&self, app: &mut App) {
-        app.add_state_system(AppState::Game, on_update);
+        app.add_event::<ActorDeathEvent>();
+        app.add_state_system(
+            AppState::Game,
+            on_update.after(crate::plugin::player::on_update),
+        );
     }
 }
 
-pub fn on_update(mut query: Query<(&mut Actor, &mut Transform, &mut Kinetics)>, time: Res<Time>) {
+fn on_update(mut query: Query<(&mut Actor, &mut Transform, &mut Kinetics)>, time: Res<Time>) {
     let time_delta = time.delta_seconds();
 
     for (mut actor, mut transform, mut kinetics) in query.iter_mut() {

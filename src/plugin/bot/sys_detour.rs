@@ -1,5 +1,5 @@
 use crate::{
-    plugin::{actor::Actor, bot::Bot},
+    plugin::{bot::Bot, Actor},
     util::{ext::Vec2Ext, math::angle_difference, Timer},
 };
 use bevy::{

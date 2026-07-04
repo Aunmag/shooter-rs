@@ -1,4 +1,4 @@
-use crate::{model::AppState, util::ext::AppExt};
+use crate::{util::ext::AppExt, AppState};
 use bevy::{
     ecs::component::Component,
     math::Vec2,

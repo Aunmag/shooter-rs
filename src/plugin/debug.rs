@@ -1,10 +1,9 @@
 use crate::{
-    model::AppState,
     plugin::{
-        actor::{ActorConfig, ActorKind, ActorSet},
-        bot::ActorBotSet,
-        AudioTracker, BonusSpawn, Crosshair, Explode, TileMap, WeaponConfig, WeaponSet,
+        bot::ActorBotSet, ActorConfig, ActorKind, ActorSet, AudioTracker, BonusSpawn, Crosshair,
+        Explode, TileMap, WeaponConfig, WeaponSet,
     },
+    state::AppState,
     util::{ext::AppExt, Timer, Transform2D},
 };
 use bevy::{

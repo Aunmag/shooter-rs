@@ -1,5 +1,5 @@
 use crate::{
-    plugin::{actor::Actor, bot::Bot},
+    plugin::{bot::Bot, Actor},
     util::ext::Fuzz,
 };
 use bevy::{

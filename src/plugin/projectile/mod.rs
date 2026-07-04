@@ -7,7 +7,7 @@ mod sys_whiz;
 
 use self::material::ProjectileMaterial;
 pub use self::{command::*, component::*, config::*};
-use crate::{model::AppState, util::ext::AppExt};
+use crate::{util::ext::AppExt, AppState};
 use bevy::{
     prelude::{App, IntoSystemConfigs, Plugin},
     sprite::Material2dPlugin,

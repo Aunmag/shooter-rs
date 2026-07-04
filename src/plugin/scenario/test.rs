@@ -1,6 +1,6 @@
 use crate::{
     map::{Map, TestMap},
-    plugin::{actor::ActorConfig, player::PlayerSpawn, scenario::ScenarioLogic, WeaponConfig},
+    plugin::{player::PlayerSpawn, scenario::ScenarioLogic, ActorConfig, WeaponConfig},
 };
 use bevy::ecs::world::{Command, World};
 use std::{any::Any, time::Duration};

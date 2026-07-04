@@ -1,12 +1,13 @@
 use crate::{
-    model::AppState,
-    resource::{AssetStorage, AudioStorage},
-    util::Timer,
+    plugin::AudioStorage,
+    resource::AssetStorage,
+    state::AppState,
+    util::{ext::AppExt, Timer},
 };
 use bevy::{
     asset::Assets,
-    ecs::{schedule::SystemConfigs, system::Local},
-    prelude::{AssetServer, AudioSource, IntoSystemConfigs, NextState, Res, ResMut},
+    ecs::system::Local,
+    prelude::{App, AssetServer, AudioSource, IntoSystemConfigs, NextState, Plugin, Res, ResMut},
     render::{mesh::Mesh, texture::Image},
     time::Time,
 };
@@ -14,7 +15,20 @@ use std::time::Duration;
 
 const INTERVAL: Duration = Duration::from_secs(1);
 
-fn on_update_inner(
+pub struct LoadingPlugin;
+
+impl Plugin for LoadingPlugin {
+    fn build(&self, app: &mut App) {
+        app.add_state_system(
+            AppState::Loading,
+            on_update.run_if(|mut r: Local<Timer>, t: Res<Time>| {
+                return r.try_next_set(t.elapsed(), || INTERVAL);
+            }),
+        );
+    }
+}
+
+fn on_update(
     asset_server: Res<AssetServer>,
     audio_assets: Res<Assets<AudioSource>>,
     mut images: ResMut<Assets<Image>>,
@@ -35,10 +49,4 @@ fn on_update_inner(
         log::info!("Loading...");
         asset_storage.load(&asset_server, &mut images, &mut meshes);
     }
-}
-
-pub fn on_update() -> SystemConfigs {
-    return on_update_inner.run_if(|mut r: Local<Timer>, t: Res<Time>| {
-        return r.try_next_set(t.elapsed(), || INTERVAL);
-    });
 }

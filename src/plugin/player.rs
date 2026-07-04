@@ -1,14 +1,12 @@
 use crate::{
     data::{LAYER_ACTOR_PLAYER, WORLD_SIZE_HALF},
-    model::AppState,
     plugin::{
-        actor::{Actor, ActorAction, ActorActionsExt, ActorConfig, ActorSet},
-        camera::MainCamera,
-        camera_target::CameraTarget,
-        kinetics::Kinetics,
-        Crosshair, Health, StatusBar, WeaponConfig, WeaponSet,
+        camera::MainCamera, camera_target::CameraTarget, kinetics::Kinetics, Actor, ActorAction,
+        ActorActionsExt, ActorConfig, ActorSet, Crosshair, Health, StatusBar, WeaponConfig,
+        WeaponSet,
     },
     resource::Settings,
+    state::AppState,
     util::ext::{AppExt, Vec2Ext},
 };
 use bevy::{

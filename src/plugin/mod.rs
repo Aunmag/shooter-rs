@@ -1,4 +1,5 @@
-pub mod actor;
+mod actor;
+mod ambience_fx;
 mod audio;
 mod blood;
 mod bonus;
@@ -14,7 +15,10 @@ mod explosion;
 mod footsteps;
 mod health;
 mod heartbeat;
+mod input;
 pub mod kinetics;
+mod loading;
+mod melee;
 mod particle;
 pub mod player;
 mod projectile;
@@ -27,7 +31,8 @@ mod ui_notification;
 mod weapon;
 
 pub use self::{
-    audio::*, blood::*, bonus::*, breath::*, camera::*, crosshair::*, debug_tweaks::*,
-    explosion::*, footsteps::*, health::*, heartbeat::*, particle::*, projectile::*,
-    skip_loader::*, status_bar::*, terrain::*, tile_map::*, ui_notification::*, weapon::*,
+    actor::*, ambience_fx::*, audio::*, blood::*, bonus::*, breath::*, camera::*, crosshair::*,
+    debug_tweaks::*, explosion::*, footsteps::*, health::*, heartbeat::*, input::*, loading::*,
+    melee::*, particle::*, projectile::*, skip_loader::*, status_bar::*, terrain::*, tile_map::*,
+    ui_notification::*, weapon::*,
 };

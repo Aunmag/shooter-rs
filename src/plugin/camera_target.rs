@@ -1,7 +1,7 @@
 use crate::{
     data::VIEW_DISTANCE,
-    model::AppState,
     plugin::camera::MainCamera,
+    state::AppState,
     util::ext::{AppExt, DurationExt, QuatExt, Vec2Ext},
 };
 use bevy::{

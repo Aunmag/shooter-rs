@@ -2,11 +2,11 @@ use crate::{
     data::VIEW_DISTANCE,
     map::{ForestMap, Map},
     plugin::{
-        actor::{Actor, ActorConfig, ActorDeathEvent, ActorKind, ActorSet},
         bot::ActorBotSet,
         player::{Player, PlayerSpawn},
         scenario::{Scenario, ScenarioLogic},
-        BonusSpawn, Health, Notify, WeaponConfig, WeaponSet,
+        Actor, ActorConfig, ActorDeathEvent, ActorKind, ActorSet, BonusSpawn, Health, Notify,
+        WeaponConfig, WeaponSet,
     },
     util::ext::Vec2Ext,
 };

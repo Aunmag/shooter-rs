@@ -1,8 +1,8 @@
 use crate::{
     data::PIXELS_PER_METER,
-    model::AppState,
-    plugin::{actor::Actor, Health, Weapon},
+    plugin::{Actor, Health, Weapon},
     resource::AssetStorage,
+    state::AppState,
     util::ext::AppExt,
 };
 use bevy::{

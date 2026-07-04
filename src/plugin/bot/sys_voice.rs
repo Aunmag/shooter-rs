@@ -1,11 +1,4 @@
-use crate::{
-    model::AudioPlay,
-    plugin::{
-        actor::{Actor, ActorKind},
-        bot::Bot,
-        AudioTracker,
-    },
-};
+use crate::plugin::{bot::Bot, Actor, ActorKind, AudioPlay, AudioTracker};
 use bevy::{
     ecs::system::Res,
     math::Vec3Swizzles,

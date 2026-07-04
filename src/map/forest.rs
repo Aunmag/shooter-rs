@@ -1,8 +1,7 @@
 use crate::{
     data::{LAYER_GROUND, LAYER_TREE, WORLD_SIZE, WORLD_SIZE_HALF, WORLD_SIZE_VISUAL},
     map::Map,
-    model::AudioPlay,
-    plugin::{AudioTracker, TerrainSpawn, TileBlend},
+    plugin::{AudioPlay, AudioTracker, TerrainSpawn, TileBlend},
     util::ext::Vec2Ext,
 };
 use bevy::{
