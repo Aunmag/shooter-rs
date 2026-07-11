@@ -22,7 +22,7 @@ use std::time::Duration;
 
 /// Increased buffering helps to summarize small and frequent damage events into one which is good
 /// for visual effects like blood. But also it increases the delay
-const BUFFERING: Duration = Duration::from_millis(100);
+const BUFFERING: Duration = Duration::from_millis(80);
 const LOW_VALUE: f32 = 0.4;
 const FLESH_PARTICLE_PER_DAMAGE: f32 = 0.2;
 const FLESH_PARTICLES_MAX: i32 = 8;
@@ -135,8 +135,8 @@ fn on_update(
 
         if health.just_died {
             audio.queue(AudioPlay {
-                path: format!("{}/death", actor.get_assets_path()).into(),
-                volume: 1.0,
+                path: "sounds/gore/gore".into(),
+                volume: 0.8,
                 source: Some(point),
                 ..AudioPlay::DEFAULT
             });
