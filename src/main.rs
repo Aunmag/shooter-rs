@@ -12,11 +12,12 @@ use crate::{
         camera_target::CameraTargetPlugin,
         collision::CollisionPlugin,
         debug::DebugPlugin,
+        editor::EditorPlugin,
         kinetics::KineticsPlugin,
         player::PlayerPlugin,
         scenario::{
-            BenchProjectilesScenario, BenchZombiesScenario, Scenario, ScenarioPlugin,
-            TestBotSpreadScenario, TestScenario, WavesScenario,
+            BenchProjectilesScenario, BenchZombiesScenario, EmptyScenario, Scenario,
+            ScenarioPlugin, TestBotSpreadScenario, TestScenario, WavesScenario,
         },
         ActorPlugin, AmbienceFxPlugin, AudioPlugin, BloodPlugin, BonusPlugin, BreathPlugin,
         CrosshairPlugin, CursorGrab, DebugTweaksPlugin, ExplosionPlugin, FootstepsPlugin,
@@ -64,6 +65,10 @@ fn main() {
     let scenario = match settings.game.scenario {
         ScenarioSettings::BenchProjectiles => Scenario::new(BenchProjectilesScenario::default()),
         ScenarioSettings::BenchZombies => Scenario::new(BenchZombiesScenario::default()),
+        ScenarioSettings::Editor => {
+            application.add_plugins(EditorPlugin);
+            Scenario::new(EmptyScenario)
+        }
         ScenarioSettings::Test => Scenario::new(TestScenario),
         ScenarioSettings::TestBotSpread => Scenario::new(TestBotSpreadScenario),
         ScenarioSettings::Waves => Scenario::new(WavesScenario::new(settings.game.level)),

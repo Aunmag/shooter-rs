@@ -41,6 +41,7 @@ impl Default for GameSettings {
 pub enum ScenarioSettings {
     BenchProjectiles,
     BenchZombies,
+    Editor,
     Test,
     TestBotSpread,
     Waves,

@@ -1,13 +1,13 @@
 [game]
-scenario = "waves" # bench_projectiles, bench_zombies, test, test_bot_spread, waves
+scenario = "editor" # bench_projectiles, bench_zombies, editor, test, test_bot_spread, waves
 difficulty = 1.0 # 0.8 - easy, 1.0 - medium, 1.2 - hard
 level = 1 # starting level
-debug = false
+debug = true
 
 [display]
-mode = "borderless" # fullscreen, borderless, windowed
-window_w = 800
-window_h = 800
+mode = "windowed" # fullscreen, borderless, windowed
+window_w = 1024
+window_h = 1024
 v_sync = false
 
 [audio]

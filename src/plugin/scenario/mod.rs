@@ -1,11 +1,14 @@
 mod bench_projectiles;
 mod bench_utils;
 mod bench_zombies;
+mod empty;
 mod test;
 mod test_bot_spread;
 mod waves;
 
-pub use self::{bench_projectiles::*, bench_zombies::*, test::*, test_bot_spread::*, waves::*};
+pub use self::{
+    bench_projectiles::*, bench_zombies::*, empty::*, test::*, test_bot_spread::*, waves::*,
+};
 use crate::{plugin::ActorDeathEvent, util::ext::AppExt, AppState};
 use bevy::{
     ecs::{
