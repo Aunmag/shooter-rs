@@ -5,9 +5,14 @@ use bevy::{
 use rand::{seq::SliceRandom, SeedableRng};
 use rand_pcg::Pcg32;
 use regex::Regex;
-use std::collections::{HashMap, HashSet};
+use std::{
+    borrow::Cow,
+    collections::{HashMap, HashSet},
+};
 
 const SPARE_PATHS: &[(&str, &str)] = &[("actors/zombie_agile/", "actors/zombie/")];
+
+const MERGE_RULES: &[&str] = &["sounds/ambience_fx"];
 
 #[derive(Resource)]
 pub struct AudioStorage {
@@ -45,7 +50,14 @@ impl AudioStorage {
             if let Some(handle) = asset_server.get_id_handle(asset_id) {
                 if let Some(path) = handle.path() {
                     let asset_path = path.path().display().to_string().replace('\\', "/");
-                    let group_path = re.replace_all(&asset_path, "");
+                    let mut group_path = re.replace_all(&asset_path, "");
+
+                    for merge_rule in MERGE_RULES {
+                        if group_path.starts_with(merge_rule) {
+                            group_path = Cow::Borrowed(merge_rule);
+                            break;
+                        }
+                    }
 
                     self.groups
                         .entry(group_path.into_owned())
@@ -56,8 +68,9 @@ impl AudioStorage {
             }
         }
 
-        for (_, group) in self.groups.iter_mut() {
+        for group in self.groups.values_mut() {
             group.audios.shuffle(&mut self.generator);
+            group.audios.shrink_to_fit();
         }
 
         log::debug!("Indexed groups: {}", self.groups.len());
