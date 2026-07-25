@@ -10,8 +10,11 @@ use bevy::{
     ecs::world::Command,
     prelude::{Assets, Handle, Image, Transform, Vec2, Vec3, World},
     reflect::TypePath,
-    render::render_resource::{AsBindGroup, ShaderRef},
-    sprite::{Material2d, Material2dPlugin, MaterialMesh2dBundle},
+    render::{
+        mesh::Mesh2d,
+        render_resource::{AsBindGroup, ShaderRef},
+    },
+    sprite::{AlphaMode2d, Material2d, Material2dPlugin, MeshMaterial2d},
 };
 use rand::{thread_rng, Rng};
 
@@ -40,6 +43,10 @@ pub struct Blood {
 impl Material2d for Blood {
     fn fragment_shader() -> ShaderRef {
         return "shader/blood.wgsl".into();
+    }
+
+    fn alpha_mode(&self) -> AlphaMode2d {
+        return AlphaMode2d::Blend;
     }
 }
 
@@ -73,16 +80,15 @@ impl Command for BloodSpawn {
         });
 
         let entity = world
-            .spawn(MaterialMesh2dBundle {
-                transform: Transform {
+            .spawn((
+                Transform {
                     translation: self.position.extend(LAYER_GROUND),
                     scale: Vec3::splat(self.size),
                     ..Transform::default()
                 },
-                mesh: mesh.into(),
-                material,
-                ..Default::default()
-            })
+                Mesh2d(mesh),
+                MeshMaterial2d(material),
+            ))
             .id();
 
         TileBlend::Entity(entity).apply(world);

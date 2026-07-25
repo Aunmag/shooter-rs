@@ -77,7 +77,7 @@ pub fn on_update(
             j.stopped = true; // only stop (destroy) on next frame so player have time to see projectile hits the target
 
             if let Some(explosion) = &j.config.explosion {
-                commands.add(Explode {
+                commands.queue(Explode {
                     config: explosion,
                     position: p0,
                     shooter: j.shooter,

@@ -50,7 +50,7 @@ impl BenchProjectilesScenario {
         let y = self.rng.gen_range(-s..s);
         let r = self.rng.gen_range(0.0..TAU);
 
-        commands.add(ActorSet {
+        commands.queue(ActorSet {
             entity,
             config: &ActorConfig::ZOMBIE,
             position: Vec2::new(x, y),
@@ -83,7 +83,7 @@ impl ScenarioLogic for BenchProjectilesScenario {
         }
 
         if self.next_shot.try_next_add(time, SHOT_INTERVAL) {
-            commands.add(|world: &mut World| {
+            commands.queue(|world: &mut World| {
                 let transforms = world
                     .query_filtered::<&Transform, With<Actor>>()
                     .iter(world)

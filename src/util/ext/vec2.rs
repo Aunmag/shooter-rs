@@ -7,7 +7,7 @@ pub trait Vec2Ext {
 
     fn from_length(length: f32, angle: f32) -> Self;
     fn rotate_by_quat(self, quat: Quat) -> Self;
-    fn angle_to(self, target: Self) -> f32;
+    fn direction_to(self, target: Self) -> f32;
     fn distance_squared(self, target: Self) -> f32;
     fn is_zero(self) -> bool;
     fn is_close(self, target: Self, threshold: f32) -> bool;
@@ -30,7 +30,7 @@ impl Vec2Ext for Vec2 {
         return Vec2::new(v.x * rw - v.y * rz, v.x * rz + v.y * rw);
     }
 
-    fn angle_to(self, target: Self) -> f32 {
+    fn direction_to(self, target: Self) -> f32 {
         return (target - self).to_angle();
     }
 
@@ -92,11 +92,11 @@ mod tests {
     }
 
     #[test]
-    fn angle_to() {
+    fn direction_to() {
         for a in ANGLES {
             let v1 = Vec2::new(12.3, 45.6);
             let v2 = v1 + Vec2::from_length(3.3, a);
-            assert_radians_eq!(v1.angle_to(v2), a);
+            assert_radians_eq!(v1.direction_to(v2), a);
         }
     }
 

@@ -5,7 +5,7 @@ pub use self::{audio_play::*, audio_storage::*};
 use crate::plugin::{camera_target::CameraTarget, Heartbeat};
 use bevy::{
     app::Update,
-    audio::{AudioBundle, AudioSink, Volume},
+    audio::{AudioPlayer, AudioSink, Volume},
     ecs::{component::Component, entity::Entity},
     prelude::{
         App, AudioSinkPlayback, Commands, DespawnRecursiveExt, Plugin, Query, Res, ResMut,
@@ -170,7 +170,7 @@ fn on_update(
             settings.volume = Volume::new(0.0);
         }
 
-        let mut entity = commands.spawn(AudioBundle { source, settings });
+        let mut entity = commands.spawn((AudioPlayer(source), settings));
 
         if is_heartbeat {
             entity.insert(Heartbeat);

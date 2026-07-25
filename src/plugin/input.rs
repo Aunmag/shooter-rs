@@ -20,18 +20,18 @@ impl Plugin for InputPlugin {
 
 fn on_update(mut commands: Commands, keyboard: Res<ButtonInput<KeyCode>>) {
     if keyboard.just_pressed(KeyCode::Escape) {
-        commands.add(|w: &mut World| {
+        commands.queue(|w: &mut World| {
             w.send_event(AppExit::Success);
         });
     }
 
     if keyboard.just_pressed(KeyCode::Tab) {
         // TODO: hide cursor on widow click
-        commands.add(CursorGrab(false));
+        commands.queue(CursorGrab(false));
     }
 
     if keyboard.just_pressed(KeyCode::F11) {
-        commands.add(|world: &mut World| {
+        commands.queue(|world: &mut World| {
             let mut settings = world.resource_mut::<Settings>();
 
             settings.display.mode = match settings.display.mode {
@@ -66,13 +66,13 @@ impl Command for CursorGrab {
             .query_filtered::<&mut Window, With<PrimaryWindow>>()
             .iter_mut(world)
         {
-            window.cursor.grab_mode = if self.0 {
+            window.cursor_options.grab_mode = if self.0 {
                 CursorGrabMode::Confined
             } else {
                 CursorGrabMode::None
             };
 
-            window.cursor.visible = !self.0;
+            window.cursor_options.visible = !self.0;
         }
     }
 }

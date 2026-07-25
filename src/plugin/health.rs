@@ -141,7 +141,7 @@ fn on_update(
                 ..AudioPlay::DEFAULT
             });
 
-            commands.add(ActorRelease(entity));
+            commands.queue(ActorRelease(entity));
 
             death_events.send(ActorDeathEvent {
                 kind: actor.kind,
@@ -165,7 +165,7 @@ fn spawn_blood(health: &Health, commands: &mut Commands, point: Vec2) {
     }
 
     if let Some(blood) = BloodSpawn::new(point, f32::min(amount, 1.0)) {
-        commands.add(blood);
+        commands.queue(blood);
     }
 }
 
@@ -181,6 +181,6 @@ fn spawn_flesh(health: &Health, commands: &mut Commands, entity: Entity) {
     };
 
     for _ in 0..particles {
-        commands.add(FleshParticleSpawn(entity));
+        commands.queue(FleshParticleSpawn(entity));
     }
 }

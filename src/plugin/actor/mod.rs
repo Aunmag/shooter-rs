@@ -37,7 +37,7 @@ impl Plugin for ActorPlugin {
 }
 
 fn on_update(mut query: Query<(&mut Actor, &mut Transform, &mut Kinetics)>, time: Res<Time>) {
-    let time_delta = time.delta_seconds();
+    let time_delta = time.delta_secs();
 
     for (mut actor, mut transform, mut kinetics) in query.iter_mut() {
         actor.update_stamina(time_delta);

@@ -9,10 +9,11 @@ use crate::{
 use bevy::{
     asset::{AssetServer, Assets, Handle},
     ecs::world::Command,
+    hierarchy::BuildChildren,
+    image::Image,
     math::Vec3Swizzles,
-    prelude::{BuildWorldChildren, Children, DespawnRecursiveExt, Entity, Transform, Vec2, World},
-    render::texture::Image,
-    sprite::{Anchor, Sprite, SpriteBundle},
+    prelude::{Children, DespawnRecursiveExt, Entity, Transform, Vec2, World},
+    sprite::{Anchor, Sprite},
 };
 
 const WEAPON_MASS_MULTIPLAYER: f32 = 5.0;
@@ -58,15 +59,14 @@ impl WeaponSet {
         let anchor = Self::find_image_anchor(world, weapon, &image);
 
         world
-            .spawn(SpriteBundle {
-                sprite: Sprite {
+            .spawn((
+                Sprite {
+                    image,
                     anchor,
                     ..Default::default()
                 },
-                texture: image,
-                transform: Transform::from_xyz(0.0, 0.0, -0.1),
-                ..Default::default()
-            })
+                Transform::from_xyz(0.0, 0.0, -0.1),
+            ))
             .insert(ActorWeaponSprite)
             .set_parent(self.entity);
     }
@@ -99,12 +99,17 @@ impl WeaponSet {
         if let Some(actor) = world.get::<Actor>(self.entity) {
             let image_suffix = weapon.grip.actor_image_suffix();
             let image_path = actor.config.get_image_path(image_suffix);
-            let image = world
+
+            let Some(image) = world
                 .resource::<AssetServer>()
                 .get_handle::<Image>(image_path)
-                .unwrap_or_default();
+            else {
+                return;
+            };
 
-            world.entity_mut(self.entity).insert(image);
+            if let Some(mut sprite) = world.get_mut::<Sprite>(self.entity) {
+                sprite.image = image;
+            }
         }
     }
 

@@ -9,7 +9,8 @@ use bevy::{
     ecs::world::Command,
     math::Vec3,
     prelude::{Entity, Time, Transform, Vec2, World},
-    sprite::MaterialMesh2dBundle,
+    render::mesh::Mesh2d,
+    sprite::MeshMaterial2d,
 };
 
 pub struct ProjectileSpawn {
@@ -40,16 +41,15 @@ impl Command for ProjectileSpawn {
             .add(ProjectileMaterial { image });
 
         world
-            .spawn(MaterialMesh2dBundle {
-                transform: Transform {
+            .spawn((
+                Transform {
                     translation: self.position.extend(LAYER_PROJECTILE),
                     rotation: self.velocity.as_quat(),
                     scale: Vec3::new(0.0, 0.0, 1.0),
                 },
-                mesh: mesh.into(),
-                material,
-                ..Default::default()
-            })
+                Mesh2d(mesh),
+                MeshMaterial2d(material),
+            ))
             .insert(projectile);
     }
 }

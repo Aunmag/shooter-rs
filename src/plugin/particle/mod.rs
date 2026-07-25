@@ -106,5 +106,5 @@ fn on_update_debug(
         return;
     };
 
-    commands.add(FleshParticleSpawn(entity));
+    commands.queue(FleshParticleSpawn(entity));
 }

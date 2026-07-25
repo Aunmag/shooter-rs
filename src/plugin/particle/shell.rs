@@ -14,7 +14,7 @@ use bevy::{
     },
     math::{Vec2, Vec3},
     prelude::{Time, Transform},
-    sprite::SpriteBundle,
+    sprite::Sprite,
 };
 use rand::Rng;
 use std::{f32::consts::FRAC_PI_2, time::Duration};
@@ -54,7 +54,7 @@ impl Command for ShellParticleSpawn {
             "particle/shell.png"
         };
 
-        let Some(texture) = world.resource::<AssetServer>().get_handle(image) else {
+        let Some(image) = world.resource::<AssetServer>().get_handle(image) else {
             return;
         };
 
@@ -69,14 +69,16 @@ impl Command for ShellParticleSpawn {
         // }
 
         world
-            .spawn(SpriteBundle {
-                transform: Transform {
+            .spawn((
+                Sprite {
+                    image,
+                    ..Default::default()
+                },
+                Transform {
                     scale: Vec3::ZERO,
                     ..Default::default()
                 },
-                texture,
-                ..Default::default()
-            })
+            ))
             .insert(Particle {
                 config: PARTICLE_CONFIG,
                 position,
@@ -91,9 +93,9 @@ impl Command for ShellParticleSpawn {
 }
 
 fn on_destroy(entity: Entity, point: Vec2, commands: &mut Commands) {
-    commands.add(TileBlend::Entity(entity));
+    commands.queue(TileBlend::Entity(entity));
 
-    commands.add(move |world: &mut World| {
+    commands.queue(move |world: &mut World| {
         let mut time = world.resource::<Time>().elapsed();
         let mut rng = rand::thread_rng();
         let interval = AUDIO_INTERVAL.fuzz(&mut rng);

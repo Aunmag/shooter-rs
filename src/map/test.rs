@@ -5,7 +5,7 @@ pub struct TestMap;
 
 impl Map for TestMap {
     fn generate(&self, world: &mut World) {
-        world.commands().add(TerrainSpawn {
+        world.commands().queue(TerrainSpawn {
             image: "terrain/test.png",
         });
     }

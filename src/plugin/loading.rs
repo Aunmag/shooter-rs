@@ -7,8 +7,9 @@ use crate::{
 use bevy::{
     asset::Assets,
     ecs::system::Local,
+    image::Image,
     prelude::{App, AssetServer, AudioSource, IntoSystemConfigs, NextState, Plugin, Res, ResMut},
-    render::{mesh::Mesh, texture::Image},
+    render::mesh::Mesh,
     time::Time,
 };
 use std::time::Duration;

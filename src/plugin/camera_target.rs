@@ -77,7 +77,7 @@ pub fn on_update(
     mut mouse_scroll: EventReader<MouseWheel>,
     time: Res<Time>,
 ) {
-    let delta = time.delta_seconds();
+    let delta = time.delta_secs();
     let mut zoom = 0.0;
 
     for event in mouse_scroll.read() {

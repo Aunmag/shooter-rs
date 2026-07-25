@@ -103,7 +103,7 @@ impl Bench {
 
         log::info!("Benchmark completed");
 
-        commands.add(|w: &mut World| {
+        commands.queue(|w: &mut World| {
             w.send_event(AppExit::Success);
         });
     }

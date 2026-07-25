@@ -79,7 +79,7 @@ fn on_update(
                 ..AudioPlay::DEFAULT
             });
 
-            commands.add(move |world: &mut World| {
+            commands.queue(move |world: &mut World| {
                 if let Some(mut actor) = world.get_mut::<Actor>(attacker_entity) {
                     actor.actions.remove(ActorAction::Attack);
                     actor.melee_next = time + actor.config.melee_interval.div_f32(actor.skill);

@@ -83,14 +83,14 @@ fn on_update(
             });
 
             if has_shells(&weapon) && weapon.config.has_bolt {
-                commands.add(ShellParticleSpawn(entity));
+                commands.queue(ShellParticleSpawn(entity));
             }
 
             for _ in 0..weapon.config.projectile.fragments {
                 let deviation = weapon.config.generate_deviation(&mut data.rng);
                 let velocity = weapon.config.generate_velocity(&mut data.rng);
 
-                commands.add(ProjectileSpawn {
+                commands.queue(ProjectileSpawn {
                     config: weapon.config.projectile,
                     position,
                     velocity: Vec2::from_angle(rotation + deviation) * velocity,
@@ -122,7 +122,7 @@ fn on_update(
 
             if has_shells(&weapon) && !weapon.config.has_bolt {
                 for _ in 0..weapon.config.ammo_capacity {
-                    commands.add(ShellParticleSpawn(entity));
+                    commands.queue(ShellParticleSpawn(entity));
                 }
             }
         }

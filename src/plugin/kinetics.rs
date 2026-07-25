@@ -72,7 +72,7 @@ impl Kinetics {
 }
 
 pub fn on_update(mut query: Query<(&mut Transform, &mut Kinetics)>, time: Res<Time>) {
-    let delta = time.delta_seconds();
+    let delta = time.delta_secs();
 
     for (mut transform, mut kinetics) in query.iter_mut() {
         transform.translation.x += kinetics.velocity.x * delta;

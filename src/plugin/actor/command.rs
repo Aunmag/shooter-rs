@@ -12,11 +12,11 @@ use crate::{
     resource::Settings,
 };
 use bevy::{
-    asset::Handle,
     ecs::world::Command,
     hierarchy::{Children, DespawnRecursiveExt},
     math::{Quat, Vec2},
-    prelude::{AssetServer, Entity, SpriteBundle, Transform, World},
+    prelude::{AssetServer, Entity, Transform, World},
+    sprite::{MeshMaterial2d, Sprite},
 };
 
 pub struct ActorSet {
@@ -29,24 +29,26 @@ pub struct ActorSet {
 impl Command for ActorSet {
     fn apply(self, world: &mut World) {
         let difficulty = world.resource::<Settings>().game.difficulty;
-        let texture_path = self.config.get_image_path(0);
-        let texture = world
+        let image_path = self.config.get_image_path(0);
+        let image = world
             .resource::<AssetServer>()
-            .get_handle(texture_path)
+            .get_handle(image_path)
             .unwrap_or_default();
 
         let mut entity_mut = world.entity_mut(self.entity);
 
         entity_mut
-            .insert(SpriteBundle {
-                transform: Transform {
+            .insert((
+                Transform {
                     translation: self.position.extend(LAYER_ACTOR),
                     rotation: Quat::from_rotation_z(self.rotation),
                     scale: TRANSFORM_SCALE,
                 },
-                texture,
-                ..Default::default()
-            })
+                Sprite {
+                    image,
+                    ..Default::default()
+                },
+            ))
             .insert(Collision {
                 radius: self.config.radius,
             })
@@ -97,7 +99,7 @@ impl Command for ActorRelease {
 
         if let Some(children) = world.get::<Children>(self.0) {
             for &child in children {
-                if world.get::<Handle<StatusBar>>(child).is_some() {
+                if world.get::<MeshMaterial2d<StatusBar>>(child).is_some() {
                     to_remove.push(child);
                 }
             }

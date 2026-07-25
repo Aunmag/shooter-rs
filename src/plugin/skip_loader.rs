@@ -25,11 +25,11 @@ impl AssetLoader for SkipLoader {
     type Settings = ();
     type Error = std::io::Error;
 
-    async fn load<'a>(
-        &'a self,
-        _: &'a mut Reader<'_>,
-        _: &'a (),
-        _: &'a mut LoadContext<'_>,
+    async fn load(
+        &self,
+        _: &mut dyn Reader,
+        _: &(),
+        _: &mut LoadContext<'_>,
     ) -> Result<Self::Asset, Self::Error> {
         return Ok(SkipAsset);
     }

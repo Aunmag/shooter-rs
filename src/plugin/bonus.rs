@@ -14,12 +14,15 @@ use bevy::{
     app::{App, Plugin},
     color::palettes::css::WHITE,
     ecs::{component::Component, entity::Entity, system::Res, world::Command},
+    hierarchy::BuildChildren,
     math::Vec3Swizzles,
     prelude::{
-        AssetServer, BuildWorldChildren, Commands, DespawnRecursiveExt, IntoSystemConfigs, Quat,
-        Query, SpatialBundle, SpriteBundle, Vec2, Vec3, With, Without, World,
+        AssetServer, Commands, DespawnRecursiveExt, IntoSystemConfigs, Quat, Query, Vec2, Vec3,
+        With, Without, World,
     },
-    text::{JustifyText, Text, Text2dBundle, TextStyle},
+    render::view::InheritedVisibility,
+    sprite::Sprite,
+    text::{JustifyText, Text2d, TextColor, TextFont, TextLayout},
     time::Time,
     transform::components::Transform,
 };
@@ -28,8 +31,8 @@ use std::{f32::consts::TAU, time::Duration};
 
 const RADIUS: f32 = 0.2;
 const PULSE: Duration = Duration::from_secs(2);
-const TEXT_SCALE_MIN: f32 = 0.39;
-const TEXT_SCALE_MAX: f32 = 0.41;
+const TEXT_SCALE_MIN: f32 = 0.29;
+const TEXT_SCALE_MAX: f32 = 0.31;
 const LIFETIME: Duration = Duration::from_secs(30);
 
 pub struct BonusPlugin;
@@ -103,7 +106,7 @@ fn update_pickup(
 
             if player_position.is_close(bonus_position, RADIUS + player_body.radius) {
                 commands.entity(bonus_entity).despawn_recursive();
-                commands.add(WeaponSet {
+                commands.queue(WeaponSet {
                     entity: player_entity,
                     weapon: Some(bonus.weapon),
                 });
@@ -115,7 +118,7 @@ fn update_pickup(
 }
 
 fn update_image(mut query: Query<&mut Transform, With<BonusImage>>, time: Res<Time>) {
-    let update_image = time.elapsed_seconds() % PULSE.as_secs_f32() * -TAU;
+    let update_image = time.elapsed_secs() % PULSE.as_secs_f32() * -TAU;
     for mut image in query.iter_mut() {
         image.rotation = Quat::from_rotation_z(update_image);
     }
@@ -129,7 +132,7 @@ fn update_label(
     let scale = interpolate(
         TEXT_SCALE_MIN,
         TEXT_SCALE_MAX,
-        (time.elapsed_seconds() / PULSE.as_secs_f32() * TAU * 2.0).cos(),
+        (time.elapsed_secs() / PULSE.as_secs_f32() * TAU * 2.0).cos(),
     );
 
     let rotation = cameras
@@ -191,27 +194,26 @@ fn spawn_bonus(world: &mut World, position: Vec2, weapon: &'static WeaponConfig)
     let time = world.resource::<Time>().elapsed();
 
     return world
-        .spawn(SpatialBundle {
-            transform: Transform::from_xyz(position.x, position.y, LAYER_BONUS)
-                .with_scale(TRANSFORM_SCALE),
-            ..Default::default()
-        })
-        .insert(Bonus {
-            weapon,
-            expiration: time + LIFETIME,
-        })
+        .spawn((
+            Transform::from_xyz(position.x, position.y, LAYER_BONUS).with_scale(TRANSFORM_SCALE),
+            InheritedVisibility::VISIBLE,
+            Bonus {
+                weapon,
+                expiration: time + LIFETIME,
+            },
+        ))
         .id();
 }
 
 fn spawn_image(world: &mut World, bonus: Entity, weapon: &WeaponConfig) {
-    let texture = world
+    let image = world
         .resource::<AssetServer>()
         .get_handle(weapon.get_image_path())
         .unwrap_or_default();
 
     world
-        .spawn(SpriteBundle {
-            texture,
+        .spawn(Sprite {
+            image,
             ..Default::default()
         })
         .insert(BonusImage)
@@ -224,22 +226,21 @@ fn spawn_label(world: &mut World, bonus: Entity, weapon: &WeaponConfig) {
         .get_handle(FONT_PATH)
         .unwrap_or_default();
 
-    let text = Text::from_section(
-        weapon.name,
-        TextStyle {
-            font,
-            font_size: PIXELS_PER_METER,
-            color: WHITE.into(),
-        },
-    )
-    .with_justify(JustifyText::Center);
-
     world
-        .spawn(Text2dBundle {
-            transform: Transform::from_scale(Vec3::new(0.0, 0.0, 1.5)),
-            text,
-            ..Default::default()
-        })
+        .spawn((
+            Transform::from_scale(Vec3::new(0.0, 0.0, 1.5)),
+            Text2d(weapon.name.to_string()),
+            TextFont {
+                font,
+                font_size: PIXELS_PER_METER,
+                ..Default::default()
+            },
+            TextColor(WHITE.into()),
+            TextLayout {
+                justify: JustifyText::Center,
+                ..Default::default()
+            },
+        ))
         .insert(BonusLabel)
         .set_parent(bonus);
 }

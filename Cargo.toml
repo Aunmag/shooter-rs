@@ -5,7 +5,7 @@ authors = ["Aunmag <aunmag@gmail.com>"]
 
 [dependencies]
 anyhow = "1.0"
-bevy = "0.14"
+bevy = "0.15"
 chrono = "0.4"
 enumset = { version = "1.1", features = ["serde"] }
 log = "0.4"

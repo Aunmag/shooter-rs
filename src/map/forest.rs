@@ -23,7 +23,7 @@ pub struct ForestMap;
 
 impl Map for ForestMap {
     fn generate(&self, world: &mut World) {
-        world.commands().add(TerrainSpawn {
+        world.commands().queue(TerrainSpawn {
             image: "terrain/grass.png",
         });
 

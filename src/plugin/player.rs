@@ -134,7 +134,7 @@ pub fn on_update(
 
                 // reset player direction
                 let rotation = transform.rotation;
-                commands.add(move |world: &mut World| {
+                commands.queue(move |world: &mut World| {
                     for mut camera in world
                         .query_filtered::<&mut Transform, With<MainCamera>>()
                         .iter_mut(world)
@@ -143,7 +143,7 @@ pub fn on_update(
                     }
                 });
             } else {
-                commands.add(move |world: &mut World| {
+                commands.queue(move |world: &mut World| {
                     let crosshair = Crosshair::spawn(world);
 
                     if let Some(mut player) = world.get_mut::<Player>(entity) {

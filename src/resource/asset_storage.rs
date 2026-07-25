@@ -1,8 +1,9 @@
 use bevy::{
     asset::{AssetServer, Assets, Handle, LoadedFolder},
     ecs::system::Resource,
+    image::Image,
     prelude::Rectangle,
-    render::{mesh::Mesh, texture::Image},
+    render::mesh::Mesh,
 };
 
 #[derive(Default, Resource)]

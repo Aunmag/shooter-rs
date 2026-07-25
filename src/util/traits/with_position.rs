@@ -19,8 +19,8 @@ pub trait WithPosition {
         return Vec2Ext::is_far(self.position(), target.position(), threshold);
     }
 
-    fn angle_to<T: WithPosition>(&self, target: &T) -> f32 {
-        return Vec2Ext::angle_to(self.position(), target.position());
+    fn direction_to<T: WithPosition>(&self, target: &T) -> f32 {
+        return Vec2Ext::direction_to(self.position(), target.position());
     }
 }
 

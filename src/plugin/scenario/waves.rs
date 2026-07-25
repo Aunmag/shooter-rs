@@ -133,7 +133,7 @@ impl WavesScenario {
                 self.kills = 0;
 
                 if self.is_wave_bonus() {
-                    commands.add(Notify {
+                    commands.queue(Notify {
                         text: "Bonus wave".into(),
                         text_small: "How long will you stay? Support is on the way...".into(),
                         ..Default::default()
@@ -141,7 +141,7 @@ impl WavesScenario {
 
                     let direction = self.rng.gen_range(-PI..PI);
                     for _ in 0..WAVE_BONUS_HUMANS {
-                        commands.add(SpawnActor {
+                        commands.queue(SpawnActor {
                             direction,
                             distance: ENEMY_SPAWN_DISTANCE,
                             config: &ActorConfig::HUMAN,
@@ -149,14 +149,14 @@ impl WavesScenario {
                         });
                     }
                 } else {
-                    commands.add(Notify {
+                    commands.queue(Notify {
                         text: format!("Wave {}/{}", self.wave_number(), WAVES.len()).into(),
                         text_small: format!("Kill {} zombies", wave.size).into(),
                         ..Default::default()
                     });
                 }
 
-                commands.add(heal_humans);
+                commands.queue(heal_humans);
                 return Task::SpawnZombie;
             }
             Task::SpawnZombie => {
@@ -177,7 +177,7 @@ impl WavesScenario {
                     spawn.weapon = Some(&WeaponConfig::PM_BROKEN);
                 }
 
-                commands.add(spawn);
+                commands.queue(spawn);
                 self.zombies_spawned += 1;
 
                 if self.zombies_spawned < wave.size {
@@ -187,20 +187,20 @@ impl WavesScenario {
                 }
             }
             Task::CheckWaveCompletion => {
-                commands.add(count_zombies);
+                commands.queue(count_zombies);
                 log::trace!("Checking for wave completion");
                 return Task::CheckWaveCompletion;
             }
             Task::CompleteWave => {
                 if self.is_wave_last() {
-                    commands.add(Notify {
+                    commands.queue(Notify {
                         text: "Congratulations!".into(),
                         text_small: format!("You've completed the all {} waves", WAVES.len())
                             .into(),
                         ..Default::default()
                     });
                 } else {
-                    commands.add(Notify {
+                    commands.queue(Notify {
                         text: format!("Wave {} completed!", self.wave_number()).into(),
                         text_small: "Prepare for the next".into(),
                         ..Default::default()
@@ -266,25 +266,25 @@ impl ScenarioLogic for WavesScenario {
             if self.kills == 1 {
                 match self.wave_index {
                     0 => {
-                        commands.add(Notify {
+                        commands.queue(Notify {
                             text_small: "Press [R] to reload".into(),
                             ..Default::default()
                         });
                     }
                     1 => {
-                        commands.add(Notify {
+                        commands.queue(Notify {
                             text_small: "Press [RMB] to aim".into(),
                             ..Default::default()
                         });
                     }
                     2 => {
-                        commands.add(Notify {
+                        commands.queue(Notify {
                             text_small: "Press [SHIFT] to sprint".into(),
                             ..Default::default()
                         });
                     }
                     3 => {
-                        commands.add(Notify {
+                        commands.queue(Notify {
                             text_small: "Use mouse wheel to change zoom".into(),
                             ..Default::default()
                         });
@@ -300,13 +300,13 @@ impl ScenarioLogic for WavesScenario {
                 .rng
                 .gen_bool(f32::min(BONUSES_PER_WAVE * wave / wave_size, 1.0).into())
             {
-                commands.add(BonusSpawn::new(event.position, self.wave_number()));
+                commands.queue(BonusSpawn::new(event.position, self.wave_number()));
             }
         }
     }
 
     fn on_player_death(&mut self, _: &ActorDeathEvent, commands: &mut Commands) {
-        commands.add(Notify {
+        commands.queue(Notify {
             text: "Game over".into(),
             text_small: "You died. Press [ESC] to exit".into(),
             duration: GAME_OVER_TEXT_DURATION,

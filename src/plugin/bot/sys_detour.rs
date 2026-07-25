@@ -33,7 +33,7 @@ pub struct Detour {
 
 impl Detour {
     pub fn calc(&self, source: Vec2, target: Vec2) -> Option<f32> {
-        let angle_from_target = target.angle_to(source);
+        let angle_from_target = target.direction_to(source);
         let angular_distance = angle_difference(angle_from_target, self.angle);
 
         if angular_distance.abs() < DIRECTION_STEP / 2.0 {
@@ -71,7 +71,7 @@ fn on_update_inner(
         };
 
         let attacker_point = attacker_transform.translation.truncate();
-        let attacker_angle = target_point.angle_to(attacker_point);
+        let attacker_angle = target_point.direction_to(attacker_point);
 
         directions_by_target
             .entry(target)

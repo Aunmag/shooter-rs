@@ -29,7 +29,7 @@ use crate::{
     util::ext::AppExt,
 };
 use bevy::{
-    core_pipeline::core_2d::Camera2dBundle,
+    core_pipeline::core_2d::Camera2d,
     ecs::world::{Command, World},
     log::LogPlugin,
     prelude::{App, AppExtStates, DefaultPlugins, PluginGroup},
@@ -129,5 +129,5 @@ fn init_log_plugin(settings: &Settings) -> LogPlugin {
 
 fn init_game(world: &mut World) {
     CursorGrab(true).apply(world);
-    world.spawn(Camera2dBundle::default()).insert(MainCamera);
+    world.spawn(Camera2d).insert(MainCamera);
 }

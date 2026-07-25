@@ -27,14 +27,14 @@ impl BenchZombiesScenario {
         for _ in 0..SPAWN_BATCH {
             let entity = commands.spawn_empty().id();
 
-            commands.add(ActorSet {
+            commands.queue(ActorSet {
                 entity,
                 config: &ActorConfig::ZOMBIE,
                 position: Vec2::ZERO,
                 rotation: 0.0,
             });
 
-            commands.add(ActorBotSet { entity });
+            commands.queue(ActorBotSet { entity });
 
             self.inner.spawned += 1;
         }

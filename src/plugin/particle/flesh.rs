@@ -14,7 +14,7 @@ use bevy::{
     },
     math::{Vec2, Vec3},
     prelude::{Time, Transform},
-    sprite::{Sprite, SpriteBundle},
+    sprite::Sprite,
 };
 use rand::Rng;
 use std::{f32::consts::TAU, time::Duration};
@@ -28,10 +28,10 @@ const PARTICLE_CONFIG: &ParticleConfig = &ParticleConfig {
     jump_factor: 1.5,
     on_destroy: |entity, point, commands| {
         if let Some(blood) = BloodSpawn::new(point, 0.2) {
-            commands.add(blood);
+            commands.queue(blood);
         }
 
-        commands.add(TileBlend::Entity(entity));
+        commands.queue(TileBlend::Entity(entity));
     },
 };
 
@@ -51,7 +51,7 @@ impl Command for FleshParticleSpawn {
 
         // TODO: find available automatically
         let path = format!("particle/flesh_{}.png", rng.gen_range(0..=5));
-        let Some(texture) = world.resource::<AssetServer>().get_handle(path) else {
+        let Some(image) = world.resource::<AssetServer>().get_handle(path) else {
             return;
         };
 
@@ -65,19 +65,18 @@ impl Command for FleshParticleSpawn {
         }
 
         world
-            .spawn(SpriteBundle {
-                sprite: Sprite {
+            .spawn((
+                Sprite {
+                    image,
                     flip_x: rng.gen(),
                     flip_y: rng.gen(),
                     ..Default::default()
                 },
-                transform: Transform {
+                Transform {
                     scale: Vec3::ZERO,
                     ..Default::default()
                 },
-                texture,
-                ..Default::default()
-            })
+            ))
             .insert(Particle {
                 config: PARTICLE_CONFIG,
                 position,

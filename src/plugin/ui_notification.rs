@@ -5,22 +5,23 @@ use crate::{
 };
 use bevy::{
     app::{App, Plugin, Update},
-    color::{palettes::css::WHITE, Alpha},
+    color::Alpha,
     ecs::{
         component::Component,
         query::With,
         world::{Command, World},
     },
+    hierarchy::BuildChildren,
     prelude::{AssetServer, Commands, DespawnRecursiveExt, Entity, PositionType, Query, Res},
-    text::{JustifyText, Text, TextSection, TextStyle},
+    text::{JustifyText, TextColor, TextFont, TextLayout, TextSpan},
     time::Time,
-    ui::{node_bundles::TextBundle, Style, UiRect, Val},
+    ui::{widget::Text, Node, UiRect, Val},
     window::{PrimaryWindow, Window},
 };
 use std::time::Duration;
 
 const POSITION: f32 = 0.3;
-const FONT_SCALE: f32 = 0.04;
+const FONT_SCALE: f32 = 0.03;
 const FADE_IN: Duration = Duration::from_millis(150);
 const FADE_OUT: Duration = Duration::from_millis(300);
 const DURATION_DEFAULT: Duration = Duration::from_millis(2500);
@@ -57,21 +58,17 @@ impl UiNotification {
 }
 
 fn on_update(
-    mut query: Query<(Entity, &UiNotification, &mut Text)>,
+    mut query: Query<(Entity, &UiNotification, &mut TextColor)>,
     mut commands: Commands,
     time: Res<Time>,
 ) {
     let time = time.elapsed();
 
-    for (entity, notification, mut text) in query.iter_mut() {
+    for (entity, notification, mut color) in query.iter_mut() {
+        color.set_alpha(notification.alpha(time));
+
         if notification.is_expired(time) {
             commands.entity(entity).despawn_recursive();
-        } else {
-            let alpha = notification.alpha(time);
-
-            for section in text.sections.iter_mut() {
-                section.style.color.set_alpha(alpha);
-            }
         }
     }
 }
@@ -97,37 +94,45 @@ impl Command for Notify {
             .next()
             .map_or(600.0, |w| w.width());
 
-        let asset_server = world.resource::<AssetServer>();
+        let font_bold = world
+            .resource::<AssetServer>()
+            .get_handle(FONT_PATH_BOLD)
+            .unwrap_or_default();
+
+        let font_small = world
+            .resource::<AssetServer>()
+            .get_handle(FONT_PATH)
+            .unwrap_or_default();
 
         world
-            .spawn(
-                TextBundle::from_sections([
-                    TextSection::new(
-                        format!("{}\n", self.text.as_ref()),
-                        TextStyle {
-                            font: asset_server.get_handle(FONT_PATH_BOLD).unwrap_or_default(),
-                            font_size: window_width * FONT_SCALE,
-                            color: WHITE.into(),
-                        },
-                    ),
-                    TextSection::new(
-                        self.text_small.as_ref(),
-                        TextStyle {
-                            font: asset_server.get_handle(FONT_PATH).unwrap_or_default(),
-                            font_size: window_width * FONT_SCALE / 2.0,
-                            color: WHITE.into(),
-                        },
-                    ),
-                ])
-                .with_text_justify(JustifyText::Center)
-                .with_style(Style {
+            .spawn((
+                UiNotification::new(time, self.duration),
+                Text::new(format!("{}\n", self.text.as_ref())),
+                TextFont {
+                    font: font_bold,
+                    font_size: window_width * FONT_SCALE,
+                    ..Default::default()
+                },
+                TextLayout {
+                    justify: JustifyText::Center,
+                    ..Default::default()
+                },
+                Node {
                     position_type: PositionType::Absolute,
                     top: Val::Percent(POSITION * 100.0),
                     margin: UiRect::horizontal(Val::Auto),
                     ..Default::default()
-                }),
-            )
-            .insert(UiNotification::new(time, self.duration));
+                },
+            ))
+            .with_child((
+                UiNotification::new(time, self.duration),
+                TextSpan::new(self.text_small.as_ref()),
+                TextFont {
+                    font: font_small,
+                    font_size: window_width * FONT_SCALE / 2.0,
+                    ..Default::default()
+                },
+            ));
 
         world.resource::<AudioTracker>().queue(AudioPlay {
             path: "sounds/notification".into(),

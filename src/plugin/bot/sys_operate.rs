@@ -97,8 +97,8 @@ struct BotHandler<'a> {
 
 impl BotHandler<'_> {
     fn dodge_enemy(&mut self, enemy: &BotTarget) {
-        let bot_to_enemy = self.angle_to(enemy);
-        let enemy_to_bot = angle_difference(enemy.direction, enemy.angle_to(self));
+        let bot_to_enemy = self.direction_to(enemy);
+        let enemy_to_bot = angle_difference(enemy.direction, enemy.direction_to(self));
 
         if enemy_to_bot.abs() < BotConfig::DODGE_ANGLE {
             let force = 1.0 - (enemy_to_bot.abs() / BotConfig::DODGE_ANGLE);
@@ -337,7 +337,7 @@ impl BotHandler<'_> {
         if self.is_close(&teammates_position, spread) {
             if is_full {
                 let angle_look = self.get_look_at();
-                let angle_to_group = self.angle_to(&teammates_position);
+                let angle_to_group = self.direction_to(&teammates_position);
                 let angle_distance = angle_difference(angle_look, angle_to_group);
 
                 self.look_at_direction(angle_look - FRAC_PI_2 * angle_distance.signum());
@@ -362,7 +362,7 @@ impl BotHandler<'_> {
     }
 
     fn look_at_position(&mut self, target: Vec2) {
-        self.actor.look_at = Some(self.angle_to(&target));
+        self.actor.look_at = Some(self.direction_to(&target));
     }
 
     fn get_look_at(&self) -> f32 {
@@ -373,7 +373,7 @@ impl BotHandler<'_> {
     }
 
     fn is_aimed_at_point(&self, point: Vec2) -> bool {
-        return self.is_aimed_at_angle(self.angle_to(&point));
+        return self.is_aimed_at_angle(self.direction_to(&point));
     }
 
     fn is_aimed_at_angle(&self, angle: f32) -> bool {

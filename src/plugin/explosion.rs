@@ -16,16 +16,17 @@ use bevy::{
         system::{Deferred, Res, ResMut},
         world::Command,
     },
+    image::Image,
     math::Vec3Swizzles,
     prelude::{
         Commands, DespawnRecursiveExt, IntoSystemConfigs, Query, Vec2, Vec3, Without, World,
     },
     reflect::TypePath,
     render::{
+        mesh::Mesh2d,
         render_resource::{AsBindGroup, ShaderRef},
-        texture::Image,
     },
-    sprite::{Material2d, Material2dPlugin, MaterialMesh2dBundle},
+    sprite::{AlphaMode2d, Material2d, Material2dPlugin, MeshMaterial2d},
     time::Time,
     transform::components::Transform,
 };
@@ -71,16 +72,15 @@ impl Command for Explode {
             .add(ExplosionMaterial { alpha: 1.0, image });
 
         world
-            .spawn(MaterialMesh2dBundle {
-                transform: Transform {
+            .spawn((
+                Transform {
                     translation: self.position.extend(LAYER_PROJECTILE),
                     scale: Vec3::new(1.0, 1.0, 1.0),
                     ..Default::default()
                 },
-                mesh: mesh.into(),
-                material,
-                ..Default::default()
-            })
+                Mesh2d(mesh),
+                MeshMaterial2d(material),
+            ))
             .insert(explosion);
 
         world.resource::<AudioTracker>().queue(AudioPlay {
@@ -131,6 +131,10 @@ impl Material2d for ExplosionMaterial {
     fn fragment_shader() -> ShaderRef {
         return "shader/explosion.wgsl".into();
     }
+
+    fn alpha_mode(&self) -> AlphaMode2d {
+        return AlphaMode2d::Blend;
+    }
 }
 
 fn on_update(
@@ -138,7 +142,7 @@ fn on_update(
         Entity,
         &mut Explosion,
         &mut Transform,
-        &Handle<ExplosionMaterial>,
+        &MeshMaterial2d<ExplosionMaterial>,
     )>,
     actors: Query<(Entity, &Actor, &Transform, &Collision), Without<Explosion>>,
     mut assets: ResMut<Assets<ExplosionMaterial>>,

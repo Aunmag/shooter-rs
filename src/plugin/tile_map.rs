@@ -8,7 +8,7 @@ use crate::{
 };
 use bevy::{
     app::{App, Plugin},
-    core_pipeline::core_2d::Camera2dBundle,
+    core_pipeline::core_2d::Camera2d,
     ecs::{
         entity::Entity,
         schedule::IntoSystemConfigs,
@@ -17,7 +17,7 @@ use bevy::{
     },
     hierarchy::DespawnRecursiveExt,
     math::{Quat, Vec3},
-    prelude::{Assets, ClearColorConfig, Handle, Image, Resource, SpriteBundle, Transform, World},
+    prelude::{Assets, ClearColorConfig, Handle, Image, Resource, Transform, World},
     render::{
         camera::{Camera, CameraOutputMode, RenderTarget},
         render_resource::{BlendState, TextureUsages},
@@ -189,15 +189,17 @@ impl TileBlend {
                 }
 
                 return world
-                    .spawn(SpriteBundle {
-                        transform: Transform {
+                    .spawn((
+                        Transform {
                             translation: position,
                             rotation: Quat::from_rotation_z(direction),
                             scale: scale_,
                         },
-                        texture: image,
-                        ..Default::default()
-                    })
+                        Sprite {
+                            image,
+                            ..Default::default()
+                        },
+                    ))
                     .id();
             }
         }
@@ -289,8 +291,9 @@ fn spawn_camera(commands: &mut Commands, index: Index, target: Handle<Image>) ->
     translation.z = 1.0;
 
     return commands
-        .spawn(Camera2dBundle {
-            camera: Camera {
+        .spawn((
+            Camera2d,
+            Camera {
                 target: RenderTarget::Image(target),
                 clear_color: ClearColorConfig::None,
                 output_mode: CameraOutputMode::Write {
@@ -299,13 +302,12 @@ fn spawn_camera(commands: &mut Commands, index: Index, target: Handle<Image>) ->
                 },
                 ..Default::default()
             },
-            transform: Transform {
+            Transform {
                 translation,
                 scale: TRANSFORM_SCALE,
                 ..Default::default()
             },
-            ..Default::default()
-        })
+        ))
         .insert(index.render_layers())
         .id();
 }
@@ -316,19 +318,18 @@ fn spawn_tile(world: &mut World, position: Vec3) -> Handle<Image> {
 
     let handle = world.resource_mut::<Assets<Image>>().add(image);
 
-    world.spawn(SpriteBundle {
-        sprite: Sprite {
+    world.spawn((
+        Sprite {
+            image: handle.clone(),
             anchor: Anchor::BottomLeft,
             ..Default::default()
         },
-        transform: Transform {
+        Transform {
             translation: position,
             scale: TRANSFORM_SCALE,
             ..Default::default()
         },
-        texture: handle.clone(),
-        ..Default::default()
-    });
+    ));
 
     return handle;
 }

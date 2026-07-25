@@ -21,9 +21,10 @@ use bevy::{
     reflect::TypePath,
     render::{
         camera::{Camera, OrthographicProjection},
+        mesh::Mesh2d,
         render_resource::{AsBindGroup, ShaderRef},
     },
-    sprite::{Material2d, Material2dPlugin, MaterialMesh2dBundle},
+    sprite::{AlphaMode2d, Material2d, Material2dPlugin, MeshMaterial2d},
     transform::components::GlobalTransform,
 };
 
@@ -58,15 +59,14 @@ impl Crosshair {
             .add(Crosshair { image });
 
         return world
-            .spawn(MaterialMesh2dBundle {
-                transform: Transform {
+            .spawn((
+                Transform {
                     translation: Vec3::new(0.0, 0.0, LAYER_CROSSHAIR),
                     ..Transform::default()
                 },
-                mesh: mesh.into(),
-                material,
-                ..Default::default()
-            })
+                Mesh2d(mesh),
+                MeshMaterial2d(material),
+            ))
             .id();
     }
 }
@@ -75,10 +75,14 @@ impl Material2d for Crosshair {
     fn fragment_shader() -> ShaderRef {
         return "shader/crosshair.wgsl".into();
     }
+
+    fn alpha_mode(&self) -> AlphaMode2d {
+        return AlphaMode2d::Blend;
+    }
 }
 
 fn on_update(
-    mut crosshairs: Query<&mut Transform, (With<Handle<Crosshair>>, Without<Player>)>,
+    mut crosshairs: Query<&mut Transform, (With<MeshMaterial2d<Crosshair>>, Without<Player>)>,
     cameras: Query<(&Camera, &GlobalTransform, &OrthographicProjection), With<MainCamera>>,
     mut players: Query<(&mut Player, &mut Transform)>,
     mut mouse_motion: EventReader<MouseMotion>,
@@ -109,7 +113,7 @@ fn on_update(
         let on_world_old =
             player_position + player_transform.rotation.as_vec() * crosshair.distance;
 
-        let Some(on_screen_old) =
+        let Ok(on_screen_old) =
             camera.world_to_viewport(camera_transform, on_world_old.extend(0.0))
         else {
             continue;
@@ -127,7 +131,7 @@ fn on_update(
         transform.scale.y = SIZE * camera_projection.scale;
 
         // put crosshair to it's updated position
-        if let Some(on_world_new) = camera
+        if let Ok(on_world_new) = camera
             .viewport_to_world(camera_transform, on_screen_new)
             .map(|v| v.origin.truncate())
         {

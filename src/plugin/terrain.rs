@@ -16,13 +16,11 @@ use bevy::{
         system::Query,
         world::{Command, World},
     },
+    image::{Image, ImageAddressMode, ImageSampler, ImageSamplerDescriptor},
     math::Vec3,
     prelude::{Rectangle, Transform, With, Without},
-    render::{
-        mesh::{Mesh, VertexAttributeValues},
-        texture::{Image, ImageAddressMode, ImageSampler, ImageSamplerDescriptor},
-    },
-    sprite::{ColorMaterial, ColorMesh2dBundle},
+    render::mesh::{Mesh, Mesh2d, VertexAttributeValues},
+    sprite::{ColorMaterial, MeshMaterial2d},
 };
 
 pub struct TerrainPlugin;
@@ -84,16 +82,15 @@ impl Command for TerrainSpawn {
             .add(image_handle.clone());
 
         world
-            .spawn(ColorMesh2dBundle {
-                transform: Transform {
+            .spawn((
+                Transform {
                     translation: Vec3::new(0.0, 0.0, LAYER_BACKGROUND),
                     scale: TRANSFORM_SCALE * count * block_size * PIXELS_PER_METER,
                     ..Default::default()
                 },
-                mesh: mesh_handle.into(),
-                material: material_handle,
-                ..Default::default()
-            })
+                Mesh2d(mesh_handle),
+                MeshMaterial2d(material_handle),
+            ))
             .insert(Terrain { block_size });
     }
 }

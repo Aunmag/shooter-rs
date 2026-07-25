@@ -1,7 +1,7 @@
 use anyhow::{Context, Result};
 use bevy::{
     ecs::system::Resource,
-    window::{PresentMode, WindowMode},
+    window::{MonitorSelection, PresentMode, WindowMode},
 };
 use serde::{Deserialize, Serialize};
 
@@ -139,10 +139,10 @@ impl DisplaySettings {
     pub fn mode(&self) -> WindowMode {
         match self.mode {
             WindowModeSettings::Fullscreen => {
-                return WindowMode::Fullscreen;
+                return WindowMode::Fullscreen(MonitorSelection::Primary);
             }
             WindowModeSettings::Borderless => {
-                return WindowMode::BorderlessFullscreen;
+                return WindowMode::BorderlessFullscreen(MonitorSelection::Primary);
             }
             WindowModeSettings::Windowed => {
                 return WindowMode::Windowed;

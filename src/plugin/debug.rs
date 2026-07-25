@@ -8,23 +8,26 @@ use crate::{
 };
 use bevy::{
     app::{App, Plugin},
-    asset::Handle,
     color::Srgba,
     diagnostic::{DiagnosticsStore, EntityCountDiagnosticsPlugin, FrameTimeDiagnosticsPlugin},
     ecs::{
+        entity::Entity,
         schedule::SystemConfigs,
         system::{Local, ResMut, Resource},
         world::World,
     },
     gizmos::gizmos::Gizmos,
+    hierarchy::BuildChildren,
     input::ButtonInput,
     prelude::{
         Commands, Component, DefaultGizmoConfigGroup, GizmoConfigStore, IntoSystemConfigs, KeyCode,
-        Query, Res, TextBundle, Update, Vec2, With,
+        Query, Res, Update, Vec2, With,
     },
-    text::{Text, TextSection, TextStyle},
+    sprite::MeshMaterial2d,
+    text::TextSpan,
     time::Time,
     transform::components::Transform,
+    ui::widget::{Text, TextUiWriter},
 };
 use rand::seq::SliceRandom;
 use std::{
@@ -72,37 +75,28 @@ fn on_init(world: &mut World) {
         .0
         .line_width = 3.0;
 
-    let style = TextStyle {
-        font_size: 30.0,
-        ..Default::default()
-    };
-
-    world.spawn((
-        TextBundle::from_sections([
-            TextSection::new("FPS: ", style.clone()),
-            TextSection::from_style(style.clone()),
-            TextSection::new("\nEntities: ", style.clone()),
-            TextSection::from_style(style.clone()),
-            TextSection::new("\nAudio sources: ", style.clone()),
-            TextSection::from_style(style.clone()),
-            TextSection::new("\n\nMap. Layers: ", style.clone()),
-            TextSection::from_style(style.clone()),
-            TextSection::new("\nMap. Tiles: ", style.clone()),
-            TextSection::from_style(style.clone()),
-            TextSection::new("\nMap. Queue: ", style.clone()),
-            TextSection::from_style(style.clone()),
-            TextSection::new(
-                "\n\
-                \nSpawn weapon: [G]\
-                \nSpawn human : [H] group: [+SHIFT]\
-                \nSpawn zombie: [J] group: [+SHIFT]\
-                \nExplode: [T]\
-                ",
-                style,
-            ),
-        ]),
-        DiagnosticsText,
-    ));
+    world
+        .spawn((DiagnosticsText, Text::new("")))
+        .with_child(TextSpan::new("FPS: "))
+        .with_child(TextSpan::new("?"))
+        .with_child(TextSpan::new("\nEntities: "))
+        .with_child(TextSpan::new("?"))
+        .with_child(TextSpan::new("\nAudio sources: "))
+        .with_child(TextSpan::new("?"))
+        .with_child(TextSpan::new("\n\nMap. Layers: "))
+        .with_child(TextSpan::new("?"))
+        .with_child(TextSpan::new("\nMap. Tiles: "))
+        .with_child(TextSpan::new("?"))
+        .with_child(TextSpan::new("\nMap. Queue: "))
+        .with_child(TextSpan::new("?"))
+        .with_child(TextSpan::new(
+            "\n\
+            \nSpawn weapon: [G]\
+            \nSpawn human : [H] group: [+SHIFT]\
+            \nSpawn zombie: [J] group: [+SHIFT]\
+            \nExplode: [T]\
+            ",
+        ));
 }
 
 fn update_diagnostics_data(
@@ -150,15 +144,16 @@ fn update_diagnostics_data(
 
 fn update_diagnostics_text_inner(
     mut data: ResMut<DiagnosticsData>,
-    mut query: Query<&mut Text, With<DiagnosticsText>>,
+    mut query: Query<Entity, With<DiagnosticsText>>,
+    mut text_writer: TextUiWriter,
 ) {
-    for mut text in &mut query {
-        text.sections[1].value = format!("{}", data.fps.unwrap_or(-1));
-        text.sections[3].value = format!("{}", data.entities.unwrap_or(-1));
-        text.sections[5].value = format!("{}", data.audio_sources.unwrap_or(-1));
-        text.sections[7].value = format!("{}", data.map_layers.unwrap_or(-1));
-        text.sections[9].value = format!("{}", data.map_tiles.unwrap_or(-1));
-        text.sections[11].value = format!("{}", data.map_queue.unwrap_or(-1));
+    for entity in &mut query {
+        *text_writer.text(entity, 2) = data.fps.unwrap_or(-1).to_string();
+        *text_writer.text(entity, 4) = data.entities.unwrap_or(-1).to_string();
+        *text_writer.text(entity, 6) = data.audio_sources.unwrap_or(-1).to_string();
+        *text_writer.text(entity, 8) = data.map_layers.unwrap_or(-1).to_string();
+        *text_writer.text(entity, 10) = data.map_tiles.unwrap_or(-1).to_string();
+        *text_writer.text(entity, 12) = data.map_queue.unwrap_or(-1).to_string();
     }
 
     data.fps = None;
@@ -195,7 +190,7 @@ fn render_debug_shapes(mut gizmos: Gizmos) {
 }
 
 fn update_input(
-    crosshairs: Query<&Transform, With<Handle<Crosshair>>>,
+    crosshairs: Query<&Transform, With<MeshMaterial2d<Crosshair>>>,
     keyboard: Res<ButtonInput<KeyCode>>,
     mut commands: Commands,
 ) {
@@ -225,7 +220,7 @@ fn update_input(
 
     match spawn {
         Spawn::Bonus => {
-            commands.add(BonusSpawn::new(position.position, u8::MAX));
+            commands.queue(BonusSpawn::new(position.position, u8::MAX));
         }
         Spawn::Human => {
             spawn_actors(&mut commands, position, &ActorConfig::HUMAN, group);
@@ -235,7 +230,7 @@ fn update_input(
         }
         Spawn::Explosion => {
             if let Some(explosion) = &ProjectileConfig::TBG_7V.explosion {
-                commands.add(Explode {
+                commands.queue(Explode {
                     config: explosion,
                     position: position.position,
                     shooter: None,
@@ -254,21 +249,21 @@ fn spawn_actors(
     for _ in 0..group {
         let entity = commands.spawn_empty().id();
 
-        commands.add(ActorSet {
+        commands.queue(ActorSet {
             entity,
             config,
             position: transform.position,
             rotation: -transform.rotation,
         });
 
-        commands.add(ActorBotSet { entity });
+        commands.queue(ActorBotSet { entity });
 
         let weapon = match config.kind {
             ActorKind::Human => WeaponConfig::ALL.choose(&mut rand::thread_rng()),
             ActorKind::Zombie => None,
         };
 
-        commands.add(WeaponSet { entity, weapon });
+        commands.queue(WeaponSet { entity, weapon });
     }
 }
 
