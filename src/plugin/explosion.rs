@@ -13,14 +13,11 @@ use bevy::{
     ecs::{
         component::Component,
         entity::Entity,
-        system::{Deferred, Res, ResMut},
-        world::Command,
+        system::{Command, Deferred, Res, ResMut},
     },
     image::Image,
     math::Vec3Swizzles,
-    prelude::{
-        Commands, DespawnRecursiveExt, IntoSystemConfigs, Query, Vec2, Vec3, Without, World,
-    },
+    prelude::{Commands, IntoScheduleConfigs, Query, Vec2, Vec3, Without, World},
     reflect::TypePath,
     render::{
         mesh::Mesh2d,
@@ -161,7 +158,7 @@ fn on_update(
             .powf(0.7);
 
         if radius_factor >= 1.0 {
-            commands.entity(explosion_entity).despawn_recursive();
+            commands.entity(explosion_entity).despawn();
             continue;
         }
 

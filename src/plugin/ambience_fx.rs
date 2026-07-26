@@ -5,7 +5,7 @@ use crate::{
 };
 use bevy::{
     ecs::{
-        schedule::IntoSystemConfigs,
+        schedule::IntoScheduleConfigs,
         system::{Local, Res},
     },
     prelude::{App, Plugin},

@@ -10,7 +10,8 @@ use crate::{plugin::ActorDeathEvent, util::ext::AppExt, AppState};
 use bevy::{
     ecs::{
         event::EventReader,
-        system::{Res, ResMut, Resource},
+        resource::Resource,
+        system::{Res, ResMut},
         world::{Mut, World},
     },
     prelude::{App, Commands, Plugin},

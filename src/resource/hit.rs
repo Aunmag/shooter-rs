@@ -4,7 +4,8 @@ use crate::{
 };
 use bevy::{
     ecs::{
-        system::{Resource, SystemBuffer, SystemMeta},
+        resource::Resource,
+        system::{SystemBuffer, SystemMeta},
         world::World,
     },
     prelude::{Entity, Vec2},

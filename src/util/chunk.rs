@@ -1,4 +1,4 @@
-use bevy::{math::Vec2, utils::HashMap};
+use bevy::{math::Vec2, platform::collections::HashMap};
 
 #[rustfmt::skip]
 const OFFSETS: &[(i32, i32)] = &[

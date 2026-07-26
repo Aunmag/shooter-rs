@@ -6,7 +6,7 @@ use crate::{
     },
 };
 use bevy::{
-    ecs::world::{Command, World},
+    ecs::{system::Command, world::World},
     math::Vec2,
     transform::components::Transform,
 };

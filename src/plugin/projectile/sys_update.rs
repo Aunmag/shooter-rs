@@ -12,7 +12,7 @@ use bevy::{
         system::{Deferred, Query},
     },
     math::Vec3Swizzles,
-    prelude::{Commands, DespawnRecursiveExt, Res, Time, Transform, Vec2, Without},
+    prelude::{Commands, Res, Time, Transform, Vec2, Without},
 };
 use std::time::Duration;
 
@@ -45,7 +45,7 @@ pub fn on_update(
 
     for (entity, mut j, mut transform) in projectiles.iter_mut() {
         if j.stopped {
-            commands.entity(entity).despawn_recursive();
+            commands.entity(entity).despawn();
             continue;
         }
 

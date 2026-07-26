@@ -1,14 +1,12 @@
 use bevy::{
     asset::AssetServer,
+    platform::collections::{HashMap, HashSet},
     prelude::{Assets, AudioSource, Handle, Resource},
 };
 use rand::{seq::SliceRandom, SeedableRng};
 use rand_pcg::Pcg32;
 use regex::Regex;
-use std::{
-    borrow::Cow,
-    collections::{HashMap, HashSet},
-};
+use std::borrow::Cow;
 
 const SPARE_PATHS: &[(&str, &str)] = &[("actors/zombie_agile/", "actors/zombie/")];
 

@@ -1,7 +1,7 @@
 use super::Bot;
 use crate::plugin::actor::Actor;
 use bevy::{
-    ecs::world::Command,
+    ecs::system::Command,
     prelude::{Entity, World},
 };
 

@@ -15,7 +15,7 @@ use bevy::{
         system::{Local, Query, Res},
     },
     math::{Vec2, Vec3Swizzles},
-    prelude::{Commands, DespawnRecursiveExt, Entity, EventWriter, IntoSystemConfigs, Transform},
+    prelude::{Commands, Entity, EventWriter, IntoScheduleConfigs, Transform},
     time::Time,
 };
 use std::time::Duration;
@@ -143,13 +143,13 @@ fn on_update(
 
             commands.queue(ActorRelease(entity));
 
-            death_events.send(ActorDeathEvent {
+            death_events.write(ActorDeathEvent {
                 kind: actor.kind,
                 position: point,
                 is_player,
             });
 
-            commands.entity(entity).despawn_recursive();
+            commands.entity(entity).despawn();
             health.just_died = false;
         }
 

@@ -7,10 +7,7 @@ use crate::{
     util::{ext::QuatExt, Timer},
 };
 use bevy::{
-    ecs::{
-        query::With,
-        world::{Command, World},
-    },
+    ecs::{query::With, system::Command, world::World},
     math::Vec2,
     prelude::{Commands, Vec3Swizzles},
     transform::components::Transform,

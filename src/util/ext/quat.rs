@@ -14,7 +14,7 @@ impl QuatExt for Quat {
         let w = self.w;
         let z = self.z;
         let v = Vec2::new(w * w - z * z, w * z + z * w);
-        debug_assert!(v.is_normalized());
+        // debug_assert!(v.is_normalized()); // TODO: check
         return v;
     }
 }

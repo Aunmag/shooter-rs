@@ -11,7 +11,7 @@ use bevy::{
     ecs::{
         entity::Entity,
         query::{With, Without},
-        schedule::IntoSystemConfigs,
+        schedule::IntoScheduleConfigs,
         system::Query,
         world::World,
     },
@@ -20,7 +20,7 @@ use bevy::{
     prelude::{EventReader, Image, Transform},
     reflect::TypePath,
     render::{
-        camera::{Camera, OrthographicProjection},
+        camera::{Camera, Projection},
         mesh::Mesh2d,
         render_resource::{AsBindGroup, ShaderRef},
     },
@@ -83,7 +83,7 @@ impl Material2d for Crosshair {
 
 fn on_update(
     mut crosshairs: Query<&mut Transform, (With<MeshMaterial2d<Crosshair>>, Without<Player>)>,
-    cameras: Query<(&Camera, &GlobalTransform, &OrthographicProjection), With<MainCamera>>,
+    cameras: Query<(&Camera, &GlobalTransform, &Projection), With<MainCamera>>,
     mut players: Query<(&mut Player, &mut Transform)>,
     mut mouse_motion: EventReader<MouseMotion>,
 ) {
@@ -127,8 +127,10 @@ fn on_update(
             on_screen_new.y = on_screen_new.y.clamp(0.0, viewport_size.y);
         }
 
-        transform.scale.x = SIZE * camera_projection.scale;
-        transform.scale.y = SIZE * camera_projection.scale;
+        if let Projection::Orthographic(projection) = camera_projection {
+            transform.scale.x = SIZE * projection.scale;
+            transform.scale.y = SIZE * projection.scale;
+        }
 
         // put crosshair to it's updated position
         if let Ok(on_world_new) = camera

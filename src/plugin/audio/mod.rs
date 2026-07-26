@@ -8,8 +8,8 @@ use bevy::{
     audio::{AudioPlayer, AudioSink, Volume},
     ecs::{component::Component, entity::Entity},
     prelude::{
-        App, AudioSinkPlayback, Commands, DespawnRecursiveExt, Plugin, Query, Res, ResMut,
-        Resource, Time, Transform, Vec2, With,
+        App, AudioSinkPlayback, Commands, Plugin, Query, Res, ResMut, Resource, Time, Transform,
+        Vec2, With,
     },
 };
 use std::{sync::Mutex, time::Duration};
@@ -150,7 +150,7 @@ fn on_update(
     for (entity, sink, expiration) in audio.iter() {
         if sink.empty() || expiration.is_some_and(|e| now > e.0) {
             sink.stop();
-            commands.entity(entity).despawn_recursive();
+            commands.entity(entity).despawn();
         } else {
             tracker.playing += 1;
         }
@@ -167,7 +167,7 @@ fn on_update(
         let mut settings = audio.settings();
 
         if is_heartbeat {
-            settings.volume = Volume::new(0.0);
+            settings.volume = Volume::Linear(0.0);
         }
 
         let mut entity = commands.spawn((AudioPlayer(source), settings));

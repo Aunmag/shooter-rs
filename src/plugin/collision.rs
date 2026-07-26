@@ -13,7 +13,7 @@ use bevy::{
     color::palettes::css::WHITE,
     ecs::{component::Component, system::Local},
     math::Vec2,
-    prelude::{App, Entity, In, IntoSystem, IntoSystemConfigs, Plugin, Query, Transform, With},
+    prelude::{App, Entity, In, IntoScheduleConfigs, IntoSystem, Plugin, Query, Transform, With},
 };
 use rand::Rng;
 use std::f32::consts::TAU;

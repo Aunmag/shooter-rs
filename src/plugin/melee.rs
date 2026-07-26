@@ -9,7 +9,7 @@ use crate::{
 };
 use bevy::{
     ecs::{entity::Entity, system::Deferred, world::World},
-    prelude::{App, Commands, IntoSystemConfigs, Plugin, Query, Res, Transform, Vec2, Without},
+    prelude::{App, Commands, IntoScheduleConfigs, Plugin, Query, Res, Transform, Vec2, Without},
     time::Time,
 };
 

@@ -5,13 +5,13 @@ use crate::{
 use bevy::{
     ecs::{
         entity::Entity,
-        schedule::SystemConfigs,
-        system::{Local, Res},
+        schedule::ScheduleConfigs,
+        system::{Local, Res, ScheduleSystem},
     },
     math::Vec2,
-    prelude::{IntoSystemConfigs, Query, Transform, With},
+    platform::collections::HashMap,
+    prelude::{IntoScheduleConfigs, Query, Transform, With},
     time::Time,
-    utils::HashMap,
 };
 use rand::Rng;
 use std::{
@@ -49,7 +49,7 @@ impl Detour {
     }
 }
 
-pub fn on_update() -> SystemConfigs {
+pub fn on_update() -> ScheduleConfigs<ScheduleSystem> {
     return on_update_inner.run_if(|mut r: Local<Timer>, t: Res<Time>| {
         return r.try_next_set(t.elapsed(), || UPDATE_INTERVAL);
     });

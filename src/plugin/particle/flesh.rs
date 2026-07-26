@@ -8,10 +8,7 @@ use crate::{
 };
 use bevy::{
     asset::AssetServer,
-    ecs::{
-        entity::Entity,
-        world::{Command, World},
-    },
+    ecs::{entity::Entity, system::Command, world::World},
     math::{Vec2, Vec3},
     prelude::{Time, Transform},
     sprite::Sprite,

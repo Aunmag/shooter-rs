@@ -6,13 +6,8 @@ use crate::{
 use bevy::{
     app::{App, Plugin, Update},
     color::Alpha,
-    ecs::{
-        component::Component,
-        query::With,
-        world::{Command, World},
-    },
-    hierarchy::BuildChildren,
-    prelude::{AssetServer, Commands, DespawnRecursiveExt, Entity, PositionType, Query, Res},
+    ecs::{component::Component, query::With, system::Command, world::World},
+    prelude::{AssetServer, Commands, Entity, PositionType, Query, Res},
     text::{JustifyText, TextColor, TextFont, TextLayout, TextSpan},
     time::Time,
     ui::{widget::Text, Node, UiRect, Val},
@@ -68,7 +63,7 @@ fn on_update(
         color.set_alpha(notification.alpha(time));
 
         if notification.is_expired(time) {
-            commands.entity(entity).despawn_recursive();
+            commands.entity(entity).despawn();
         }
     }
 }

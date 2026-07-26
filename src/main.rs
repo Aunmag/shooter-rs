@@ -30,7 +30,7 @@ use crate::{
 };
 use bevy::{
     core_pipeline::core_2d::Camera2d,
-    ecs::world::{Command, World},
+    ecs::{system::Command, world::World},
     log::LogPlugin,
     prelude::{App, AppExtStates, DefaultPlugins, PluginGroup},
     render::texture::ImagePlugin,

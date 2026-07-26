@@ -1,10 +1,7 @@
 use crate::resource::{Settings, WindowModeSettings};
 use bevy::{
     app::{AppExit, Update},
-    ecs::{
-        query::With,
-        world::{Command, World},
-    },
+    ecs::{query::With, system::Command, world::World},
     input::ButtonInput,
     prelude::{App, Commands, KeyCode, Plugin, Res},
     window::{CursorGrabMode, PrimaryWindow, Window},

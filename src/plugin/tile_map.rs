@@ -11,21 +11,20 @@ use bevy::{
     core_pipeline::core_2d::Camera2d,
     ecs::{
         entity::Entity,
-        schedule::IntoSystemConfigs,
-        system::{Commands, Res, ResMut},
-        world::{Command, Mut},
+        schedule::IntoScheduleConfigs,
+        system::{Command, Commands, Res, ResMut},
+        world::Mut,
     },
-    hierarchy::DespawnRecursiveExt,
     math::{Quat, Vec3},
+    platform::collections::HashMap,
     prelude::{Assets, ClearColorConfig, Handle, Image, Resource, Transform, World},
     render::{
-        camera::{Camera, CameraOutputMode, RenderTarget},
+        camera::{Camera, CameraOutputMode},
         render_resource::{BlendState, TextureUsages},
         view::RenderLayers,
     },
     sprite::{Anchor, Sprite},
 };
-use std::collections::HashMap;
 
 const TILE_SIZE: f32 = 16.0;
 const TILE_SIZE_PX: u32 = (TILE_SIZE * PIXELS_PER_METER) as u32;
@@ -102,7 +101,7 @@ impl TileMap {
 
 fn on_update(mut tile_map: ResMut<TileMap>, mut commands: Commands) {
     for entity in tile_map.to_remove.drain(..) {
-        commands.entity(entity).despawn_recursive();
+        commands.entity(entity).despawn();
     }
 
     // I don't know why we have to wait exactly 3 frames before render next layer
@@ -244,7 +243,7 @@ impl Command for TileBlend {
                 }
             });
         } else if let Self::Entity(entity) = self {
-            world.entity_mut(entity).despawn_recursive();
+            world.entity_mut(entity).despawn();
         }
     }
 }
@@ -294,7 +293,7 @@ fn spawn_camera(commands: &mut Commands, index: Index, target: Handle<Image>) ->
         .spawn((
             Camera2d,
             Camera {
-                target: RenderTarget::Image(target),
+                target: target.into(),
                 clear_color: ClearColorConfig::None,
                 output_mode: CameraOutputMode::Write {
                     blend_state: Some(BlendState::PREMULTIPLIED_ALPHA_BLENDING),

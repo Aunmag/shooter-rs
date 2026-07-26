@@ -10,7 +10,7 @@ use self::material::ProjectileMaterial;
 pub use self::{command::*, component::*, config::*};
 use crate::{util::ext::AppExt, AppState};
 use bevy::{
-    prelude::{App, IntoSystemConfigs, Plugin},
+    prelude::{App, IntoScheduleConfigs, Plugin},
     sprite::Material2dPlugin,
 };
 

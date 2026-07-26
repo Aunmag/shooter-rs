@@ -6,7 +6,7 @@ use crate::{
 };
 use bevy::{
     asset::AssetServer,
-    ecs::world::{Command, World},
+    ecs::{system::Command, world::World},
     math::{Vec2, Vec3},
 };
 use rand::{seq::SliceRandom, Rng, SeedableRng};

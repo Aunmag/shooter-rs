@@ -15,7 +15,7 @@ use crate::{
 use bevy::{
     ecs::system::{Deferred, Local, Query},
     math::{Vec2, Vec3Swizzles},
-    prelude::{App, Commands, Entity, IntoSystemConfigs, Plugin, Res, Time, Transform},
+    prelude::{App, Commands, Entity, IntoScheduleConfigs, Plugin, Res, Time, Transform},
 };
 use rand::{Rng, SeedableRng};
 use rand_pcg::Pcg32;

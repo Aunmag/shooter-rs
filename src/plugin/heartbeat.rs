@@ -5,12 +5,12 @@ use crate::{
 };
 use bevy::{
     app::{App, Plugin},
-    audio::AudioSink,
+    audio::{AudioSink, Volume},
     ecs::{
         component::Component,
         system::{Local, Query},
     },
-    prelude::{AudioSinkPlayback, IntoSystemConfigs, Res, With},
+    prelude::{AudioSinkPlayback, IntoScheduleConfigs, Res, With},
     time::Time,
 };
 use std::time::Duration;
@@ -50,7 +50,7 @@ fn on_enter(audio: Res<AudioTracker>) {
 }
 
 fn on_update(
-    heartbeats: Query<&AudioSink, With<Heartbeat>>,
+    mut heartbeats: Query<&mut AudioSink, With<Heartbeat>>,
     targets: Query<(&Health, &Actor), With<CameraTarget>>,
 ) {
     let mut play = false;
@@ -70,9 +70,9 @@ fn on_update(
         }
     }
 
-    for heartbeat in heartbeats.iter() {
+    for mut heartbeat in heartbeats.iter_mut() {
         if play {
-            heartbeat.set_volume(volume);
+            heartbeat.set_volume(Volume::Linear(volume));
             heartbeat.set_speed(speed);
 
             if heartbeat.is_paused() {

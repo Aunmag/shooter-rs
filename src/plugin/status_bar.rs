@@ -8,8 +8,10 @@ use crate::{
 use bevy::{
     app::{App, Plugin},
     asset::Asset,
-    ecs::system::{Query, ResMut},
-    hierarchy::BuildChildren,
+    ecs::{
+        hierarchy::ChildOf,
+        system::{Query, ResMut},
+    },
     prelude::{Assets, Children, Entity, Handle, Image, Res, Transform, Vec3, World},
     reflect::TypePath,
     render::{
@@ -68,7 +70,7 @@ impl StatusBar {
 
         world
             .spawn((transform, Mesh2d(mesh), MeshMaterial2d(material)))
-            .set_parent(parent);
+            .insert(ChildOf(parent));
     }
 }
 

@@ -8,7 +8,7 @@ use bevy::{
     asset::Assets,
     ecs::system::Local,
     image::Image,
-    prelude::{App, AssetServer, AudioSource, IntoSystemConfigs, NextState, Plugin, Res, ResMut},
+    prelude::{App, AssetServer, AudioSource, IntoScheduleConfigs, NextState, Plugin, Res, ResMut},
     render::mesh::Mesh,
     time::Time,
 };

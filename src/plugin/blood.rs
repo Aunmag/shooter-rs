@@ -7,7 +7,7 @@ use crate::{
 use bevy::{
     app::{App, Plugin},
     asset::Asset,
-    ecs::world::Command,
+    ecs::system::Command,
     prelude::{Assets, Handle, Image, Transform, Vec2, Vec3, World},
     reflect::TypePath,
     render::{

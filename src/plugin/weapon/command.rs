@@ -8,11 +8,10 @@ use crate::{
 };
 use bevy::{
     asset::{AssetServer, Assets, Handle},
-    ecs::world::Command,
-    hierarchy::BuildChildren,
+    ecs::{hierarchy::ChildOf, system::Command},
     image::Image,
     math::Vec3Swizzles,
-    prelude::{Children, DespawnRecursiveExt, Entity, Transform, Vec2, World},
+    prelude::{Children, Entity, Transform, Vec2, World},
     sprite::{Anchor, Sprite},
 };
 
@@ -38,7 +37,7 @@ impl WeaponSet {
         world.entity_mut(self.entity).remove_children(&to_remove);
 
         for entity in &to_remove {
-            world.entity_mut(*entity).despawn_recursive();
+            world.entity_mut(*entity).despawn();
         }
     }
 
@@ -68,7 +67,7 @@ impl WeaponSet {
                 Transform::from_xyz(0.0, 0.0, -0.1),
             ))
             .insert(ActorWeaponSprite)
-            .set_parent(self.entity);
+            .insert(ChildOf(self.entity));
     }
 
     fn find_image_anchor(world: &World, weapon: &WeaponConfig, image: &Handle<Image>) -> Anchor {

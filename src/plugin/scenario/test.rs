@@ -2,7 +2,7 @@ use crate::{
     map::{Map, TestMap},
     plugin::{player::PlayerSpawn, scenario::ScenarioLogic, ActorConfig, WeaponConfig},
 };
-use bevy::ecs::world::{Command, World};
+use bevy::ecs::{system::Command, world::World};
 use std::{any::Any, time::Duration};
 
 pub struct TestScenario;

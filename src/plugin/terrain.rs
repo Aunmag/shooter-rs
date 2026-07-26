@@ -12,9 +12,9 @@ use bevy::{
     asset::{AssetServer, Assets},
     ecs::{
         component::Component,
-        schedule::IntoSystemConfigs,
-        system::Query,
-        world::{Command, World},
+        schedule::IntoScheduleConfigs,
+        system::{Command, Query},
+        world::World,
     },
     image::{Image, ImageAddressMode, ImageSampler, ImageSamplerDescriptor},
     math::Vec3,

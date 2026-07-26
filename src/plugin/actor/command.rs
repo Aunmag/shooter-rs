@@ -12,8 +12,7 @@ use crate::{
     resource::Settings,
 };
 use bevy::{
-    ecs::world::Command,
-    hierarchy::{Children, DespawnRecursiveExt},
+    ecs::{hierarchy::Children, system::Command},
     math::{Quat, Vec2},
     prelude::{AssetServer, Entity, Transform, World},
     sprite::{MeshMaterial2d, Sprite},
@@ -82,7 +81,7 @@ impl Command for ActorRelease {
             .get::<Player>(self.0)
             .and_then(|p| p.crosshair.as_ref())
         {
-            world.entity_mut(crosshair.entity).despawn_recursive();
+            world.entity_mut(crosshair.entity).despawn();
         }
 
         if let Some(kinetics) = world.get_mut::<Kinetics>(self.0).as_mut() {
@@ -106,7 +105,7 @@ impl Command for ActorRelease {
         }
 
         for entity in &to_remove {
-            world.entity_mut(*entity).despawn_recursive();
+            world.entity_mut(*entity).despawn();
         }
     }
 }

@@ -14,10 +14,8 @@ use bevy::{
         component::Component,
         entity::Entity,
         query::{With, Without},
-        system::Query,
-        world::Command,
+        system::{Command, Query},
     },
-    hierarchy::DespawnRecursiveExt,
     input::{mouse::MouseMotion, ButtonInput},
     math::Vec2,
     prelude::{App, Commands, EventReader, KeyCode, MouseButton, Plugin, Res, Transform, World},
@@ -130,7 +128,7 @@ pub fn on_update(
 
         if mouse.just_pressed(MouseButton::Right) {
             if let Some(crosshair) = player.crosshair.take() {
-                commands.entity(crosshair.entity).despawn_recursive();
+                commands.entity(crosshair.entity).despawn();
 
                 // reset player direction
                 let rotation = transform.rotation;

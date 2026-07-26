@@ -42,7 +42,7 @@ impl AudioPlay {
         };
 
         return settings
-            .with_volume(Volume::new(self.volume))
+            .with_volume(Volume::Linear(self.volume))
             .with_speed(self.speed);
     }
 

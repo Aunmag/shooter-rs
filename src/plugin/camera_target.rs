@@ -9,12 +9,13 @@ use bevy::{
     ecs::{
         component::Component,
         event::EventReader,
-        schedule::IntoSystemConfigs,
+        schedule::IntoScheduleConfigs,
         system::{Query, Res},
     },
     input::mouse::MouseWheel,
     math::{Quat, Vec2},
-    prelude::{OrthographicProjection, Transform, With, Without},
+    prelude::{Transform, With, Without},
+    render::camera::Projection,
     time::Time,
     window::{PrimaryWindow, Window},
 };
@@ -71,7 +72,7 @@ impl CameraTarget {
 }
 
 pub fn on_update(
-    mut cameras: Query<(&mut Transform, &mut OrthographicProjection), With<MainCamera>>,
+    mut cameras: Query<(&mut Transform, &mut Projection), With<MainCamera>>,
     mut targets: Query<(&Transform, &mut CameraTarget), Without<MainCamera>>,
     windows: Query<&Window, With<PrimaryWindow>>,
     mut mouse_scroll: EventReader<MouseWheel>,
@@ -110,8 +111,11 @@ pub fn on_update(
         if let Some((mut camera_transform, mut camera_projection)) = cameras.iter_mut().next() {
             camera_transform.translation.x = target_transform.translation.x + offset.x;
             camera_transform.translation.y = target_transform.translation.y + offset.y;
-            camera_projection.scale = scale;
             camera_transform.rotation = rotation;
+
+            if let Projection::Orthographic(camera_projection) = camera_projection.as_mut() {
+                camera_projection.scale = scale;
+            }
         }
     }
 }

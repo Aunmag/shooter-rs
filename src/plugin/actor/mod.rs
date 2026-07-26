@@ -17,7 +17,7 @@ use bevy::{
     color::palettes::css::RED,
     ecs::system::Query,
     math::Vec2,
-    prelude::{App, IntoSystemConfigs, Plugin, Res, Time},
+    prelude::{App, IntoScheduleConfigs, Plugin, Res, Time},
     transform::components::Transform,
 };
 

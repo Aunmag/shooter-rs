@@ -12,16 +12,16 @@ use bevy::{
     diagnostic::{DiagnosticsStore, EntityCountDiagnosticsPlugin, FrameTimeDiagnosticsPlugin},
     ecs::{
         entity::Entity,
-        schedule::SystemConfigs,
-        system::{Local, ResMut, Resource},
+        resource::Resource,
+        schedule::ScheduleConfigs,
+        system::{Local, ResMut, ScheduleSystem},
         world::World,
     },
     gizmos::gizmos::Gizmos,
-    hierarchy::BuildChildren,
     input::ButtonInput,
     prelude::{
-        Commands, Component, DefaultGizmoConfigGroup, GizmoConfigStore, IntoSystemConfigs, KeyCode,
-        Query, Res, Update, Vec2, With,
+        Commands, Component, DefaultGizmoConfigGroup, GizmoConfigStore, IntoScheduleConfigs,
+        KeyCode, Query, Res, Update, Vec2, With,
     },
     sprite::MeshMaterial2d,
     text::TextSpan,
@@ -58,7 +58,7 @@ impl Plugin for DebugPlugin {
     fn build(&self, application: &mut App) {
         application
             .insert_resource(DiagnosticsData::default())
-            .add_plugins(FrameTimeDiagnosticsPlugin)
+            .add_plugins(FrameTimeDiagnosticsPlugin::default())
             .add_plugins(EntityCountDiagnosticsPlugin)
             .add_state_system_enter(AppState::Game, on_init)
             .add_systems(Update, update_diagnostics_data)
@@ -73,7 +73,8 @@ fn on_init(world: &mut World) {
         .resource_mut::<GizmoConfigStore>()
         .config_mut::<DefaultGizmoConfigGroup>()
         .0
-        .line_width = 3.0;
+        .line
+        .width = 3.0;
 
     world
         .spawn((DiagnosticsText, Text::new("")))
@@ -164,7 +165,7 @@ fn update_diagnostics_text_inner(
     data.map_queue = None;
 }
 
-fn update_diagnostics_text() -> SystemConfigs {
+fn update_diagnostics_text() -> ScheduleConfigs<ScheduleSystem> {
     return update_diagnostics_text_inner
         .after(update_diagnostics_data)
         .run_if(|mut r: Local<Timer>, t: Res<Time>| {

@@ -9,8 +9,8 @@ use bevy::{
     asset::AssetServer,
     ecs::{
         entity::Entity,
-        system::Commands,
-        world::{Command, World},
+        system::{Command, Commands},
+        world::World,
     },
     math::{Vec2, Vec3},
     prelude::{Time, Transform},

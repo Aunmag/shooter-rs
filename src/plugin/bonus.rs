@@ -13,12 +13,15 @@ use crate::{
 use bevy::{
     app::{App, Plugin},
     color::palettes::css::WHITE,
-    ecs::{component::Component, entity::Entity, system::Res, world::Command},
-    hierarchy::BuildChildren,
+    ecs::{
+        component::Component,
+        entity::Entity,
+        hierarchy::ChildOf,
+        system::{Command, Res},
+    },
     math::Vec3Swizzles,
     prelude::{
-        AssetServer, Commands, DespawnRecursiveExt, IntoSystemConfigs, Quat, Query, Vec2, Vec3,
-        With, Without, World,
+        AssetServer, Commands, IntoScheduleConfigs, Quat, Query, Vec2, Vec3, With, Without, World,
     },
     render::view::InheritedVisibility,
     sprite::Sprite,
@@ -91,7 +94,7 @@ fn update_pickup(
 
     for (bonus_entity, bonus, bonus_transform) in bonuses.iter() {
         if now > bonus.expiration {
-            commands.entity(bonus_entity).despawn_recursive();
+            commands.entity(bonus_entity).despawn();
             continue;
         }
 
@@ -105,7 +108,7 @@ fn update_pickup(
             let player_position = player_transform.translation.xy();
 
             if player_position.is_close(bonus_position, RADIUS + player_body.radius) {
-                commands.entity(bonus_entity).despawn_recursive();
+                commands.entity(bonus_entity).despawn();
                 commands.queue(WeaponSet {
                     entity: player_entity,
                     weapon: Some(bonus.weapon),
@@ -217,7 +220,7 @@ fn spawn_image(world: &mut World, bonus: Entity, weapon: &WeaponConfig) {
             ..Default::default()
         })
         .insert(BonusImage)
-        .set_parent(bonus);
+        .insert(ChildOf(bonus));
 }
 
 fn spawn_label(world: &mut World, bonus: Entity, weapon: &WeaponConfig) {
@@ -242,5 +245,5 @@ fn spawn_label(world: &mut World, bonus: Entity, weapon: &WeaponConfig) {
             },
         ))
         .insert(BonusLabel)
-        .set_parent(bonus);
+        .insert(ChildOf(bonus));
 }

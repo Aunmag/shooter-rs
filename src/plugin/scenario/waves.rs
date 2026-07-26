@@ -11,7 +11,7 @@ use crate::{
     util::ext::Vec2Ext,
 };
 use bevy::{
-    ecs::{query::With, world::Command},
+    ecs::{query::With, system::Command},
     math::{Vec2, Vec3Swizzles},
     prelude::{Commands, World},
     transform::components::Transform,
