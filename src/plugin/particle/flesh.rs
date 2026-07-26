@@ -13,7 +13,7 @@ use bevy::{
     prelude::{Time, Transform},
     sprite::Sprite,
 };
-use rand::Rng;
+use rand::RngExt;
 use std::{f32::consts::TAU, time::Duration};
 
 const VELOCITY_MIN: f32 = 1.0;
@@ -39,7 +39,7 @@ impl Command for FleshParticleSpawn {
 
     fn apply(self, world: &mut World) {
         let now = world.resource::<Time>().elapsed();
-        let mut rng = rand::thread_rng();
+        let mut rng = rand::rng();
 
         let Some(position) = world
             .get::<Transform>(self.0)
@@ -49,14 +49,14 @@ impl Command for FleshParticleSpawn {
         };
 
         // TODO: find available automatically
-        let path = format!("particle/flesh_{}.png", rng.gen_range(0..=5));
+        let path = format!("particle/flesh_{}.png", rng.random_range(0..=5));
         let Some(image) = world.resource::<AssetServer>().get_handle(path) else {
             return;
         };
 
         let mut velocity = Vec2::from_length(
-            rng.gen_range(VELOCITY_MIN..VELOCITY_MAX),
-            rng.gen_range(0.0..TAU),
+            rng.random_range(VELOCITY_MIN..VELOCITY_MAX),
+            rng.random_range(0.0..TAU),
         );
 
         if let Some(kinetics) = world.get::<Kinetics>(self.0) {
@@ -67,8 +67,8 @@ impl Command for FleshParticleSpawn {
             .spawn((
                 Sprite {
                     image,
-                    flip_x: rng.gen(),
-                    flip_y: rng.gen(),
+                    flip_x: rng.random(),
+                    flip_y: rng.random(),
                     ..Default::default()
                 },
                 Transform {
@@ -79,12 +79,12 @@ impl Command for FleshParticleSpawn {
             .insert(Particle {
                 config: PARTICLE_CONFIG,
                 position,
-                rotation: rng.gen_range(0.0..TAU),
+                rotation: rng.random_range(0.0..TAU),
                 velocity,
                 velocity_spin: Vec3::new(
-                    rng.gen_range(-VELOCITY_SPIN..VELOCITY_SPIN) / 2.0,
-                    rng.gen_range(-VELOCITY_SPIN..VELOCITY_SPIN) / 2.0,
-                    rng.gen_range(-VELOCITY_SPIN..VELOCITY_SPIN),
+                    rng.random_range(-VELOCITY_SPIN..VELOCITY_SPIN) / 2.0,
+                    rng.random_range(-VELOCITY_SPIN..VELOCITY_SPIN) / 2.0,
+                    rng.random_range(-VELOCITY_SPIN..VELOCITY_SPIN),
                 ),
                 since: now,
                 until: now + DURATION.fuzz(&mut rng),

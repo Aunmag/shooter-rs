@@ -12,7 +12,7 @@ use bevy::{
     prelude::{Commands, Vec3Swizzles},
     transform::components::Transform,
 };
-use rand::{Rng, SeedableRng};
+use rand::{RngExt, SeedableRng};
 use rand_pcg::Pcg32;
 use std::{any::Any, f32::consts::TAU, time::Duration};
 
@@ -43,9 +43,9 @@ impl BenchProjectilesScenario {
     fn spawn_shooter(&mut self, commands: &mut Commands) {
         let entity = commands.spawn_empty().id();
         let s = WORLD_SIZE / 2.0;
-        let x = self.rng.gen_range(-s..s);
-        let y = self.rng.gen_range(-s..s);
-        let r = self.rng.gen_range(0.0..TAU);
+        let x = self.rng.random_range(-s..s);
+        let y = self.rng.random_range(-s..s);
+        let r = self.rng.random_range(0.0..TAU);
 
         commands.queue(ActorSet {
             entity,

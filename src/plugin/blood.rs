@@ -15,7 +15,7 @@ use bevy::{
     shader::ShaderRef,
     sprite_render::{AlphaMode2d, Material2d, Material2dPlugin, MeshMaterial2d},
 };
-use rand::{thread_rng, Rng};
+use rand::RngExt;
 
 const SIZE_MIN: f32 = 0.8;
 const SIZE_MAX: f32 = 6.0;
@@ -75,7 +75,7 @@ impl Command for BloodSpawn {
         let mesh = assets.dummy_mesh().clone();
 
         let material = world.resource_mut::<Assets<Blood>>().add(Blood {
-            seed: thread_rng().gen_range(0.0..500.0),
+            seed: rand::rng().random_range(0.0..500.0),
             size: self.size * PIXELS_PER_METER,
             image,
         });

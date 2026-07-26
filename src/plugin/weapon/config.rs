@@ -1,4 +1,4 @@
-use crate::{plugin::ProjectileConfig, util::ext::RngExt};
+use crate::{plugin::ProjectileConfig, util::ext::RngExt2};
 use rand_pcg::Pcg32;
 use std::time::Duration;
 

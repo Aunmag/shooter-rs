@@ -15,7 +15,7 @@ use bevy::{
     math::Vec2,
     prelude::{App, Entity, In, IntoScheduleConfigs, IntoSystem, Plugin, Query, Transform, With},
 };
-use rand::Rng;
+use rand::RngExt;
 use std::f32::consts::TAU;
 
 const DEBUG: bool = false;
@@ -79,7 +79,7 @@ fn on_update_find_collisions(
 
             if distance.is_short(distance_min) {
                 let angle = if distance.is_zero() {
-                    Vec2::from_angle(rand::thread_rng().gen_range(0.0..TAU))
+                    Vec2::from_angle(rand::rng().random_range(0.0..TAU))
                 } else {
                     distance.normalize()
                 };

@@ -13,7 +13,7 @@ use bevy::{
     prelude::{IntoScheduleConfigs, Query, Transform, With},
     time::Time,
 };
-use rand::Rng;
+use rand::RngExt;
 use std::{
     f32::consts::{FRAC_PI_2, TAU},
     time::Duration,
@@ -90,7 +90,7 @@ fn on_update_inner(
 
                 bot.1.detour = Some(Detour {
                     angle: direction.angle,
-                    distance: rand::thread_rng().gen_range(DISTANCE_MIN..DISTANCE_MAX),
+                    distance: rand::rng().random_range(DISTANCE_MIN..DISTANCE_MAX),
                 });
             }
         }

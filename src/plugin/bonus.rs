@@ -30,7 +30,7 @@ use bevy::{
     time::Time,
     transform::components::Transform,
 };
-use rand::seq::SliceRandom;
+use rand::seq::IndexedRandom;
 use std::{f32::consts::TAU, time::Duration};
 
 const RADIUS: f32 = 0.2;
@@ -183,7 +183,7 @@ fn choose_weapon(world: &mut World, level: u8) -> Option<&'static WeaponConfig> 
     }
 
     return WeaponConfig::ALL
-        .choose_weighted(&mut rand::thread_rng(), |w| {
+        .choose_weighted(&mut rand::rng(), |w| {
             if w.level > level || Some(w.name) == weapon_of_all_the_players {
                 return 0.0;
             } else {

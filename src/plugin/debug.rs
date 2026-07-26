@@ -29,7 +29,7 @@ use bevy::{
     transform::components::Transform,
     ui::widget::{Text, TextUiWriter},
 };
-use rand::seq::SliceRandom;
+use rand::seq::IndexedRandom;
 use std::{
     sync::{Mutex, OnceLock},
     time::Duration,
@@ -260,7 +260,7 @@ fn spawn_actors(
         commands.queue(ActorBotSet { entity });
 
         let weapon = match config.kind {
-            ActorKind::Human => WeaponConfig::ALL.choose(&mut rand::thread_rng()),
+            ActorKind::Human => WeaponConfig::ALL.choose(&mut rand::rng()),
             ActorKind::Zombie => None,
         };
 

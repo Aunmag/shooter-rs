@@ -5,7 +5,7 @@ use bevy::{
     prelude::{Query, Transform},
     time::Time,
 };
-use rand::Rng as _;
+use rand::RngExt;
 use std::{ops::Range, time::Duration};
 
 const INTERVAL: Range<Duration> = Duration::from_secs(5)..Duration::from_secs(30);
@@ -24,7 +24,7 @@ pub fn on_update(
 
         if !bot
             .voice_timer
-            .try_next_set(time, || rand::thread_rng().gen_range(INTERVAL))
+            .try_next_set(time, || rand::rng().random_range(INTERVAL))
         {
             continue;
         }

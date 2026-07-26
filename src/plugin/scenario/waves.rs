@@ -16,7 +16,7 @@ use bevy::{
     prelude::{Commands, World},
     transform::components::Transform,
 };
-use rand::{seq::SliceRandom, Rng, SeedableRng};
+use rand::{seq::IndexedRandom, RngExt, SeedableRng};
 use rand_pcg::Pcg32;
 use std::{any::Any, f32::consts::PI, time::Duration};
 
@@ -139,7 +139,7 @@ impl WavesScenario {
                         ..Default::default()
                     });
 
-                    let direction = self.rng.gen_range(-PI..PI);
+                    let direction = self.rng.random_range(-PI..PI);
                     for _ in 0..WAVE_BONUS_HUMANS {
                         commands.queue(SpawnActor {
                             direction,
@@ -163,17 +163,17 @@ impl WavesScenario {
                 log::debug!("Spawning a zombie");
 
                 let mut spawn = SpawnActor {
-                    direction: self.rng.gen_range(-PI..PI),
+                    direction: self.rng.random_range(-PI..PI),
                     distance: ENEMY_SPAWN_DISTANCE,
                     config: &ActorConfig::ZOMBIE,
                     weapon: None,
                 };
 
-                if self.rng.gen_bool(wave.agile_chance) {
+                if self.rng.random_bool(wave.agile_chance) {
                     spawn.config = &ActorConfig::ZOMBIE_AGILE;
-                } else if self.rng.gen_bool(wave.rifle_chance) {
+                } else if self.rng.random_bool(wave.rifle_chance) {
                     spawn.weapon = Some(&WeaponConfig::AKS_74U_BROKEN);
-                } else if self.rng.gen_bool(wave.pistol_chance) {
+                } else if self.rng.random_bool(wave.pistol_chance) {
                     spawn.weapon = Some(&WeaponConfig::PM_BROKEN);
                 }
 
@@ -298,7 +298,7 @@ impl ScenarioLogic for WavesScenario {
 
             if self
                 .rng
-                .gen_bool(f32::min(BONUSES_PER_WAVE * wave / wave_size, 1.0).into())
+                .random_bool(f32::min(BONUSES_PER_WAVE * wave / wave_size, 1.0).into())
             {
                 commands.queue(BonusSpawn::new(event.position, self.wave_number()));
             }

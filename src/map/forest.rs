@@ -9,7 +9,7 @@ use bevy::{
     ecs::{system::Command, world::World},
     math::{Vec2, Vec3},
 };
-use rand::{seq::SliceRandom, Rng, SeedableRng};
+use rand::{seq::IndexedRandom, RngExt, SeedableRng};
 use rand_pcg::Pcg32;
 use std::f32::consts::{FRAC_PI_2, PI, TAU};
 
@@ -73,7 +73,10 @@ fn spawn_trees(world: &mut World) {
 
     for _ in 0..trees {
         for _ in 0..TREE_FIND_POSITION_ATTEMPTS {
-            let position = Vec2::new(rng.gen_range(-range..range), rng.gen_range(-range..range));
+            let position = Vec2::new(
+                rng.random_range(-range..range),
+                rng.random_range(-range..range),
+            );
 
             if is_position_free(position, &occupied_positions) {
                 let texture = image.choose(&mut rng).unwrap_or(&image[0]);
@@ -81,7 +84,7 @@ fn spawn_trees(world: &mut World) {
                 blend_sprite(
                     world,
                     position.extend(LAYER_TREE),
-                    rng.gen_range(0.0..TAU),
+                    rng.random_range(0.0..TAU),
                     texture,
                 );
 

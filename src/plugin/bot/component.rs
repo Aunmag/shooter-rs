@@ -4,7 +4,7 @@ use crate::{
     util::{ext::Fuzz, Timer},
 };
 use bevy::{ecs::component::Component, prelude::Entity};
-use rand::{Rng, SeedableRng};
+use rand::{RngExt, SeedableRng};
 use rand_pcg::Pcg32;
 use std::{f32::consts::TAU, time::Duration};
 
@@ -35,7 +35,7 @@ impl Bot {
             detour: None,
             update_timer: Timer::default(),
             voice_timer: Timer::default(),
-            idle_direction: rng.gen_range(0.0..TAU),
+            idle_direction: rng.random_range(0.0..TAU),
             idle_movement: false,
             was_burst_fire: false,
             shooting_state: BotShootingState::Prepare,
@@ -45,10 +45,10 @@ impl Bot {
     }
 
     pub fn update_idle(&mut self) {
-        self.idle_movement = self.rng.gen_bool(BotConfig::IDLE_MOVEMENT_CHANCE);
+        self.idle_movement = self.rng.random_bool(BotConfig::IDLE_MOVEMENT_CHANCE);
         self.idle_direction += self
             .rng
-            .gen_range(-BotConfig::IDLE_ROTATION..BotConfig::IDLE_ROTATION);
+            .random_range(-BotConfig::IDLE_ROTATION..BotConfig::IDLE_ROTATION);
     }
 
     pub fn get_shooting_state(
@@ -61,7 +61,7 @@ impl Bot {
                 BotShootingState::Prepare => BotShootingState::Shoot,
                 BotShootingState::Shoot => BotShootingState::Pause,
                 BotShootingState::Pause => {
-                    if self.rng.gen_bool(BotConfig::REPEAT_SHOOT_CHANCE) {
+                    if self.rng.random_bool(BotConfig::REPEAT_SHOOT_CHANCE) {
                         BotShootingState::Shoot
                     } else {
                         BotShootingState::Prepare

@@ -17,7 +17,7 @@ use bevy::{
     math::{Vec2, Vec3Swizzles},
     prelude::{App, Commands, Entity, IntoScheduleConfigs, Plugin, Res, Time, Transform},
 };
-use rand::{Rng, SeedableRng};
+use rand::{RngExt, SeedableRng};
 use rand_pcg::Pcg32;
 
 pub struct WeaponPlugin;
@@ -96,7 +96,7 @@ fn on_update(
             }
 
             let recoil_push = transform.rotation.as_vec() * -weapon.get_recoil();
-            let recoil_spin = if data.rng.gen::<bool>() {
+            let recoil_spin = if data.rng.random::<bool>() {
                 actor.config.recoil_factor / actor.skill
             } else {
                 actor.config.recoil_factor / -actor.skill

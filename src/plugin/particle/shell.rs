@@ -3,7 +3,7 @@ use crate::{
         particle::{Particle, ParticleConfig},
         AudioPlay, AudioTracker, TileBlend, Weapon,
     },
-    util::ext::{Fuzz, QuatExt, RngExt, Vec2Ext},
+    util::ext::{Fuzz, QuatExt, RngExt2, Vec2Ext},
 };
 use bevy::{
     asset::AssetServer,
@@ -16,7 +16,7 @@ use bevy::{
     prelude::{Time, Transform},
     sprite::Sprite,
 };
-use rand::Rng;
+use rand::RngExt;
 use std::{f32::consts::FRAC_PI_2, time::Duration};
 
 const ROTATION: f32 = 0.3;
@@ -38,7 +38,7 @@ impl Command for ShellParticleSpawn {
 
     fn apply(self, world: &mut World) {
         let now = world.resource::<Time>().elapsed();
-        let mut rng = rand::thread_rng();
+        let mut rng = rand::rng();
 
         let Some((mut position, mut direction)) = world
             .get::<Transform>(self.0)
@@ -86,7 +86,7 @@ impl Command for ShellParticleSpawn {
                 position,
                 rotation: direction,
                 velocity,
-                velocity_spin: Vec3::new(0.0, 0.0, rng.gen_range(-VELOCITY_SPIN..VELOCITY_SPIN)),
+                velocity_spin: Vec3::new(0.0, 0.0, rng.random_range(-VELOCITY_SPIN..VELOCITY_SPIN)),
                 since: now,
                 until: now + DURATION.fuzz(&mut rng),
                 scale: 1.0,
@@ -99,7 +99,7 @@ fn on_destroy(entity: Entity, point: Vec2, commands: &mut Commands) {
 
     commands.queue(move |world: &mut World| {
         let mut time = world.resource::<Time>().elapsed();
-        let mut rng = rand::thread_rng();
+        let mut rng = rand::rng();
         let interval = AUDIO_INTERVAL.fuzz(&mut rng);
         let audio = world.resource::<AudioTracker>();
         let sound = AudioPlay {
@@ -115,7 +115,7 @@ fn on_destroy(entity: Entity, point: Vec2, commands: &mut Commands) {
             ..sound
         });
 
-        if rng.gen() {
+        if rng.random() {
             time += interval;
             audio.queue_delayed(
                 time,

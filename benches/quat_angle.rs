@@ -1,5 +1,5 @@
 use bevy::math::{EulerRot, Quat};
-use criterion::{BenchmarkId, Criterion, Throughput};
+use criterion::{BenchmarkId, Criterion};
 use std::{f32::consts::PI, hint::black_box};
 
 fn angle_euler(q: Quat) -> f32 {
@@ -13,14 +13,14 @@ fn angle_custom(q: Quat) -> f32 {
 fn bench(c: &mut Criterion) {
     let mut group = c.benchmark_group("quat_angle");
 
-    for r in [0.0, PI / 3.0, PI] {
-        let q = Quat::from_rotation_z(r);
-        group.bench_with_input(BenchmarkId::new("Euler", q), &q, |b, q| {
-            b.iter(|| angle_euler(*q))
+    for m in [0.0, 0.5, 1.0] {
+        let q = Quat::from_rotation_z(PI * m);
+        group.bench_with_input(BenchmarkId::new("Euler", m), &q, |b, q| {
+            b.iter(|| angle_euler(black_box(*q)))
         });
 
-        group.bench_with_input(BenchmarkId::new("Custom", q), &q, |b, q| {
-            b.iter(|| angle_custom(*q))
+        group.bench_with_input(BenchmarkId::new("Custom", m), &q, |b, q| {
+            b.iter(|| angle_custom(black_box(*q)))
         });
     }
 

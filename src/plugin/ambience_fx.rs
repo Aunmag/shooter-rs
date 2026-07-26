@@ -11,7 +11,7 @@ use bevy::{
     prelude::{App, Plugin},
     time::Time,
 };
-use rand::Rng as _;
+use rand::RngExt;
 use std::{ops::Range, time::Duration};
 
 const INTERVAL: Range<Duration> = Duration::from_secs(15)..Duration::from_secs(25);
@@ -23,7 +23,7 @@ impl Plugin for AmbienceFxPlugin {
         app.add_state_system(
             AppState::Game,
             on_update.run_if(|mut r: Local<Timer>, t: Res<Time>| {
-                return r.try_next_set(t.elapsed(), || rand::thread_rng().gen_range(INTERVAL));
+                return r.try_next_set(t.elapsed(), || rand::rng().random_range(INTERVAL));
             }),
         );
     }

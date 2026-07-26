@@ -27,7 +27,7 @@ use bevy::{
     time::Time,
     transform::components::Transform,
 };
-use rand::Rng;
+use rand::RngExt;
 use std::{f32::consts::TAU, time::Duration};
 
 const PUSH_MULTIPLIER: f32 = 20.0;
@@ -89,8 +89,8 @@ impl Command for Explode {
 
         let image_path = "terrain/crater.png";
         if let Some(image) = world.resource::<AssetServer>().get_handle(image_path) {
-            let mut rng = rand::thread_rng();
-            let direction = rng.gen_range(0.0..TAU);
+            let mut rng = rand::rng();
+            let direction = rng.random_range(0.0..TAU);
             let diameter = (self.config.radius * 2.0 / 6.0).fuzz_with(&mut rng, 0.2); // 6 times smaller that the explosion wave
 
             TileBlend::image(
