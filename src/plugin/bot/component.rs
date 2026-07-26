@@ -25,8 +25,8 @@ pub struct Bot {
 }
 
 impl Bot {
-    pub fn new(config: &BotConfig, skill: f32, seed: u64) -> Self {
-        let mut rng = Pcg32::seed_from_u64(seed);
+    pub fn new(config: &BotConfig, skill: f32, seed: u32) -> Self {
+        let mut rng = Pcg32::seed_from_u64(seed as u64);
 
         return Self {
             config: config.clone_with(skill, &mut rng),

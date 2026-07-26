@@ -11,7 +11,7 @@ use crate::{
 };
 use bevy::{
     color::palettes::css::WHITE,
-    ecs::{component::Component, system::Local},
+    ecs::{component::Component, schedule::SystemSet, system::Local},
     math::Vec2,
     prelude::{App, Entity, In, IntoScheduleConfigs, IntoSystem, Plugin, Query, Transform, With},
 };
@@ -23,11 +23,16 @@ const EXTRA_RESOLVE_DISTANCE: f32 = 0.0001;
 
 pub struct CollisionPlugin;
 
+#[derive(SystemSet, Debug, Clone, PartialEq, Eq, Hash)]
+pub struct CollisionSystems;
+
 impl Plugin for CollisionPlugin {
     fn build(&self, app: &mut App) {
         app.add_state_system(
             AppState::Game,
-            before_update.pipe(on_update).after(kinetics::on_update),
+            (on_update_find_collisions.pipe(on_update_resolve_collisions))
+                .in_set(CollisionSystems)
+                .after(kinetics::on_update),
         );
     }
 }
@@ -43,7 +48,7 @@ struct CollisionFindSystemData {
     previous_solutions: usize,
 }
 
-fn before_update(
+fn on_update_find_collisions(
     mut data: Local<CollisionFindSystemData>,
     query: Query<(Entity, &Collision, &Transform, &Kinetics)>,
 ) -> Vec<CollisionSolution> {
@@ -96,7 +101,7 @@ fn before_update(
     return solutions;
 }
 
-pub fn on_update(
+fn on_update_resolve_collisions(
     In(mut solutions): In<Vec<CollisionSolution>>, // TODO: don't run if empty
     mut query: Query<(&mut Transform, &mut Kinetics), With<Collision>>,
 ) {

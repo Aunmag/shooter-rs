@@ -5,10 +5,10 @@ use crate::{
 };
 use bevy::{
     app::{App, Plugin, Update},
-    color::Alpha,
-    ecs::{component::Component, query::With, system::Command, world::World},
+    color::{palettes::css::WHITE, Alpha},
+    ecs::{component::Component, hierarchy::Children, query::With, system::Command, world::World},
     prelude::{AssetServer, Commands, Entity, PositionType, Query, Res},
-    text::{Justify, TextColor, TextFont, TextLayout, TextSpan},
+    text::{FontWeight, Justify, TextColor, TextFont, TextLayout, TextSpan},
     time::Time,
     ui::{widget::Text, Node, UiRect, Val},
     window::{PrimaryWindow, Window},
@@ -53,14 +53,25 @@ impl UiNotification {
 }
 
 fn on_update(
-    mut query: Query<(Entity, &UiNotification, &mut TextColor)>,
+    notifications: Query<(Entity, &UiNotification, &Children)>,
+    mut colors: Query<&mut TextColor>,
     mut commands: Commands,
     time: Res<Time>,
 ) {
     let time = time.elapsed();
 
-    for (entity, notification, mut color) in query.iter_mut() {
-        color.set_alpha(notification.alpha(time));
+    for (entity, notification, children) in notifications.iter() {
+        let alpha = notification.alpha(time);
+
+        if let Ok(mut color) = colors.get_mut(entity) {
+            color.set_alpha(alpha);
+        }
+
+        for child in children {
+            if let Ok(mut color) = colors.get_mut(*child) {
+                color.set_alpha(alpha);
+            }
+        }
 
         if notification.is_expired(time) {
             commands.entity(entity).despawn();
@@ -99,13 +110,17 @@ impl Command for Notify {
             .get_handle(FONT_PATH)
             .unwrap_or_default();
 
+        let color = WHITE.with_alpha(0.0);
+
         world
             .spawn((
                 UiNotification::new(time, self.duration),
                 Text::new(format!("{}\n", self.text.as_ref())),
+                TextColor(color.into()),
                 TextFont {
                     font: font_bold,
                     font_size: window_width * FONT_SCALE,
+                    weight: FontWeight::BOLD,
                     ..Default::default()
                 },
                 TextLayout {
@@ -120,8 +135,8 @@ impl Command for Notify {
                 },
             ))
             .with_child((
-                UiNotification::new(time, self.duration),
                 TextSpan::new(self.text_small.as_ref()),
+                TextColor(color.into()),
                 TextFont {
                     font: font_small,
                     font_size: window_width * FONT_SCALE / 2.0,

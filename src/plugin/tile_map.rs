@@ -8,7 +8,7 @@ use crate::{
 };
 use bevy::{
     app::{App, Plugin},
-    camera::{visibility::RenderLayers, Camera, Camera2d, CameraOutputMode},
+    camera::{visibility::RenderLayers, Camera, Camera2d, CameraOutputMode, RenderTarget},
     ecs::{
         entity::Entity,
         schedule::IntoScheduleConfigs,
@@ -289,7 +289,6 @@ fn spawn_camera(commands: &mut Commands, index: Index, target: Handle<Image>) ->
         .spawn((
             Camera2d,
             Camera {
-                target: target.into(),
                 clear_color: ClearColorConfig::None,
                 output_mode: CameraOutputMode::Write {
                     blend_state: Some(BlendState::PREMULTIPLIED_ALPHA_BLENDING),
@@ -297,6 +296,7 @@ fn spawn_camera(commands: &mut Commands, index: Index, target: Handle<Image>) ->
                 },
                 ..Default::default()
             },
+            RenderTarget::Image(target.into()),
             Transform {
                 translation,
                 scale: TRANSFORM_SCALE,

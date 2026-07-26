@@ -5,8 +5,8 @@ mod config;
 pub use self::{command::*, component::*, config::*};
 use crate::{
     plugin::{
-        Actor, ActorActionsExt, AudioPlay, AudioTracker, ProjectilePhysics, ProjectileSpawn,
-        ShellParticleSpawn,
+        collision::CollisionSystems, Actor, ActorActionsExt, AudioPlay, AudioTracker,
+        ProjectilePhysics, ProjectileSpawn, ShellParticleSpawn,
     },
     resource::HitResource,
     state::AppState,
@@ -24,10 +24,7 @@ pub struct WeaponPlugin;
 
 impl Plugin for WeaponPlugin {
     fn build(&self, app: &mut App) {
-        app.add_state_system(
-            AppState::Game,
-            on_update.after(crate::plugin::collision::on_update),
-        );
+        app.add_state_system(AppState::Game, on_update.after(CollisionSystems));
     }
 }
 

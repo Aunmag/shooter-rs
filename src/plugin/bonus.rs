@@ -1,8 +1,10 @@
 use crate::{
     data::{FONT_PATH, LAYER_BONUS, PIXELS_PER_METER, TRANSFORM_SCALE},
     plugin::{
-        camera::MainCamera, collision::Collision, player::Player, Actor, ActorKind, Weapon,
-        WeaponConfig, WeaponSet,
+        camera::MainCamera,
+        collision::{Collision, CollisionSystems},
+        player::Player,
+        Actor, ActorKind, Weapon, WeaponConfig, WeaponSet,
     },
     state::AppState,
     util::{
@@ -41,10 +43,7 @@ pub struct BonusPlugin;
 
 impl Plugin for BonusPlugin {
     fn build(&self, app: &mut App) {
-        app.add_state_system(
-            AppState::Game,
-            update_pickup.after(crate::plugin::collision::on_update),
-        );
+        app.add_state_system(AppState::Game, update_pickup.after(CollisionSystems));
         app.add_state_system(AppState::Game, update_image);
         app.add_state_system(AppState::Game, update_label);
     }

@@ -1,7 +1,8 @@
 use crate::{
     data::{LAYER_GROUND, LAYER_PROJECTILE},
     plugin::{
-        collision::Collision, Actor, AudioPlay, AudioTracker, ProjectileExplosion, TileBlend,
+        collision::{Collision, CollisionSystems},
+        Actor, AudioPlay, AudioTracker, ProjectileExplosion, TileBlend,
     },
     resource::{AssetStorage, HitResource},
     state::AppState,
@@ -38,10 +39,7 @@ pub struct ExplosionPlugin;
 impl Plugin for ExplosionPlugin {
     fn build(&self, app: &mut App) {
         app.add_plugins(Material2dPlugin::<ExplosionMaterial>::default());
-        app.add_state_system(
-            AppState::Game,
-            on_update.after(crate::plugin::collision::on_update),
-        );
+        app.add_state_system(AppState::Game, on_update.after(CollisionSystems));
     }
 }
 

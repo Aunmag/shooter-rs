@@ -17,7 +17,7 @@ impl Plugin for SkipLoaderPlugin {
 #[derive(Asset, TypePath)]
 struct SkipAsset;
 
-#[derive(Default)]
+#[derive(Default, TypePath)]
 struct SkipLoader;
 
 impl AssetLoader for SkipLoader {

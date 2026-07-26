@@ -8,7 +8,7 @@ mod sys_whiz;
 
 use self::material::ProjectileMaterial;
 pub use self::{command::*, component::*, config::*};
-use crate::{util::ext::AppExt, AppState};
+use crate::{plugin::collision::CollisionSystems, util::ext::AppExt, AppState};
 use bevy::{
     prelude::{App, IntoScheduleConfigs, Plugin},
     sprite_render::Material2dPlugin,
@@ -21,7 +21,7 @@ impl Plugin for ProjectilePlugin {
         app.add_plugins(Material2dPlugin::<ProjectileMaterial>::default());
         app.add_state_system(
             AppState::Game,
-            sys_update::on_update.after(crate::plugin::collision::on_update),
+            sys_update::on_update.after(CollisionSystems),
         );
         app.add_state_system(AppState::Game, sys_whiz::on_update);
     }

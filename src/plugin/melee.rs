@@ -1,5 +1,8 @@
 use crate::{
-    plugin::{Actor, ActorAction, ActorActionsExt, ActorConfig, AudioPlay, AudioTracker, Weapon},
+    plugin::{
+        collision::CollisionSystems, Actor, ActorAction, ActorActionsExt, ActorConfig, AudioPlay,
+        AudioTracker, Weapon,
+    },
     resource::HitResource,
     state::AppState,
     util::{
@@ -17,10 +20,7 @@ pub struct MeleePlugin;
 
 impl Plugin for MeleePlugin {
     fn build(&self, app: &mut App) {
-        app.add_state_system(
-            AppState::Game,
-            on_update.after(crate::plugin::collision::on_update),
-        );
+        app.add_state_system(AppState::Game, on_update.after(CollisionSystems));
     }
 }
 

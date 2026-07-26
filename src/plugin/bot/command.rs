@@ -11,7 +11,7 @@ pub struct ActorBotSet {
 
 impl Command for ActorBotSet {
     fn apply(self, world: &mut World) {
-        let entity_id = u64::from(self.entity.index());
+        let entity_id = self.entity.index_u32();
 
         if let Some(actor) = world.get::<Actor>(self.entity) {
             let config = actor.config.bot;

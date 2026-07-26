@@ -34,7 +34,7 @@ impl WeaponSet {
             }
         }
 
-        world.entity_mut(self.entity).remove_children(&to_remove);
+        world.entity_mut(self.entity).detach_children(&to_remove);
 
         for entity in &to_remove {
             world.entity_mut(*entity).despawn();

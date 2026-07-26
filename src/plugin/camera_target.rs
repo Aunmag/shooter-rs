@@ -1,6 +1,6 @@
 use crate::{
     data::VIEW_DISTANCE,
-    plugin::camera::MainCamera,
+    plugin::{camera::MainCamera, collision::CollisionSystems},
     state::AppState,
     util::ext::{AppExt, DurationExt, QuatExt},
 };
@@ -32,10 +32,7 @@ pub struct CameraTargetPlugin;
 
 impl Plugin for CameraTargetPlugin {
     fn build(&self, app: &mut App) {
-        app.add_state_system(
-            AppState::Game,
-            on_update.after(crate::plugin::collision::on_update),
-        );
+        app.add_state_system(AppState::Game, on_update.after(CollisionSystems));
     }
 }
 
