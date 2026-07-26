@@ -67,6 +67,8 @@ impl BloodSpawn {
 }
 
 impl Command for BloodSpawn {
+    type Out = ();
+
     fn apply(self, world: &mut World) {
         let assets = world.resource::<AssetStorage>();
         let image = assets.dummy_image().clone();

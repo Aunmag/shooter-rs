@@ -34,6 +34,8 @@ const PARTICLE_CONFIG: &ParticleConfig = &ParticleConfig {
 pub struct ShellParticleSpawn(pub Entity);
 
 impl Command for ShellParticleSpawn {
+    type Out = ();
+
     fn apply(self, world: &mut World) {
         let now = world.resource::<Time>().elapsed();
         let mut rng = rand::thread_rng();

@@ -39,6 +39,8 @@ pub struct TerrainSpawn {
 }
 
 impl Command for TerrainSpawn {
+    type Out = ();
+
     fn apply(self, world: &mut World) {
         let Some(image_handle) = world
             .resource::<AssetServer>()
@@ -51,7 +53,7 @@ impl Command for TerrainSpawn {
 
         let block_size;
 
-        if let Some(image) = world.resource_mut::<Assets<Image>>().get_mut(&image_handle) {
+        if let Some(mut image) = world.resource_mut::<Assets<Image>>().get_mut(&image_handle) {
             image.sampler = ImageSampler::Descriptor(ImageSamplerDescriptor {
                 address_mode_u: ImageAddressMode::Repeat,
                 address_mode_v: ImageAddressMode::Repeat,

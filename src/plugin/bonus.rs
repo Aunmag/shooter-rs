@@ -26,7 +26,7 @@ use bevy::{
         AssetServer, Commands, IntoScheduleConfigs, Quat, Query, Vec2, Vec3, With, Without, World,
     },
     sprite::{Sprite, Text2d},
-    text::{Justify, TextColor, TextFont, TextLayout},
+    text::{FontSize, Justify, TextColor, TextFont, TextLayout},
     time::Time,
     transform::components::Transform,
 };
@@ -61,6 +61,8 @@ impl BonusSpawn {
 }
 
 impl Command for BonusSpawn {
+    type Out = ();
+
     fn apply(self, world: &mut World) {
         if let Some(weapon) = choose_weapon(world, self.level) {
             let bonus = spawn_bonus(world, self.position, weapon);
@@ -231,8 +233,8 @@ fn spawn_label(world: &mut World, bonus: Entity, weapon: &WeaponConfig) {
             Transform::from_scale(Vec3::new(0.0, 0.0, 1.5)),
             Text2d(weapon.name.to_string()),
             TextFont {
-                font,
-                font_size: PIXELS_PER_METER,
+                font: font.into(),
+                font_size: FontSize::Px(PIXELS_PER_METER),
                 ..Default::default()
             },
             TextColor(WHITE.into()),

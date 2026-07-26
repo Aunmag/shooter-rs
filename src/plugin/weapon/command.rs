@@ -134,6 +134,8 @@ impl WeaponSet {
 }
 
 impl Command for WeaponSet {
+    type Out = ();
+
     fn apply(self, world: &mut World) {
         self.remove_old_weapon_component(world);
         self.remove_old_weapon_sprite(world);

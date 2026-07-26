@@ -6,17 +6,16 @@ use crate::{
 use bevy::{
     app::{App, Plugin, Update},
     color::{palettes::css::WHITE, Alpha},
-    ecs::{component::Component, hierarchy::Children, query::With, system::Command, world::World},
+    ecs::{component::Component, hierarchy::Children, system::Command, world::World},
     prelude::{AssetServer, Commands, Entity, PositionType, Query, Res},
-    text::{FontWeight, Justify, TextColor, TextFont, TextLayout, TextSpan},
+    text::{FontSize, FontWeight, Justify, TextColor, TextFont, TextLayout, TextSpan},
     time::Time,
     ui::{widget::Text, Node, UiRect, Val},
-    window::{PrimaryWindow, Window},
 };
 use std::time::Duration;
 
 const POSITION: f32 = 0.3;
-const FONT_SCALE: f32 = 0.03;
+const FONT_SIZE: FontSize = FontSize::Vw(3.0);
 const FADE_IN: Duration = Duration::from_millis(150);
 const FADE_OUT: Duration = Duration::from_millis(300);
 const DURATION_DEFAULT: Duration = Duration::from_millis(2500);
@@ -87,18 +86,14 @@ pub struct Notify {
 }
 
 impl Command for Notify {
+    type Out = ();
+
     fn apply(mut self, world: &mut World) {
         let time = world.resource::<Time>().elapsed();
 
         if self.duration.is_zero() {
             self.duration = DURATION_DEFAULT;
         }
-
-        let window_width = world
-            .query_filtered::<&Window, With<PrimaryWindow>>()
-            .iter(world)
-            .next()
-            .map_or(600.0, |w| w.width());
 
         let font_bold = world
             .resource::<AssetServer>()
@@ -118,8 +113,8 @@ impl Command for Notify {
                 Text::new(format!("{}\n", self.text.as_ref())),
                 TextColor(color.into()),
                 TextFont {
-                    font: font_bold,
-                    font_size: window_width * FONT_SCALE,
+                    font: font_bold.into(),
+                    font_size: FONT_SIZE,
                     weight: FontWeight::BOLD,
                     ..Default::default()
                 },
@@ -138,8 +133,8 @@ impl Command for Notify {
                 TextSpan::new(self.text_small.as_ref()),
                 TextColor(color.into()),
                 TextFont {
-                    font: font_small,
-                    font_size: window_width * FONT_SCALE / 2.0,
+                    font: font_small.into(),
+                    font_size: FONT_SIZE * 0.5,
                     ..Default::default()
                 },
             ));

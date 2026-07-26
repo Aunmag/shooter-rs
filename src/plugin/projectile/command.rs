@@ -22,6 +22,8 @@ pub struct ProjectileSpawn {
 }
 
 impl Command for ProjectileSpawn {
+    type Out = ();
+
     fn apply(self, world: &mut World) {
         let assets = world.resource::<AssetStorage>();
         let image = assets.dummy_image().clone();

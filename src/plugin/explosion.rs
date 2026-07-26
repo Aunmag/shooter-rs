@@ -50,6 +50,8 @@ pub struct Explode {
 }
 
 impl Command for Explode {
+    type Out = ();
+
     fn apply(self, world: &mut World) {
         let explosion = Explosion {
             config: self.config,
@@ -165,7 +167,7 @@ fn on_update(
         explosion_transform.scale.x = radius * 2.0;
         explosion_transform.scale.y = radius * 2.0;
 
-        if let Some(material) = assets.get_mut(material) {
+        if let Some(mut material) = assets.get_mut(material) {
             material.alpha = force_factor;
         }
 

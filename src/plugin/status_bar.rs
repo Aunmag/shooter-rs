@@ -94,7 +94,7 @@ fn on_update(
 
     for (actor, health, weapon, children) in targets.iter() {
         for child in children.iter() {
-            if let Some(material) = handles.get(*child).ok().and_then(|h| assets.get_mut(h)) {
+            if let Some(mut material) = handles.get(*child).ok().and_then(|h| assets.get_mut(h)) {
                 material.health -= (material.health - health.get()) * interpolation;
 
                 if health.is_low() {

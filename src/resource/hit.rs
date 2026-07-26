@@ -6,7 +6,7 @@ use bevy::{
     ecs::{
         resource::Resource,
         system::{SystemBuffer, SystemMeta},
-        world::World,
+        world::{DeferredWorld, World},
     },
     prelude::{Entity, Vec2},
 };
@@ -47,6 +47,7 @@ impl SystemBuffer for HitResource {
 
         for hit in self.hits.drain(..) {
             if let Ok((mut kinetics, mut health, camera)) = targets.get_mut(world, hit.entity) {
+                // TODO: do these computations before `queue`
                 let momentum_linear = hit.momentum.length();
                 let mut push = hit.momentum;
                 let mut spin = hit.spin * momentum_linear;
@@ -64,6 +65,10 @@ impl SystemBuffer for HitResource {
                 }
             }
         }
+    }
+
+    fn queue(&mut self, _: &SystemMeta, _: DeferredWorld) {
+        // TODO: learn more
     }
 }
 

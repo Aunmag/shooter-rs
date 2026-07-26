@@ -35,6 +35,8 @@ const PARTICLE_CONFIG: &ParticleConfig = &ParticleConfig {
 pub struct FleshParticleSpawn(pub Entity);
 
 impl Command for FleshParticleSpawn {
+    type Out = ();
+
     fn apply(self, world: &mut World) {
         let now = world.resource::<Time>().elapsed();
         let mut rng = rand::thread_rng();

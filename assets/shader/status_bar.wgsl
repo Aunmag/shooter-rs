@@ -7,7 +7,7 @@ const COLOR_STAMINA = vec4<f32>(0.8, 0.8, 0.8, 0.4);
 const COLOR_HEALTH = vec4<f32>(1.0, 0.0, 0.0, 0.6);
 const COLOR_AMMO = vec4<f32>(0.8, 0.8, 0.8, 0.4);
 
-struct Uniform {
+struct Material {
     health: f32,
     health_alpha: f32,
     ammo: f32,
@@ -16,7 +16,7 @@ struct Uniform {
 };
 
 @group(2) @binding(0)
-var<uniform> uniform: Uniform;
+var<uniform> material: Material;
 
 @group(2) @binding(1)
 var texture: texture_2d<f32>;
@@ -75,8 +75,8 @@ fn bar(value: f32, center: vec2<f32>, color: vec4<f32>, radius: f32, thickness: 
 @fragment
 fn fragment(in: VertexOutput) -> @location(0) vec4<f32> {
     var center  = in.uv.xy - 0.5;
-    var stamina = bar(uniform.stamina, center, mix_alpha(COLOR_STAMINA, 1.0                 ), 0.62, 0.01);
-    var health  = bar(uniform.health , center, mix_alpha(COLOR_HEALTH , uniform.health_alpha), 0.91, 0.06);
-    var ammo    = bar(uniform.ammo   , center, mix_alpha(COLOR_AMMO   , uniform.ammo_alpha  ), 1.00, 0.01);
+    var stamina = bar(material.stamina, center, mix_alpha(COLOR_STAMINA, 1.0                 ), 0.62, 0.01);
+    var health  = bar(material.health , center, mix_alpha(COLOR_HEALTH , material.health_alpha), 0.91, 0.06);
+    var ammo    = bar(material.ammo   , center, mix_alpha(COLOR_AMMO   , material.ammo_alpha  ), 1.00, 0.01);
     return vec4<f32>(stamina + health + ammo);
 }

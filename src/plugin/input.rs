@@ -56,6 +56,8 @@ fn on_update(mut commands: Commands, keyboard: Res<ButtonInput<KeyCode>>) {
 pub struct CursorGrab(pub bool);
 
 impl Command for CursorGrab {
+    type Out = ();
+
     fn apply(self, world: &mut World) {
         for mut cursor in world
             .query_filtered::<&mut CursorOptions, With<PrimaryWindow>>()

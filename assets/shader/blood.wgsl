@@ -11,13 +11,13 @@ const CENTER_BRIGHTNESS_1 = 2.0;
 const CENTER_BRIGHTNESS_2 = 1.4;
 const KF = 0.2;
 
-struct Uniform {
+struct Material {
     seed: f32,
     size: f32,
 };
 
 @group(2) @binding(0)
-var<uniform> uniform: Uniform;
+var<uniform> material: Material;
 
 @group(2) @binding(0)
 var texture: texture_2d<f32>;
@@ -52,8 +52,8 @@ fn noise(p: vec2<f32>) -> f32 {
 @fragment
 fn fragment(in: VertexOutput) -> @location(0) vec4<f32> {
     var uv_m = in.uv.xy;
-    uv_m *= uniform.size / SCALE;
-    uv_m += uniform.seed;
+    uv_m *= material.size / SCALE;
+    uv_m += material.seed;
 
     var m = mat2x2(1.6, 1.2, -1.2, 1.6);
     var f = 0.0;

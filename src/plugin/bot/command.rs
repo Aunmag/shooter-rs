@@ -10,6 +10,8 @@ pub struct ActorBotSet {
 }
 
 impl Command for ActorBotSet {
+    type Out = ();
+
     fn apply(self, world: &mut World) {
         let entity_id = self.entity.index_u32();
 

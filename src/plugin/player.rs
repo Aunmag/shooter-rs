@@ -191,6 +191,8 @@ pub struct PlayerSet {
 }
 
 impl Command for PlayerSet {
+    type Out = ();
+
     fn apply(self, world: &mut World) {
         let health_multiplier = 1.0 / world.resource::<Settings>().game.difficulty;
 
@@ -226,6 +228,8 @@ pub struct PlayerSpawn {
 }
 
 impl Command for PlayerSpawn {
+    type Out = ();
+
     fn apply(self, world: &mut World) {
         let entity = world.spawn_empty().id();
 

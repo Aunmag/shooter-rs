@@ -1,11 +1,11 @@
 #import bevy_sprite::mesh2d_vertex_output::VertexOutput
 
-struct Uniform {
+struct Material {
     alpha: f32,
 };
 
 @group(2) @binding(0)
-var<uniform> uniform: Uniform;
+var<uniform> material: Material;
 
 @group(2) @binding(1)
 var texture: texture_2d<f32>;
@@ -19,5 +19,5 @@ fn fragment(in: VertexOutput) -> @location(0) vec4<f32> {
     var w = pow(c, 64.0);
     var a_inner = pow(c, 2.0);
     var a_outer = saturate((1.0 - c) * 100.0);
-    return vec4<f32>(1.0, 1.0, w, a_inner * a_outer * uniform.alpha);
+    return vec4<f32>(1.0, 1.0, w, a_inner * a_outer * material.alpha);
 }

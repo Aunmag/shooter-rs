@@ -27,6 +27,8 @@ pub struct ActorSet {
 }
 
 impl Command for ActorSet {
+    type Out = ();
+
     fn apply(self, world: &mut World) {
         let difficulty = world.resource::<Settings>().game.difficulty;
         let image_path = self.config.get_image_path(0);
@@ -67,6 +69,8 @@ impl Command for ActorSet {
 pub struct ActorRelease(pub Entity);
 
 impl Command for ActorRelease {
+    type Out = ();
+
     fn apply(self, world: &mut World) {
         let difficulty = world.resource::<Settings>().game.difficulty;
 

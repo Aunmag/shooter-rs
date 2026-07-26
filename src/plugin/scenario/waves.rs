@@ -339,6 +339,8 @@ struct SpawnActor {
 }
 
 impl Command for SpawnActor {
+    type Out = ();
+
     fn apply(self, world: &mut World) {
         let mut center = Vec2::ZERO;
         let mut players = 0.0;
