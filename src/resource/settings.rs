@@ -49,8 +49,8 @@ pub enum ScenarioSettings {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct DisplaySettings {
     pub mode: WindowModeSettings,
-    pub window_w: u16,
-    pub window_h: u16,
+    pub window_w: u32,
+    pub window_h: u32,
     pub v_sync: bool,
 }
 

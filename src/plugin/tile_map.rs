@@ -8,7 +8,7 @@ use crate::{
 };
 use bevy::{
     app::{App, Plugin},
-    core_pipeline::core_2d::Camera2d,
+    camera::{visibility::RenderLayers, Camera, Camera2d, CameraOutputMode},
     ecs::{
         entity::Entity,
         schedule::IntoScheduleConfigs,
@@ -18,11 +18,7 @@ use bevy::{
     math::{Quat, Vec3},
     platform::collections::HashMap,
     prelude::{Assets, ClearColorConfig, Handle, Image, Resource, Transform, World},
-    render::{
-        camera::{Camera, CameraOutputMode},
-        render_resource::{BlendState, TextureUsages},
-        view::RenderLayers,
-    },
+    render::render_resource::{BlendState, TextureUsages},
     sprite::{Anchor, Sprite},
 };
 
@@ -320,9 +316,9 @@ fn spawn_tile(world: &mut World, position: Vec3) -> Handle<Image> {
     world.spawn((
         Sprite {
             image: handle.clone(),
-            anchor: Anchor::BottomLeft,
             ..Default::default()
         },
+        Anchor::BOTTOM_LEFT,
         Transform {
             translation: position,
             scale: TRANSFORM_SCALE,

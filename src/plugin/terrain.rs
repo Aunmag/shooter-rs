@@ -18,9 +18,9 @@ use bevy::{
     },
     image::{Image, ImageAddressMode, ImageSampler, ImageSamplerDescriptor},
     math::Vec3,
+    mesh::{Mesh, Mesh2d, VertexAttributeValues},
     prelude::{Rectangle, Transform, With, Without},
-    render::mesh::{Mesh, Mesh2d, VertexAttributeValues},
-    sprite::{ColorMaterial, MeshMaterial2d},
+    sprite_render::{ColorMaterial, MeshMaterial2d},
 };
 
 pub struct TerrainPlugin;

@@ -18,7 +18,7 @@ use bevy::{
     },
     input::{mouse::MouseMotion, ButtonInput},
     math::Vec2,
-    prelude::{App, Commands, EventReader, KeyCode, MouseButton, Plugin, Res, Transform, World},
+    prelude::{App, Commands, KeyCode, MessageReader, MouseButton, Plugin, Res, Transform, World},
 };
 
 pub struct PlayerPlugin;
@@ -81,7 +81,7 @@ pub fn on_update(
     cameras: Query<&Transform, With<MainCamera>>,
     keyboard: Res<ButtonInput<KeyCode>>,
     mouse: Res<ButtonInput<MouseButton>>,
-    mut mouse_motion: EventReader<MouseMotion>,
+    mut mouse_motion: MessageReader<MouseMotion>,
     mut commands: Commands,
     settings: Res<Settings>,
 ) {

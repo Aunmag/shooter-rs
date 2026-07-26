@@ -15,7 +15,8 @@ use bevy::{
     ecs::{hierarchy::Children, system::Command},
     math::{Quat, Vec2},
     prelude::{AssetServer, Entity, Transform, World},
-    sprite::{MeshMaterial2d, Sprite},
+    sprite::Sprite,
+    sprite_render::MeshMaterial2d,
 };
 
 pub struct ActorSet {

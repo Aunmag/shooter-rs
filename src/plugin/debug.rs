@@ -23,7 +23,7 @@ use bevy::{
         Commands, Component, DefaultGizmoConfigGroup, GizmoConfigStore, IntoScheduleConfigs,
         KeyCode, Query, Res, Update, Vec2, With,
     },
-    sprite::MeshMaterial2d,
+    sprite_render::MeshMaterial2d,
     text::TextSpan,
     time::Time,
     transform::components::Transform,
@@ -59,7 +59,7 @@ impl Plugin for DebugPlugin {
         application
             .insert_resource(DiagnosticsData::default())
             .add_plugins(FrameTimeDiagnosticsPlugin::default())
-            .add_plugins(EntityCountDiagnosticsPlugin)
+            .add_plugins(EntityCountDiagnosticsPlugin::default())
             .add_state_system_enter(AppState::Game, on_init)
             .add_systems(Update, update_diagnostics_data)
             .add_systems(Update, update_diagnostics_text())

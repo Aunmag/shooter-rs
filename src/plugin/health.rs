@@ -15,7 +15,7 @@ use bevy::{
         system::{Local, Query, Res},
     },
     math::{Vec2, Vec3Swizzles},
-    prelude::{Commands, Entity, EventWriter, IntoScheduleConfigs, Transform},
+    prelude::{Commands, Entity, IntoScheduleConfigs, MessageWriter, Transform},
     time::Time,
 };
 use std::time::Duration;
@@ -103,7 +103,7 @@ impl Health {
 
 fn on_update(
     mut query: Query<(Entity, &Actor, &mut Health, &Transform, Has<Player>)>,
-    mut death_events: EventWriter<ActorDeathEvent>,
+    mut death_events: MessageWriter<ActorDeathEvent>,
     mut commands: Commands,
     settings: Res<Settings>,
     audio: Res<AudioTracker>,

@@ -8,7 +8,7 @@ use bevy::{
     color::Alpha,
     ecs::{component::Component, query::With, system::Command, world::World},
     prelude::{AssetServer, Commands, Entity, PositionType, Query, Res},
-    text::{JustifyText, TextColor, TextFont, TextLayout, TextSpan},
+    text::{Justify, TextColor, TextFont, TextLayout, TextSpan},
     time::Time,
     ui::{widget::Text, Node, UiRect, Val},
     window::{PrimaryWindow, Window},
@@ -109,7 +109,7 @@ impl Command for Notify {
                     ..Default::default()
                 },
                 TextLayout {
-                    justify: JustifyText::Center,
+                    justify: Justify::Center,
                     ..Default::default()
                 },
                 Node {

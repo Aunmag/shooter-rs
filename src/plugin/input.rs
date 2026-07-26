@@ -4,7 +4,7 @@ use bevy::{
     ecs::{query::With, system::Command, world::World},
     input::ButtonInput,
     prelude::{App, Commands, KeyCode, Plugin, Res},
-    window::{CursorGrabMode, PrimaryWindow, Window},
+    window::{CursorGrabMode, CursorOptions, PrimaryWindow, Window},
 };
 
 pub struct InputPlugin;
@@ -17,9 +17,7 @@ impl Plugin for InputPlugin {
 
 fn on_update(mut commands: Commands, keyboard: Res<ButtonInput<KeyCode>>) {
     if keyboard.just_pressed(KeyCode::Escape) {
-        commands.queue(|w: &mut World| {
-            w.send_event(AppExit::Success);
-        });
+        commands.write_message(AppExit::Success);
     }
 
     if keyboard.just_pressed(KeyCode::Tab) {
@@ -48,7 +46,7 @@ fn on_update(mut commands: Commands, keyboard: Res<ButtonInput<KeyCode>>) {
                 if display.mode == WindowModeSettings::Windowed {
                     window
                         .resolution
-                        .set(f32::from(display.window_w), f32::from(display.window_h));
+                        .set(display.window_w as f32, display.window_h as f32);
                 }
             }
         });
@@ -59,17 +57,17 @@ pub struct CursorGrab(pub bool);
 
 impl Command for CursorGrab {
     fn apply(self, world: &mut World) {
-        for mut window in world
-            .query_filtered::<&mut Window, With<PrimaryWindow>>()
+        for mut cursor in world
+            .query_filtered::<&mut CursorOptions, With<PrimaryWindow>>()
             .iter_mut(world)
         {
-            window.cursor_options.grab_mode = if self.0 {
+            cursor.grab_mode = if self.0 {
                 CursorGrabMode::Confined
             } else {
                 CursorGrabMode::None
             };
 
-            window.cursor_options.visible = !self.0;
+            cursor.visible = !self.0;
         }
     }
 }

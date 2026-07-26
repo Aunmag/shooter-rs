@@ -11,7 +11,7 @@ pub use self::{command::*, component::*, config::*};
 use crate::{util::ext::AppExt, AppState};
 use bevy::{
     prelude::{App, IntoScheduleConfigs, Plugin},
-    sprite::Material2dPlugin,
+    sprite_render::Material2dPlugin,
 };
 
 pub struct ProjectilePlugin;

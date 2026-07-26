@@ -17,13 +17,12 @@ use bevy::{
     },
     image::Image,
     math::Vec3Swizzles,
+    mesh::Mesh2d,
     prelude::{Commands, IntoScheduleConfigs, Query, Vec2, Vec3, Without, World},
     reflect::TypePath,
-    render::{
-        mesh::Mesh2d,
-        render_resource::{AsBindGroup, ShaderRef},
-    },
-    sprite::{AlphaMode2d, Material2d, Material2dPlugin, MeshMaterial2d},
+    render::render_resource::AsBindGroup,
+    shader::ShaderRef,
+    sprite_render::{AlphaMode2d, Material2d, Material2dPlugin, MeshMaterial2d},
     time::Time,
     transform::components::Transform,
 };

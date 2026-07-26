@@ -1,7 +1,7 @@
 use crate::plugin::actor::ActorKind;
-use bevy::{math::Vec2, prelude::Event};
+use bevy::{math::Vec2, prelude::Message};
 
-#[derive(Event)]
+#[derive(Message)]
 pub struct ActorDeathEvent {
     pub kind: ActorKind,
     pub position: Vec2,

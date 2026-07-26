@@ -8,9 +8,9 @@ use bevy::{
     asset::Assets,
     ecs::system::Command,
     math::Vec3,
+    mesh::Mesh2d,
     prelude::{Entity, Time, Transform, Vec2, World},
-    render::mesh::Mesh2d,
-    sprite::MeshMaterial2d,
+    sprite_render::MeshMaterial2d,
 };
 
 pub struct ProjectileSpawn {

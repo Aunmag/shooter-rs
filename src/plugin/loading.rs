@@ -8,8 +8,8 @@ use bevy::{
     asset::Assets,
     ecs::system::Local,
     image::Image,
+    mesh::Mesh,
     prelude::{App, AssetServer, AudioSource, IntoScheduleConfigs, NextState, Plugin, Res, ResMut},
-    render::mesh::Mesh,
     time::Time,
 };
 use std::time::Duration;

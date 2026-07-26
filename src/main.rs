@@ -29,11 +29,11 @@ use crate::{
     util::ext::AppExt,
 };
 use bevy::{
-    core_pipeline::core_2d::Camera2d,
+    camera::Camera2d,
     ecs::{system::Command, world::World},
+    image::ImagePlugin,
     log::LogPlugin,
     prelude::{App, AppExtStates, DefaultPlugins, PluginGroup},
-    render::texture::ImagePlugin,
     window::{Window, WindowPlugin, WindowResolution},
 };
 
@@ -51,8 +51,8 @@ fn main() {
                     title: APP_TITLE.to_string(),
                     mode: settings.display.mode(),
                     resolution: WindowResolution::new(
-                        f32::from(settings.display.window_w),
-                        f32::from(settings.display.window_h),
+                        settings.display.window_w,
+                        settings.display.window_h,
                     ),
                     present_mode: settings.display.present_mode(),
                     ..Default::default()

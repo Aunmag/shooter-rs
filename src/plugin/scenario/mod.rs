@@ -9,12 +9,11 @@ pub use self::{bench_projectiles::*, bench_zombies::*, test::*, test_bot_spread:
 use crate::{plugin::ActorDeathEvent, util::ext::AppExt, AppState};
 use bevy::{
     ecs::{
-        event::EventReader,
         resource::Resource,
         system::{Res, ResMut},
         world::{Mut, World},
     },
-    prelude::{App, Commands, Plugin},
+    prelude::{App, Commands, MessageReader, Plugin},
     time::Time,
 };
 use std::{any::Any, time::Duration};
@@ -77,7 +76,7 @@ fn on_enter(world: &mut World) {
 fn on_update(
     mut scenario: ResMut<Scenario>,
     mut commands: Commands,
-    mut death_events: EventReader<ActorDeathEvent>,
+    mut death_events: MessageReader<ActorDeathEvent>,
     time: Res<Time>,
 ) {
     let time = time.elapsed();

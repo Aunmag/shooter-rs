@@ -23,9 +23,8 @@ use bevy::{
     prelude::{
         AssetServer, Commands, IntoScheduleConfigs, Quat, Query, Vec2, Vec3, With, Without, World,
     },
-    render::view::InheritedVisibility,
-    sprite::Sprite,
-    text::{JustifyText, Text2d, TextColor, TextFont, TextLayout},
+    sprite::{Sprite, Text2d},
+    text::{Justify, TextColor, TextFont, TextLayout},
     time::Time,
     transform::components::Transform,
 };
@@ -199,7 +198,6 @@ fn spawn_bonus(world: &mut World, position: Vec2, weapon: &'static WeaponConfig)
     return world
         .spawn((
             Transform::from_xyz(position.x, position.y, LAYER_BONUS).with_scale(TRANSFORM_SCALE),
-            InheritedVisibility::VISIBLE,
             Bonus {
                 weapon,
                 expiration: time + LIFETIME,
@@ -240,7 +238,7 @@ fn spawn_label(world: &mut World, bonus: Entity, weapon: &WeaponConfig) {
             },
             TextColor(WHITE.into()),
             TextLayout {
-                justify: JustifyText::Center,
+                justify: Justify::Center,
                 ..Default::default()
             },
         ))

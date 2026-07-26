@@ -6,16 +6,15 @@ use crate::{
 };
 use bevy::{
     app::{App, Plugin},
+    camera::Projection,
     ecs::{
         component::Component,
-        event::EventReader,
         schedule::IntoScheduleConfigs,
         system::{Query, Res},
     },
     input::mouse::MouseWheel,
     math::{Quat, Vec2},
-    prelude::{Transform, With, Without},
-    render::camera::Projection,
+    prelude::{MessageReader, Transform, With, Without},
     time::Time,
     window::{PrimaryWindow, Window},
 };
@@ -75,7 +74,7 @@ pub fn on_update(
     mut cameras: Query<(&mut Transform, &mut Projection), With<MainCamera>>,
     mut targets: Query<(&Transform, &mut CameraTarget), Without<MainCamera>>,
     windows: Query<&Window, With<PrimaryWindow>>,
-    mut mouse_scroll: EventReader<MouseWheel>,
+    mut mouse_scroll: MessageReader<MouseWheel>,
     time: Res<Time>,
 ) {
     let delta = time.delta_secs();

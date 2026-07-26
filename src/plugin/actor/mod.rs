@@ -28,7 +28,7 @@ pub struct ActorPlugin;
 
 impl Plugin for ActorPlugin {
     fn build(&self, app: &mut App) {
-        app.add_event::<ActorDeathEvent>();
+        app.add_message::<ActorDeathEvent>();
         app.add_state_system(
             AppState::Game,
             on_update.after(crate::plugin::player::on_update),

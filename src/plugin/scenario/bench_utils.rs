@@ -1,8 +1,5 @@
 use anyhow::Result;
-use bevy::{
-    app::AppExit,
-    ecs::{system::Commands, world::World},
-};
+use bevy::{app::AppExit, ecs::system::Commands};
 use chrono::Local;
 use std::{fs::File, io::Write, path::Path, time::Duration};
 
@@ -102,9 +99,6 @@ impl Bench {
         }
 
         log::info!("Benchmark completed");
-
-        commands.queue(|w: &mut World| {
-            w.send_event(AppExit::Success);
-        });
+        commands.write_message(AppExit::Success);
     }
 }

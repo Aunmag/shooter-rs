@@ -8,13 +8,12 @@ use bevy::{
     app::{App, Plugin},
     asset::Asset,
     ecs::system::Command,
+    mesh::Mesh2d,
     prelude::{Assets, Handle, Image, Transform, Vec2, Vec3, World},
     reflect::TypePath,
-    render::{
-        mesh::Mesh2d,
-        render_resource::{AsBindGroup, ShaderRef},
-    },
-    sprite::{AlphaMode2d, Material2d, Material2dPlugin, MeshMaterial2d},
+    render::render_resource::AsBindGroup,
+    shader::ShaderRef,
+    sprite_render::{AlphaMode2d, Material2d, Material2dPlugin, MeshMaterial2d},
 };
 use rand::{thread_rng, Rng};
 

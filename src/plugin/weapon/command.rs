@@ -61,9 +61,9 @@ impl WeaponSet {
             .spawn((
                 Sprite {
                     image,
-                    anchor,
                     ..Default::default()
                 },
+                anchor,
                 Transform::from_xyz(0.0, 0.0, -0.1),
             ))
             .insert(ActorWeaponSprite)
@@ -79,7 +79,7 @@ impl WeaponSet {
 
         if let Some(image) = world.resource::<Assets<Image>>().get(image) {
             let offset = weapon.image_offset - arms_length * PIXELS_PER_METER;
-            return Anchor::Custom(Vec2::new(offset / image.size_x() as f32 - 0.5, 0.0));
+            return Anchor(Vec2::new(offset / image.size_x() as f32 - 0.5, 0.0));
         } else {
             log::warn!(
                 "Unable to set anchor for image {} since it hasn't loaded yet",

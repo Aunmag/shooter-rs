@@ -8,6 +8,7 @@ use crate::{
 use bevy::{
     app::{App, Plugin},
     asset::{Asset, Assets, Handle},
+    camera::{Camera, Projection},
     ecs::{
         entity::Entity,
         query::{With, Without},
@@ -17,14 +18,12 @@ use bevy::{
     },
     input::mouse::MouseMotion,
     math::{Vec2, Vec3},
-    prelude::{EventReader, Image, Transform},
+    mesh::Mesh2d,
+    prelude::{Image, MessageReader, Transform},
     reflect::TypePath,
-    render::{
-        camera::{Camera, Projection},
-        mesh::Mesh2d,
-        render_resource::{AsBindGroup, ShaderRef},
-    },
-    sprite::{AlphaMode2d, Material2d, Material2dPlugin, MeshMaterial2d},
+    render::render_resource::AsBindGroup,
+    shader::ShaderRef,
+    sprite_render::{AlphaMode2d, Material2d, Material2dPlugin, MeshMaterial2d},
     transform::components::GlobalTransform,
 };
 
@@ -85,7 +84,7 @@ fn on_update(
     mut crosshairs: Query<&mut Transform, (With<MeshMaterial2d<Crosshair>>, Without<Player>)>,
     cameras: Query<(&Camera, &GlobalTransform, &Projection), With<MainCamera>>,
     mut players: Query<(&mut Player, &mut Transform)>,
-    mut mouse_motion: EventReader<MouseMotion>,
+    mut mouse_motion: MessageReader<MouseMotion>,
 ) {
     let mut cursor_delta = Vec2::ZERO;
 

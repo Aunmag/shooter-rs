@@ -12,13 +12,12 @@ use bevy::{
         hierarchy::ChildOf,
         system::{Query, ResMut},
     },
+    mesh::Mesh2d,
     prelude::{Assets, Children, Entity, Handle, Image, Res, Transform, Vec3, World},
     reflect::TypePath,
-    render::{
-        mesh::Mesh2d,
-        render_resource::{AsBindGroup, ShaderRef},
-    },
-    sprite::{AlphaMode2d, Material2d, Material2dPlugin, MeshMaterial2d},
+    render::render_resource::AsBindGroup,
+    shader::ShaderRef,
+    sprite_render::{AlphaMode2d, Material2d, Material2dPlugin, MeshMaterial2d},
     time::Time,
 };
 use std::{f32::consts::TAU, time::Duration};
