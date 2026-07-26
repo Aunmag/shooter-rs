@@ -5,7 +5,15 @@ authors = ["Aunmag <aunmag@gmail.com>"]
 
 [dependencies]
 anyhow = "1.0"
-bevy = "0.19"
+bevy = { version = "0.19", default-features = false, features = [
+    "2d_bevy_render",
+    "audio",
+    "default_app",
+    "default_platform",
+    "ui_bevy_render",
+    # "debug", # only for dev builds
+    # "dynamic_linking", # only for dev builds
+] }
 chrono = "0.4"
 enumset = { version = "1.1", features = ["serde"] }
 log = "0.4"
