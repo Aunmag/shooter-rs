@@ -15,6 +15,7 @@ use bevy::{
     math::{Vec2, Vec3},
     prelude::{Time, Transform},
     sprite::Sprite,
+    time::DelayedCommandsExt,
 };
 use rand::RngExt;
 use std::{f32::consts::FRAC_PI_2, time::Duration};
@@ -98,10 +99,8 @@ fn on_destroy(entity: Entity, point: Vec2, commands: &mut Commands) {
     commands.queue(TileBlend::Entity(entity));
 
     commands.queue(move |world: &mut World| {
-        let mut time = world.resource::<Time>().elapsed();
         let mut rng = rand::rng();
-        let interval = AUDIO_INTERVAL.fuzz(&mut rng);
-        let audio = world.resource::<AudioTracker>();
+        let delay = AUDIO_INTERVAL.fuzz(&mut rng);
         let sound = AudioPlay {
             source: Some(point),
             volume: AUDIO_VOLUME.fuzz(&mut rng),
@@ -110,29 +109,33 @@ fn on_destroy(entity: Entity, point: Vec2, commands: &mut Commands) {
             ..AudioPlay::DEFAULT
         };
 
-        audio.queue(AudioPlay {
+        world.resource::<AudioTracker>().queue(AudioPlay {
             path: "sounds/shell_t0".into(),
             ..sound
         });
 
         if rng.random() {
-            time += interval;
-            audio.queue_delayed(
-                time,
-                AudioPlay {
-                    path: "sounds/shell_t1".into(),
-                    ..sound
-                },
-            );
+            let audio = AudioPlay {
+                path: "sounds/shell_t1".into(),
+                ..sound
+            };
+
+            world
+                .commands()
+                .delayed()
+                .duration(delay)
+                .queue(move |w: &mut World| w.resource::<AudioTracker>().queue(audio));
         }
 
-        time += interval.mul_f32(0.6);
-        audio.queue_delayed(
-            time,
-            AudioPlay {
-                path: "sounds/shell_t2".into(),
-                ..sound
-            },
-        );
+        let audio = AudioPlay {
+            path: "sounds/shell_t2".into(),
+            ..sound
+        };
+
+        world
+            .commands()
+            .delayed()
+            .duration(delay.mul_f32(0.6))
+            .queue(move |w: &mut World| w.resource::<AudioTracker>().queue(audio));
     });
 }

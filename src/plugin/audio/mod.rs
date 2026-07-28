@@ -31,7 +31,6 @@ impl Plugin for AudioPlugin {
         app.insert_resource(AudioStorage::default());
         app.insert_resource(AudioTracker {
             queue: Mutex::new(Vec::with_capacity(self.limit)),
-            queue_delayed: Mutex::new(Vec::new()),
             playing: 0,
             limit: self.limit,
             listener: Vec2::ZERO,
@@ -45,7 +44,6 @@ impl Plugin for AudioPlugin {
 #[derive(Resource)]
 pub struct AudioTracker {
     queue: Mutex<Vec<AudioPlay>>,
-    queue_delayed: Mutex<Vec<(AudioPlay, Duration)>>,
     limit: usize, // TODO: autoupdate from settings
     pub playing: usize,
     pub listener: Vec2,
@@ -93,24 +91,6 @@ impl AudioTracker {
         }
     }
 
-    pub fn queue_delayed(&self, time: Duration, audio: AudioPlay) {
-        if let Ok(mut queue) = self.queue_delayed.lock() {
-            queue.push((audio, time));
-        }
-    }
-
-    fn update_delayed(&self, now: Duration) {
-        let Ok(mut queue_delayed) = self.queue_delayed.lock() else {
-            return;
-        };
-
-        for i in (0..queue_delayed.len()).rev() {
-            if queue_delayed[i].1 <= now {
-                self.queue(queue_delayed.swap_remove(i).0);
-            }
-        }
-    }
-
     fn take_queue(&self) -> Vec<AudioPlay> {
         if let Ok(mut queue) = self.queue.lock() {
             if queue.is_empty() {
@@ -155,8 +135,6 @@ fn on_update(
             tracker.playing += 1;
         }
     }
-
-    tracker.update_delayed(now);
 
     for audio in &tracker.take_queue() {
         let Some(source) = storage.choose(audio.path.as_ref()) else {
