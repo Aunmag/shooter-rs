@@ -1,5 +1,4 @@
 pub mod bench;
-pub mod chunk;
 mod envelope;
 pub mod ext;
 pub mod geometry;
