@@ -6,8 +6,8 @@ use crate::{
     resource::HitResource,
     state::AppState,
     util::{
-        ext::{AppExt, Vec2Ext},
-        math, Transform2D,
+        ext::{AppExt, QuatExt, Vec2Ext},
+        math,
     },
 };
 use bevy::{
@@ -35,53 +35,37 @@ fn on_update(
     crate::util::bench::bench!();
     let time = time.elapsed();
 
-    for (attacker_entity, attacker_actor, attacker_transform) in attackers.iter() {
-        if !attacker_actor.actions.is_attacking() {
+    for (entity, actor, transform) in attackers.iter() {
+        if !actor.actions.is_attacking() {
             continue;
         }
 
-        if attacker_actor.melee_next > time {
+        if actor.melee_next > time {
             continue;
         }
 
-        let attacker_transform = Transform2D::from(attacker_transform);
-        let mut victim: Option<TargetData> = None;
+        let position = transform.translation.truncate();
+        let rotation = transform.rotation.angle_z();
 
-        for (target_entity, target_actor, target_transform) in targets.iter() {
-            if attacker_actor.config.kind == target_actor.config.kind {
-                continue;
-            }
+        if let Some(victim) = find_victim(actor.config, position, rotation, &targets) {
+            let momentum = actor.config.melee_damage * actor.skill;
 
-            if let Some(target_data) = calc_target_data(
-                attacker_actor.config,
-                &attacker_transform,
-                target_actor.config,
-                &Transform2D::from(target_transform),
-                target_entity,
-            ) {
-                if victim
-                    .as_ref()
-                    .is_none_or(|v| v.distance > target_data.distance)
-                {
-                    victim = Some(target_data);
-                }
-            }
-        }
-
-        if let Some(victim) = victim {
-            let momentum = attacker_actor.config.melee_damage * attacker_actor.skill;
-            let force = Vec2::from_length(momentum, victim.angle_objective);
-            hits.add(victim.entity, force, -victim.angle_subjective, false);
+            hits.add(
+                victim.entity,
+                Vec2::from_length(momentum, victim.angle_objective),
+                -victim.angle_subjective,
+                false,
+            );
 
             audio.queue(AudioPlay {
                 path: "sounds/melee".into(),
                 volume: 0.6,
-                source: Some(attacker_transform.position),
+                source: Some(position),
                 ..AudioPlay::DEFAULT
             });
 
             commands.queue(move |world: &mut World| {
-                if let Some(mut actor) = world.get_mut::<Actor>(attacker_entity) {
+                if let Some(mut actor) = world.get_mut::<Actor>(entity) {
                     actor.actions.remove(ActorAction::Attack);
                     actor.melee_next = time + actor.config.melee_interval.div_f32(actor.skill);
                 }
@@ -90,41 +74,56 @@ fn on_update(
     }
 }
 
-struct TargetData {
+fn find_victim(
+    own_config: &ActorConfig,
+    own_position: Vec2,
+    own_rotation: f32,
+    targets: &Query<(Entity, &Actor, &Transform)>,
+) -> Option<Victim> {
+    let mut victim = None;
+
+    // TODO: optimize by using spatial index
+    for (entity, actor, transform) in targets.iter() {
+        if own_config.kind == actor.config.kind {
+            continue;
+        }
+
+        let relative = transform.translation.truncate() - own_position;
+        let distance_to_hit = own_config.melee_distance + actor.config.radius; // TODO: add own body radius
+
+        if relative.is_long(distance_to_hit) {
+            continue;
+        }
+
+        let angle_objective = relative.to_angle();
+        let angle_subjective = math::angle_difference(angle_objective, own_rotation);
+        let distance_angular = angle_subjective.abs() / own_config.melee_distance_angular * 2.0;
+
+        if distance_angular > 1.0 {
+            continue;
+        }
+
+        let distance = relative.length() / distance_to_hit;
+
+        if victim
+            .as_ref()
+            .is_none_or(|v: &Victim| v.distance > distance)
+        {
+            victim = Some(Victim {
+                entity,
+                distance,
+                angle_objective,
+                angle_subjective,
+            });
+        }
+    }
+
+    return victim;
+}
+
+struct Victim {
     entity: Entity,
     distance: f32,
     angle_objective: f32,
     angle_subjective: f32,
-}
-
-fn calc_target_data(
-    attacker: &ActorConfig,
-    attacker_transform: &Transform2D,
-    target: &ActorConfig,
-    target_transform: &Transform2D,
-    target_entity: Entity,
-) -> Option<TargetData> {
-    let relative = target_transform.position - attacker_transform.position;
-    let distance_to_hit = attacker.melee_distance + target.radius;
-
-    if relative.is_long(distance_to_hit) {
-        return None;
-    }
-
-    let angle_objective = relative.to_angle();
-    let angle_subjective = math::angle_difference(angle_objective, attacker_transform.rotation);
-    let distance_angular = angle_subjective.abs() / (attacker.melee_distance_angular / 2.0);
-
-    if distance_angular > 1.0 {
-        return None;
-    }
-
-    let distance = relative.length() / distance_to_hit;
-
-    return Some(TargetData {
-        entity: target_entity,
-        distance: distance * distance_angular,
-        angle_objective,
-        angle_subjective,
-    });
 }
