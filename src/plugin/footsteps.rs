@@ -1,25 +1,47 @@
 use crate::{
     plugin::{AudioPlay, AudioTracker},
     state::AppState,
-    util::{ext::AppExt, math::interpolate},
+    util::{
+        ext::{AppExt, Fuzz},
+        math::interpolate,
+        SmartString, Timer,
+    },
 };
 use bevy::{
     app::{App, Plugin},
-    ecs::{component::Component, system::Query},
-    math::{Vec2, Vec3Swizzles},
+    ecs::{
+        component::Component,
+        schedule::IntoScheduleConfigs,
+        system::{Local, Query},
+    },
+    math::Vec2,
     prelude::{Res, Time, Transform},
 };
+use rand::RngExt;
 use std::time::Duration;
 
 const STRIDE_DISTANCE_MIN: f32 = 0.1;
 const STRIDE_RATE_MIN: (f32, f32, f32) = (0.1, 70.0, 0.04);
 const STRIDE_RATE_MAX: (f32, f32, f32) = (5.0, 135.0, 0.19);
 
+const SOUND: AudioPlay = AudioPlay {
+    path: SmartString::Ref("sounds/footstep"),
+    falloff: AudioPlay::FALLOFF_SHORTEST,
+    ..AudioPlay::DEFAULT
+};
+
+const BUFFER_DURATION: Duration = Duration::from_millis(10);
+
 pub struct FootstepsPlugin;
 
 impl Plugin for FootstepsPlugin {
     fn build(&self, app: &mut App) {
-        app.add_state_system(AppState::Game, on_update);
+        app.add_state_system(
+            AppState::Game,
+            on_update.run_if(|mut r: Local<Timer>, t: Res<Time>| {
+                return r.try_next_set(t.elapsed(), || BUFFER_DURATION);
+            }),
+        );
     }
 }
 
@@ -37,10 +59,26 @@ fn on_update(
 ) {
     crate::util::bench::bench!();
     let time = time.elapsed();
+    let mut combined_volume = 0.0;
 
     for (mut footsteps, transform) in query.iter_mut() {
-        let translation = transform.translation.xy();
-        let distance_squared = footsteps.position.distance_squared(translation);
+        let position = transform.translation.truncate();
+
+        if footsteps.time.is_zero() {
+            let offset_ms = rand::rng().random_range(0..500);
+            let offset = Duration::from_millis(offset_ms);
+            footsteps.time = time + offset;
+            footsteps.position = position;
+            continue;
+        }
+
+        let elapsed = time.saturating_sub(footsteps.time);
+
+        if elapsed.is_zero() {
+            continue;
+        }
+
+        let distance_squared = footsteps.position.distance_squared(position);
 
         if distance_squared.is_nan() || distance_squared < STRIDE_DISTANCE_MIN * STRIDE_DISTANCE_MIN
         {
@@ -48,23 +86,28 @@ fn on_update(
         }
 
         let distance = distance_squared.sqrt();
-        let velocity = distance / time.saturating_sub(footsteps.time).as_secs_f32();
+        let velocity = distance / elapsed.as_secs_f32();
         let intensity = calc_stride_intensity(velocity);
 
         if time < footsteps.time + calc_stride_interval(intensity) {
             continue;
         }
 
-        audio.queue(AudioPlay {
-            path: "sounds/footstep".into(),
-            volume: calc_stride_volume(intensity),
-            source: Some(translation),
-            falloff: AudioPlay::FALLOFF_SHORTEST,
-            ..AudioPlay::DEFAULT
-        });
-
         footsteps.time = time;
-        footsteps.position = translation;
+        footsteps.position = position;
+
+        let volume_abstract = calc_stride_volume(intensity);
+        let volume_spatial = SOUND.calc_spatial_volume(volume_abstract, position, audio.listener);
+
+        combined_volume += volume_spatial * volume_spatial;
+    }
+
+    if combined_volume > AudioPlay::VOLUME_MIN * AudioPlay::VOLUME_MIN {
+        audio.queue(AudioPlay {
+            volume: f32::min(combined_volume.sqrt(), 1.0),
+            speed: 1.0.fuzz_with(&mut rand::rng(), 0.1),
+            ..SOUND
+        });
     }
 }
 

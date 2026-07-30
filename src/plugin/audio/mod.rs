@@ -14,8 +14,6 @@ use bevy::{
 };
 use std::{sync::Mutex, time::Duration};
 
-const VOLUME_MIN: f32 = 0.01;
-
 pub struct AudioPlugin {
     limit: usize,
 }
@@ -53,11 +51,12 @@ impl AudioTracker {
     // TODO: ability to queue with command?
     pub fn queue(&self, mut audio: AudioPlay) {
         crate::util::bench::bench!();
+
         if let Some(source) = audio.source {
-            audio.volume = self.calc_spatial_volume(source, audio.volume, audio.falloff);
+            audio.volume = audio.calc_spatial_volume(audio.volume, source, self.listener);
         }
 
-        if audio.volume < VOLUME_MIN {
+        if audio.volume < AudioPlay::VOLUME_MIN {
             return;
         }
 
@@ -102,10 +101,6 @@ impl AudioTracker {
         } else {
             return Vec::new();
         }
-    }
-
-    pub fn calc_spatial_volume(&self, source: Vec2, volume: f32, falloff: f32) -> f32 {
-        return volume * (-source.distance(self.listener) * falloff).exp();
     }
 }
 

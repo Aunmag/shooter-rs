@@ -14,6 +14,8 @@ pub struct AudioPlay {
 }
 
 impl AudioPlay {
+    pub const VOLUME_MIN: f32 = 0.01;
+
     pub const DURATION_ONCE: Duration = Duration::ZERO;
     pub const DURATION_FOREVER: Duration = Duration::MAX;
 
@@ -23,7 +25,7 @@ impl AudioPlay {
     pub const FALLOFF_LONGER: f32 = f32::midpoint(Self::FALLOFF_MEDIUM, Self::FALLOFF_LONGEST);
     pub const FALLOFF_LONGEST: f32 = 0.045;
 
-    const CLOSE_DISTANCE: f32 = 0.5;
+    pub const CLOSE_DISTANCE: f32 = 0.5;
 
     pub const DEFAULT: Self = Self {
         path: SmartString::Ref("sound/default"),
@@ -33,6 +35,10 @@ impl AudioPlay {
         source: None,
         duration: Self::DURATION_ONCE,
     };
+
+    pub fn calc_spatial_volume(&self, volume: f32, source: Vec2, listener: Vec2) -> f32 {
+        return volume * (-source.distance(listener) * self.falloff).exp();
+    }
 
     pub fn settings(&self) -> PlaybackSettings {
         let settings = if self.is_looped() {
