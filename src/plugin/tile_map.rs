@@ -205,6 +205,8 @@ impl Command for TileBlend {
     type Out = ();
 
     fn apply(self, world: &mut World) {
+        crate::util::bench::bench!();
+
         if let Some(position) = self.provide_position(world) {
             let entity = self.provide_entity(world);
             let index = Index::from(position);

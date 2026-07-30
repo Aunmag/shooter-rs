@@ -59,6 +59,7 @@ fn on_update_inner(
     mut bots: Query<(Entity, &mut Bot, &Transform)>,
     actors: Query<&Transform, With<Actor>>,
 ) {
+    crate::util::bench::bench!();
     let mut directions_by_target = HashMap::new();
 
     for (attacker, attacker_bot, attacker_transform) in bots.iter() {
@@ -79,6 +80,7 @@ fn on_update_inner(
             .add(attacker, attacker_angle);
     }
 
+    // crate::util::bench::bench!();
     for (_target, directions) in directions_by_target.iter_mut() {
         directions.normalize();
 

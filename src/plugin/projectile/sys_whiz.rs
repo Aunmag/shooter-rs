@@ -19,6 +19,7 @@ pub fn on_update(
     audio: Res<AudioTracker>,
     time: Res<Time>,
 ) {
+    crate::util::bench::bench!();
     let t0 = time.elapsed();
     let t1 = t0.saturating_sub(time.delta());
 

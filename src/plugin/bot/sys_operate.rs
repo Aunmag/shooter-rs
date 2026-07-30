@@ -38,6 +38,7 @@ pub fn on_update(
     actors: Query<(&Transform, &Kinetics), With<Actor>>,
     time: Res<Time>,
 ) {
+    crate::util::bench::bench!();
     let time = time.elapsed();
 
     for (mut bot, mut actor, transform, kinetics, weapon) in bots.iter_mut() {

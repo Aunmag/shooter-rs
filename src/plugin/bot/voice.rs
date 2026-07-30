@@ -32,6 +32,7 @@ fn on_update(
     audio: Res<AudioTracker>,
     time: Res<Time>,
 ) {
+    crate::util::bench::bench!();
     let time = time.elapsed();
 
     for (mut voice, actor, transform) in bots.iter_mut() {

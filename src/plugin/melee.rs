@@ -32,6 +32,7 @@ fn on_update(
     mut commands: Commands,
     time: Res<Time>,
 ) {
+    crate::util::bench::bench!();
     let time = time.elapsed();
 
     for (attacker_entity, attacker_actor, attacker_transform) in attackers.iter() {

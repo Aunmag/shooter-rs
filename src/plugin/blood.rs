@@ -70,6 +70,7 @@ impl Command for BloodSpawn {
     type Out = ();
 
     fn apply(self, world: &mut World) {
+        crate::util::bench::bench!();
         let assets = world.resource::<AssetStorage>();
         let image = assets.dummy_image().clone();
         let mesh = assets.dummy_mesh().clone();

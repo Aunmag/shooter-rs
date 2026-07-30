@@ -79,6 +79,7 @@ fn on_update(
     mut death_events: MessageReader<ActorDeathEvent>,
     time: Res<Time>,
 ) {
+    crate::util::bench::bench!();
     let time = time.elapsed();
 
     if !death_events.is_empty() {

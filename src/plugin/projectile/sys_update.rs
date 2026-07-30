@@ -27,6 +27,7 @@ pub fn on_update(
     audio: Res<AudioTracker>,
     time: Res<Time>,
 ) {
+    crate::util::bench::bench!();
     // Abbreviations used:
     // j - projectile
     // s - projectile state

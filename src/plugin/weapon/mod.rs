@@ -48,6 +48,7 @@ fn on_update(
     audio: Res<AudioTracker>,
     time: Res<Time>,
 ) {
+    crate::util::bench::bench!();
     let now = time.elapsed();
 
     for (entity, actor, transform, mut weapon) in query.iter_mut() {

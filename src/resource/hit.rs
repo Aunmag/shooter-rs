@@ -37,6 +37,8 @@ impl HitResource {
 
 impl SystemBuffer for HitResource {
     fn apply(&mut self, _: &SystemMeta, world: &mut World) {
+        crate::util::bench::bench!();
+
         if self.hits.is_empty() {
             return;
         }

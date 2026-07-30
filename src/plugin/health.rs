@@ -108,6 +108,7 @@ fn on_update(
     settings: Res<Settings>,
     audio: Res<AudioTracker>,
 ) {
+    crate::util::bench::bench!();
     if settings.game.scenario == ScenarioSettings::BenchProjectiles {
         return;
     }

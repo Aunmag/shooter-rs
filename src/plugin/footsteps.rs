@@ -35,6 +35,7 @@ fn on_update(
     audio: Res<AudioTracker>,
     time: Res<Time>,
 ) {
+    crate::util::bench::bench!();
     let time = time.elapsed();
 
     for (mut footsteps, transform) in query.iter_mut() {

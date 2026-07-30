@@ -52,6 +52,7 @@ pub struct AudioTracker {
 impl AudioTracker {
     // TODO: ability to queue with command?
     pub fn queue(&self, mut audio: AudioPlay) {
+        crate::util::bench::bench!();
         if let Some(source) = audio.source {
             audio.volume = self.calc_spatial_volume(source, audio.volume, audio.falloff);
         }
@@ -119,6 +120,7 @@ fn on_update(
     listeners: Query<&Transform, With<CameraTarget>>,
     time: Res<Time>,
 ) {
+    crate::util::bench::bench!();
     let now = time.elapsed();
 
     if let Some(listener) = listeners.iter().next() {

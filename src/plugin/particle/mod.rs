@@ -64,6 +64,7 @@ fn on_update(
     mut commands: Commands,
     time: Res<Time>,
 ) {
+    crate::util::bench::bench!();
     let now = time.elapsed();
 
     for (entity, particle, mut transform) in query.iter_mut() {

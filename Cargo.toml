@@ -27,6 +27,10 @@ toml = "1.1"
 [dev-dependencies]
 criterion = { version = "0.8", features = ["html_reports"] }
 
+[features]
+# default = ["bench"] # NOTE: for dev builds only
+bench = []
+
 # Enable more optimizations for dependencies in debug mode but not the project code itself
 # See: https://bevyengine.org/learn/quick-start/getting-started/setup/#compile-with-performance-optimizations
 [profile.dev]
