@@ -11,7 +11,7 @@ use crate::{
 use bevy::{
     app::{App, Plugin},
     asset::{Asset, Assets, Handle},
-    color::palettes::css::WHITE,
+    color::{palettes::css::WHITE, Alpha},
     ecs::{
         component::Component,
         entity::Entity,
@@ -92,7 +92,7 @@ impl Command for Explode {
 
         TileBlend::Image {
             image: "terrain/crater.png",
-            color: WHITE.into(),
+            color: WHITE.with_alpha(0.8).into(),
             position: self.position.extend(LAYER_GROUND),
             direction: rng.random_range(0.0..TAU),
             size: self.config.radius.fuzz_with(&mut rng, 0.2),
