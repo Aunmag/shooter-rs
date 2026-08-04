@@ -10,7 +10,8 @@ use crate::{
 };
 use bevy::{
     app::{App, Plugin},
-    asset::{Asset, AssetServer, Assets, Handle},
+    asset::{Asset, Assets, Handle},
+    color::palettes::css::WHITE,
     ecs::{
         component::Component,
         entity::Entity,
@@ -87,22 +88,17 @@ impl Command for Explode {
             ..AudioPlay::DEFAULT
         });
 
-        let image_path = "terrain/crater.png";
-        if let Some(image) = world.resource::<AssetServer>().get_handle(image_path) {
-            let mut rng = rand::rng();
-            let direction = rng.random_range(0.0..TAU);
-            let diameter = (self.config.radius * 2.0 / 6.0).fuzz_with(&mut rng, 0.2); // 6 times smaller that the explosion wave
+        let mut rng = rand::rng();
 
-            TileBlend::image(
-                image,
-                self.position.extend(LAYER_GROUND),
-                direction,
-                Some(diameter),
-            )
-            .apply(world);
-        } else {
-            log::warn!("Image {} not found", image_path);
+        TileBlend::Image {
+            image: "terrain/crater.png",
+            color: WHITE.into(),
+            position: self.position.extend(LAYER_GROUND),
+            direction: rng.random_range(0.0..TAU),
+            size: self.config.radius.fuzz_with(&mut rng, 0.2),
+            flip: rng.random(),
         }
+        .apply(world);
     }
 }
 

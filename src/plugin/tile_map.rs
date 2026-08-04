@@ -8,7 +8,9 @@ use crate::{
 };
 use bevy::{
     app::{App, Plugin},
+    asset::AssetServer,
     camera::{visibility::RenderLayers, Camera, Camera2d, CameraOutputMode, RenderTarget},
+    color::Color,
     ecs::{
         entity::Entity,
         schedule::IntoScheduleConfigs,
@@ -138,23 +140,16 @@ fn on_update(mut tile_map: ResMut<TileMap>, mut commands: Commands) {
 pub enum TileBlend {
     Entity(Entity),
     Image {
-        image: Handle<Image>,
+        image: &'static str,
+        color: Color,
         position: Vec3,
         direction: f32,
-        scale: Option<f32>,
+        size: f32,
+        flip: bool,
     },
 }
 
 impl TileBlend {
-    pub fn image(image: Handle<Image>, position: Vec3, direction: f32, scale: Option<f32>) -> Self {
-        return Self::Image {
-            image,
-            position,
-            direction,
-            scale,
-        };
-    }
-
     fn provide_position(&self, world: &World) -> Option<Vec3> {
         match self {
             Self::Entity(entity) => {
@@ -166,36 +161,50 @@ impl TileBlend {
         }
     }
 
-    fn provide_entity(self, world: &mut World) -> Entity {
+    fn provide_entity(self, world: &mut World) -> Option<Entity> {
         match self {
             Self::Entity(entity) => {
-                return entity;
+                return Some(entity);
             }
             Self::Image {
+                image,
+                color,
                 position,
                 direction,
-                image,
-                scale,
+                size,
+                flip,
             } => {
-                let mut scale_ = TRANSFORM_SCALE;
+                let Some(handle) = world.resource::<AssetServer>().get_handle(image) else {
+                    log::warn!("Image {} not found", image);
+                    return None;
+                };
 
-                if let Some(scale) = scale {
-                    scale_ *= scale;
+                let scale;
+
+                if let Some(asset) = world.resource::<Assets<Image>>().get(&handle) {
+                    scale = Vec3::splat(size / u32::max(asset.width(), asset.height()) as f32);
+                } else {
+                    log::warn!("Image {} not loaded", image);
+                    return None;
                 }
 
-                return world
+                let entity = world
                     .spawn((
                         Transform {
                             translation: position,
                             rotation: Quat::from_rotation_z(direction),
-                            scale: scale_,
+                            scale,
                         },
                         Sprite {
-                            image,
+                            image: handle,
+                            color,
+                            flip_x: flip,
                             ..Default::default()
                         },
                     ))
                     .id();
+
+                return Some(entity);
             }
         }
     }
@@ -208,7 +217,10 @@ impl Command for TileBlend {
         crate::util::bench::bench!();
 
         if let Some(position) = self.provide_position(world) {
-            let entity = self.provide_entity(world);
+            let Some(entity) = self.provide_entity(world) else {
+                return;
+            };
+
             let index = Index::from(position);
             world.entity_mut(entity).insert(index.render_layers());
 

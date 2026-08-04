@@ -2,10 +2,10 @@ use crate::{
     data::{LAYER_GROUND, LAYER_TREE, WORLD_SIZE, WORLD_SIZE_HALF, WORLD_SIZE_VISUAL},
     map::Map,
     plugin::{AudioPlay, AudioTracker, TerrainSpawn, TileBlend},
-    util::ext::Vec2Ext,
+    util::ext::{RngExt2, Vec2Ext},
 };
 use bevy::{
-    asset::AssetServer,
+    color::{Color, Srgba},
     ecs::{system::Command, world::World},
     math::{Vec2, Vec3},
 };
@@ -13,8 +13,7 @@ use rand::{seq::IndexedRandom, RngExt, SeedableRng};
 use rand_pcg::Pcg32;
 use std::f32::consts::{FRAC_PI_2, PI, TAU};
 
-const TREES_PER_METER: f32 = 0.02;
-const TREES_QUANTITY: f32 = WORLD_SIZE_VISUAL * WORLD_SIZE_VISUAL * TREES_PER_METER;
+const TREES_DENSITY: f32 = 0.025;
 const TREE_BUFFER_ZONE: f32 = 3.2;
 const TREE_FIND_POSITION_ATTEMPTS: usize = 32;
 const BLUFF_SPRITE_SIZE: f32 = 4.0;
@@ -35,37 +34,52 @@ impl Map for ForestMap {
 
 fn spawn_bluffs(world: &mut World) {
     let n = WORLD_SIZE_HALF;
-    let z = LAYER_GROUND;
     let r1 = PI;
     let r2 = 0.0;
     let r3 = FRAC_PI_2;
     let r4 = FRAC_PI_2 + PI;
 
     let range = (WORLD_SIZE / BLUFF_SPRITE_SIZE).abs().round() as u32;
-    let image = "terrain/bluff.png";
+    let blend = |w: &mut World, i: &'static str, x: f32, y: f32, r: f32| {
+        TileBlend::Image {
+            image: i,
+            color: Color::default(),
+            position: Vec3::new(x, y, LAYER_GROUND),
+            direction: r,
+            size: BLUFF_SPRITE_SIZE,
+            flip: false,
+        }
+        .apply(w);
+    };
 
+    let mut image = "terrain/bluff.png";
     for i in 1..range {
         let j = BLUFF_SPRITE_SIZE * i as f32 - WORLD_SIZE_HALF;
-        blend_sprite(world, Vec3::new(j, -n, z), r1, image);
-        blend_sprite(world, Vec3::new(j, n, z), r2, image);
-        blend_sprite(world, Vec3::new(-n, j, z), r3, image);
-        blend_sprite(world, Vec3::new(n, j, z), r4, image);
+        blend(world, image, j, -n, r1);
+        blend(world, image, j, n, r2);
+        blend(world, image, -n, j, r3);
+        blend(world, image, n, j, r4);
     }
 
-    let image_corner = "terrain/bluff_corner.png";
-    blend_sprite(world, Vec3::new(-n, -n, z), r1, image_corner);
-    blend_sprite(world, Vec3::new(n, n, z), r2, image_corner);
-    blend_sprite(world, Vec3::new(-n, n, z), r3, image_corner);
-    blend_sprite(world, Vec3::new(n, -n, z), r4, image_corner);
+    image = "terrain/bluff_corner.png";
+    blend(world, image, -n, -n, r1);
+    blend(world, image, n, n, r2);
+    blend(world, image, -n, n, r3);
+    blend(world, image, n, -n, r4);
 }
 
 fn spawn_trees(world: &mut World) {
-    let mut rng = Pcg32::seed_from_u64(100);
-    let trees = f32::max(0.0, TREES_QUANTITY) as usize;
-    let image = [
-        "terrain/tree_0.png",
-        "terrain/tree_1.png",
-        "terrain/tree_2.png",
+    let mut rng = Pcg32::seed_from_u64(250);
+
+    let trees = usize::max(
+        0,
+        (WORLD_SIZE_VISUAL * WORLD_SIZE_VISUAL * TREES_DENSITY) as usize,
+    );
+
+    let images = [
+        (1.0, "terrain/tree_1.png", 3.0, 4.0),
+        (1.0, "terrain/tree_2.png", 3.0, 4.0),
+        (0.5, "terrain/tree_spruce.png", 1.5, 2.5),
     ];
 
     let range = WORLD_SIZE_VISUAL / 2.0;
@@ -79,14 +93,27 @@ fn spawn_trees(world: &mut World) {
             );
 
             if is_position_free(position, &occupied_positions) {
-                let texture = image.choose(&mut rng).unwrap_or(&image[0]);
+                let (_weight, image, size_min, size_max) = images
+                    .choose_weighted(&mut rng, |i| i.0)
+                    .unwrap_or(&images[0]);
 
-                blend_sprite(
-                    world,
-                    position.extend(LAYER_TREE),
-                    rng.random_range(0.0..TAU),
-                    texture,
+                let color_fuzz = 0.06;
+                let color = Srgba::new(
+                    1.0 - rng.random_range(0.0..color_fuzz),
+                    1.0 - rng.random_range(0.0..color_fuzz),
+                    1.0 - rng.random_range(0.0..color_fuzz),
+                    0.95,
                 );
+
+                TileBlend::Image {
+                    image,
+                    color: color.into(),
+                    position: position.extend(LAYER_TREE),
+                    direction: rng.random_range(0.0..TAU),
+                    size: rng.gen_range_safely(*size_min, *size_max),
+                    flip: rng.random(),
+                }
+                .apply(world);
 
                 occupied_positions.push(position);
                 break;
@@ -95,15 +122,6 @@ fn spawn_trees(world: &mut World) {
     }
 
     log::debug!("Spawned trees: {}", occupied_positions.len());
-}
-
-fn blend_sprite(world: &mut World, position: Vec3, direction: f32, path: &'static str) {
-    let Some(image) = world.resource::<AssetServer>().get_handle(path) else {
-        log::warn!("Image {} not found", path);
-        return;
-    };
-
-    TileBlend::image(image, position, direction, None).apply(world);
 }
 
 fn play_audio(world: &mut World) {
