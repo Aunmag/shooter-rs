@@ -25,10 +25,6 @@ impl Command for ProjectileSpawn {
     type Out = ();
 
     fn apply(self, world: &mut World) {
-        let assets = world.resource::<AssetStorage>();
-        let image = assets.dummy_image().clone();
-        let mesh = assets.dummy_mesh().clone();
-
         let projectile = Projectile::new(
             self.config,
             world.resource::<Time>().elapsed(),
@@ -38,9 +34,11 @@ impl Command for ProjectileSpawn {
             self.shooter,
         );
 
+        let mesh = world.resource::<AssetStorage>().dummy_mesh().clone();
+
         let material = world
             .resource_mut::<Assets<ProjectileMaterial>>()
-            .add(ProjectileMaterial { image });
+            .add(ProjectileMaterial {});
 
         world
             .spawn((

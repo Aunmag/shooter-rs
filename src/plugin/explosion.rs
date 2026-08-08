@@ -10,14 +10,13 @@ use crate::{
 };
 use bevy::{
     app::{App, Plugin},
-    asset::{Asset, Assets, Handle},
+    asset::{Asset, Assets},
     color::{palettes::css::WHITE, Alpha},
     ecs::{
         component::Component,
         entity::Entity,
         system::{Command, Deferred, Res, ResMut},
     },
-    image::Image,
     math::Vec3Swizzles,
     mesh::Mesh2d,
     prelude::{Commands, IntoScheduleConfigs, Query, Vec2, Vec3, Without, World},
@@ -61,12 +60,10 @@ impl Command for Explode {
             shooter: self.shooter,
         };
 
-        let assets = world.resource::<AssetStorage>();
-        let image = assets.dummy_image().clone();
-        let mesh = assets.dummy_mesh().clone();
+        let mesh = world.resource::<AssetStorage>().dummy_mesh().clone();
         let material = world
             .resource_mut::<Assets<ExplosionMaterial>>()
-            .add(ExplosionMaterial { alpha: 1.0, image });
+            .add(ExplosionMaterial { alpha: 1.0 });
 
         world
             .spawn((
@@ -114,9 +111,6 @@ struct Explosion {
 struct ExplosionMaterial {
     #[uniform(0)]
     alpha: f32,
-    #[texture(1)]
-    #[sampler(2)]
-    image: Handle<Image>,
 }
 
 impl Material2d for ExplosionMaterial {

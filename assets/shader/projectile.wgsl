@@ -1,15 +1,11 @@
 #import bevy_sprite::mesh2d_vertex_output::VertexOutput
 
-@group(2) @binding(0)
-var texture: texture_2d<f32>;
-
-@group(2) @binding(1)
-var oputput: sampler;
+const COLOR = vec4<f32>(1.0, 1.0, 0.1, 1.0);
 
 @fragment
 fn fragment(in: VertexOutput) -> @location(0) vec4<f32> {
-    var y = 0.01 / abs(0.5 - in.uv.y);
-    var x0 = saturate((1.0 - in.uv.x) * 100.0);
-    var x1 = in.uv.x;
-    return vec4<f32>(1.0, 1.0, 0.1, y * x0 * x1);
+    let y = 0.01 / abs(0.5 - in.uv.y);
+    let x0 = saturate((1.0 - in.uv.x) * 100.0);
+    let x1 = in.uv.x;
+    return vec4<f32>(COLOR.rgb, COLOR.a * y * x0 * x1);
 }

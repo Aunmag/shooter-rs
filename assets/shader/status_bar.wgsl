@@ -18,25 +18,10 @@ struct Material {
 @group(2) @binding(0)
 var<uniform> material: Material;
 
-@group(2) @binding(1)
-var texture: texture_2d<f32>;
-
-@group(2) @binding(2)
-var oputput: sampler;
-
 fn rotate(v: vec2<f32>, center: vec2<f32>, r: f32) -> vec2<f32> {
-    var s = sin(r);
-    var c = cos(r);
+    let s = sin(r);
+    let c = cos(r);
     return (v - center) * mat2x2(c, -s, s, c) + center;
-}
-
-fn ddxy(v: f32, c: f32) -> f32 {
-    // TODO: make it more smooth
-    if v < c {
-        return 0.0;
-    }
-
-    return 1.0;
 }
 
 fn mix_alpha(color: vec4<f32>, a: f32) -> vec4<f32> {
@@ -48,22 +33,22 @@ fn ring(center: vec2<f32>, value: f32, radius: f32, thickness: f32) -> f32 {
     var c = length(center);
     c -= (radius / 2.0 - thickness);
     c = abs(c);
-    c = ddxy(c, thickness);
+    c = step(thickness, c);
     c = 1.0 - c;
 
     // trim
-    var r = rotate(center, vec2<f32>(0.0, 0.0), -PI * (value + 1.5));
+    let r = rotate(center, vec2<f32>(0.0, 0.0), -PI * (value + 1.5));
     var t = atan2(r.x, r.y);
     t += PI;
     t = value * PI * 2.0 - t;
-    t = ddxy(t, 0.0);
+    t = step(0.0, t);
     t = 1.0 - t;
 
     return clamp(c - t, 0.0, 1.0);
 }
 
 fn bar(value: f32, center: vec2<f32>, color: vec4<f32>, radius: f32, thickness: f32) -> vec4<f32> {
-    var fill = ring(center, value * RANGE, radius, thickness);
+    let fill = ring(center, value * RANGE, radius, thickness);
 
     if fill > 0.1 {
         return mix_alpha(color, fill);
@@ -74,9 +59,9 @@ fn bar(value: f32, center: vec2<f32>, color: vec4<f32>, radius: f32, thickness: 
 
 @fragment
 fn fragment(in: VertexOutput) -> @location(0) vec4<f32> {
-    var center  = in.uv.xy - 0.5;
-    var stamina = bar(material.stamina, center, mix_alpha(COLOR_STAMINA, 1.0                 ), 0.62, 0.01);
-    var health  = bar(material.health , center, mix_alpha(COLOR_HEALTH , material.health_alpha), 0.91, 0.06);
-    var ammo    = bar(material.ammo   , center, mix_alpha(COLOR_AMMO   , material.ammo_alpha  ), 1.00, 0.01);
+    let center  = in.uv.xy - 0.5;
+    let stamina = bar(material.stamina, center, mix_alpha(COLOR_STAMINA, 1.0                  ), 0.62, 0.01);
+    let health  = bar(material.health , center, mix_alpha(COLOR_HEALTH , material.health_alpha), 0.91, 0.06);
+    let ammo    = bar(material.ammo   , center, mix_alpha(COLOR_AMMO   , material.ammo_alpha  ), 1.00, 0.01);
     return vec4<f32>(stamina + health + ammo);
 }

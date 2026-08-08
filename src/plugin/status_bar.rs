@@ -13,7 +13,7 @@ use bevy::{
         system::{Query, ResMut},
     },
     mesh::Mesh2d,
-    prelude::{Assets, Children, Entity, Handle, Image, Res, Transform, Vec3, World},
+    prelude::{Assets, Children, Entity, Res, Transform, Vec3, World},
     reflect::TypePath,
     render::render_resource::AsBindGroup,
     shader::ShaderRef,
@@ -46,23 +46,17 @@ pub struct StatusBar {
     ammo_alpha: f32,
     #[uniform(0)]
     stamina: f32,
-    #[texture(1)]
-    #[sampler(2)]
-    image: Handle<Image>,
 }
 
 impl StatusBar {
     pub fn spawn(world: &mut World, parent: Entity) {
-        let assets = world.resource::<AssetStorage>();
-        let image = assets.dummy_image().clone();
-        let mesh = assets.dummy_mesh().clone();
+        let mesh = world.resource::<AssetStorage>().dummy_mesh().clone();
         let material = world.resource_mut::<Assets<StatusBar>>().add(StatusBar {
             health: 0.0,
             health_alpha: 0.0,
             ammo: 1.0,
             ammo_alpha: 0.0,
             stamina: 0.0,
-            image,
         });
 
         let transform = Transform::default().with_scale(Vec3::splat(PIXELS_PER_METER * 1.2));

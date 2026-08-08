@@ -9,7 +9,7 @@ use bevy::{
     asset::Asset,
     ecs::system::Command,
     mesh::Mesh2d,
-    prelude::{Assets, Handle, Image, Transform, Vec2, Vec3, World},
+    prelude::{Assets, Transform, Vec2, Vec3, World},
     reflect::TypePath,
     render::render_resource::AsBindGroup,
     shader::ShaderRef,
@@ -34,9 +34,6 @@ pub struct Blood {
     seed: f32,
     #[uniform(0)]
     size: f32,
-    #[texture(1)]
-    #[sampler(2)]
-    image: Handle<Image>,
 }
 
 impl Material2d for Blood {
@@ -71,14 +68,11 @@ impl Command for BloodSpawn {
 
     fn apply(self, world: &mut World) {
         crate::util::bench::bench!();
-        let assets = world.resource::<AssetStorage>();
-        let image = assets.dummy_image().clone();
-        let mesh = assets.dummy_mesh().clone();
+        let mesh = world.resource::<AssetStorage>().dummy_mesh().clone();
 
         let material = world.resource_mut::<Assets<Blood>>().add(Blood {
             seed: rand::rng().random_range(0.0..500.0),
             size: self.size * PIXELS_PER_METER,
-            image,
         });
 
         let entity = world
