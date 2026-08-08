@@ -6,7 +6,7 @@ mod event;
 
 pub use self::{action::*, command::*, component::*, config::*, event::*};
 use crate::{
-    plugin::{debug::debug_line, kinetics::Kinetics},
+    plugin::{debug::debug_line, kinetics::Kinetics, player::PlayerSystems},
     state::AppState,
     util::{
         ext::{AppExt, QuatExt, Vec2Ext},
@@ -29,10 +29,7 @@ pub struct ActorPlugin;
 impl Plugin for ActorPlugin {
     fn build(&self, app: &mut App) {
         app.add_message::<ActorDeathEvent>();
-        app.add_state_system(
-            AppState::Game,
-            on_update.after(crate::plugin::player::on_update),
-        );
+        app.add_state_system(AppState::Game, on_update.after(PlayerSystems));
     }
 }
 

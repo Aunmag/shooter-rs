@@ -5,6 +5,7 @@ pub enum ActorAction {
     Sprint,
     Attack,
     Reload,
+    AimToggle,
 }
 
 pub type ActorActions = EnumSet<ActorAction>;

@@ -13,6 +13,7 @@ pub struct Actor {
     pub movement: Vec2,
     pub actions: ActorActions,
     pub look_at: Option<f32>,
+    pub aim_distance: f32,
     pub melee_next: Duration,
 }
 
@@ -28,6 +29,7 @@ impl Actor {
             movement: Vec2::ZERO,
             actions: ActorActions::empty(),
             look_at: None,
+            aim_distance: 1.0,
             melee_next: Duration::ZERO,
         };
     }

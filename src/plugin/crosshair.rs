@@ -1,30 +1,29 @@
 use crate::{
     data::{LAYER_CROSSHAIR, PIXELS_PER_METER},
-    plugin::{camera::MainCamera, player::Player},
+    plugin::{camera::MainCamera, Actor},
     resource::AssetStorage,
     state::AppState,
-    util::ext::{AppExt, QuatExt, Vec2Ext},
+    util::ext::{AppExt, Vec2Ext},
 };
 use bevy::{
     app::{App, Plugin},
-    asset::{Asset, Assets, Handle},
-    camera::{Camera, Projection},
+    asset::{Asset, Assets},
+    camera::Projection,
     ecs::{
+        component::Component,
         entity::Entity,
         query::{With, Without},
         schedule::IntoScheduleConfigs,
-        system::Query,
+        system::{Commands, Query},
         world::World,
     },
-    input::mouse::MouseMotion,
     math::{Vec2, Vec3},
     mesh::Mesh2d,
-    prelude::{Image, MessageReader, Transform},
+    prelude::Transform,
     reflect::TypePath,
     render::render_resource::AsBindGroup,
     shader::ShaderRef,
     sprite_render::{AlphaMode2d, Material2d, Material2dPlugin, MeshMaterial2d},
-    transform::components::GlobalTransform,
 };
 
 const SIZE: f32 = PIXELS_PER_METER * 1.2;
@@ -33,7 +32,7 @@ pub struct CrosshairPlugin;
 
 impl Plugin for CrosshairPlugin {
     fn build(&self, app: &mut App) {
-        app.add_plugins(Material2dPlugin::<Crosshair>::default());
+        app.add_plugins(Material2dPlugin::<CrosshairMaterial>::default());
         app.add_state_system(
             AppState::Game,
             on_update.after(crate::plugin::camera_target::on_update),
@@ -41,36 +40,49 @@ impl Plugin for CrosshairPlugin {
     }
 }
 
-#[derive(Debug, Clone, Asset, TypePath, AsBindGroup)]
+#[derive(Component)]
 pub struct Crosshair {
-    #[texture(1)]
-    #[sampler(2)]
-    image: Handle<Image>,
+    attached_to: Entity,
 }
 
 impl Crosshair {
-    pub fn spawn(world: &mut World) -> Entity {
-        let assets = world.resource::<AssetStorage>();
-        let image = assets.dummy_image().clone();
-        let mesh = assets.dummy_mesh().clone();
-        let material = world
-            .resource_mut::<Assets<Crosshair>>()
-            .add(Crosshair { image });
+    pub fn spawn(world: &mut World, attached_to: Entity) {
+        let mesh = world.resource::<AssetStorage>().dummy_mesh().clone();
 
-        return world
-            .spawn((
-                Transform {
-                    translation: Vec3::new(0.0, 0.0, LAYER_CROSSHAIR),
-                    ..Transform::default()
-                },
-                Mesh2d(mesh),
-                MeshMaterial2d(material),
-            ))
-            .id();
+        let material = world
+            .resource_mut::<Assets<CrosshairMaterial>>()
+            .add(CrosshairMaterial {});
+
+        world.spawn((
+            Crosshair { attached_to },
+            Transform {
+                translation: Vec3::new(0.0, 0.0, LAYER_CROSSHAIR),
+                ..Transform::default()
+            },
+            Mesh2d(mesh),
+            MeshMaterial2d(material),
+        ));
+    }
+
+    pub fn despawn(world: &mut World, attached_to: Entity) {
+        let mut to_despawn = Vec::new();
+
+        for (entity, crosshair) in world.query::<(Entity, &Crosshair)>().iter(world) {
+            if crosshair.attached_to == attached_to {
+                to_despawn.push(entity);
+            }
+        }
+
+        for entity in to_despawn {
+            world.entity_mut(entity).despawn();
+        }
     }
 }
 
-impl Material2d for Crosshair {
+#[derive(Debug, Clone, Asset, TypePath, AsBindGroup)]
+struct CrosshairMaterial {}
+
+impl Material2d for CrosshairMaterial {
     fn fragment_shader() -> ShaderRef {
         return "shader/crosshair.wgsl".into();
     }
@@ -81,71 +93,30 @@ impl Material2d for Crosshair {
 }
 
 fn on_update(
-    mut crosshairs: Query<&mut Transform, (With<MeshMaterial2d<Crosshair>>, Without<Player>)>,
-    cameras: Query<(&Camera, &GlobalTransform, &Projection), With<MainCamera>>,
-    mut players: Query<(&mut Player, &mut Transform)>,
-    mut mouse_motion: MessageReader<MouseMotion>,
+    mut crosshairs: Query<(Entity, &Crosshair, &mut Transform), Without<Actor>>,
+    actors: Query<(&Actor, &Transform)>,
+    cameras: Query<&Projection, With<MainCamera>>,
+    mut commands: Commands,
 ) {
-    let mut cursor_delta = Vec2::ZERO;
+    let projection = cameras.iter().next();
 
-    for event in mouse_motion.read() {
-        cursor_delta += event.delta;
-    }
-
-    let Some((camera, camera_transform, camera_projection)) = cameras.iter().next() else {
-        return;
-    };
-
-    for (mut player, mut player_transform) in players.iter_mut() {
-        let Some(crosshair) = player.crosshair.as_mut() else {
+    for (entity, crosshair, mut transform) in crosshairs.iter_mut() {
+        let Ok((actor, actor_transform)) = actors.get(crosshair.attached_to) else {
+            commands.entity(entity).despawn();
             continue;
         };
 
-        let Ok(mut transform) = crosshairs.get_mut(crosshair.entity) else {
-            continue;
-        };
+        let mut position = Vec2::new(actor.aim_distance, 0.0);
+        position = position.rotate_by_quat(actor_transform.rotation);
+        position += actor_transform.translation.truncate();
 
-        let player_position = player_transform.translation.truncate();
+        transform.translation.x = position.x;
+        transform.translation.y = position.y;
+        transform.rotation = actor_transform.rotation;
 
-        // crosshair must in sync with player while it moves, also player direction can be changed
-        // because of weapon recoil, so crosshair should be affected too
-        let on_world_old =
-            player_position + player_transform.rotation.as_vec() * crosshair.distance;
-
-        let Ok(on_screen_old) =
-            camera.world_to_viewport(camera_transform, on_world_old.extend(0.0))
-        else {
-            continue;
-        };
-
-        let mut on_screen_new = on_screen_old + cursor_delta;
-
-        // clamp crosshair inside view port
-        if let Some(viewport_size) = camera.logical_viewport_size() {
-            on_screen_new.x = on_screen_new.x.clamp(0.0, viewport_size.x);
-            on_screen_new.y = on_screen_new.y.clamp(0.0, viewport_size.y);
-        }
-
-        if let Projection::Orthographic(projection) = camera_projection {
+        if let Some(Projection::Orthographic(projection)) = projection {
             transform.scale.x = SIZE * projection.scale;
             transform.scale.y = SIZE * projection.scale;
-        }
-
-        // put crosshair to it's updated position
-        if let Ok(on_world_new) = camera
-            .viewport_to_world(camera_transform, on_screen_new)
-            .map(|v| v.origin.truncate())
-        {
-            transform.translation.x = on_world_new.x;
-            transform.translation.y = on_world_new.y;
-
-            // update only when cursor moved more than 1px actually, otherwise errors may grow
-            if (on_screen_new - on_screen_old).is_long(1.0) {
-                crosshair.distance = player_position.distance(on_world_new);
-                player_transform.rotation = (on_world_new - player_position).as_quat();
-            }
-
-            transform.rotation = player_transform.rotation;
         }
     }
 }

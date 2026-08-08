@@ -7,7 +7,7 @@ use crate::{
         collision::Collision,
         kinetics::Kinetics,
         player::Player,
-        Breath, Footsteps, Health, StatusBar,
+        Breath, Crosshair, Footsteps, Health, StatusBar,
     },
     resource::Settings,
 };
@@ -82,12 +82,7 @@ impl Command for ActorRelease {
             actor.skill = difficulty;
         }
 
-        if let Some(crosshair) = world
-            .get::<Player>(self.0)
-            .and_then(|p| p.crosshair.as_ref())
-        {
-            world.entity_mut(crosshair.entity).despawn();
-        }
+        Crosshair::despawn(world, self.0);
 
         if let Some(kinetics) = world.get_mut::<Kinetics>(self.0).as_mut() {
             kinetics.drag = Kinetics::DRAG_DEFAULT;

@@ -2,75 +2,114 @@ use crate::{
     data::{LAYER_ACTOR_PLAYER, WORLD_SIZE_HALF},
     plugin::{
         camera::MainCamera, camera_target::CameraTarget, kinetics::Kinetics, Actor, ActorAction,
-        ActorActionsExt, ActorConfig, ActorSet, Crosshair, Health, StatusBar, WeaponConfig,
-        WeaponSet,
+        ActorActions, ActorActionsExt, ActorConfig, ActorSet, Crosshair, Health, StatusBar,
+        WeaponConfig, WeaponSet,
     },
     resource::Settings,
     state::AppState,
-    util::ext::{AppExt, Vec2Ext},
+    util::ext::{AppExt, QuatExt, Vec2Ext},
 };
 use bevy::{
+    camera::Camera,
     ecs::{
         component::Component,
         entity::Entity,
         query::{With, Without},
-        system::{Command, Query},
+        schedule::{IntoScheduleConfigs, SystemSet},
+        system::{Command, In, IntoSystem, Query},
     },
     input::{mouse::MouseMotion, ButtonInput},
     math::Vec2,
-    prelude::{App, Commands, KeyCode, MessageReader, MouseButton, Plugin, Res, Transform, World},
+    prelude::{App, KeyCode, MessageReader, MouseButton, Plugin, Res, Transform, World},
+    transform::components::GlobalTransform,
 };
+
+const EXTRA_ROTATION_MULTIPLAYER: f32 = 0.1;
+const EXTRA_ROTATION_MAX: f32 = 0.11;
+
+#[derive(SystemSet, Debug, Clone, PartialEq, Eq, Hash)]
+pub struct PlayerSystems;
 
 pub struct PlayerPlugin;
 
 impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
-        app.add_state_system(AppState::Game, on_update);
+        app.add_state_system(
+            AppState::Game,
+            (on_update_1.pipe(on_update_2)).in_set(PlayerSystems),
+        );
     }
 }
 
 #[derive(Component)]
 pub struct Player {
     pub is_controllable: bool, // TODO: avoid
-    pub crosshair: Option<PlayerCrosshair>,
+    is_aiming: bool,
     extra_rotation: f32,
 }
 
 impl Player {
-    pub const EXTRA_ROTATION_MULTIPLAYER: f32 = 0.1;
-    pub const EXTRA_ROTATION_MAX: f32 = 0.11;
-
-    pub fn new(is_controllable: bool) -> Self {
-        return Self {
-            is_controllable,
-            crosshair: None,
-            extra_rotation: 0.0,
-        };
-    }
-
-    pub fn add_extra_rotation(&mut self, value: f32) -> f32 {
-        let previous = self.extra_rotation;
-        let limit = Self::EXTRA_ROTATION_MAX;
-        self.extra_rotation = (self.extra_rotation + value).clamp(-limit, limit);
-        let added = self.extra_rotation - previous;
-        return added;
-    }
-
-    pub fn get_extra_rotation(&self) -> f32 {
-        return self.extra_rotation;
+    fn rotate(&mut self, value: f32) -> f32 {
+        let limit = EXTRA_ROTATION_MAX;
+        let extra_rotation_before = self.extra_rotation;
+        self.extra_rotation += value * EXTRA_ROTATION_MULTIPLAYER;
+        self.extra_rotation = self.extra_rotation.clamp(-limit, limit);
+        let extra_rotation_change = self.extra_rotation - extra_rotation_before;
+        return value + extra_rotation_change;
     }
 }
 
-pub struct PlayerCrosshair {
-    pub entity: Entity,
-    pub distance: f32,
+fn on_update_1(
+    keyboard: Res<ButtonInput<KeyCode>>,
+    mouse: Res<ButtonInput<MouseButton>>,
+    mut mouse_motion: MessageReader<MouseMotion>,
+) -> Input {
+    let mut input = Input::default();
+
+    for event in mouse_motion.read() {
+        input.mouse_motion += event.delta;
+    }
+
+    if keyboard.pressed(KeyCode::KeyW) {
+        input.movement.x += 1.0;
+    }
+
+    if keyboard.pressed(KeyCode::KeyS) {
+        input.movement.x -= 1.0;
+    }
+
+    if keyboard.pressed(KeyCode::KeyA) {
+        input.movement.y += 1.0;
+    }
+
+    if keyboard.pressed(KeyCode::KeyD) {
+        input.movement.y -= 1.0;
+    }
+
+    input
+        .actions
+        .set(ActorAction::Sprint, keyboard.pressed(KeyCode::ShiftLeft));
+
+    input
+        .actions
+        .set(ActorAction::Attack, mouse.pressed(MouseButton::Left));
+
+    input
+        .actions
+        .set(ActorAction::Reload, keyboard.pressed(KeyCode::KeyR));
+
+    input.actions.set(
+        ActorAction::AimToggle,
+        mouse.just_pressed(MouseButton::Right),
+    );
+
+    return input;
 }
 
-// TODO: separate aim?
-pub fn on_update(
+fn on_update_2(
+    In(input): In<Input>,
     mut players: Query<
         (
-            Entity,
             &mut Player,
             &mut Actor,
             &mut Transform,
@@ -78,110 +117,126 @@ pub fn on_update(
         ),
         Without<MainCamera>,
     >,
-    cameras: Query<&Transform, With<MainCamera>>,
-    keyboard: Res<ButtonInput<KeyCode>>,
-    mouse: Res<ButtonInput<MouseButton>>,
-    mut mouse_motion: MessageReader<MouseMotion>,
-    mut commands: Commands,
+    cameras: Query<(&Camera, &Transform, &GlobalTransform), With<MainCamera>>,
     settings: Res<Settings>,
 ) {
-    let mut mouse_delta_x = 0.0;
+    let camera = cameras.iter().next();
 
-    for event in mouse_motion.read() {
-        mouse_delta_x -= event.delta.x;
-    }
-
-    for (entity, mut player, mut actor, mut transform, camera) in players.iter_mut() {
-        if !player.is_controllable {
-            continue;
-        }
-
-        actor.movement = Vec2::ZERO;
-
-        if keyboard.pressed(KeyCode::KeyW) {
-            actor.movement.x += 1.0;
-        }
-
-        if keyboard.pressed(KeyCode::KeyS) {
-            actor.movement.x -= 1.0;
-        }
-
-        if keyboard.pressed(KeyCode::KeyA) {
-            actor.movement.y += 1.0;
-        }
-
-        if keyboard.pressed(KeyCode::KeyD) {
-            actor.movement.y -= 1.0;
-        }
-
-        actor
-            .actions
-            .set(ActorAction::Sprint, keyboard.pressed(KeyCode::ShiftLeft));
-
-        actor
-            .actions
-            .set(ActorAction::Attack, mouse.pressed(MouseButton::Left));
-
-        actor
-            .actions
-            .set(ActorAction::Reload, keyboard.pressed(KeyCode::KeyR));
-
-        if mouse.just_pressed(MouseButton::Right) {
-            if let Some(crosshair) = player.crosshair.take() {
-                commands.entity(crosshair.entity).despawn();
-
-                // reset player direction
-                let rotation = transform.rotation;
-                commands.queue(move |world: &mut World| {
-                    for mut camera in world
-                        .query_filtered::<&mut Transform, With<MainCamera>>()
-                        .iter_mut(world)
-                    {
-                        camera.rotation = rotation;
-                    }
-                });
-            } else {
-                commands.queue(move |world: &mut World| {
-                    let crosshair = Crosshair::spawn(world);
-
-                    if let Some(mut player) = world.get_mut::<Player>(entity) {
-                        player.crosshair = Some(PlayerCrosshair {
-                            entity: crosshair,
-                            distance: 1.0,
-                        });
-                    }
-                });
-            }
-        }
-
+    for (mut player, mut actor, mut transform, camera_target) in players.iter_mut() {
         let limit = WORLD_SIZE_HALF;
         transform.translation.x = transform.translation.x.clamp(-limit, limit);
         transform.translation.y = transform.translation.y.clamp(-limit, limit);
 
-        if player.crosshair.is_some() {
-            // TODO: simplify
+        if !player.is_controllable {
+            continue;
+        }
+
+        actor.movement = input.movement;
+        actor.actions = input.actions;
+
+        if actor.actions.contains(ActorAction::AimToggle) {
+            player.is_aiming = !player.is_aiming;
+
+            if !player.is_aiming {
+                // sync player back with camera
+                if let Some(camera) = camera {
+                    transform.rotation = camera.1.rotation.perp();
+                    player.extra_rotation = 0.0;
+                }
+            }
+        }
+
+        if let Some((camera, _, camera_transform_global)) = camera {
+            update_aim(
+                &mut actor,
+                &mut transform,
+                &mut player,
+                camera,
+                camera_transform_global,
+                input.mouse_motion,
+                settings.controls.mouse_sensitivity,
+            );
+        }
+
+        if player.is_aiming {
+            // make movement relative to the camera
             actor.movement.y = -actor.movement.y;
             actor.movement = actor.movement.rotate_by_quat(transform.rotation);
             let x_copy = actor.movement.x;
             actor.movement.x = actor.movement.y;
             actor.movement.y = x_copy;
 
-            if let Some(camera) = cameras.iter().next() {
-                actor.movement = actor.movement.rotate_by_quat(camera.rotation);
+            if let Some(camera) = camera {
+                actor.movement = actor.movement.rotate_by_quat(camera.1.rotation);
             }
         } else {
-            let rotation_base = mouse_delta_x * settings.controls.mouse_sensitivity;
-            let rotation_extra = rotation_base * Player::EXTRA_ROTATION_MULTIPLAYER;
-            transform.rotate_local_z(rotation_base + player.add_extra_rotation(rotation_extra));
+            actor.aim_distance = f32::max(actor.aim_distance, 1.0);
         }
 
-        if let Some(mut camera) = camera {
-            if player.crosshair.is_some() {
-                camera.sync_angle = None;
+        if let Some(mut camera_target) = camera_target {
+            if player.is_aiming {
+                camera_target.sync_angle = None;
             } else {
-                camera.sync_angle = Some(player.get_extra_rotation());
+                camera_target.sync_angle = Some(player.extra_rotation);
             }
         }
+    }
+}
+
+fn update_aim(
+    actor: &mut Actor,
+    actor_transform: &mut Transform,
+    player: &mut Player,
+    camera: &Camera,
+    camera_transform: &GlobalTransform,
+    mouse_motion: Vec2,
+    mouse_sensitivity: f32,
+) {
+    if mouse_motion.is_zero() {
+        return; // early return to prevent floating point error grow
+    }
+
+    if !player.is_aiming {
+        actor_transform.rotate_local_z(player.rotate(-mouse_motion.x * mouse_sensitivity));
+
+        if mouse_motion.y == 0.0 {
+            return; // early return to prevent floating point error grow
+        }
+    }
+
+    // aim must in sync with player while it moves, also player direction can be changed because of
+    // weapon recoil, so aim should be affected too
+    let position = actor_transform.translation.truncate();
+    let on_world_old = position + actor_transform.rotation.as_vec() * actor.aim_distance;
+
+    let Ok(on_screen_old) = camera.world_to_viewport(camera_transform, on_world_old.extend(0.0))
+    else {
+        return;
+    };
+
+    let mut on_screen_new = on_screen_old + mouse_motion;
+
+    // clamp aim inside view port
+    if let Some(viewport_size) = camera.logical_viewport_size() {
+        on_screen_new.x = on_screen_new.x.clamp(0.0, viewport_size.x);
+        on_screen_new.y = on_screen_new.y.clamp(0.0, viewport_size.y);
+    }
+
+    // put aim to it's updated position
+    let Ok(on_world_new) = camera
+        .viewport_to_world(camera_transform, on_screen_new)
+        .map(|v| v.origin.truncate())
+    else {
+        return;
+    };
+
+    // update only when cursor moved more than 1px actually, otherwise errors may grow
+    if (on_screen_new - on_screen_old).is_long(0.99) {
+        actor.aim_distance = position.distance(on_world_new);
+    }
+
+    if player.is_aiming {
+        actor_transform.rotation = (on_world_new - position).as_quat();
     }
 }
 
@@ -212,9 +267,15 @@ impl Command for PlayerSet {
             kinetics.drag = Kinetics::DRAG_PLAYER;
         }
 
+        Crosshair::spawn(world, self.entity);
+
         world
             .entity_mut(self.entity)
-            .insert(Player::new(self.is_controllable))
+            .insert(Player {
+                is_controllable: self.is_controllable,
+                is_aiming: false,
+                extra_rotation: 0.0,
+            })
             .insert(CameraTarget::default());
 
         StatusBar::spawn(world, self.entity);
@@ -253,4 +314,11 @@ impl Command for PlayerSpawn {
         }
         .apply(world);
     }
+}
+
+#[derive(Default)]
+struct Input {
+    mouse_motion: Vec2,
+    movement: Vec2,
+    actions: ActorActions,
 }

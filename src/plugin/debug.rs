@@ -23,7 +23,6 @@ use bevy::{
         Commands, Component, DefaultGizmoConfigGroup, GizmoConfigStore, IntoScheduleConfigs,
         KeyCode, Query, Res, Update, Vec2, With,
     },
-    sprite_render::MeshMaterial2d,
     text::TextSpan,
     time::Time,
     transform::components::Transform,
@@ -191,7 +190,7 @@ fn render_debug_shapes(mut gizmos: Gizmos) {
 }
 
 fn update_input(
-    crosshairs: Query<&Transform, With<MeshMaterial2d<Crosshair>>>,
+    crosshairs: Query<&Transform, With<Crosshair>>,
     keyboard: Res<ButtonInput<KeyCode>>,
     mut commands: Commands,
 ) {
