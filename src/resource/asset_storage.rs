@@ -1,6 +1,7 @@
 use bevy::{
     asset::{AssetServer, Assets, Handle, LoadedFolder},
     ecs::resource::Resource,
+    image::Image,
     mesh::Mesh,
     prelude::Rectangle,
 };
@@ -8,12 +9,19 @@ use bevy::{
 #[derive(Default, Resource)]
 pub struct AssetStorage {
     assets: Option<Handle<LoadedFolder>>,
+    dummy_image: Handle<Image>,
     dummy_mesh: Handle<Mesh>,
 }
 
 impl AssetStorage {
-    pub fn load(&mut self, asset_server: &AssetServer, meshes: &mut Assets<Mesh>) {
+    pub fn load(
+        &mut self,
+        asset_server: &AssetServer,
+        images: &mut Assets<Image>,
+        meshes: &mut Assets<Mesh>,
+    ) {
         self.assets = Some(asset_server.load_folder("."));
+        self.dummy_image = images.add(Image::default());
         self.dummy_mesh = meshes.add(Mesh::from(Rectangle::default()));
     }
 
@@ -26,6 +34,10 @@ impl AssetStorage {
             .assets
             .as_ref()
             .is_some_and(|h| asset_server.is_loaded_with_dependencies(h.id()));
+    }
+
+    pub fn dummy_image(&self) -> &Handle<Image> {
+        return &self.dummy_image;
     }
 
     pub fn dummy_mesh(&self) -> &Handle<Mesh> {

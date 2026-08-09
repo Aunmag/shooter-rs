@@ -21,8 +21,8 @@ use crate::{
         ActorPlugin, AmbienceFxPlugin, AudioPlugin, BloodPlugin, BonusPlugin, BreathPlugin,
         CrosshairPlugin, CursorGrab, DebugTweaksPlugin, ExplosionPlugin, FootstepsPlugin,
         HealthPlugin, HeartbeatPlugin, InputPlugin, LoadingPlugin, MainCamera, MeleePlugin,
-        ParticlePlugin, ProjectilePlugin, SkipLoaderPlugin, StatusBarPlugin, TerrainPlugin,
-        TileMapPlugin, UiNotificationPlugin, WeaponPlugin,
+        ParticlePlugin, ProjectilePlugin, SkipLoaderPlugin, SpriteDissolvePlugin, StatusBarPlugin,
+        TerrainPlugin, TileMapPlugin, UiNotificationPlugin, WeaponPlugin,
     },
     resource::{AssetStorage, ScenarioSettings, Settings},
     state::AppState,
@@ -99,6 +99,7 @@ fn main() {
         .add_plugins(ProjectilePlugin)
         .add_plugins(ScenarioPlugin)
         .add_plugins(SkipLoaderPlugin)
+        .add_plugins(SpriteDissolvePlugin)
         .add_plugins(StatusBarPlugin)
         .add_plugins(TerrainPlugin)
         .add_plugins(TileMapPlugin)

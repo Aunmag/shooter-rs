@@ -7,6 +7,7 @@ use crate::{
 use bevy::{
     asset::Assets,
     ecs::system::Local,
+    image::Image,
     mesh::Mesh,
     prelude::{App, AssetServer, AudioSource, IntoScheduleConfigs, NextState, Plugin, Res, ResMut},
     time::Time,
@@ -31,6 +32,7 @@ impl Plugin for LoadingPlugin {
 fn on_update(
     asset_server: Res<AssetServer>,
     audio_assets: Res<Assets<AudioSource>>,
+    mut images: ResMut<Assets<Image>>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut asset_storage: ResMut<AssetStorage>,
     mut audio_storage: ResMut<AudioStorage>,
@@ -46,6 +48,6 @@ fn on_update(
         }
     } else {
         log::info!("Loading...");
-        asset_storage.load(&asset_server, &mut meshes);
+        asset_storage.load(&asset_server, &mut images, &mut meshes);
     }
 }

@@ -24,6 +24,7 @@ pub mod player;
 mod projectile;
 pub mod scenario;
 mod skip_loader;
+mod sprite_dissolve;
 mod status_bar;
 mod terrain;
 mod tile_map;
@@ -33,6 +34,6 @@ mod weapon;
 pub use self::{
     actor::*, ambience_fx::*, audio::*, blood::*, bonus::*, breath::*, camera::*, crosshair::*,
     debug_tweaks::*, explosion::*, footsteps::*, health::*, heartbeat::*, input::*, loading::*,
-    melee::*, particle::*, projectile::*, skip_loader::*, status_bar::*, terrain::*, tile_map::*,
-    ui_notification::*, weapon::*,
+    melee::*, particle::*, projectile::*, skip_loader::*, sprite_dissolve::*, status_bar::*,
+    terrain::*, tile_map::*, ui_notification::*, weapon::*,
 };

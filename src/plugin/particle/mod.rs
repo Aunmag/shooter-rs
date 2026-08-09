@@ -1,7 +1,8 @@
+mod dirt;
 mod flesh;
 mod shell;
 
-pub use self::{flesh::*, shell::*};
+pub use self::{dirt::*, flesh::*, shell::*};
 use crate::{
     data::{LAYER_GROUND, LAYER_PROJECTILE, TRANSFORM_SCALE},
     plugin::player::Player,

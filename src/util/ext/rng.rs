@@ -1,3 +1,4 @@
+use bevy::color::Srgba;
 use rand::{Rng, RngExt};
 use rand_distr::StandardNormal;
 use std::{cmp::Ordering, time::Duration};
@@ -47,5 +48,20 @@ impl Fuzz for f32 {
 impl Fuzz for Duration {
     fn fuzz_with<R: Rng>(self, rng: &mut R, n: f32) -> Self {
         return self.mul_f32(1.0 + rng.random_range(-n..n));
+    }
+}
+
+impl Fuzz for Srgba {
+    fn fuzz<R: Rng>(self, rng: &mut R) -> Self {
+        return self.fuzz_with(rng, 0.06);
+    }
+
+    fn fuzz_with<R: Rng>(self, rng: &mut R, n: f32) -> Self {
+        return Srgba::new(
+            (self.red + rng.random_range(-n..n)).clamp(0.0, 1.0),
+            (self.green + rng.random_range(-n..n)).clamp(0.0, 1.0),
+            (self.blue + rng.random_range(-n..n)).clamp(0.0, 1.0),
+            self.alpha,
+        );
     }
 }

@@ -2,7 +2,7 @@ use crate::{
     data::{LAYER_GROUND, LAYER_TREE, WORLD_SIZE, WORLD_SIZE_HALF, WORLD_SIZE_VISUAL},
     map::Map,
     plugin::{AudioPlay, AudioTracker, TerrainSpawn, TileBlend},
-    util::ext::{RngExt2, Vec2Ext},
+    util::ext::{Fuzz, RngExt2, Vec2Ext},
 };
 use bevy::{
     color::{Color, Srgba},
@@ -97,17 +97,9 @@ fn spawn_trees(world: &mut World) {
                     .choose_weighted(&mut rng, |i| i.0)
                     .unwrap_or(&images[0]);
 
-                let color_fuzz = 0.06;
-                let color = Srgba::new(
-                    1.0 - rng.random_range(0.0..color_fuzz),
-                    1.0 - rng.random_range(0.0..color_fuzz),
-                    1.0 - rng.random_range(0.0..color_fuzz),
-                    0.95,
-                );
-
                 TileBlend::Image {
                     image,
-                    color: color.into(),
+                    color: Srgba::new(1.0, 1.0, 1.0, 0.95).fuzz(&mut rng).into(),
                     position: position.extend(LAYER_TREE),
                     direction: rng.random_range(0.0..TAU),
                     size: rng.gen_range_safely(*size_min, *size_max),

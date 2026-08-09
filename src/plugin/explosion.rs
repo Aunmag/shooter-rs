@@ -2,7 +2,7 @@ use crate::{
     data::{LAYER_GROUND, LAYER_PROJECTILE},
     plugin::{
         collision::{Collision, CollisionSystems},
-        Actor, AudioPlay, AudioTracker, ProjectileExplosion, TileBlend,
+        Actor, AudioPlay, AudioTracker, DirtParticleSpawn, ProjectileExplosion, TileBlend,
     },
     resource::{AssetStorage, HitResource},
     state::AppState,
@@ -31,7 +31,8 @@ use rand::RngExt;
 use std::{f32::consts::TAU, time::Duration};
 
 const PUSH_MULTIPLIER: f32 = 20.0;
-const DURATION: Duration = Duration::from_millis(500);
+const DURATION: Duration = Duration::from_millis(400);
+const DURATION_PARTICLES: Duration = Duration::from_millis(550);
 const FORCE_MIN: f32 = 0.01;
 
 pub struct ExplosionPlugin;
@@ -86,6 +87,16 @@ impl Command for Explode {
         });
 
         let mut rng = rand::rng();
+
+        DirtParticleSpawn {
+            amount: (self.config.radius * 8.0) as u8,
+            position: self.position,
+            velocity_min: self.config.radius / 4.0,
+            velocity_max: self.config.radius,
+            duration: DURATION_PARTICLES,
+            size_max: 2.5,
+        }
+        .apply(world);
 
         TileBlend::Image {
             image: "terrain/crater.png",
