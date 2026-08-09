@@ -1,7 +1,7 @@
 use crate::{
     plugin::{
         collision::Collision, projectile::state::ProjectileState, Actor, AudioPlay, AudioTracker,
-        Explode, Projectile,
+        DirtParticleSpawn, Explode, Projectile,
     },
     resource::HitResource,
     util::{ext::Vec2Ext, geometry::GeometryProjection, math::angle_factor_signed},
@@ -18,6 +18,7 @@ use std::time::Duration;
 
 const TIME_DELTA_FOR_RENDER: Duration = Duration::from_millis(25); // 40 FPS
 const SPIN_FACTOR: f32 = 1.5;
+const DROP_PARTICLES: u8 = 8;
 
 pub fn on_update(
     mut projectiles: Query<(Entity, &mut Projectile, &mut Transform)>,
@@ -75,8 +76,6 @@ pub fn on_update(
         update_transform(&j, p0, p2, &mut transform);
 
         if stopped {
-            j.stopped = true; // only stop (destroy) on next frame so player have time to see projectile hits the target
-
             if let Some(explosion) = &j.config.explosion {
                 commands.queue(Explode {
                     config: explosion,
@@ -84,6 +83,29 @@ pub fn on_update(
                     shooter: j.shooter,
                 });
             }
+
+            if s0.dropped() {
+                let amount = u8::max(DROP_PARTICLES.saturating_sub(j.config.fragments), 1);
+
+                commands.queue(DirtParticleSpawn {
+                    amount,
+                    position: p0,
+                    velocity_min: 0.3,
+                    velocity_max: 1.0,
+                    duration: Duration::from_millis(250),
+                    size_max: 1.2,
+                });
+
+                audio.queue(AudioPlay {
+                    path: "sounds/bullet/ground".into(),
+                    volume: 0.8 / (j.config.fragments as f32).sqrt(),
+                    falloff: AudioPlay::FALLOFF_SHORTER,
+                    source: Some(p0),
+                    ..AudioPlay::DEFAULT
+                });
+            }
+
+            j.stopped = true; // only stop (destroy) on next frame so player have time to see projectile hits the target
         }
     }
 }
@@ -160,8 +182,8 @@ impl Victim {
         hits.add(self.entity, force, -spin, false);
 
         audio.queue(AudioPlay {
-            path: "sounds/hit_body".into(),
-            volume: 1.2, // TODO: make it depend from momentum
+            path: "sounds/bullet/flesh".into(),
+            volume: 1.2 / (s.projectile.config.fragments as f32).sqrt(),
             source: Some(self.position),
             ..AudioPlay::DEFAULT
         });

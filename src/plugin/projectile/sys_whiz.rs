@@ -19,6 +19,8 @@ pub fn on_update(
     audio: Res<AudioTracker>,
     time: Res<Time>,
 ) {
+    // TODO: early return if sounds disabled
+
     crate::util::bench::bench!();
     let t0 = time.elapsed();
     let t1 = t0.saturating_sub(time.delta());
@@ -65,7 +67,7 @@ pub fn on_update(
 
         if let Some(source) = closest {
             audio.queue(AudioPlay {
-                path: "sounds/bullet_whiz".into(),
+                path: "sounds/bullet/air".into(),
                 volume: 0.8,
                 falloff: AudioPlay::FALLOFF_SHORTEST,
                 source: Some(source),

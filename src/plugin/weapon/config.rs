@@ -1,5 +1,4 @@
-use crate::{plugin::ProjectileConfig, util::ext::RngExt2};
-use rand_pcg::Pcg32;
+use crate::plugin::ProjectileConfig;
 use std::time::Duration;
 
 pub struct WeaponConfig {
@@ -263,15 +262,6 @@ impl WeaponConfig {
         grip: WeaponGrip::TwoHandsWithButt,
         image_offset: 10.0,
     };
-
-    pub fn generate_deviation(&self, rng: &mut Pcg32) -> f32 {
-        return rng.gen_normal(self.deviation);
-    }
-
-    pub fn generate_velocity(&self, rng: &mut Pcg32) -> f32 {
-        let deviation = rng.gen_normal(self.muzzle_velocity * Self::VELOCITY_DEVIATION);
-        return self.muzzle_velocity + deviation;
-    }
 
     pub fn get_mass_with_full_ammo(&self) -> f32 {
         return self.mass + self.projectile.mass * f32::from(self.ammo_capacity);

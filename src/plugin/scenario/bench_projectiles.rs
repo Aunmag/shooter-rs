@@ -96,6 +96,7 @@ impl ScenarioLogic for BenchProjectilesScenario {
                         config: WEAPON.projectile,
                         position,
                         velocity: rotation * WEAPON.muzzle_velocity,
+                        distance_limit: f32::INFINITY,
                         shooter: None,
                     }
                     .apply(world);

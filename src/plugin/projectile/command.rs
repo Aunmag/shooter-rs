@@ -18,6 +18,7 @@ pub struct ProjectileSpawn {
     // TODO: store spawn time here for better accuracy?
     pub position: Vec2,
     pub velocity: Vec2,
+    pub distance_limit: f32,
     pub shooter: Option<Entity>,
 }
 
@@ -30,7 +31,7 @@ impl Command for ProjectileSpawn {
             world.resource::<Time>().elapsed(),
             self.position,
             self.velocity,
-            f32::INFINITY,
+            self.distance_limit,
             self.shooter,
         );
 

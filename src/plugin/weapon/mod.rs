@@ -10,7 +10,7 @@ use crate::{
     },
     resource::HitResource,
     state::AppState,
-    util::ext::{AppExt, QuatExt, Vec2Ext},
+    util::ext::{AppExt, Fuzz, QuatExt, RngExt2, Vec2Ext},
 };
 use bevy::{
     ecs::system::{Deferred, Local, Query},
@@ -85,13 +85,15 @@ fn on_update(
             }
 
             for _ in 0..weapon.config.projectile.fragments {
-                let deviation = weapon.config.generate_deviation(&mut data.rng);
-                let velocity = weapon.config.generate_velocity(&mut data.rng);
+                let deviation = generate_deviation(weapon.config, &mut data.rng);
+                let velocity = generate_velocity(weapon.config, &mut data.rng);
+                let distance_limit = generate_distance_limit(weapon.config, actor, &mut data.rng);
 
                 commands.queue(ProjectileSpawn {
                     config: weapon.config.projectile,
                     position,
                     velocity: Vec2::from_angle(rotation + deviation) * velocity,
+                    distance_limit,
                     shooter: Some(entity),
                 });
             }
@@ -125,6 +127,25 @@ fn on_update(
             }
         }
     }
+}
+
+fn generate_deviation(weapon: &WeaponConfig, rng: &mut Pcg32) -> f32 {
+    return rng.gen_normal(weapon.deviation);
+}
+
+fn generate_velocity(weapon: &WeaponConfig, rng: &mut Pcg32) -> f32 {
+    let deviation = rng.gen_normal(weapon.muzzle_velocity * WeaponConfig::VELOCITY_DEVIATION);
+    return weapon.muzzle_velocity + deviation;
+}
+
+fn generate_distance_limit(weapon: &WeaponConfig, actor: &Actor, rng: &mut Pcg32) -> f32 {
+    let mut distance_limit = actor.aim_distance;
+
+    if weapon.projectile.fragments > 1 {
+        distance_limit = distance_limit.fuzz_with(rng, 0.1);
+    }
+
+    return f32::max(distance_limit - Weapon::BARREL_LENGTH, 0.1);
 }
 
 fn has_shells(weapon: &Weapon) -> bool {

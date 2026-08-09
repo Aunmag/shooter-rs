@@ -56,9 +56,12 @@ impl<'a> ProjectileState<'a> {
     }
 
     pub fn stopped(&self) -> bool {
+        return self.projectile.stopped || self.dropped();
+    }
+
+    pub fn dropped(&self) -> bool {
         let distance_limit = self.projectile.distance_limit;
-        return self.projectile.stopped
-            || distance_limit < DISTANCE_1MM
+        return distance_limit < DISTANCE_1MM
             || self.traveled.is_long(distance_limit - DISTANCE_1MM)
             || self.velocity().is_short(ProjectileConfig::VELOCITY_MIN);
     }

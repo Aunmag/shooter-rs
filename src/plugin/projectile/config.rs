@@ -12,7 +12,7 @@ pub struct ProjectileConfig {
 impl ProjectileConfig {
     /// Will stop projectiles that barely move. Essential for bullets with constant deceleration so
     /// they drop at slow speed
-    pub const VELOCITY_MIN: f32 = 5.0;
+    pub const VELOCITY_MIN: f32 = 18.0;
 
     /// Makes game more caricature by slowing projectiles down, but the physics still works as if
     /// they travel with real-world velocities

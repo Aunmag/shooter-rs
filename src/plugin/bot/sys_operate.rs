@@ -43,6 +43,7 @@ pub fn on_update(
 
     for (mut bot, mut actor, transform, kinetics, weapon) in bots.iter_mut() {
         actor.reset_actions();
+        actor.aim_distance = f32::INFINITY;
 
         let enemy = bot
             .enemy
@@ -162,6 +163,7 @@ impl BotHandler<'_> {
             if shooting_state == BotShootingState::Shoot && (is_aimed || self.bot.was_burst_fire) {
                 self.actor.actions |= ActorAction::Attack;
                 self.bot.was_burst_fire = weapon.config.is_automatic;
+                self.actor.aim_distance = self.distance_squared(&target.position).sqrt();
                 debug_color = RED;
             } else {
                 // keep aim ony while not attacking, otherwise recoil won't work
