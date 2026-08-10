@@ -37,7 +37,11 @@ pub fn on_update(
 
             let head = ProjectileState::calc(projectile, t0).position();
             let tail = ProjectileState::calc(projectile, t1).position();
-            let length = head.distance_squared(tail);
+            let length_squared = head.distance_squared(tail);
+
+            if length_squared == 0.0 {
+                continue;
+            }
 
             let projection = listener.project_on(&(head, tail));
 
@@ -45,15 +49,11 @@ pub fn on_update(
                 debug_line(listener, projection, RED);
             }
 
-            let to_head_distance = projection.distance_squared(head);
-
-            if to_head_distance > length {
+            if projection.distance_squared(head) > length_squared {
                 continue;
             }
 
-            let to_tail_distance = projection.distance_squared(tail);
-
-            if to_tail_distance > length {
+            if projection.distance_squared(tail) > length_squared {
                 continue;
             }
 
