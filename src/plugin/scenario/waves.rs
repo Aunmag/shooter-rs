@@ -82,31 +82,18 @@ const WAVE_BONUS: Wave = Wave {
 
 const ENEMY_SPAWN_DISTANCE: f32 = VIEW_DISTANCE * 0.5;
 const BONUSES_PER_WAVE: f32 = 3.0;
-const GAME_OVER_TEXT_DURATION: Duration = Duration::from_secs(8);
-const DEFAULT_INTERVAL: Duration = Duration::from_secs(2);
 const WAVE_BONUS_HUMANS: u8 = 16;
-const SPAWN_INTERVAL: Duration = Duration::from_millis(700);
 
-enum Task {
+enum Stage {
     StartNextWave,
     SpawnZombie,
     CheckWaveCompletion,
     CompleteWave,
-}
-
-impl Task {
-    fn get_timeout(&self) -> Duration {
-        return match self {
-            Self::StartNextWave => DEFAULT_INTERVAL,
-            Self::SpawnZombie => SPAWN_INTERVAL,
-            Self::CheckWaveCompletion => DEFAULT_INTERVAL,
-            Self::CompleteWave => Duration::from_secs(4),
-        };
-    }
+    GameOver,
 }
 
 pub struct WavesScenario {
-    task: Task,
+    stage: Stage,
     wave_index: u8,
     zombies_spawned: u16,
     kills: u16,
@@ -116,7 +103,7 @@ pub struct WavesScenario {
 impl WavesScenario {
     pub fn new(level: u8) -> Self {
         return Self {
-            task: Task::StartNextWave,
+            stage: Stage::StartNextWave,
             wave_index: level.saturating_sub(1),
             zombies_spawned: 0,
             kills: 0,
@@ -124,11 +111,11 @@ impl WavesScenario {
         };
     }
 
-    fn update(&mut self, commands: &mut Commands) -> Task {
+    fn update(&mut self, commands: &mut Commands) -> Stage {
         let wave = self.wave();
 
-        match self.task {
-            Task::StartNextWave => {
+        match self.stage {
+            Stage::StartNextWave => {
                 self.zombies_spawned = 0;
                 self.kills = 0;
 
@@ -143,9 +130,9 @@ impl WavesScenario {
                 }
 
                 commands.queue(heal_humans);
-                return Task::SpawnZombie;
+                return Stage::SpawnZombie;
             }
-            Task::SpawnZombie => {
+            Stage::SpawnZombie => {
                 log::debug!("Spawning a zombie");
 
                 let mut spawn = SpawnActor {
@@ -164,20 +151,20 @@ impl WavesScenario {
                 }
 
                 commands.queue(spawn);
-                self.zombies_spawned += 1;
+                self.zombies_spawned = self.zombies_spawned.saturating_add(1);
 
                 if self.zombies_spawned < wave.size {
-                    return Task::SpawnZombie;
+                    return Stage::SpawnZombie;
                 } else {
-                    return Task::CheckWaveCompletion;
+                    return Stage::CheckWaveCompletion;
                 }
             }
-            Task::CheckWaveCompletion => {
+            Stage::CheckWaveCompletion => {
                 commands.queue(count_zombies);
                 log::trace!("Checking for wave completion");
-                return Task::CheckWaveCompletion;
+                return Stage::CheckWaveCompletion;
             }
-            Task::CompleteWave => {
+            Stage::CompleteWave => {
                 if self.is_wave_last() {
                     commands.queue(Notify {
                         text: "Congratulations!".into(),
@@ -194,7 +181,10 @@ impl WavesScenario {
                 }
 
                 self.wave_index = self.wave_index.saturating_add(1);
-                return Task::StartNextWave;
+                return Stage::StartNextWave;
+            }
+            Stage::GameOver => {
+                return Stage::GameOver;
             }
         }
     }
@@ -207,6 +197,17 @@ impl WavesScenario {
 
     fn wave_number(&self) -> u8 {
         return self.wave_index.saturating_add(1);
+    }
+
+    fn interval(&self) -> Duration {
+        return match self.stage {
+            Stage::StartNextWave => Duration::from_secs(2),
+            Stage::SpawnZombie if self.is_wave_bonus() => Duration::from_millis(300),
+            Stage::SpawnZombie => Duration::from_millis(700),
+            Stage::CheckWaveCompletion => Duration::from_secs(2),
+            Stage::CompleteWave => Duration::from_secs(4),
+            Stage::GameOver => Duration::from_secs(10),
+        };
     }
 
     fn is_wave_last(&self) -> bool {
@@ -242,12 +243,12 @@ impl ScenarioLogic for WavesScenario {
         }
         .apply(world);
 
-        return DEFAULT_INTERVAL;
+        return self.interval();
     }
 
     fn on_actor_death(&mut self, event: &ActorDeathEvent, commands: &mut Commands) {
         if let ActorKind::Zombie = event.kind {
-            self.kills += 1;
+            self.kills = self.kills.saturating_add(1);
 
             if self.kills == 1 {
                 match self.wave_index {
@@ -296,17 +297,18 @@ impl ScenarioLogic for WavesScenario {
     }
 
     fn on_player_death(&mut self, _: &ActorDeathEvent, commands: &mut Commands) {
+        self.stage = Stage::GameOver;
         commands.queue(Notify {
             text: "Game over".into(),
             text_small: "You died. Press [ESC] to exit".into(),
-            duration: GAME_OVER_TEXT_DURATION,
+            duration: Duration::from_secs(8),
         });
     }
 
     fn on_interval_update(&mut self, _time: Duration, commands: &mut Commands) -> Duration {
-        let timeout = self.task.get_timeout();
-        self.task = WavesScenario::update(self, commands);
-        return timeout;
+        let interval = self.interval();
+        self.stage = WavesScenario::update(self, commands);
+        return interval;
     }
 
     fn as_any_mut(&mut self) -> &mut dyn Any {
@@ -362,7 +364,7 @@ fn count_zombies(world: &mut World) {
         .any(|a| a.config.kind == ActorKind::Zombie)
     {
         if let Some(scenario) = world.resource_mut::<Scenario>().logic::<WavesScenario>() {
-            scenario.task = Task::CompleteWave;
+            scenario.stage = Stage::CompleteWave;
         }
     }
 }
