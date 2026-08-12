@@ -386,11 +386,21 @@ fn on_bonus_wave_enter(world: &mut World) {
     let mut rng = rand::rng();
     let direction = rng.random_range(-PI..PI);
     for _ in 0..WAVE_BONUS_HUMANS {
+        let weapon = WeaponConfig::ALL
+            .choose_weighted(&mut rng, |w| {
+                if w.level <= 6 {
+                    return 1.0;
+                } else {
+                    return 0.0; // do not give best weapons to bots
+                }
+            })
+            .ok();
+
         SpawnActor {
             direction,
             distance: ENEMY_SPAWN_DISTANCE,
             config: &ActorConfig::HUMAN,
-            weapon: WeaponConfig::ALL.choose(&mut rng),
+            weapon,
         }
         .apply(world);
     }
