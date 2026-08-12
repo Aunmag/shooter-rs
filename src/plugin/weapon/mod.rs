@@ -108,6 +108,10 @@ fn on_update(
             hits.add(entity, recoil_push, recoil_spin, true);
         }
 
+        if !actor.actions.is_attacking() {
+            weapon.release_trigger();
+        }
+
         if !weapon.is_reloading() && (!weapon.has_ammo() || actor.actions.is_reloading()) {
             let reloading_duration = weapon.config.reloading_time.div_f32(actor.skill);
             weapon.reload(now, reloading_duration);

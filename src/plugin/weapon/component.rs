@@ -11,6 +11,7 @@ pub struct Weapon {
     reloading: Option<Duration>,
     last_shot: Duration,
     next_time: Duration,
+    is_trigger_pressed: bool,
 }
 
 impl Weapon {
@@ -23,10 +24,17 @@ impl Weapon {
             reloading: None,
             last_shot: Duration::ZERO,
             next_time: Duration::ZERO,
+            is_trigger_pressed: false,
         };
     }
 
     pub fn try_fire(&mut self, time: Duration) -> bool {
+        if !self.config.is_automatic && self.is_trigger_pressed {
+            return false;
+        }
+
+        self.is_trigger_pressed = true;
+
         if self.is_ready(time) && self.has_ammo() {
             self.ammo = self.ammo.saturating_sub(1);
             self.last_shot = time;
@@ -50,10 +58,20 @@ impl Weapon {
             self.reloading = None;
             self.ammo = self.config.ammo_capacity;
 
+            // it just makes gameplay more pleasant. so player won't need to re-click fire after
+            // reloading for guns that reload after each shot
+            if !self.config.is_automatic && self.config.ammo_capacity == 1 {
+                self.is_trigger_pressed = false;
+            }
+
             if !was_armed {
                 self.next_time = time + ARMING_DURATION;
             }
         }
+    }
+
+    pub fn release_trigger(&mut self) {
+        self.is_trigger_pressed = false;
     }
 
     pub fn get_mass(&self) -> f32 {

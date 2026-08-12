@@ -30,6 +30,8 @@ impl WeaponConfig {
     pub const RELOADING_TIME_RIFLE_HEAVY: Duration = Duration::from_millis(1600);
     pub const RELOADING_TIME_MACHINE_GUN: Duration = Duration::from_millis(5000);
 
+    pub const SEMI_AUTO_FIRE_RATE: f32 = 400.0;
+
     pub const RECOIL_MASS_POW: f32 = 0.25;
     pub const RECOIL_POW: f32 = 0.5;
     pub const RECOIL_MUL: f32 = 13.0;
@@ -55,7 +57,7 @@ impl WeaponConfig {
         mass: 0.73,
         muzzle_velocity: 315.0,
         deviation: 0.03,
-        fire_rate: 120.0,
+        fire_rate: Self::SEMI_AUTO_FIRE_RATE,
         is_automatic: false,
         projectile: &ProjectileConfig::_9X18,
         ammo_capacity: 8,
@@ -77,7 +79,7 @@ impl WeaponConfig {
         mass: 0.85,
         muzzle_velocity: 430.0,
         deviation: 0.025,
-        fire_rate: 110.0,
+        fire_rate: Self::SEMI_AUTO_FIRE_RATE,
         is_automatic: false,
         projectile: &ProjectileConfig::_7_62X25,
         ammo_capacity: 8,
@@ -94,7 +96,7 @@ impl WeaponConfig {
         mass: 2.2,
         muzzle_velocity: 260.0,
         deviation: 0.1,
-        fire_rate: 100.0,
+        fire_rate: Self::SEMI_AUTO_FIRE_RATE,
         is_automatic: false,
         projectile: &ProjectileConfig::_12X76,
         ammo_capacity: 2,
@@ -128,7 +130,7 @@ impl WeaponConfig {
         mass: 3.2,
         muzzle_velocity: 410.0,
         deviation: 0.022,
-        fire_rate: 85.0,
+        fire_rate: Self::SEMI_AUTO_FIRE_RATE,
         is_automatic: false,
         projectile: &ProjectileConfig::_12X76,
         ammo_capacity: 2,
@@ -218,7 +220,7 @@ impl WeaponConfig {
         mass: 5.8,
         muzzle_velocity: 120.0,
         deviation: 0.0, // make perfect precision since each shoot from RPG-7 takes a very long time
-        fire_rate: 120.0,
+        fire_rate: Self::SEMI_AUTO_FIRE_RATE,
         is_automatic: false,
         projectile: &ProjectileConfig::TBG_7V,
         ammo_capacity: 1,
@@ -235,7 +237,7 @@ impl WeaponConfig {
         mass: 3.3,
         muzzle_velocity: 410.0,
         deviation: 0.03,
-        fire_rate: 220.0,
+        fire_rate: Self::SEMI_AUTO_FIRE_RATE,
         is_automatic: false,
         projectile: &ProjectileConfig::_12X76,
         ammo_capacity: 10,
