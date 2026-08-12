@@ -24,6 +24,7 @@ impl<'a> ProjectileState<'a> {
                 (t * a).exp_m1() * v / a
             }
             ProjectilePhysics::Rocket => calc_rocket_distance(v, t),
+            ProjectilePhysics::Grenade => v * t,
         };
 
         traveled *= ProjectileConfig::VELOCITY_VISUAL_FACTOR;
@@ -51,6 +52,9 @@ impl<'a> ProjectileState<'a> {
             ProjectilePhysics::Bullet => return v + d * self.projectile.config.acceleration(),
             ProjectilePhysics::Rocket => {
                 return v; // it actually might be slower due to acceleration but it doesn't matter for now
+            }
+            ProjectilePhysics::Grenade => {
+                return v;
             }
         };
     }
@@ -105,6 +109,17 @@ mod tests {
 
         let (t, d) = test_physics(&ProjectileConfig::TBG_7V, 5.0);
         assert_eq!(t, 243);
+        assert_eq!(d, 5.0);
+    }
+
+    #[test]
+    fn test_grenade() {
+        let (t, d) = test_physics(&ProjectileConfig::VOG_25, f32::INFINITY);
+        assert_eq!(t, 250);
+        assert_eq!(d, 20.0);
+
+        let (t, d) = test_physics(&ProjectileConfig::VOG_25, 5.0);
+        assert_eq!(t, 63);
         assert_eq!(d, 5.0);
     }
 

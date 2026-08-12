@@ -13,6 +13,7 @@ pub mod debug;
 mod debug_tweaks;
 mod explosion;
 mod footsteps;
+mod grenade;
 mod health;
 mod heartbeat;
 mod input;
@@ -33,7 +34,7 @@ mod weapon;
 
 pub use self::{
     actor::*, ambience_fx::*, audio::*, blood::*, bonus::*, breath::*, camera::*, crosshair::*,
-    debug_tweaks::*, explosion::*, footsteps::*, health::*, heartbeat::*, input::*, loading::*,
-    melee::*, particle::*, projectile::*, skip_loader::*, sprite_dissolve::*, status_bar::*,
-    terrain::*, tile_map::*, ui_notification::*, weapon::*,
+    debug_tweaks::*, explosion::*, footsteps::*, grenade::*, health::*, heartbeat::*, input::*,
+    loading::*, melee::*, particle::*, projectile::*, skip_loader::*, sprite_dissolve::*,
+    status_bar::*, terrain::*, tile_map::*, ui_notification::*, weapon::*,
 };

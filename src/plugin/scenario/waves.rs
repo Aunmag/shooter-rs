@@ -222,18 +222,7 @@ impl ScenarioLogic for WavesScenario {
     fn on_enter(&mut self, _time: Duration, world: &mut World) -> Duration {
         ForestMap.generate(world);
 
-        let weapon = WeaponConfig::ALL
-            .iter()
-            .find(|w| {
-                let wave = self.wave_number();
-
-                if wave == 1 {
-                    return w.level == wave;
-                } else {
-                    return w.level == wave.saturating_sub(1); // give weapon of previous level
-                }
-            })
-            .unwrap_or(&WeaponConfig::IZH_27);
+        let weapon = &WeaponConfig::RG_6;
 
         PlayerSpawn {
             config: &ActorConfig::HUMAN,

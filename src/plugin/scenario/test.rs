@@ -13,7 +13,7 @@ impl ScenarioLogic for TestScenario {
 
         PlayerSpawn {
             config: &ActorConfig::HUMAN,
-            weapon: &WeaponConfig::AKS_74U,
+            weapon: &WeaponConfig::RG_6,
             is_controllable: true,
         }
         .apply(world);

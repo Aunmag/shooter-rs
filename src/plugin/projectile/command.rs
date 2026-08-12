@@ -1,6 +1,8 @@
 use crate::{
     data::LAYER_PROJECTILE,
-    plugin::{projectile::material::ProjectileMaterial, Projectile, ProjectileConfig},
+    plugin::{
+        projectile::material::ProjectileMaterial, Projectile, ProjectileConfig, ProjectilePhysics,
+    },
     resource::AssetStorage,
     util::ext::Vec2Ext,
 };
@@ -15,7 +17,6 @@ use bevy::{
 
 pub struct ProjectileSpawn {
     pub config: &'static ProjectileConfig,
-    // TODO: store spawn time here for better accuracy?
     pub position: Vec2,
     pub velocity: Vec2,
     pub distance_limit: f32,
@@ -35,22 +36,27 @@ impl Command for ProjectileSpawn {
             self.shooter,
         );
 
-        let mesh = world.resource::<AssetStorage>().dummy_mesh().clone();
+        let transform = Transform {
+            translation: self.position.extend(LAYER_PROJECTILE),
+            rotation: self.velocity.as_quat(),
+            scale: Vec3::new(0.0, 0.0, 1.0),
+        };
 
-        let material = world
-            .resource_mut::<Assets<ProjectileMaterial>>()
-            .add(ProjectileMaterial {});
+        if self.config.physics == ProjectilePhysics::Grenade {
+            world.spawn((projectile, transform));
+        } else {
+            let mesh = world.resource::<AssetStorage>().dummy_mesh().clone();
 
-        world
-            .spawn((
-                Transform {
-                    translation: self.position.extend(LAYER_PROJECTILE),
-                    rotation: self.velocity.as_quat(),
-                    scale: Vec3::new(0.0, 0.0, 1.0),
-                },
+            let material = world
+                .resource_mut::<Assets<ProjectileMaterial>>()
+                .add(ProjectileMaterial {});
+
+            world.spawn((
+                projectile,
+                transform,
                 Mesh2d(mesh),
                 MeshMaterial2d(material),
-            ))
-            .insert(projectile);
+            ));
+        }
     }
 }

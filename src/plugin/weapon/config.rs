@@ -48,6 +48,7 @@ impl WeaponConfig {
         Self::RPK_74,
         Self::SAIGA_12K,
         Self::PKM,
+        Self::RG_6,
         Self::RPG_7,
     ];
 
@@ -263,6 +264,23 @@ impl WeaponConfig {
         is_shotgun: false,
         grip: WeaponGrip::TwoHandsWithButt,
         image_offset: 10.0,
+    };
+
+    pub const RG_6: Self = Self {
+        name: "RG-6",
+        level: 7,
+        mass: 5.6,
+        muzzle_velocity: 76.0,
+        deviation: 0.0,
+        fire_rate: Self::SEMI_AUTO_FIRE_RATE,
+        is_automatic: false,
+        projectile: &ProjectileConfig::VOG_25,
+        ammo_capacity: 6,
+        reloading_time: Duration::from_millis(2000),
+        has_bolt: false,
+        is_shotgun: false,
+        grip: WeaponGrip::TwoHandsWithButt,
+        image_offset: 9.0,
     };
 
     pub fn get_mass_with_full_ammo(&self) -> f32 {

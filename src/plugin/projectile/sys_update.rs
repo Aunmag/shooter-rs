@@ -1,7 +1,7 @@
 use crate::{
     plugin::{
         collision::Collision, projectile::state::ProjectileState, Actor, AudioPlay, AudioTracker,
-        DirtParticleSpawn, Explode, Projectile,
+        DirtParticleSpawn, Explode, Projectile, ProjectilePhysics,
     },
     resource::HitResource,
     util::{ext::Vec2Ext, geometry::GeometryProjection, math::angle_factor_signed},
@@ -55,7 +55,7 @@ pub fn on_update(
         let mut p0 = s0.position();
         let mut stopped = s0.stopped();
 
-        if !stopped {
+        if !stopped && j.config.physics != ProjectilePhysics::Grenade {
             let p1 = ProjectileState::calc(&j, t1).position();
 
             if let Some(victim) = Victim::find(p0, p1, &obstacles, j.shooter) {

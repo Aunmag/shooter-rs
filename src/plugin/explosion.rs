@@ -79,8 +79,8 @@ impl Command for Explode {
             .insert(explosion);
 
         world.resource::<AudioTracker>().queue(AudioPlay {
-            path: "sounds/explosion".into(),
-            volume: 1.2,
+            path: self.config.sound.into(),
+            volume: self.config.volume,
             source: Some(self.position),
             falloff: AudioPlay::FALLOFF_LONGEST,
             ..AudioPlay::DEFAULT

@@ -69,6 +69,21 @@ impl ProjectileConfig {
         explosion: Some(ProjectileExplosion {
             radius: 3.2,
             energy: 12.0,
+            sound: "sounds/explosion_a",
+            volume: 1.2,
+        }),
+    };
+
+    pub const VOG_25: Self = Self {
+        fragments: 1,
+        mass: 0.25,
+        size: 1.0,
+        physics: ProjectilePhysics::Grenade,
+        explosion: Some(ProjectileExplosion {
+            radius: 2.2,
+            energy: 8.0,
+            sound: "sounds/explosion_b",
+            volume: 1.0,
         }),
     };
 
@@ -85,6 +100,7 @@ impl ProjectileConfig {
 pub enum ProjectilePhysics {
     Bullet,
     Rocket,
+    Grenade,
 }
 
 impl ProjectilePhysics {
@@ -92,6 +108,7 @@ impl ProjectilePhysics {
         return match self {
             Self::Bullet => f32::INFINITY,
             Self::Rocket => 40.0,
+            Self::Grenade => 15.0,
         };
     }
 }
@@ -100,4 +117,6 @@ impl ProjectilePhysics {
 pub struct ProjectileExplosion {
     pub radius: f32,
     pub energy: f32,
+    pub sound: &'static str,
+    pub volume: f32,
 }
