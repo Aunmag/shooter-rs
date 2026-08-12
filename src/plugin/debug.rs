@@ -220,7 +220,11 @@ fn update_input(
 
     match spawn {
         Spawn::Bonus => {
-            commands.queue(BonusSpawn::new(position.position, u8::MAX));
+            commands.queue(BonusSpawn {
+                position: position.position,
+                weapon: None,
+                level: u8::MAX,
+            });
         }
         Spawn::Human => {
             spawn_actors(&mut commands, position, &ActorConfig::HUMAN, group);

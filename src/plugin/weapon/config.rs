@@ -46,9 +46,9 @@ impl WeaponConfig {
         Self::AKS_74U,
         Self::AK_74M,
         Self::RPK_74,
-        Self::RPG_7,
         Self::SAIGA_12K,
         Self::PKM,
+        Self::RPG_7,
     ];
 
     pub const PM: Self = Self {
@@ -216,7 +216,7 @@ impl WeaponConfig {
 
     pub const RPG_7: Self = Self {
         name: "RPG-7",
-        level: 5,
+        level: 8,
         mass: 5.8,
         muzzle_velocity: 120.0,
         deviation: 0.0, // make perfect precision since each shoot from RPG-7 takes a very long time

@@ -67,8 +67,8 @@ impl ProjectileConfig {
         size: 5.0,
         physics: ProjectilePhysics::Rocket,
         explosion: Some(ProjectileExplosion {
-            radius: 4.0,
-            energy: 8.0,
+            radius: 3.2,
+            energy: 12.0,
         }),
     };
 

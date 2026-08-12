@@ -133,21 +133,7 @@ impl WavesScenario {
                 self.kills = 0;
 
                 if self.is_wave_bonus() {
-                    commands.queue(Notify {
-                        text: "Bonus wave".into(),
-                        text_small: "How long will you stay? Support is on the way...".into(),
-                        ..Default::default()
-                    });
-
-                    let direction = self.rng.random_range(-PI..PI);
-                    for _ in 0..WAVE_BONUS_HUMANS {
-                        commands.queue(SpawnActor {
-                            direction,
-                            distance: ENEMY_SPAWN_DISTANCE,
-                            config: &ActorConfig::HUMAN,
-                            weapon: WeaponConfig::ALL.choose(&mut self.rng),
-                        });
-                    }
+                    commands.queue(on_bonus_wave_enter);
                 } else {
                     commands.queue(Notify {
                         text: format!("Wave {}/{}", self.wave_number(), WAVES.len()).into(),
@@ -300,7 +286,11 @@ impl ScenarioLogic for WavesScenario {
                 .rng
                 .random_bool(f32::min(BONUSES_PER_WAVE * wave / wave_size, 1.0).into())
             {
-                commands.queue(BonusSpawn::new(event.position, self.wave_number()));
+                commands.queue(BonusSpawn {
+                    position: event.position,
+                    weapon: None,
+                    level: self.wave_number(),
+                });
             }
         }
     }
@@ -342,21 +332,7 @@ impl Command for SpawnActor {
     type Out = ();
 
     fn apply(self, world: &mut World) {
-        let mut center = Vec2::ZERO;
-        let mut players = 0.0;
-
-        for transform in world
-            .query_filtered::<&Transform, With<Player>>()
-            .iter(world)
-        {
-            center += transform.translation.xy();
-            players += 1.0;
-        }
-
-        if players > 0.0 {
-            center /= players;
-        }
-
+        let center = find_players_center(world);
         let entity = world.spawn_empty().id();
 
         ActorSet {
@@ -397,4 +373,55 @@ fn heal_humans(world: &mut World) {
             health.heal();
         }
     }
+}
+
+fn on_bonus_wave_enter(world: &mut World) {
+    Notify {
+        text: "Bonus wave".into(),
+        text_small: "How long will you stay? Support is on the way...".into(),
+        ..Default::default()
+    }
+    .apply(world);
+
+    let mut rng = rand::rng();
+    let direction = rng.random_range(-PI..PI);
+    for _ in 0..WAVE_BONUS_HUMANS {
+        SpawnActor {
+            direction,
+            distance: ENEMY_SPAWN_DISTANCE,
+            config: &ActorConfig::HUMAN,
+            weapon: WeaponConfig::ALL.choose(&mut rng),
+        }
+        .apply(world);
+    }
+
+    let center = find_players_center(world);
+
+    for x in [-3.0, 3.0] {
+        BonusSpawn {
+            position: center + Vec2::new(x, 0.0),
+            weapon: Some(&WeaponConfig::RPG_7),
+            level: u8::MAX,
+        }
+        .apply(world);
+    }
+}
+
+fn find_players_center(world: &mut World) -> Vec2 {
+    let mut center = Vec2::ZERO;
+    let mut players = 0.0;
+
+    for transform in world
+        .query_filtered::<&Transform, With<Player>>()
+        .iter(world)
+    {
+        center += transform.translation.xy();
+        players += 1.0;
+    }
+
+    if players > 0.0 {
+        center /= players;
+    }
+
+    return center;
 }

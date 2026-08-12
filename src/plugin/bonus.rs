@@ -50,21 +50,16 @@ impl Plugin for BonusPlugin {
 }
 
 pub struct BonusSpawn {
-    position: Vec2,
-    level: u8,
-}
-
-impl BonusSpawn {
-    pub fn new(position: Vec2, level: u8) -> Self {
-        return Self { position, level };
-    }
+    pub position: Vec2,
+    pub weapon: Option<&'static WeaponConfig>,
+    pub level: u8,
 }
 
 impl Command for BonusSpawn {
     type Out = ();
 
     fn apply(self, world: &mut World) {
-        if let Some(weapon) = choose_weapon(world, self.level) {
+        if let Some(weapon) = self.weapon.or_else(|| choose_weapon(world, self.level)) {
             let bonus = spawn_bonus(world, self.position, weapon);
             spawn_image(world, bonus, weapon);
             spawn_label(world, bonus, weapon);
