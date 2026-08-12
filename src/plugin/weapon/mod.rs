@@ -149,6 +149,10 @@ fn generate_distance_limit(weapon: &WeaponConfig, actor: &Actor, rng: &mut Pcg32
         distance_limit = distance_limit.fuzz_with(rng, 0.1);
     }
 
+    if let Some(explosion) = &weapon.projectile.explosion {
+        distance_limit = f32::max(distance_limit, explosion.radius);
+    }
+
     return f32::max(distance_limit - Weapon::BARREL_LENGTH, 0.1);
 }
 
