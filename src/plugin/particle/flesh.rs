@@ -8,6 +8,7 @@ use crate::{
 };
 use bevy::{
     asset::AssetServer,
+    color::Srgba,
     ecs::{entity::Entity, system::Command, world::World},
     math::{Vec2, Vec3},
     prelude::{Time, Transform},
@@ -67,6 +68,7 @@ impl Command for FleshParticleSpawn {
             .spawn((
                 Sprite {
                     image,
+                    color: Srgba::WHITE.fuzz(&mut rng).into(),
                     flip_x: rng.random(),
                     flip_y: rng.random(),
                     ..Default::default()
