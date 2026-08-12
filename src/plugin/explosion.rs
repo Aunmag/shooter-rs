@@ -182,11 +182,9 @@ fn on_update(
             .map(|a| a.1.config.kind);
 
         for (actor_entity, actor, actor_transform, actor_body) in actors.iter() {
-            if explosion.shooter == Some(actor_entity) {
-                continue;
-            }
+            let is_self = explosion.shooter == Some(actor_entity);
 
-            if shooter_kind == Some(actor.config.kind) {
+            if !is_self && shooter_kind == Some(actor.config.kind) {
                 continue;
             }
 
@@ -197,9 +195,13 @@ fn on_update(
                     continue;
                 }
 
-                let energy = (actor_position - explosion_position).normalize()
+                let mut energy = (actor_position - explosion_position).normalize()
                     * explosion.config.energy
                     * force_factor;
+
+                if is_self {
+                    energy /= 2.0;
+                }
 
                 hits.add(actor_entity, energy, 0.0, false);
                 hits.add(actor_entity, energy * PUSH_MULTIPLIER, 0.0, true); // extra push without damage
