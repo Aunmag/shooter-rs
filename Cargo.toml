@@ -11,8 +11,8 @@ bevy = { version = "0.19", default-features = false, features = [
     "default_app",
     "default_platform",
     "ui_bevy_render",
-    # "debug", # only for dev builds
-    # "dynamic_linking", # only for dev builds
+    "debug", # only for dev builds
+    "dynamic_linking", # only for dev builds
 ] }
 chrono = "0.4"
 enumset = { version = "1.1", features = ["serde"] }
@@ -28,7 +28,7 @@ toml = "1.1"
 criterion = { version = "0.8", features = ["html_reports"] }
 
 [features]
-# default = ["bench"] # NOTE: for dev builds only
+default = ["bench"] # NOTE: for dev builds only
 bench = []
 
 # Enable more optimizations for dependencies in debug mode but not the project code itself
