@@ -16,7 +16,7 @@ impl ProjectileConfig {
 
     /// Makes game more caricature by slowing projectiles down, but the physics still works as if
     /// they travel with real-world velocities
-    pub const VELOCITY_VISUAL_FACTOR: f32 = 1.0 / 5.0;
+    pub const VELOCITY_VISUAL_FACTOR: f32 = 1.0 / 8.0;
 
     pub const ROCKET_ACCELERATION_FACTOR: f32 = 8.0;
     pub const ROCKET_ACCELERATION_TIME: Duration = Duration::from_millis(800);

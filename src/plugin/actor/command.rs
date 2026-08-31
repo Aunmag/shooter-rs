@@ -1,15 +1,7 @@
 use crate::{
-    data::{LAYER_ACTOR, TRANSFORM_SCALE},
-    plugin::{
-        actor::{action::ActorActions, config::ActorKind, Actor, ActorConfig},
-        bot::Bot,
-        camera_target::CameraTarget,
-        collision::Collision,
-        kinetics::Kinetics,
-        player::Player,
-        Breath, Crosshair, Footsteps, Health, StatusBar,
-    },
-    resource::Settings,
+    data::{LAYER_ACTOR, TRANSFORM_SCALE}, plugin::{
+        Breath, Crosshair, Footsteps, Health, Heartbeat, StatusBar, actor::{Actor, ActorConfig, action::ActorActions, config::ActorKind}, bot::Bot, camera_target::CameraTarget, collision::Collision, kinetics::Kinetics, player::Player,
+    }, resource::Settings,
 };
 use bevy::{
     ecs::{hierarchy::Children, system::Command},
@@ -92,6 +84,7 @@ impl Command for ActorRelease {
         entity_mut.remove::<Bot>();
         entity_mut.remove::<Player>();
         entity_mut.remove::<Breath>();
+        entity_mut.remove::<Heartbeat>();
         entity_mut.remove::<CameraTarget>();
 
         let mut to_remove = Vec::new();

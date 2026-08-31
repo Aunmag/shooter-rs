@@ -124,7 +124,7 @@ impl WeaponSet {
             .map(|t| t.translation.xy())
         {
             world.resource::<AudioTracker>().queue(AudioPlay {
-                path: "sounds/pickup_weapon".into(),
+                path: "sounds/player/pickup".into(),
                 volume: 0.9,
                 source: Some(source),
                 ..AudioPlay::DEFAULT

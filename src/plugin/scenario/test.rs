@@ -1,6 +1,5 @@
 use crate::{
-    map::{Map, TestMap},
-    plugin::{player::PlayerSpawn, scenario::ScenarioLogic, ActorConfig, WeaponConfig},
+    map::{ForestMap, Map, TestMap}, plugin::{ActorConfig, WeaponConfig, player::PlayerSpawn, scenario::ScenarioLogic},
 };
 use bevy::ecs::{system::Command, world::World};
 use std::{any::Any, time::Duration};
@@ -9,7 +8,8 @@ pub struct TestScenario;
 
 impl ScenarioLogic for TestScenario {
     fn on_enter(&mut self, _time: Duration, world: &mut World) -> Duration {
-        TestMap.generate(world);
+        ForestMap.generate(world);
+        // TestMap.generate(world);
 
         PlayerSpawn {
             config: &ActorConfig::HUMAN,

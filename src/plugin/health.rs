@@ -23,7 +23,6 @@ use std::time::Duration;
 /// Increased buffering helps to summarize small and frequent damage events into one which is good
 /// for visual effects like blood. But also it increases the delay
 const BUFFERING: Duration = Duration::from_millis(80);
-const LOW_VALUE: f32 = 0.4;
 const FLESH_PARTICLE_PER_DAMAGE: f32 = 0.2;
 const FLESH_PARTICLES_MAX: i32 = 8;
 
@@ -45,13 +44,15 @@ impl Plugin for HealthPlugin {
 pub struct Health {
     resistance: f32,
     /// In range of `0.0` and `1.0`
-    health: f32,
+    pub health: f32, // TODO: make private
     /// In range of `0.0` and `INFINITY`
     damage: f32,
     just_died: bool,
 }
 
 impl Health {
+    pub const LOW_VALUE: f32 = 0.4;
+
     pub fn new(resistance: f32) -> Self {
         return Self {
             resistance,
@@ -97,7 +98,7 @@ impl Health {
     }
 
     pub fn is_low(&self) -> bool {
-        return self.health < LOW_VALUE;
+        return self.health < Self::LOW_VALUE;
     }
 }
 
@@ -116,6 +117,7 @@ fn on_update(
     for (entity, actor, mut health, transform, is_player) in query.iter_mut() {
         let actor = actor.config;
         let point = transform.translation.xy();
+        // health.health = 0.3;
 
         if health.is_alive() && health.damage > actor.pain_threshold {
             audio.queue(AudioPlay {
