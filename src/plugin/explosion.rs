@@ -2,7 +2,7 @@ use crate::{
     data::{LAYER_GROUND, LAYER_PROJECTILE},
     plugin::{
         collision::{Collision, CollisionSystems},
-        Actor, AudioPlay, AudioTracker, DirtParticleSpawn, ProjectileExplosion, TileBlend,
+        Actor, AudioPlay, AudioPool, DirtParticleSpawn, ProjectileExplosion, TileBlend,
     },
     resource::{AssetStorage, HitResource},
     state::AppState,
@@ -78,7 +78,7 @@ impl Command for Explode {
             ))
             .insert(explosion);
 
-        world.resource::<AudioTracker>().queue(AudioPlay {
+        world.resource::<AudioPool>().queue(AudioPlay {
             path: "sounds/explosion".into(),
             volume: 1.2,
             source: Some(self.position),

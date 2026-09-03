@@ -1,5 +1,5 @@
 use crate::{
-    plugin::{camera_target::CameraTarget, Actor, AudioPlay, AudioTracker, Health},
+    plugin::{camera_target::CameraTarget, Actor, AudioPlay, AudioPool, Health},
     state::AppState,
     util::{ext::AppExt, math::interpolate, Timer},
 };
@@ -41,7 +41,7 @@ impl Heartbeat {
     pub const PATH: &'static str = "sounds/heartbeat";
 }
 
-fn on_enter(audio: Res<AudioTracker>) {
+fn on_enter(audio: Res<AudioPool>) {
     audio.queue(AudioPlay {
         path: Heartbeat::PATH.into(),
         duration: AudioPlay::DURATION_FOREVER,

@@ -1,7 +1,7 @@
 use crate::{
     plugin::{
         collision::CollisionSystems, Actor, ActorAction, ActorActionsExt, ActorConfig, AudioPlay,
-        AudioTracker, Weapon,
+        AudioPool, Weapon,
     },
     resource::HitResource,
     state::AppState,
@@ -28,7 +28,7 @@ fn on_update(
     attackers: Query<(Entity, &Actor, &Transform), Without<Weapon>>,
     targets: Query<(Entity, &Actor, &Transform)>,
     mut hits: Deferred<HitResource>,
-    audio: Res<AudioTracker>,
+    audio: Res<AudioPool>,
     mut commands: Commands,
     time: Res<Time>,
 ) {

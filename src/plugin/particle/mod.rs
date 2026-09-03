@@ -44,7 +44,7 @@ impl Plugin for ParticlePlugin {
 }
 
 #[derive(Component)]
-struct Particle {
+pub struct Particle {
     config: &'static ParticleConfig,
     position: Vec2,
     rotation: f32,

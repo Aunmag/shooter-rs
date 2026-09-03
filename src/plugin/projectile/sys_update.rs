@@ -1,6 +1,6 @@
 use crate::{
     plugin::{
-        collision::Collision, projectile::state::ProjectileState, Actor, AudioPlay, AudioTracker,
+        collision::Collision, projectile::state::ProjectileState, Actor, AudioPlay, AudioPool,
         DirtParticleSpawn, Explode, Projectile,
     },
     resource::HitResource,
@@ -25,7 +25,7 @@ pub fn on_update(
     obstacles: Query<(Entity, &Collision, &Transform, &Actor), Without<Projectile>>,
     mut hits: Deferred<HitResource>,
     mut commands: Commands,
-    audio: Res<AudioTracker>,
+    audio: Res<AudioPool>,
     time: Res<Time>,
 ) {
     crate::util::bench::bench!();
@@ -167,7 +167,7 @@ impl Victim {
         return victim;
     }
 
-    fn hit(&self, s: &ProjectileState, audio: &AudioTracker, hits: &mut HitResource) {
+    fn hit(&self, s: &ProjectileState, audio: &AudioPool, hits: &mut HitResource) {
         let force = s.velocity() * s.projectile.config.fragment_mass();
 
         if force.is_zero() {

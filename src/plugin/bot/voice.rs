@@ -1,5 +1,5 @@
 use crate::{
-    plugin::{Actor, AudioPlay, AudioTracker},
+    plugin::{Actor, AudioPlay, AudioPool},
     state::AppState,
     util::{ext::AppExt, Timer},
 };
@@ -29,7 +29,7 @@ pub struct BotVoice {
 
 fn on_update(
     mut bots: Query<(&mut BotVoice, &Actor, &Transform)>,
-    audio: Res<AudioTracker>,
+    audio: Res<AudioPool>,
     time: Res<Time>,
 ) {
     crate::util::bench::bench!();

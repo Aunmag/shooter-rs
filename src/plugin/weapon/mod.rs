@@ -5,7 +5,7 @@ mod config;
 pub use self::{command::*, component::*, config::*};
 use crate::{
     plugin::{
-        collision::CollisionSystems, Actor, ActorActionsExt, AudioPlay, AudioTracker,
+        collision::CollisionSystems, Actor, ActorActionsExt, AudioPlay, AudioPool,
         ProjectilePhysics, ProjectileSpawn, ShellParticleSpawn,
     },
     resource::HitResource,
@@ -45,7 +45,7 @@ fn on_update(
     mut query: Query<(Entity, &Actor, &Transform, &mut Weapon)>,
     mut commands: Commands,
     mut hits: Deferred<HitResource>,
-    audio: Res<AudioTracker>,
+    audio: Res<AudioPool>,
     time: Res<Time>,
 ) {
     crate::util::bench::bench!();

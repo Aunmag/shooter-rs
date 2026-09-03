@@ -1,8 +1,8 @@
 [game]
-scenario = "waves" # bench_projectiles, bench_zombies, test, test_bot_spread, waves
+scenario = "test" # bench_projectiles, bench_zombies, test, test_bot_spread, waves
 difficulty = 1.0 # 0.8 - easy, 1.0 - medium, 1.2 - hard
-level = 1 # starting level
-debug = false
+level = 8 # starting level
+debug = true
 
 [display]
 mode = "borderless" # fullscreen, borderless, windowed
@@ -11,7 +11,7 @@ window_h = 800
 v_sync = false
 
 [audio]
-sources = 48
+sources = 32 # 265 is laggy
 
 [controls]
 mouse_sensitivity = 0.003

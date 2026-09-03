@@ -1,7 +1,7 @@
 use crate::{
     data::{LAYER_GROUND, LAYER_TREE, WORLD_SIZE, WORLD_SIZE_HALF, WORLD_SIZE_VISUAL},
     map::Map,
-    plugin::{AudioPlay, AudioTracker, TerrainSpawn, TileBlend},
+    plugin::{AudioPlay, AudioPool, TerrainSpawn, TileBlend},
     util::ext::{Fuzz, RngExt2, Vec2Ext},
 };
 use bevy::{
@@ -117,7 +117,7 @@ fn spawn_trees(world: &mut World) {
 }
 
 fn play_audio(world: &mut World) {
-    let audio = world.resource::<AudioTracker>();
+    let audio = world.resource::<AudioPool>();
 
     audio.queue(AudioPlay {
         path: "sounds/ambience_music".into(),

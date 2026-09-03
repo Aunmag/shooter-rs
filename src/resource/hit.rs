@@ -21,6 +21,10 @@ pub struct HitResource {
 
 impl HitResource {
     pub fn add(&mut self, entity: Entity, momentum: Vec2, spin: f32, is_recoil: bool) {
+        if is_recoil {
+            return;
+        }
+
         // TODO: find out why NaN might happen
         if momentum.is_zero() || !momentum.is_finite() {
             return;
@@ -60,11 +64,12 @@ impl SystemBuffer for HitResource {
                     health.damage(momentum_linear);
                 }
 
-                kinetics.push(push, spin, false);
-
                 if let Some(mut camera) = camera {
                     camera.shake(push, spin);
+                    spin = 0.0; // TODO: document
                 }
+
+                kinetics.push(push, spin, false);
             }
         }
     }

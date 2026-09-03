@@ -1,5 +1,5 @@
 use crate::{
-    plugin::{AudioPlay, AudioTracker},
+    plugin::{AudioPlay, AudioPool},
     state::AppState,
     util::{
         ext::{AppExt, Fuzz},
@@ -54,7 +54,7 @@ pub struct Footsteps {
 // TODO: play sound on turn
 fn on_update(
     mut query: Query<(&mut Footsteps, &Transform)>,
-    audio: Res<AudioTracker>,
+    audio: Res<AudioPool>,
     time: Res<Time>,
 ) {
     crate::util::bench::bench!();
@@ -97,7 +97,7 @@ fn on_update(
         footsteps.position = position;
 
         let volume_abstract = calc_stride_volume(intensity);
-        let volume_spatial = SOUND.calc_spatial_volume(volume_abstract, position, audio.listener);
+        let volume_spatial = SOUND.calc_spatial_volume(volume_abstract, position, audio.listener());
 
         combined_volume += volume_spatial * volume_spatial;
     }

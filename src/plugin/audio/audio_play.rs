@@ -1,5 +1,9 @@
-use crate::util::{ext::Vec2Ext, SmartString};
-use bevy::{audio::Volume, math::Vec2, prelude::PlaybackSettings};
+use crate::util::SmartString;
+use bevy::{
+    audio::{PlaybackMode, Volume},
+    math::Vec2,
+    prelude::PlaybackSettings,
+};
 use std::time::Duration;
 
 #[derive(Clone)]
@@ -25,8 +29,6 @@ impl AudioPlay {
     pub const FALLOFF_LONGER: f32 = f32::midpoint(Self::FALLOFF_MEDIUM, Self::FALLOFF_LONGEST);
     pub const FALLOFF_LONGEST: f32 = 0.045;
 
-    pub const CLOSE_DISTANCE: f32 = 0.5;
-
     pub const DEFAULT: Self = Self {
         path: SmartString::Ref("sound/default"),
         volume: 1.0,
@@ -41,15 +43,16 @@ impl AudioPlay {
     }
 
     pub fn settings(&self) -> PlaybackSettings {
-        let settings = if self.is_looped() {
-            PlaybackSettings::LOOP
-        } else {
-            PlaybackSettings::ONCE
+        return PlaybackSettings {
+            mode: if self.is_looped() {
+                PlaybackMode::Loop
+            } else {
+                PlaybackMode::Despawn
+            },
+            volume: Volume::Linear(self.volume),
+            speed: self.speed,
+            ..Default::default()
         };
-
-        return settings
-            .with_volume(Volume::Linear(self.volume))
-            .with_speed(self.speed);
     }
 
     pub fn is_looped(&self) -> bool {
@@ -65,26 +68,6 @@ impl AudioPlay {
             return Some(self.duration);
         } else {
             return None;
-        }
-    }
-
-    pub fn is_similar_to(&self, other: &Self) -> bool {
-        return self.path == other.path
-            && self.has_same_source(other)
-            && self.is_looped() == other.is_looped();
-    }
-
-    pub fn has_same_source(&self, other: &Self) -> bool {
-        match (self.source, other.source) {
-            (Some(s1), Some(s2)) => {
-                return s1.is_close(s2, Self::CLOSE_DISTANCE);
-            }
-            (None, None) => {
-                return true;
-            }
-            _ => {
-                return false;
-            }
         }
     }
 }

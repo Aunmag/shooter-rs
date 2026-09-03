@@ -1,7 +1,7 @@
 use crate::{
     plugin::{
         particle::{Particle, ParticleConfig},
-        AudioPlay, AudioTracker, TileBlend, Weapon,
+        AudioPlay, AudioPool, TileBlend, Weapon,
     },
     util::ext::{Fuzz, QuatExt, RngExt2, Vec2Ext},
 };
@@ -109,7 +109,7 @@ fn on_destroy(entity: Entity, point: Vec2, commands: &mut Commands) {
             ..AudioPlay::DEFAULT
         };
 
-        world.resource::<AudioTracker>().queue(AudioPlay {
+        world.resource::<AudioPool>().queue(AudioPlay {
             path: "sounds/shell_t0".into(),
             ..sound
         });
@@ -124,7 +124,7 @@ fn on_destroy(entity: Entity, point: Vec2, commands: &mut Commands) {
                 .commands()
                 .delayed()
                 .duration(delay)
-                .queue(move |w: &mut World| w.resource::<AudioTracker>().queue(audio));
+                .queue(move |w: &mut World| w.resource::<AudioPool>().queue(audio));
         }
 
         let audio = AudioPlay {
@@ -136,6 +136,6 @@ fn on_destroy(entity: Entity, point: Vec2, commands: &mut Commands) {
             .commands()
             .delayed()
             .duration(delay.mul_f32(0.6))
-            .queue(move |w: &mut World| w.resource::<AudioTracker>().queue(audio));
+            .queue(move |w: &mut World| w.resource::<AudioPool>().queue(audio));
     });
 }

@@ -133,8 +133,6 @@ impl WavesScenario {
                 return Stage::SpawnZombie;
             }
             Stage::SpawnZombie => {
-                log::debug!("Spawning a zombie");
-
                 let mut spawn = SpawnActor {
                     direction: self.rng.random_range(-PI..PI),
                     distance: ENEMY_SPAWN_DISTANCE,

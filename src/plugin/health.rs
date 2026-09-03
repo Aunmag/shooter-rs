@@ -1,6 +1,6 @@
 use crate::{
     plugin::{
-        player::Player, Actor, ActorDeathEvent, ActorRelease, AudioPlay, AudioTracker, BloodSpawn,
+        player::Player, Actor, ActorDeathEvent, ActorRelease, AudioPlay, AudioPool, BloodSpawn,
         FleshParticleSpawn,
     },
     resource::{ScenarioSettings, Settings},
@@ -106,7 +106,7 @@ fn on_update(
     mut death_events: MessageWriter<ActorDeathEvent>,
     mut commands: Commands,
     settings: Res<Settings>,
-    audio: Res<AudioTracker>,
+    audio: Res<AudioPool>,
 ) {
     crate::util::bench::bench!();
     if settings.game.scenario == ScenarioSettings::BenchProjectiles {

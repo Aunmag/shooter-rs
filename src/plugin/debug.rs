@@ -1,13 +1,14 @@
 use crate::{
     plugin::{
-        bot::ActorBotSet, ActorConfig, ActorKind, ActorSet, AudioTracker, BonusSpawn, Crosshair,
-        Explode, ProjectileConfig, TileMap, WeaponConfig, WeaponSet,
+        bot::ActorBotSet, ActorConfig, ActorKind, ActorSet, BonusSpawn, Crosshair, Explode,
+        Particle, ProjectileConfig, TileMap, WeaponConfig, WeaponSet,
     },
     state::AppState,
     util::{ext::AppExt, Timer, Transform2D},
 };
 use bevy::{
     app::{App, Plugin},
+    audio::AudioSink,
     color::Srgba,
     diagnostic::{DiagnosticsStore, EntityCountDiagnosticsPlugin, FrameTimeDiagnosticsPlugin},
     ecs::{
@@ -46,6 +47,7 @@ struct DiagnosticsData {
     fps: Option<i32>,
     entities: Option<i32>,
     audio_sources: Option<i32>,
+    particles: Option<i32>,
     map_layers: Option<i32>,
     map_tiles: Option<i32>,
     map_queue: Option<i32>,
@@ -83,6 +85,8 @@ fn on_init(world: &mut World) {
         .with_child(TextSpan::new("?"))
         .with_child(TextSpan::new("\nAudio sources: "))
         .with_child(TextSpan::new("?"))
+        .with_child(TextSpan::new("\nParticles: "))
+        .with_child(TextSpan::new("?"))
         .with_child(TextSpan::new("\n\nMap. Layers: "))
         .with_child(TextSpan::new("?"))
         .with_child(TextSpan::new("\nMap. Tiles: "))
@@ -101,7 +105,8 @@ fn on_init(world: &mut World) {
 
 fn update_diagnostics_data(
     diagnostics: Res<DiagnosticsStore>,
-    audio_tracker: Res<AudioTracker>,
+    audio: Query<Entity, With<AudioSink>>,
+    particles: Query<Entity, With<Particle>>,
     tile_map: Res<TileMap>,
     mut data: ResMut<DiagnosticsData>,
 ) {
@@ -122,8 +127,13 @@ fn update_diagnostics_data(
     }
 
     {
-        let value = audio_tracker.playing as i32;
+        let value = audio.count() as i32;
         data.audio_sources = Some(i32::max(value, data.audio_sources.unwrap_or(value)));
+    }
+
+    {
+        let value = particles.count() as i32;
+        data.particles = Some(i32::max(value, data.particles.unwrap_or(value)));
     }
 
     {
@@ -151,14 +161,16 @@ fn update_diagnostics_text_inner(
         *text_writer.text(entity, 2) = data.fps.unwrap_or(-1).to_string();
         *text_writer.text(entity, 4) = data.entities.unwrap_or(-1).to_string();
         *text_writer.text(entity, 6) = data.audio_sources.unwrap_or(-1).to_string();
-        *text_writer.text(entity, 8) = data.map_layers.unwrap_or(-1).to_string();
-        *text_writer.text(entity, 10) = data.map_tiles.unwrap_or(-1).to_string();
-        *text_writer.text(entity, 12) = data.map_queue.unwrap_or(-1).to_string();
+        *text_writer.text(entity, 8) = data.particles.unwrap_or(-1).to_string();
+        *text_writer.text(entity, 10) = data.map_layers.unwrap_or(-1).to_string();
+        *text_writer.text(entity, 12) = data.map_tiles.unwrap_or(-1).to_string();
+        *text_writer.text(entity, 14) = data.map_queue.unwrap_or(-1).to_string();
     }
 
     data.fps = None;
     data.entities = None;
     data.audio_sources = None;
+    data.particles = None;
     data.map_layers = None;
     data.map_tiles = None;
     data.map_queue = None;

@@ -1,7 +1,7 @@
 use crate::{
     plugin::{
         camera_target::CameraTarget, debug::debug_line, projectile::state::ProjectileState,
-        AudioPlay, AudioTracker, Projectile, ProjectilePhysics,
+        AudioPlay, AudioPool, Projectile, ProjectilePhysics,
     },
     util::geometry::GeometryProjection,
 };
@@ -16,7 +16,7 @@ const DEBUG: bool = false;
 pub fn on_update(
     mut projectiles: Query<&Projectile>,
     listeners: Query<&Transform, With<CameraTarget>>,
-    audio: Res<AudioTracker>,
+    audio: Res<AudioPool>,
     time: Res<Time>,
 ) {
     // TODO: early return if sounds disabled

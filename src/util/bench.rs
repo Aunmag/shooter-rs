@@ -51,7 +51,7 @@ impl Benches {
             ));
         }
 
-        log::info!("{}", report_string);
+        // log::info!("{}", report_string);
     }
 }
 

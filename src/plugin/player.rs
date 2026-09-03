@@ -137,7 +137,9 @@ fn on_update_2(
         if actor.actions.contains(ActorAction::AimToggle) {
             player.is_aiming = !player.is_aiming;
 
-            if !player.is_aiming {
+            if player.is_aiming {
+                actor.aim_distance = 1.0;
+            } else {
                 // sync player back with camera
                 if let Some(camera) = camera {
                     transform.rotation = camera.1.rotation.perp();
@@ -170,7 +172,8 @@ fn on_update_2(
                 actor.movement = actor.movement.rotate_by_quat(camera.1.rotation);
             }
         } else {
-            actor.aim_distance = f32::max(actor.aim_distance, 1.0);
+            // actor.aim_distance = f32::max(actor.aim_distance, 1.0);
+            actor.aim_distance = f32::INFINITY;
         }
 
         if let Some(mut camera_target) = camera_target {
