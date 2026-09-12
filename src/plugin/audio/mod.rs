@@ -2,10 +2,10 @@ mod audio_play;
 mod audio_storage;
 
 pub use self::{audio_play::*, audio_storage::*};
-use crate::plugin::{camera_target::CameraTarget, Heartbeat};
+use crate::plugin::camera_target::CameraTarget;
 use bevy::{
     app::Update,
-    audio::{AudioPlayer, AudioSink, Volume},
+    audio::{AudioPlayer, AudioSink},
     ecs::{component::Component, entity::Entity},
     prelude::{
         App, AudioSinkPlayback, Commands, Plugin, Query, Res, ResMut, Resource, Time, Transform,
@@ -138,18 +138,7 @@ fn on_update(
             continue;
         };
 
-        let is_heartbeat = audio.path.as_ref() == Heartbeat::PATH;
-        let mut settings = audio.settings();
-
-        if is_heartbeat {
-            settings.volume = Volume::Linear(0.0);
-        }
-
-        let mut entity = commands.spawn((AudioPlayer(source), settings));
-
-        if is_heartbeat {
-            entity.insert(Heartbeat);
-        }
+        let mut entity = commands.spawn((AudioPlayer(source), audio.settings()));
 
         if let Some(duration) = audio.duration() {
             entity.insert(Expiration(now + duration));

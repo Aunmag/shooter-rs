@@ -7,7 +7,7 @@ use crate::{
         collision::Collision,
         kinetics::Kinetics,
         player::Player,
-        Breath, Crosshair, Footsteps, Health, StatusBar,
+        Breath, Crosshair, Footsteps, Health, Heartbeat, StatusBar,
     },
     resource::Settings,
 };
@@ -92,6 +92,7 @@ impl Command for ActorRelease {
         entity_mut.remove::<Bot>();
         entity_mut.remove::<Player>();
         entity_mut.remove::<Breath>();
+        entity_mut.remove::<Heartbeat>();
         entity_mut.remove::<CameraTarget>();
 
         let mut to_remove = Vec::new();

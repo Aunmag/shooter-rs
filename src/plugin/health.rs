@@ -23,7 +23,6 @@ use std::time::Duration;
 /// Increased buffering helps to summarize small and frequent damage events into one which is good
 /// for visual effects like blood. But also it increases the delay
 const BUFFERING: Duration = Duration::from_millis(80);
-const LOW_VALUE: f32 = 0.4;
 const FLESH_PARTICLE_PER_DAMAGE: f32 = 0.2;
 const FLESH_PARTICLES_MAX: i32 = 8;
 
@@ -52,6 +51,8 @@ pub struct Health {
 }
 
 impl Health {
+    pub const LOW_VALUE: f32 = 0.4;
+
     pub fn new(resistance: f32) -> Self {
         return Self {
             resistance,
@@ -97,7 +98,7 @@ impl Health {
     }
 
     pub fn is_low(&self) -> bool {
-        return self.health < LOW_VALUE;
+        return self.health < Self::LOW_VALUE;
     }
 }
 

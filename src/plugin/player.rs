@@ -2,8 +2,8 @@ use crate::{
     data::{LAYER_ACTOR_PLAYER, WORLD_SIZE_HALF},
     plugin::{
         camera::MainCamera, camera_target::CameraTarget, kinetics::Kinetics, Actor, ActorAction,
-        ActorActions, ActorActionsExt, ActorConfig, ActorSet, Crosshair, Health, StatusBar,
-        WeaponConfig, WeaponSet,
+        ActorActions, ActorActionsExt, ActorConfig, ActorSet, Crosshair, Health, Heartbeat,
+        StatusBar, WeaponConfig, WeaponSet,
     },
     resource::Settings,
     state::AppState,
@@ -276,6 +276,7 @@ impl Command for PlayerSet {
                 is_aiming: false,
                 extra_rotation: 0.0,
             })
+            .insert(Heartbeat::default())
             .insert(CameraTarget::default());
 
         StatusBar::spawn(world, self.entity);
