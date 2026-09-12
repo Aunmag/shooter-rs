@@ -1,6 +1,6 @@
 use crate::{
     data::{FONT_PATH, FONT_PATH_BOLD},
-    plugin::{AudioPlay, AudioTracker},
+    plugin::{AudioPlay, AudioPool},
     util::{Envelope, SmartString},
 };
 use bevy::{
@@ -139,7 +139,7 @@ impl Command for Notify {
                 },
             ));
 
-        world.resource::<AudioTracker>().queue(AudioPlay {
+        world.resource::<AudioPool>().queue(AudioPlay {
             path: "sounds/notification".into(),
             volume: 0.8,
             ..AudioPlay::DEFAULT

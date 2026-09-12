@@ -1,13 +1,14 @@
 use crate::{
     plugin::{
-        bot::ActorBotSet, ActorConfig, ActorKind, ActorSet, AudioTracker, BonusSpawn, Crosshair,
-        Explode, ProjectileConfig, TileMap, WeaponConfig, WeaponSet,
+        bot::ActorBotSet, ActorConfig, ActorKind, ActorSet, BonusSpawn, Crosshair, Explode,
+        ProjectileConfig, TileMap, WeaponConfig, WeaponSet,
     },
     state::AppState,
     util::{ext::AppExt, Timer, Transform2D},
 };
 use bevy::{
     app::{App, Plugin},
+    audio::AudioSink,
     color::Srgba,
     diagnostic::{DiagnosticsStore, EntityCountDiagnosticsPlugin, FrameTimeDiagnosticsPlugin},
     ecs::{
@@ -101,7 +102,7 @@ fn on_init(world: &mut World) {
 
 fn update_diagnostics_data(
     diagnostics: Res<DiagnosticsStore>,
-    audio_tracker: Res<AudioTracker>,
+    audio: Query<Entity, With<AudioSink>>,
     tile_map: Res<TileMap>,
     mut data: ResMut<DiagnosticsData>,
 ) {
@@ -122,7 +123,7 @@ fn update_diagnostics_data(
     }
 
     {
-        let value = audio_tracker.playing as i32;
+        let value = audio.count() as i32;
         data.audio_sources = Some(i32::max(value, data.audio_sources.unwrap_or(value)));
     }
 

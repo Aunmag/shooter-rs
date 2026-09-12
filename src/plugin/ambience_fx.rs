@@ -1,5 +1,5 @@
 use crate::{
-    plugin::{AudioPlay, AudioTracker},
+    plugin::{AudioPlay, AudioPool},
     state::AppState,
     util::{ext::AppExt, Timer},
 };
@@ -29,7 +29,7 @@ impl Plugin for AmbienceFxPlugin {
     }
 }
 
-fn on_update(audio: Res<AudioTracker>) {
+fn on_update(audio: Res<AudioPool>) {
     audio.queue(AudioPlay {
         path: "sounds/ambience_fx".into(),
         volume: 0.3,

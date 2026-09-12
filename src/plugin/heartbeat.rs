@@ -1,5 +1,5 @@
 use crate::{
-    plugin::{AudioPlay, AudioTracker, Health},
+    plugin::{AudioPlay, AudioPool, Health},
     state::AppState,
     util::{
         ext::{AppExt, Fuzz},
@@ -48,7 +48,7 @@ pub struct Heartbeat {
 
 fn on_update(
     mut query: Query<(&mut Heartbeat, &Health)>,
-    audio_pool: Res<AudioTracker>,
+    audio_pool: Res<AudioPool>,
     time: Res<Time>,
 ) {
     let time = time.elapsed();

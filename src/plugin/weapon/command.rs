@@ -2,7 +2,7 @@ use crate::{
     data::PIXELS_PER_METER,
     plugin::{
         camera_target::CameraTarget, kinetics::Kinetics, Actor, ActorWeaponSprite, AudioPlay,
-        AudioTracker, Weapon, WeaponConfig, WeaponGrip,
+        AudioPool, Weapon, WeaponConfig, WeaponGrip,
     },
     util::ext::ImageExt,
 };
@@ -123,7 +123,7 @@ impl WeaponSet {
             .get::<Transform>(self.entity)
             .map(|t| t.translation.xy())
         {
-            world.resource::<AudioTracker>().queue(AudioPlay {
+            world.resource::<AudioPool>().queue(AudioPlay {
                 path: "sounds/player/pickup".into(),
                 volume: 0.9,
                 source: Some(source),

@@ -11,7 +11,7 @@ window_h = 800
 v_sync = false
 
 [audio]
-sources = 48
+sources = 32
 
 [controls]
 mouse_sensitivity = 0.003

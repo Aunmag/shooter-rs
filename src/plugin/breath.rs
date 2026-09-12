@@ -1,5 +1,5 @@
 use crate::{
-    plugin::{Actor, AudioPlay, AudioTracker},
+    plugin::{Actor, AudioPlay, AudioPool},
     state::AppState,
     util::{ext::AppExt, math::interpolate},
 };
@@ -29,7 +29,7 @@ pub struct Breath {
 
 fn on_update(
     mut query: Query<(&mut Breath, &Actor, &Transform)>,
-    audio: Res<AudioTracker>,
+    audio: Res<AudioPool>,
     time: Res<Time>,
 ) {
     let time = time.elapsed();

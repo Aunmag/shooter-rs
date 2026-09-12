@@ -80,7 +80,7 @@ pub struct AudioSettings {
 
 impl Default for AudioSettings {
     fn default() -> Self {
-        return Self { sources: 48 };
+        return Self { sources: 32 };
     }
 }
 
